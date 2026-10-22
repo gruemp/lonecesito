@@ -13,4 +13,6 @@ Implementación de la imagen de diseño aprobada, con portada, categorías, soli
 
 Los formularios guardan datos solo en el navegador. No hay autenticación real, base de datos compartida, pagos ni envío de solicitudes a terceros. Los límites se explican en los propios formularios.
 
-Las pruebas de lógica y la comprobación de recursos están aprobadas. La revisión visual en navegador sigue pendiente por falta de un servidor de vista previa disponible; no se afirma coincidencia exacta de píxeles ni que exista una web publicada.
+Web publicada en GitHub Pages: https://gruemp.github.io/lonecesito/ . Se despliega desde la raíz de `codex/diseno-original`.
+
+Verificación: cinco pruebas de lógica aprobadas, sintaxis y recursos locales comprobados. Portada revisada en el navegador en la nube; filtros, detalles y guardado local de propuestas comprobados. Los formularios de publicación, proveedores e ingreso se abren correctamente. La revisión móvil en un dispositivo real queda pendiente. No se afirma coincidencia exacta de píxeles con la imagen generada.
