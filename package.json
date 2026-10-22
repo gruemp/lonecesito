@@ -1,0 +1,11 @@
+{
+  "name": "lonecesito",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portal LoNecesito basado en el diseño original aprobado",
+  "scripts": {
+    "test": "node --test 2026-10-22_pruebas.test.js",
+    "check": "node --check 2026-10-22_app.js"
+  }
+}
