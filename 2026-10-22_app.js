@@ -359,7 +359,7 @@ function init(){
     $('#publish-error').hidden=true;$('#publish-error').textContent='';
     $('#draft-status').textContent=activeDraft&&!request?'Borrador local recuperado. Puedes continuarlo o editarlo.':'';
     $('#wizard-clear').hidden=!activeDraft||!!request;
-    setWizardStep(0);openDialog('publish');
+    openDialog('publish');setWizardStep(0);
   }
   function saveWizardDraft(closeDialog=false){
     const next={...state,draft:{data:buildDraft(wizardData()),editingRequestId}};
