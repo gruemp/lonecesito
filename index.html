@@ -175,6 +175,15 @@
     </div>
   </dialog>
 
+  <dialog id="chat-dialog" aria-labelledby="chat-title">
+    <div class="dialog-header"><h2 id="chat-title">Conversación privada</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
+    <p id="chat-context" class="dialog-intro"></p>
+    <p class="demo-note">Vista previa del chat. Todavía no existe mensajería entre personas: el chat seguro y las fotografías por mensaje necesitan Firebase. No se enviará ningún mensaje desde esta demostración.</p>
+    <div class="chat-preview"><p>Aquí aparecerán las preguntas y respuestas cuando el servicio esté conectado.</p></div>
+    <label for="chat-message">Mensaje</label><textarea id="chat-message" rows="2" placeholder="Escribe un mensaje" disabled></textarea>
+    <div class="dialog-actions"><button class="button button-secondary" disabled>Adjuntar foto</button><button class="button" disabled>Enviar</button></div>
+  </dialog>
+
   <dialog id="proposal-dialog" aria-labelledby="proposal-title">
     <div class="dialog-header"><h2 id="proposal-title">Presenta una propuesta</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
     <p id="proposal-request-title" class="dialog-intro"></p>
