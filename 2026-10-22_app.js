@@ -419,8 +419,9 @@ function init(){
       const actions=el('div','proposal-actions');
       const buttons=mine?[
         ...(p.status==='activa'&&request.status==='abierta'?[['accept','Aceptar'],...(request.category==='bienes'?[['partial','Aceptar menos unidades']]:[])]:[]),
+        ['chat','Conversar (próximamente)'],['report','Reportar (prueba)'],
         ['discard',p.discarded?'Recuperar':'Descartar']
-      ]:p.status==='activa'?[['edit','Modificar mi oferta'],['withdraw','Retirar']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
+      ]:p.status==='activa'?[['chat','Conversar (próximamente)'],['edit','Modificar mi oferta'],['withdraw','Retirar']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
       for(const [action,label] of buttons){const button=el('button','my-action',label);button.type='button';button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);}
       if(actions.children.length)item.append(actions);
       return item;
@@ -622,6 +623,18 @@ function init(){
       if(['edit','withdraw','confirm-old','confirm-partial'].includes(action)&&(!identity||identity.toLocaleLowerCase('es')!==proposal.name.toLocaleLowerCase('es'))){
         throw new Error('Selecciona el perfil local de este proveedor para administrar su propuesta.');
       }
+      if(action==='chat'){
+        $('#chat-context').textContent='Necesidad: '+request.title+' · Proveedor: '+proposal.name+' · Precio fijo: '+(proposal.price==null?'No registrado':money(proposal.price));
+        openDialog('chat');return;
+      }
+      if(action==='report'){
+        if(!mine)throw new Error('Este reporte de propuesta corresponde al comprador de la necesidad.');
+        const reason=window.prompt('Describe el problema con esta propuesta. El reporte será una prueba local, no será enviado.');
+        if(!reason?.trim())return;
+        const reports=[...state.reports,{requestId:request.id,reason:('Propuesta '+proposal.name+': '+reason.trim()).slice(0,300),at:new Date().toISOString()}].slice(-30);
+        if(save({...state,reports},'detail-error'))showToast('Reporte guardado localmente. Nadie ha sido notificado.');
+        return;
+      }
       if(action==='view'){showRequest(request.id);return;}
       if(action==='edit'){if(proposal.status!=='activa')throw new Error('Solo puedes modificar una propuesta activa.');$('#detail-dialog').close();openProposalFor(request,proposal);return;}
       if(action==='withdraw'){
@@ -794,7 +807,8 @@ function init(){
       if(request.status!=='abierta')throw new Error('Esta necesidad no recibe nuevas propuestas.');
       const values={...Object.fromEntries(new FormData(event.currentTarget)),requestId:currentRequestId,picture:proposalPicture,quantity:request.category==='bienes'?$('#proposal-quantity').value:'1'};
       const proposals=editingProposalId?changeProposal(state.proposals,editingProposalId,values):appendProposal(state.proposals,values);
-      if(!save({...state,proposals,proposalDraft:null},'proposal-error'))return;
+      const profile=state.provider||{name:values.name,specialty:'Ofertas de prueba',city:request.city};
+      if(!save({...state,proposals,provider:profile,proposalDraft:null},'proposal-error'))return;
       editingProposalId=null;$('#proposal-dialog').close();event.currentTarget.reset();renderOwnRequests();showRequest(currentRequestId);
       showToast('Propuesta de prueba guardada localmente. No se ha enviado a ningún comprador.');
     }catch(error){setError('proposal-error',error);}
