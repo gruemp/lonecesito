@@ -93,3 +93,6 @@ dialog{border:1px solid #dce3d4;border-radius:20px;padding:28px;width:calc(100% 
  #publish-dialog{padding:19px;max-height:calc(100dvh - 22px)}
 }
 @media(max-width:360px){.path-chooser{grid-template-columns:1fr}.wizard-actions{grid-template-columns:1fr}}
+
+.wizard-clear{margin:7px 0 0;padding:0;border:0;background:transparent;color:var(--green);font-size:13px;text-decoration:underline;text-underline-offset:2px;align-self:flex-start}
+.wizard-clear:hover{color:#6d8d2d}
