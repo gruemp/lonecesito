@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen} from './2026-10-22_app.js';
 import {readFileSync} from 'node:fs';
 
 const req={id:'necesidad-1',title:'Necesito empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',description:'Necesito empaques con el logo del negocio.',quantity:10,condition:'cualquiera',status:'abierta'};
@@ -188,4 +188,53 @@ test('el HTML contiene formularios, filtros, foto única, controles y textos de 
   for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
   assert.ok(html.includes('sin SMS'));
   assert.ok(html.includes('Propuestas sin límite'));
+});
+
+test('la navegación compacta admite cinco vistas y recupera inicio ante rutas desconocidas',()=>{
+  assert.deepEqual(SCREEN_IDS,['inicio','necesidades','mis-necesidades','mis-propuestas','favoritos']);
+  for(const id of SCREEN_IDS)assert.equal(resolveScreen('#'+id),id);
+  assert.equal(resolveScreen('#una-pagina-antigua'),'inicio');
+  assert.equal(resolveScreen(''),'inicio');
+});
+test('la portada y las listas no cargan imágenes automáticamente',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.equal(/<img\b/i.test(html),false,'El HTML inicial no debe incluir imágenes visibles');
+  assert.equal(/rel="preload"[^>]*as="image"/i.test(html),false);
+  assert.ok(html.includes('Ver detalles'));
+  assert.ok(html.includes('¿Qué necesitas?'));
+  assert.ok(html.includes('Puedo ofrecerlo'));
+});
+test('solo una vista está visible al iniciar y todas tienen su navegación correspondiente',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  for(const id of SCREEN_IDS){
+    assert.ok(html.includes('id="'+id+'" data-screen="'+id+'"')||html.includes('id="'+id+'"')&&html.includes('data-screen="'+id+'"'));
+    assert.ok(html.includes('data-screen-link="'+id+'"'));
+  }
+  for(const id of SCREEN_IDS.filter(id=>id!=='inicio')){
+    const element=new RegExp('<section[^>]*id="'+id+'"[^>]*>');
+    const match=html.match(element);
+    assert.ok(match&&match[0].includes('hidden'),'La vista '+id+' debe iniciar oculta');
+  }
+  const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
+  assert.deepEqual(screens,[...SCREEN_IDS]);
+});
+test('las fotos se revelan bajo demanda también en formularios y propuestas',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(js.includes("button.addEventListener('click',()=>{"));
+  assert.ok(js.includes("const show=frame.hidden;"));
+  assert.ok(js.includes("frame.replaceChildren();"));
+  assert.ok(js.includes("const image=pictureNode(data,caption)"));
+  assert.ok(js.includes("addPictureToggle(box,current,'Fotografía seleccionada')"));
+  assert.ok(js.includes("addPictureToggle(photo,request.picture"));
+  assert.ok(js.includes("addPictureToggle(reveal,p.picture"));
+  assert.ok(html.includes('id="request-photo-preview"')&&html.includes('id="proposal-photo-preview"'));
+  assert.ok(html.includes('id="detail-photo"'));
+});
+test('las secciones adicionales aparecen solo a petición del usuario',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(html.includes('<details class="compact-help">'));
+  assert.ok(html.includes('<details class="compact-filters"'));
+  assert.ok(html.includes('id="more-filters"'));
+  assert.ok(html.includes('id="screen-navigation"'));
 });
