@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus} from './2026-10-22_app.js';
+import {readFileSync} from 'node:fs';
 
 const request={title:'Necesito empaques personalizados',city:'Bogotá',category:'productos',description:'Busco cien empaques con mi logo para esta semana.'};
 const proposal=(name='Proveedor Uno')=>({name,requestId:'empaques',description:'Ofrecemos los cien empaques con entrega en cinco días.'});
@@ -83,4 +84,57 @@ test('normalizes structured proposals, limits prices and preserves resolved stat
   assert.throws(()=>normalizeProposal({...proposal(),price:'-30'}),/precio/);
   const restored=decodeState(JSON.stringify({version:1,requests:[{...request,id:'local-done',category:'bienes',quantity:2,status:'resuelta'}]}));
   assert.equal(restored.requests[0].status,'resuelta');
+});
+
+test('drafts retain only permitted fields, never contact details',()=>{
+  const draft=buildDraft({title:'  Necesito una nevera  ',city:'Santa Marta',category:'servicios',subcategory:'mantenimiento',description:'Necesito reparación técnica',phone:'3105551234',name:'Persona privada',unknown:'dato'});
+  assert.equal(draft.title,'  Necesito una nevera  ');
+  assert.equal(draft.category,'servicios');
+  assert.equal(draft.subcategory,'mantenimiento');
+  assert.equal(Object.hasOwn(draft,'phone'),false);
+  assert.equal(Object.hasOwn(draft,'name'),false);
+  assert.equal(Object.hasOwn(draft,'unknown'),false);
+});
+test('drafts survive storage and malformed draft fields are sanitized',()=>{
+  const state=decodeState(null);
+  const payload=JSON.stringify({...state,draft:{data:{title:'Necesito materiales',city:'Bogotá',phone:'NO-GUARDAR',category:'bienes',subcategory:'insumos'},editingRequestId:'inventada'}});
+  const restored=decodeState(payload);
+  assert.equal(restored.draft.data.title,'Necesito materiales');
+  assert.equal(restored.draft.editingRequestId,null);
+  assert.equal(JSON.stringify(restored.draft).includes('NO-GUARDAR'),false);
+  const invalid=decodeState(JSON.stringify({...state,draft:{data:null}}));
+  assert.equal(invalid.draft,null);
+});
+test('saved draft can refer to an existing editable request only',()=>{
+  const saved={...request,id:'local-1',category:'bienes',quantity:2};
+  const draft={data:buildDraft(saved),editingRequestId:'local-1'};
+  const open=decodeState(JSON.stringify({version:1,requests:[saved],draft}));
+  assert.equal(open.draft.editingRequestId,'local-1');
+  const closed=decodeState(JSON.stringify({version:1,requests:[{...saved,status:'cancelada'}],draft}));
+  assert.equal(closed.draft.editingRequestId,null);
+});
+test('local request status transitions are explicit and immutable',()=>{
+  const originals=[{...request,id:'mi-1',status:'abierta'},{...request,id:'mi-2',status:'abierta'}];
+  const closed=updateLocalRequestStatus(originals,'mi-1','resuelta');
+  assert.equal(originals[0].status,'abierta');
+  assert.equal(closed[0].status,'resuelta');
+  assert.equal(closed[1].status,'abierta');
+  assert.throws(()=>updateLocalRequestStatus(closed,'mi-1','cancelada'),/abiertas/);
+  assert.throws(()=>updateLocalRequestStatus(closed,'ausente','resuelta'),/No se encontró/);
+  assert.throws(()=>updateLocalRequestStatus(closed,'mi-2','publicada'),/Estado no válido/);
+});
+test('closed request status survives local reload',()=>{
+  const restored=decodeState(JSON.stringify({version:1,requests:[{...request,id:'local-c',status:'cancelada'}]}));
+  assert.equal(restored.requests[0].status,'cancelada');
+});
+test('new navigation, three wizard steps and personal section have distinct element ids',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  for(const id of ['mis-necesidades','my-requests-grid','my-empty','wizard-next','wizard-back','wizard-draft','wizard-clear','wizard-submit','wizard-review']){
+    assert.ok(html.includes('id="'+id+'"'),'Missing '+id);
+  }
+  for(const i of ['0','1','2'])assert.ok(html.includes('data-wizard-step="'+i+'"'));
+  assert.ok(html.includes('Necesito algo'));
+  assert.ok(html.includes('Puedo ofrecerlo'));
+  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
+  assert.equal(new Set(ids).size,ids.length);
 });

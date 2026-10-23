@@ -8,7 +8,7 @@
   <title>LoNecesito — Tú lo necesitas. Alguien lo tiene.</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/2026-10-22_diseno-original.png" as="image">
-  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-1">
+  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-2">
   <script type="module" src="2026-10-22_app.js"></script>
 </head>
 <body>
@@ -27,10 +27,10 @@
   <header class="site-header shell">
     <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark asset" aria-hidden="true"><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448"></span><span>LoNecesito</span></a>
     <nav class="desktop-nav" aria-label="Navegación principal">
-      <a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#proveedores">Para proveedores</a>
+      <a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#mis-necesidades">Mis necesidades</a><a href="#proveedores">Para proveedores</a>
     </nav>
     <div class="header-actions"><button class="text-button" data-open="access" id="access-button">Ingresar</button><button class="button button-small" data-open="publish">Publicar gratis</button></div>
-    <details class="mobile-nav"><summary aria-label="Abrir menú"><span></span><span></span><span></span></summary><nav aria-label="Navegación móvil"><a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#proveedores">Para proveedores</a><button class="text-button" data-open="access">Ingresar</button></nav></details>
+    <details class="mobile-nav"><summary aria-label="Abrir menú"><span></span><span></span><span></span></summary><nav aria-label="Navegación móvil"><a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#mis-necesidades">Mis necesidades</a><a href="#proveedores">Para proveedores</a><button class="text-button" data-open="access">Ingresar</button></nav></details>
   </header>
 
   <main id="contenido">
@@ -43,7 +43,10 @@
           <label class="sr-only" for="hero-need">¿Qué necesitas?</label><input id="hero-need" name="need" placeholder="¿Qué necesitas?" maxlength="120" autocomplete="off">
           <div class="composer-bottom"><div class="location-input"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg><label class="sr-only" for="hero-city">¿Dónde lo necesitas?</label><input id="hero-city" name="city" placeholder="¿Dónde lo necesitas?" maxlength="80" autocomplete="address-level2" list="cities"></div><button class="button" type="submit">Publicar gratis <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button></div>
         </form>
-        <a class="hero-explore" href="#necesidades" data-explore>O explorar necesidades de bienes y servicios <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a>
+        <div class="path-chooser" aria-label="Elige qué quieres hacer">
+          <button type="button" class="path-option path-primary" data-open="publish"><span class="path-title">Necesito algo <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></span><span class="path-hint">Crear una solicitud de prueba</span></button>
+          <a class="path-option" href="#necesidades" data-explore><span class="path-title">Puedo ofrecerlo <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></span><span class="path-hint">Explorar ejemplos y ofertar de prueba</span></a>
+        </div>
         <ul class="benefits" aria-label="Ventajas"><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Publicar es gratis</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Hasta 3 propuestas</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Tú eliges</li></ul>
       </div>
       <figure class="hero-visual asset" role="img" aria-label="Ejemplo de solicitud: busco 20 sillas para mi café, Bogotá, esta semana. Propuesta recibida: entrega y condiciones claras."><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448" fetchpriority="high"><figcaption class="sr-only">Una solicitud y su propuesta, sobre una fotografía del café.</figcaption></figure>
@@ -70,6 +73,12 @@
       <p class="empty-state" id="empty-state" hidden>No hay solicitudes en esta categoría todavía.</p>
     </section>
 
+    <section class="my-section shell" id="mis-necesidades" aria-labelledby="my-title">
+      <div class="section-heading"><div><p class="section-note">Tu espacio de prueba</p><h2 id="my-title">Mis necesidades <span id="my-count" class="my-count"></span></h2></div><button class="button button-small" type="button" data-open="publish">Nueva necesidad</button></div>
+      <p class="my-note">Estas solicitudes solo existen en este navegador; no están vinculadas a una cuenta real ni son visibles en otros dispositivos.</p>
+      <div class="my-grid" id="my-requests-grid"></div>
+      <div class="my-empty" id="my-empty"><p>Aún no has creado una solicitud en este navegador.</p><button class="button button-small" type="button" data-open="publish">Publicar mi primera necesidad</button></div>
+    </section>
     <section class="how-section shell" id="como-funciona" aria-labelledby="how-title"><h2 id="how-title">De una necesidad a una solución.</h2><ol class="steps"><li><span class="step-number">1</span><svg class="step-icon" aria-hidden="true"><use href="#document"/></svg><div><h3>1. Publica</h3><p>Cuéntanos qué necesitas<br>y dónde.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">2</span><svg class="step-icon" aria-hidden="true"><use href="#conversation"/></svg><div><h3>2. Compara</h3><p>Recibe hasta 3 propuestas<br>de proveedores.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">3</span><svg class="step-icon" aria-hidden="true"><use href="#approved"/></svg><div><h3>3. Elige</h3><p>Revisa las opciones<br>y selecciona la mejor.</p></div></li></ol></section>
 
     <section class="provider-section wide-shell" id="proveedores" aria-labelledby="provider-title"><div class="provider-copy"><h2 id="provider-title">Tu próximo cliente ya sabe lo que necesita.</h2><p>Conecta con solicitudes de tu especialidad.</p><button class="button button-lime" data-open="provider">Quiero ofertar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button></div><div class="provider-photo asset" role="img" aria-label="Proveedor listo para atender nuevas solicitudes"><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448" loading="lazy"></div></section>
@@ -80,38 +89,51 @@
   <div class="toast" id="toast" role="status" hidden></div>
 
   
+  
   <dialog id="publish-dialog" aria-labelledby="publish-title">
     <div class="dialog-header"><h2 id="publish-title">Publica lo que necesitas</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
-    <p class="dialog-intro">Describe un bien o servicio y dónde lo necesitas. Publicar la solicitud de prueba es gratis.</p>
-    <p class="demo-note">Demostración: esta solicitud solo se guarda en este navegador; otras personas no podrán verla ni enviarte ofertas.</p>
+    <p class="demo-note">Demostración: solo tú podrás ver estas solicitudes en este navegador. No se envían a otras personas ni proveedores.</p>
+    <div class="wizard-progress" role="group" aria-label="Progreso de publicación">
+      <span class="wizard-label" id="wizard-status" aria-live="polite">Paso 1 de 3: ¿Qué necesitas?</span><button type="button" class="wizard-clear" id="wizard-clear" hidden>Empezar una nueva</button><div class="wizard-bars" aria-hidden="true"><span class="is-complete"></span><span></span><span></span></div>
+    </div>
     <form id="publish-form" class="dialog-form">
-      <label for="request-title">¿Qué necesitas?</label>
-      <input id="request-title" name="title" minlength="8" maxlength="120" required placeholder="Por ejemplo: necesito 100 empaques personalizados">
-      <div class="form-columns">
-        <div><label for="request-category">Necesito un</label><select id="request-category" name="category" required><option value="bienes">Bien</option><option value="servicios">Servicio</option></select></div>
-        <div><label for="request-subcategory">Categoría</label><select id="request-subcategory" name="subcategory" required></select></div>
+      <div class="wizard-step" data-wizard-step="0" aria-labelledby="wizard-title-1">
+        <h3 class="wizard-heading" id="wizard-title-1">1. Cuéntanos qué necesitas</h3>
+        <label for="request-category">¿Qué necesitas?</label>
+        <select id="request-category" name="category" required><option value="bienes">Un bien o producto</option><option value="servicios">Un servicio</option></select>
+        <label for="request-title">Descríbelo en pocas palabras</label>
+        <input id="request-title" name="title" minlength="8" maxlength="120" required placeholder="Ej. Necesito reparar mi nevera">
+        <label for="request-subcategory">Categoría</label>
+        <select id="request-subcategory" name="subcategory" required></select>
       </div>
-      <label for="request-city">¿Dónde necesitas el bien o servicio?</label>
-      <input id="request-city" name="city" minlength="2" maxlength="80" required list="cities" autocomplete="address-level2" placeholder="Ciudad o zona de entrega o ejecución">
-      <fieldset id="goods-fields" class="goods-fields">
-        <legend>Características del bien</legend>
-        <div class="form-columns">
+      <div class="wizard-step" data-wizard-step="1" aria-labelledby="wizard-title-2" hidden>
+        <h3 class="wizard-heading" id="wizard-title-2">2. Completa los detalles</h3>
+        <label for="request-city">¿Dónde necesitas el bien o servicio?</label>
+        <input id="request-city" name="city" minlength="2" maxlength="80" required list="cities" autocomplete="address-level2" placeholder="Ciudad o zona de entrega o ejecución">
+        <fieldset id="goods-fields" class="goods-fields"><legend>Características del bien</legend><div class="form-columns">
           <div><label for="request-quantity">Cantidad</label><input id="request-quantity" name="quantity" type="number" min="1" max="1000000" step="1" required value="1"></div>
           <div><label for="request-condition">Condición</label><select id="request-condition" name="condition" required><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
+        </div></fieldset>
+        <label for="request-description">Describe lo que necesitas</label><textarea id="request-description" name="description" rows="4" minlength="15" maxlength="1500" required placeholder="Para bienes: referencia y entrega. Para servicios: alcance, visita o diagnóstico y condiciones."></textarea>
+        <div class="form-columns">
+          <div><label for="request-budget">Presupuesto aproximado, COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
+          <div><label for="request-date">Fecha deseada (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
         </div>
-      </fieldset>
-      <label for="request-description">Describe lo que necesitas</label>
-      <textarea id="request-description" name="description" rows="4" minlength="15" maxlength="1500" required placeholder="Para bienes: referencias, cantidad y entrega. Para servicios: alcance, visita o diagnóstico, condiciones y plazo."></textarea>
-      <div class="form-columns">
-        <div><label for="request-budget">Presupuesto aproximado, COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
-        <div><label for="request-date">Fecha deseada (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
       </div>
-      <label for="request-phone">Número celular (opcional y no almacenado)</label>
-      <input id="request-phone" name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="Solo para ilustrar el futuro contacto privado">
-      <p class="privacy-note">Por tu privacidad, en esta demostración el celular no se guarda ni se transmite. Nunca aparecerá en los listados.</p>
-      <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> Entiendo que esto es una prueba local y no envía solicitudes a otros usuarios.</label>
+      <div class="wizard-step" data-wizard-step="2" aria-labelledby="wizard-title-3" hidden>
+        <h3 class="wizard-heading" id="wizard-title-3">3. Revisa y confirma</h3>
+        <div class="review-box" id="wizard-review" aria-live="polite"></div>
+        <p class="privacy-note">No solicitamos tu celular para esta prueba: todavía no existe una conexión real entre personas y proveedores.</p>
+        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> Entiendo que mi solicitud solo quedará guardada en este navegador.</label>
+      </div>
+      <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
       <p class="form-error" id="publish-error" role="alert" hidden></p>
-      <button class="button" type="submit">Guardar solicitud de prueba <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+      <div class="wizard-actions">
+        <button class="button button-secondary" type="button" id="wizard-back" hidden>Anterior</button>
+        <button class="button button-secondary" type="button" id="wizard-draft">Guardar borrador</button>
+        <button class="button" type="button" id="wizard-next">Continuar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+        <button class="button" type="submit" id="wizard-submit" hidden>Guardar solicitud de prueba</button>
+      </div>
     </form>
   </dialog>
 
