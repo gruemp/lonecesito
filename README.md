@@ -1,4 +1,23 @@
 # lonecesito
+## Rediseño compacto — rama para revisión
+
+Rama: `codex/interfaz-compacta-sin-imagenes-2026-10-23`.
+
+Objetivo: **que cada pantalla muestre únicamente lo necesario para el siguiente paso**, en escritorio y celular, sin imágenes visibles de inicio. Se conserva la misma lógica local de necesidades y propuestas.
+
+- **Inicio reducido:** pregunta «¿Qué necesitas?», ciudad opcional en este paso, botón «Continuar» y ruta para quien quiere ofrecer.
+- **Cinco vistas independientes:** Inicio, Explorar, Necesidades, Ofertas y Guardadas. Solo una vista aparece cada vez; se abren mediante enlaces con hash para mantener la navegación directa.
+- **Navegación móvil completa:** cinco enlaces visibles simultáneamente sin desplazamiento lateral del menú.
+- **Exploración compacta:** fichas de texto sin miniaturas; búsqueda y filtros de tipo visibles; filtros avanzados de ciudad/categoría tras pulsar «Más filtros».
+- **Acciones progresivas:** «Ver detalles» abre una solicitud; «Más opciones», «Más acciones» y «Condiciones e historial» evitan mostrar controles secundarios inicialmente.
+- **Imágenes solo bajo demanda:** ni el HTML inicial ni las tarjetas crean imágenes de inmediato. Si hay foto, «Ver foto» crea la imagen al pulsar y la retira al ocultarla. Aplica a necesidades, propuestas y vistas previas de los formularios.
+- **Reglas de negocio preservadas:** precios fijos, ofertas ilimitadas, estados, compras parciales, favoritos, borradores y almacenamiento local.
+- **Pruebas:** 28 escenarios de lógica y estructura comprobados en ejecución JavaScript aislada, junto con IDs HTML únicos, referencias de elementos válidas y CSS con llaves equilibradas. Quedan pendientes la validación visual en navegadores y dispositivos reales.
+
+Firebase, autenticación real, ofertas compartidas y chat entre usuarios **siguen aplazados**. Este rediseño no habilita transacciones reales. La rama está destinada a revisión antes de fusionarse con GitHub Pages.
+
+---
+
 Portal de necesidades LoNecesito: publica lo que buscas y recibe propuestas de proveedores.
 
 ## Etapa de mejoras acordadas — 23 de octubre de 2026 (rama en revisión)
