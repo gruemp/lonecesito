@@ -226,6 +226,12 @@ export function persistState(storage,state){
   try{storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{return false;}
 }
 
+export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','mis-propuestas','favoritos']);
+export function resolveScreen(hash){
+  const value=String(hash||'').replace(/^#/,'');
+  return SCREEN_IDS.includes(value)?value:'inicio';
+}
+
 function init(){
   const $=selector=>document.querySelector(selector);
   const $$=selector=>[...document.querySelectorAll(selector)];
@@ -233,6 +239,17 @@ function init(){
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
   let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
+  function activateScreen(screenId){
+    const selected=resolveScreen(screenId);
+    $('.app-screen').forEach(section=>{section.hidden=section.id!==selected;});
+    $('[data-screen-link]').forEach(link=>{
+      if(link.dataset.screenLink===selected)link.setAttribute('aria-current','page');
+      else link.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',()=>activateScreen(window.location.hash));
+
   const records=()=>[...state.requests,...EXAMPLES.map(example=>({...example,status:'abierta'}))];
   const findRequest=id=>records().find(request=>request.id===id);
   const svg=(name,className='icon')=>{
@@ -312,19 +329,39 @@ function init(){
     img.src=data;img.alt=caption;img.loading='lazy';img.className='uploaded-picture';
     return img;
   }
+  function addPictureToggle(container,data,caption){
+    if(!data)return;
+    const button=el('button','image-reveal','Ver foto');
+    button.type='button';button.setAttribute('aria-expanded','false');
+    button.setAttribute('aria-label','Ver foto: '+caption);
+    const frame=el('div','image-frame');frame.hidden=true;
+    button.addEventListener('click',()=>{
+      const show=frame.hidden;
+      frame.replaceChildren();
+      if(show){const image=pictureNode(data,caption);if(image)frame.append(image);}
+      frame.hidden=!show;
+      button.textContent=show?'Ocultar foto':'Ver foto';
+      button.setAttribute('aria-expanded',String(show));
+      button.setAttribute('aria-label',(show?'Ocultar foto: ':'Ver foto: ')+caption);
+    });
+    container.append(button,frame);
+  }
   function addUserCard(request){
     const article=el('article','request-card');article.dataset.id=request.id;article.dataset.kind=request.category;article.dataset.userRequest='true';
-    const photo=el('div','card-photo new-request-photo');
-    const image=pictureNode(request.picture,'Fotografía de la necesidad');
-    if(image)photo.append(image);else{photo.setAttribute('aria-hidden','true');photo.append(svg('box','step-icon'));}
     const content=el('div','card-content');
     const category=el('p','category',CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría'));
-    const title=el('h3','',request.title),city=el('p','card-city');city.append(svg('pin'),document.createTextNode(request.city));
+    const title=el('h3','',request.title);
+    const city=el('p','card-city',request.city);
     const date=el('p','card-published',request.createdAt?'Publicada: '+formatDate(request.createdAt):'');
-    const btn=el('button','card-link','Ver solicitud ');btn.dataset.request=request.id;btn.append(svg('arrow'));
-    const fav=el('button','my-action favorite-toggle',state.favorites.includes(request.id)?'★ Guardada':'☆ Guardar');
+    const actions=el('div','card-actions');
+    const btn=el('button','card-link','Ver detalles ');btn.type='button';btn.dataset.request=request.id;btn.append(svg('arrow'));
+    const fav=el('button','my-action favorite-toggle',state.favorites.includes(request.id)?'Guardada':'Guardar');
     fav.type='button';fav.dataset.favorite=request.id;fav.setAttribute('aria-pressed',String(state.favorites.includes(request.id)));
-    content.append(category,title,city,date,btn,fav);article.append(photo,content);return article;
+    actions.append(btn,fav);content.append(category,title,city);
+    if(date.textContent)content.append(date);
+    content.append(actions);article.append(content);
+    if(request.picture){const reveal=el('div','card-photo-toggle');addPictureToggle(reveal,request.picture,'Fotografía de '+request.title);article.append(reveal);}
+    return article;
   }
   function renderOwnRequests(){
     grid.querySelectorAll('[data-user-request]').forEach(card=>card.remove());
@@ -346,7 +383,15 @@ function init(){
       const actions=el('div','my-card-actions');
       const choices=[['view','Ver detalles'],...(request.status==='abierta'?[['edit','Editar'],['resolve','Marcar resuelta'],['cancel','Cancelar']]:[]),...(request.status==='en_proceso'?[['resolve','Marcar resuelta'],['reopen','Reabrir ofertas'],['cancel','Cancelar']]:[]),...(request.status==='cancelada'?[['reopen','Reactivar']]:[])];
       for(const [action,label] of choices){const button=el('button','my-action',label);button.type='button';button.dataset.action=action;button.dataset.id=request.id;actions.append(button);}
-      article.append(top,info,actions);return article;
+      article.append(top,info);
+      const mainAction=actions.firstElementChild;
+      if(mainAction)article.append(mainAction);
+      if(actions.children.length){
+        const options=el('details','card-options');
+        options.append(el('summary','','Más opciones'),actions);
+        article.append(options);
+      }
+      return article;
     }));
   }
   function renderFavorites(){
@@ -370,7 +415,14 @@ function init(){
         const button=el('button','my-action',text);
         button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);
       }
-      item.append(header,status,actions);return item;
+      item.append(header,status);
+      const mainAction=actions.firstElementChild;
+      if(mainAction)item.append(mainAction);
+      if(actions.children.length){
+        const options=el('details','card-options');
+        options.append(el('summary','','Más opciones'),actions);item.append(options);
+      }
+      return item;
     }));
     $('#my-proposals-empty').hidden=mine.length>0;
   }
@@ -394,8 +446,8 @@ function init(){
     $('#detail-city').textContent=request.city;
     $('#detail-description').textContent=request.description;
     const photo=$('#detail-photo');photo.replaceChildren();
-    const image=pictureNode(request.picture,'Imagen proporcionada por el comprador');if(image)photo.append(image);
-    photo.hidden=!image;
+    photo.hidden=!request.picture;
+    addPictureToggle(photo,request.picture,'Fotografía de la necesidad');
     const meta=[];
     if(request.category==='bienes'){if(request.quantity)meta.push('Cantidad solicitada: '+request.quantity);meta.push('Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'})[request.condition]);}
     meta.push(request.budget!=null?'Presupuesto máximo orientativo: '+money(request.budget):'Presupuesto: sin indicar');
@@ -415,10 +467,13 @@ function init(){
       const price=el('p','proposal-price',p.price!=null?money(p.price)+' total'+(request.category==='bienes'?' · '+money(proposalUnitPrice(p))+' / unidad':''):'Precio sin registrar (oferta heredada)');
       const desc=el('p','',p.description+' · Cantidad: '+(request.category==='bienes'?p.quantity:'Servicio')+
         (p.delivery?' · Plazo: '+p.delivery:'')+(p.warranty?' · Garantía: '+p.warranty:'')+(p.exclusions?' · Exclusiones: '+p.exclusions:''));
-      item.append(price,desc);
-      if(p.picture){const image=pictureNode(p.picture,'Imagen de la propuesta');item.append(image);}
-      if(p.createdAt)item.append(el('p','card-published','Presentada: '+formatDate(p.createdAt)+(p.updatedAt&&p.updatedAt!==p.createdAt?' · Modificada':'') ));
-      if(p.priceHistory.length)item.append(el('p','card-published','Precios anteriores: '+p.priceHistory.map(v=>money(v.price)).join(', ')));
+      item.append(price);
+      const extra=el('details','offer-extra');
+      extra.append(el('summary','','Condiciones e historial'),desc);
+      if(p.createdAt)extra.append(el('p','card-published','Presentada: '+formatDate(p.createdAt)+(p.updatedAt&&p.updatedAt!==p.createdAt?' · Modificada':'') ));
+      if(p.priceHistory.length)extra.append(el('p','card-published','Precios anteriores: '+p.priceHistory.map(v=>money(v.price)).join(', ')));
+      item.append(extra);
+      if(p.picture){const reveal=el('div','proposal-photo-toggle');addPictureToggle(reveal,p.picture,'Fotografía de la propuesta de '+p.name);item.append(reveal);}
       const actions=el('div','proposal-actions');
       const buttons=mine?[
         ...(p.status==='activa'&&request.status==='abierta'?[['accept','Aceptar'],...(request.category==='bienes'?[['partial','Aceptar menos unidades']]:[])]:[]),
@@ -426,7 +481,11 @@ function init(){
         ['discard',p.discarded?'Recuperar':'Descartar']
       ]:p.status==='activa'?[['chat','Conversar (próximamente)'],['edit','Modificar mi oferta'],['withdraw','Retirar']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
       for(const [action,label] of buttons){const button=el('button','my-action',label);button.type='button';button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);}
-      if(actions.children.length)item.append(actions);
+      const main=actions.firstElementChild;
+      if(main)item.append(main);
+      if(actions.children.length){
+        const more=el('details','card-options');more.append(el('summary','','Más acciones'),actions);item.append(more);
+      }
       return item;
     }));
     $('#proposals-empty').hidden=visible.length>0;
@@ -542,7 +601,7 @@ function init(){
     const current=kind==='request'?wizardPicture:proposalPicture;
     const box=$('#'+kind+'-photo-preview');
     box.replaceChildren();
-    if(current){const image=pictureNode(current,'Fotografía seleccionada');box.append(image);}
+    addPictureToggle(box,current,'Fotografía seleccionada');
     $('#'+kind+'-photo-remove').hidden=!current;
   }
   async function compressImage(file){
@@ -756,7 +815,8 @@ function init(){
       clearTimeout(draftTimer);editingRequestId=null;wizardSubmitted=true;
       $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();setWizardStep(0);
       currentCategory='all';currentSubcategory='all';currentCity='all';populateSubcategories();renderOwnRequests();
-      $('#mis-necesidades').scrollIntoView({block:'start'});
+      window.location.hash='#mis-necesidades';
+      activateScreen('mis-necesidades');
       showToast(previous?'Necesidad de prueba actualizada.':'Necesidad de prueba guardada. La publicación real requerirá identificarte con Firebase.');
     }catch(error){setError('publish-error',error);}
   });
@@ -825,7 +885,8 @@ function init(){
       const provider={name:cleanText(values.name,2,80,'El nombre'),specialty:cleanText(values.specialty,3,120,'La especialidad'),city:cleanText(values.city,2,80,'La ciudad')};
       if(!save({...state,provider},'provider-error'))return;
       $('#provider-dialog').close();renderMyProposals();showToast('Perfil de proveedor de prueba guardado en este navegador. No verifica tu identidad.');
-      $('#necesidades').scrollIntoView({block:'start'});
+      window.location.hash='#necesidades';
+      activateScreen('necesidades');
     }catch(error){setError('provider-error',error);}
   });
   $('#access-form').addEventListener('submit',event=>{
@@ -837,6 +898,7 @@ function init(){
     }catch(error){setError('access-error',error);}
   });
   populatePublishSubcategories();populateSubcategories();populateCities();updateAccess();renderOwnRequests();
+  activateScreen(window.location.hash);
 
 }
 
