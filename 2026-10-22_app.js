@@ -246,7 +246,7 @@ export function applyScreenNavigation(root,screenId){
 
 function init(){
   const $=selector=>document.querySelector(selector);
-  const $=selector=>[...document.querySelectorAll(selector)];
+  const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
   let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
