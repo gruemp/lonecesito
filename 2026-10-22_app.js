@@ -32,54 +32,137 @@ function optionalAmount(value,label){
   if(!Number.isSafeInteger(number)||number<0||number>1000000000000)throw new Error(`Revisa ${label}.`);
   return number;
 }
+const MAX_PICTURE_LENGTH=1400000;
+const REQUEST_STATES=['abierta','en_proceso','resuelta','cancelada'];
+const PROPOSAL_STATES=['activa','retirada','aceptada','por_confirmar','pendiente_confirmacion','historica','acuerdo_cancelado'];
+const ISO_DATE=/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+function pictureOrEmpty(value){
+  return typeof value==='string'&&value.length<=MAX_PICTURE_LENGTH&&/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(value)?value:'';
+}
+function validTimestamp(value){return typeof value==='string'&&ISO_DATE.test(value)&&!Number.isNaN(Date.parse(value))?value:'';}
+function positiveQuantity(value,label){
+  const quantity=Number(value);
+  if(!Number.isSafeInteger(quantity)||quantity<1||quantity>1000000)throw new Error('Indica una '+label+' válida.');
+  return quantity;
+}
+function requiredPrice(value){
+  const amount=optionalAmount(value,'el precio fijo');
+  if(amount===null||amount<1)throw new Error('El precio fijo total es obligatorio y debe ser mayor que cero.');
+  return amount;
+}
 export function normalizeRequest(input){
   const legacy=input?.category==='productos'||input?.category==='negocios';
   const category=legacy?'bienes':input?.category;
   if(!Object.hasOwn(CATEGORIES,category))throw new Error('Selecciona bien o servicio.');
   const subcategory=Object.hasOwn(SUBCATEGORIES[category],input?.subcategory)?input.subcategory:'otros';
-  const amount=optionalAmount(input?.budget,'el presupuesto');
+  const budget=optionalAmount(input?.budget,'el presupuesto');
   const desiredDate=optionalText(input?.desiredDate,10,'la fecha deseada');
-  if(desiredDate){const parsed=new Date(`${desiredDate}T00:00:00Z`);if(!/^\d{4}-\d{2}-\d{2}$/.test(desiredDate)||Number.isNaN(parsed.getTime())||parsed.toISOString().slice(0,10)!==desiredDate)throw new Error('Revisa la fecha deseada.');}
+  if(desiredDate){const parsed=new Date(desiredDate+'T00:00:00Z');if(!/^\d{4}-\d{2}-\d{2}$/.test(desiredDate)||Number.isNaN(parsed.getTime())||parsed.toISOString().slice(0,10)!==desiredDate)throw new Error('Revisa la fecha deseada.');}
   let quantity=null,condition=null;
   if(category==='bienes'){
-    if(input?.quantity!=null&&input.quantity!==''){
-      quantity=Number(input.quantity);
-      if(!Number.isSafeInteger(quantity)||quantity<1||quantity>1000000)throw new Error('Indica una cantidad válida de bienes.');
-    }else if(!legacy)throw new Error('Indica la cantidad de bienes.');
+    if(input?.quantity!=null&&input.quantity!=='')quantity=positiveQuantity(input.quantity,'cantidad');
+    else if(!legacy)throw new Error('Indica la cantidad de bienes.');
     condition=input?.condition||'cualquiera';
     if(!['nuevo','usado','cualquiera'].includes(condition))throw new Error('Selecciona la condición del bien.');
   }
   return {
-    title:cleanText(input.title,8,120,'La descripción breve'),
-    city:cleanText(input.city,2,80,'El lugar de entrega o ejecución'),
-    category,subcategory,
-    description:cleanText(input.description,15,1500,'Los detalles'),
-    budget:amount,desiredDate,quantity,condition,
-    status:['resuelta','cancelada'].includes(input?.status)?input.status:'abierta'
+    title:cleanText(input?.title,8,120,'La descripción breve'),
+    city:cleanText(input?.city,2,80,'La ciudad o municipio'),
+    category,subcategory,description:cleanText(input?.description,15,1500,'Los detalles'),
+    budget,desiredDate,quantity,condition,picture:pictureOrEmpty(input?.picture),
+    createdAt:validTimestamp(input?.createdAt),status:REQUEST_STATES.includes(input?.status)?input.status:'abierta'
   };
 }
-
-export function normalizeProposal(input){
+export function normalizeProposal(input,{legacy=false}={}){
+  const price=input?.price==null||input.price===''?legacy?null:requiredPrice(input?.price):requiredPrice(input.price);
+  const quantity=positiveQuantity(input?.quantity||1,'cantidad ofrecida');
+  if(price!=null&&price%quantity!==0)throw new Error('El precio total debe permitir un precio unitario en pesos enteros.');
+  let status=PROPOSAL_STATES.includes(input?.status)?input.status:'activa';
+  if(price===null)status='historica';
   return {
+    id:typeof input?.id==='string'&&input.id.length<=120?input.id:'',
     name:cleanText(input?.name,2,80,'El nombre'),
     description:cleanText(input?.description,15,1500,'La propuesta'),
     requestId:cleanText(input?.requestId,1,120,'La solicitud'),
-    price:optionalAmount(input?.price,'el precio total'),
-    delivery:optionalText(input?.delivery,120,'el plazo'),
+    price,quantity,delivery:optionalText(input?.delivery,120,'el plazo'),
     exclusions:optionalText(input?.exclusions,300,'las exclusiones'),
-    warranty:optionalText(input?.warranty,300,'la garantía')
+    warranty:optionalText(input?.warranty,300,'la garantía'),
+    picture:pictureOrEmpty(input?.picture),
+    status,discarded:input?.discarded===true,
+    createdAt:validTimestamp(input?.createdAt),updatedAt:validTimestamp(input?.updatedAt),
+    acceptedQuantity:Number.isSafeInteger(input?.acceptedQuantity)&&input.acceptedQuantity>0?input.acceptedQuantity:0,
+    pendingQuantity:Number.isSafeInteger(input?.pendingQuantity)&&input.pendingQuantity>0?input.pendingQuantity:0,
+    priceHistory:Array.isArray(input?.priceHistory)?input.priceHistory.slice(-30).filter(v=>Number.isSafeInteger(v.price)&&v.price>0&&validTimestamp(v.at)).map(v=>({price:v.price,at:v.at})):[]
   };
 }
-
+export const proposalUnitPrice=proposal=>proposal.price==null?Number.POSITIVE_INFINITY:proposal.price/proposal.quantity;
+export function sortProposals(proposals,category){
+  return [...proposals].sort((a,b)=>{
+    const aPrice=category==='bienes'?proposalUnitPrice(a):a.price??Number.POSITIVE_INFINITY;
+    const bPrice=category==='bienes'?proposalUnitPrice(b):b.price??Number.POSITIVE_INFINITY;
+    return aPrice-bPrice||String(a.createdAt||'').localeCompare(String(b.createdAt||''))||a.name.localeCompare(b.name,'es');
+  });
+}
+function newId(prefix){return prefix+'-'+(globalThis.crypto?.randomUUID?.()||Date.now()+'-'+Math.random().toString(36).slice(2));}
 export function appendProposal(proposals,input){
   const proposal=normalizeProposal(input);
-  const matching=proposals.filter(p=>p.requestId===proposal.requestId);
-  if(matching.length>=3)throw new Error('Esta solicitud ya tiene las tres propuestas de prueba permitidas.');
-  if(matching.some(p=>p.name.toLocaleLowerCase('es')===proposal.name.toLocaleLowerCase('es')))throw new Error('Ya guardaste una propuesta con este nombre para esta solicitud.');
-  return [...proposals,proposal];
+  const reserved=['activa','por_confirmar','pendiente_confirmacion','aceptada'];
+  if(proposals.some(p=>p.requestId===proposal.requestId&&p.name.toLocaleLowerCase('es')===proposal.name.toLocaleLowerCase('es')&&reserved.includes(p.status||'activa')))
+    throw new Error('Ya tienes una propuesta para esta necesidad. Puedes modificarla o retirarla.');
+  return [...proposals,{...proposal,id:newId('propuesta'),status:'activa',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}];
 }
-
-
+export function changeProposal(proposals,id,changes){
+  const original=proposals.find(p=>p.id===id);
+  if(!original||original.status!=='activa')throw new Error('Esta propuesta no se puede modificar.');
+  const next=normalizeProposal({...original,...changes,id:original.id});
+  const at=new Date().toISOString();
+  const priceHistory=original.price!==next.price&&original.price!=null?[...original.priceHistory,{price:original.price,at}].slice(-30):original.priceHistory;
+  return proposals.map(p=>p.id===id?{...next,priceHistory,createdAt:original.createdAt,updatedAt:at}:p);
+}
+export function withdrawProposal(proposals,id){
+  const found=proposals.find(p=>p.id===id);
+  if(!found||!['activa','por_confirmar','pendiente_confirmacion'].includes(found.status))throw new Error('Solo se puede retirar una propuesta no aceptada.');
+  return proposals.map(p=>p.id===id?{...p,status:'retirada',pendingQuantity:0}:p);
+}
+export function discardProposal(proposals,id,discarded){
+  if(!proposals.some(p=>p.id===id))throw new Error('La propuesta no existe.');
+  return proposals.map(p=>p.id===id?{...p,discarded:!!discarded}:p);
+}
+export function requestedRemaining(request,proposals){
+  if(request.category!=='bienes')return proposals.some(p=>p.requestId===request.id&&p.status==='aceptada')?0:1;
+  const committed=proposals.filter(p=>p.requestId===request.id&&['aceptada','por_confirmar'].includes(p.status))
+    .reduce((sum,p)=>sum+(p.status==='aceptada'?p.acceptedQuantity:p.pendingQuantity),0);
+  return Math.max(0,(request.quantity||1)-committed);
+}
+export function acceptProposal(proposals,request,id,quantity){
+  if(request.status!=='abierta')throw new Error('La necesidad no está abierta.');
+  const found=proposals.find(p=>p.id===id&&p.requestId===request.id);
+  if(!found||found.status!=='activa'||found.price==null)throw new Error('Selecciona una propuesta activa con precio confirmado.');
+  const remaining=requestedRemaining(request,proposals);
+  const selected=request.category==='bienes'?positiveQuantity(quantity,'cantidad a aceptar'):1;
+  if(selected>remaining||selected>found.quantity)throw new Error('La cantidad excede las unidades disponibles.');
+  const partial=request.category==='bienes'&&selected<found.quantity;
+  return proposals.map(p=>p.id===id?{...p,status:partial?'por_confirmar':'aceptada',acceptedQuantity:partial?0:selected,pendingQuantity:partial?selected:0}:p);
+}
+export function confirmPartial(proposals,id){
+  const found=proposals.find(p=>p.id===id);
+  if(!found||found.status!=='por_confirmar')throw new Error('La venta parcial no está pendiente.');
+  return proposals.map(p=>p.id===id?{...p,status:'aceptada',acceptedQuantity:found.pendingQuantity,pendingQuantity:0}:p);
+}
+export function reopenCanceled(requests,proposals,id){
+  const found=requests.find(r=>r.id===id);
+  if(!found||!['cancelada','en_proceso'].includes(found.status))throw new Error('Esta necesidad no se puede reabrir.');
+  return {
+    requests:requests.map(r=>r.id===id?{...r,status:'abierta'}:r),
+    proposals:proposals.map(p=>p.requestId===id&&p.status==='activa'?{...p,status:'pendiente_confirmacion'}:
+      p.requestId===id&&['aceptada','por_confirmar'].includes(p.status)?{...p,status:'acuerdo_cancelado',acceptedQuantity:0,pendingQuantity:0}:p)
+  };
+}
+export function confirmOldProposal(proposals,id){
+  const found=proposals.find(p=>p.id===id);
+  if(!found||found.status!=='pendiente_confirmacion')throw new Error('La propuesta no necesita confirmación.');
+  return proposals.map(p=>p.id===id?{...p,status:'activa',updatedAt:new Date().toISOString()}:p);
+}
 const DRAFT_FIELDS=Object.freeze({title:120,city:80,category:24,subcategory:40,description:1500,budget:20,quantity:12,condition:24,desiredDate:10});
 export function buildDraft(input){
   const draft={};
@@ -90,48 +173,52 @@ export function buildDraft(input){
   if(!Object.hasOwn(CATEGORIES,draft.category))draft.category='bienes';
   if(!Object.hasOwn(SUBCATEGORIES[draft.category],draft.subcategory))draft.subcategory='otros';
   if(!['nuevo','usado','cualquiera'].includes(draft.condition))draft.condition='cualquiera';
+  draft.picture=pictureOrEmpty(input?.picture);
   return draft;
 }
-
 export function updateLocalRequestStatus(requests,id,status){
-  if(!['resuelta','cancelada'].includes(status))throw new Error('Estado no válido.');
-  const target=requests.find(request=>request.id===id);
-  if(!target)throw new Error('No se encontró la solicitud.');
-  if(target.status!=='abierta')throw new Error('Solo se pueden cerrar solicitudes abiertas.');
-  return requests.map(request=>request.id===id?{...request,status}:request);
+  if(!['resuelta','cancelada','en_proceso'].includes(status))throw new Error('Estado no válido.');
+  const found=requests.find(r=>r.id===id);
+  if(!found)throw new Error('No se encontró la solicitud.');
+  if(!['abierta','en_proceso'].includes(found.status)||found.status==='en_proceso'&&status==='en_proceso')throw new Error('Solo se pueden cerrar solicitudes abiertas o en proceso.');
+  return requests.map(r=>r.id===id?{...r,status}:r);
 }
-
 export function decodeState(raw){
-  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null};
+  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null,proposalDraft:null,favorites:[],seen:{},reports:[]};
   if(!raw)return state;
   let parsed;try{parsed=JSON.parse(raw);}catch{return state;}
   if(!parsed||typeof parsed!=='object'||parsed.version!==1)return state;
   if(Array.isArray(parsed.requests)){
     const ids=new Set(EXAMPLES.map(r=>r.id));
     for(const item of parsed.requests.slice(0,50)){
-      try{
-        const normalized=normalizeRequest(item);
-        const id=cleanText(item.id,1,120,'El identificador');
-        if(ids.has(id))continue;
-        ids.add(id);state.requests.push({...normalized,id});
-      }catch{/* Ignore malformed records without discarding valid records. */}
+      try{const normalized=normalizeRequest(item),id=cleanText(item.id,1,120,'El identificador');if(ids.has(id))continue;ids.add(id);state.requests.push({...normalized,id});}catch{}
     }
   }
   const requestIds=new Set([...EXAMPLES,...state.requests].map(r=>r.id));
   if(Array.isArray(parsed.proposals)){
-    for(const proposal of parsed.proposals.slice(0,159)){
-      try{if(requestIds.has(proposal.requestId))state.proposals=appendProposal(state.proposals,proposal);}catch{/* Ignore invalid or excess proposals. */}
+    for(const item of parsed.proposals.slice(0,900)){
+      try{
+        if(!requestIds.has(item.requestId))continue;
+        const proposal=normalizeProposal(item,{legacy:true});
+        const id=proposal.id||'legacy-'+state.proposals.length+'-'+proposal.requestId;
+        state.proposals.push({...proposal,id});
+      }catch{}
     }
   }
   if(parsed.draft&&typeof parsed.draft==='object'&&parsed.draft.data&&typeof parsed.draft.data==='object'){
     const editingRequestId=typeof parsed.draft.editingRequestId==='string'&&state.requests.some(r=>r.id===parsed.draft.editingRequestId&&r.status==='abierta')?parsed.draft.editingRequestId:null;
     state.draft={data:buildDraft(parsed.draft.data),editingRequestId};
   }
+  if(parsed.proposalDraft&&typeof parsed.proposalDraft==='object'){
+    state.proposalDraft={...parsed.proposalDraft,description:optionalText(parsed.proposalDraft.description,1500,'el borrador'),price:optionalText(parsed.proposalDraft.price,20,'el borrador'),quantity:optionalText(parsed.proposalDraft.quantity,10,'el borrador')};
+  }
   if(typeof parsed.name==='string'&&parsed.name.trim().length>=2&&parsed.name.length<=40)state.name=parsed.name.trim();
-  if(parsed.provider){try{state.provider={name:cleanText(parsed.provider.name,2,80,'El nombre'),specialty:cleanText(parsed.provider.specialty,3,120,'La especialidad'),city:cleanText(parsed.provider.city,2,80,'La ciudad')};}catch{/* Ignore an invalid profile. */}}
+  if(parsed.provider){try{state.provider={name:cleanText(parsed.provider.name,2,80,'El nombre'),specialty:cleanText(parsed.provider.specialty,3,120,'La especialidad'),city:cleanText(parsed.provider.city,2,80,'La ciudad')};}catch{}}
+  if(Array.isArray(parsed.favorites))state.favorites=[...new Set(parsed.favorites.filter(id=>requestIds.has(id)))].slice(0,200);
+  if(parsed.seen&&typeof parsed.seen==='object'&&!Array.isArray(parsed.seen))for(const [id,at] of Object.entries(parsed.seen))if(requestIds.has(id)&&validTimestamp(at))state.seen[id]=at;
+  if(Array.isArray(parsed.reports))state.reports=parsed.reports.slice(-30).filter(v=>v&&typeof v==='object').map(v=>({requestId:String(v.requestId||'').slice(0,120),reason:String(v.reason||'').slice(0,300),at:validTimestamp(v.at)}));
   return state;
 }
-
 export function persistState(storage,state){
   try{storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{return false;}
 }
