@@ -8,7 +8,7 @@
   <title>LoNecesito — Tú lo necesitas. Alguien lo tiene.</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="preload" href="assets/2026-10-22_diseno-original.png" as="image">
-  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-2">
+  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-3">
   <script type="module" src="2026-10-22_app.js"></script>
 </head>
 <body>
@@ -27,7 +27,7 @@
   <header class="site-header shell">
     <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark asset" aria-hidden="true"><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448"></span><span>LoNecesito</span></a>
     <nav class="desktop-nav" aria-label="Navegación principal">
-      <a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#mis-necesidades">Mis necesidades</a><a href="#proveedores">Para proveedores</a>
+      <a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#mis-necesidades">Mis necesidades</a><a href="#mis-propuestas">Mis propuestas</a><a href="#proveedores">Para proveedores</a>
     </nav>
     <div class="header-actions"><button class="text-button" data-open="access" id="access-button">Ingresar</button><button class="button button-small" data-open="publish">Publicar gratis</button></div>
     <details class="mobile-nav"><summary aria-label="Abrir menú"><span></span><span></span><span></span></summary><nav aria-label="Navegación móvil"><a href="#como-funciona">Cómo funciona</a><a href="#necesidades" data-explore>Explorar necesidades</a><a href="#mis-necesidades">Mis necesidades</a><a href="#proveedores">Para proveedores</a><button class="text-button" data-open="access">Ingresar</button></nav></details>
@@ -47,13 +47,13 @@
           <button type="button" class="path-option path-primary" data-open="publish"><span class="path-title">Necesito algo <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></span><span class="path-hint">Crear una solicitud de prueba</span></button>
           <a class="path-option" href="#necesidades" data-explore><span class="path-title">Puedo ofrecerlo <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></span><span class="path-hint">Explorar ejemplos y ofertar de prueba</span></a>
         </div>
-        <ul class="benefits" aria-label="Ventajas"><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Publicar es gratis</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Hasta 3 propuestas</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Tú eliges</li></ul>
+        <ul class="benefits" aria-label="Ventajas"><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Publicar es gratis</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Propuestas sin límite</li><li><span class="check-dot"><svg class="icon" aria-hidden="true"><use href="#check"/></svg></span>Tú eliges</li></ul>
       </div>
       <figure class="hero-visual asset" role="img" aria-label="Ejemplo de solicitud: busco 20 sillas para mi café, Bogotá, esta semana. Propuesta recibida: entrega y condiciones claras."><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448" fetchpriority="high"><figcaption class="sr-only">Una solicitud y su propuesta, sobre una fotografía del café.</figcaption></figure>
     </section>
 
     <section class="requests-section shell" id="necesidades" aria-labelledby="requests-title">
-      <p class="section-note">Solicitudes ilustrativas y pruebas guardadas en este navegador</p>
+      <p class="section-note">Solicitudes ilustrativas y pruebas guardadas en este navegador; todavía no son publicaciones reales</p>
       <div class="section-heading"><h2 id="requests-title">Lo que otros necesitan hoy</h2><a class="underlined-link" href="#necesidades" data-explore>Explorar necesidades <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a></div>
       <div class="filters" role="group" aria-label="Filtrar necesidades por tipo">
         <button class="filter is-active" data-category="all" aria-pressed="true">Todo</button>
@@ -62,6 +62,7 @@
       </div>
       <div class="listing-controls">
         <div><label for="list-subcategory">Categoría</label><select id="list-subcategory" aria-label="Categoría de la necesidad"></select></div>
+        <div><label for="list-city">Ciudad o municipio</label><select id="list-city" aria-label="Filtrar necesidades por ciudad"></select></div>
         <div><label for="request-search">Buscar necesidades</label><input id="request-search" type="search" maxlength="120" placeholder="¿Qué necesitas encontrar?"></div>
       </div>
       <div class="request-grid" id="request-grid">
@@ -75,11 +76,23 @@
 
     <section class="my-section shell" id="mis-necesidades" aria-labelledby="my-title">
       <div class="section-heading"><div><p class="section-note">Tu espacio de prueba</p><h2 id="my-title">Mis necesidades <span id="my-count" class="my-count"></span></h2></div><button class="button button-small" type="button" data-open="publish">Nueva necesidad</button></div>
-      <p class="my-note">Estas solicitudes solo existen en este navegador; no están vinculadas a una cuenta real ni son visibles en otros dispositivos.</p>
+      <p class="my-note">Estas solicitudes solo existen en este navegador; no están vinculadas a una cuenta real ni son visibles en otros dispositivos. Las propuestas nuevas se cuentan dentro de esta demostración.</p>
       <div class="my-grid" id="my-requests-grid"></div>
       <div class="my-empty" id="my-empty"><p>Aún no has creado una solicitud en este navegador.</p><button class="button button-small" type="button" data-open="publish">Publicar mi primera necesidad</button></div>
     </section>
-    <section class="how-section shell" id="como-funciona" aria-labelledby="how-title"><h2 id="how-title">De una necesidad a una solución.</h2><ol class="steps"><li><span class="step-number">1</span><svg class="step-icon" aria-hidden="true"><use href="#document"/></svg><div><h3>1. Publica</h3><p>Cuéntanos qué necesitas<br>y dónde.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">2</span><svg class="step-icon" aria-hidden="true"><use href="#conversation"/></svg><div><h3>2. Compara</h3><p>Recibe hasta 3 propuestas<br>de proveedores.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">3</span><svg class="step-icon" aria-hidden="true"><use href="#approved"/></svg><div><h3>3. Elige</h3><p>Revisa las opciones<br>y selecciona la mejor.</p></div></li></ol></section>
+    <section class="my-section shell" id="mis-propuestas" aria-labelledby="my-proposals-title">
+      <div class="section-heading"><div><p class="section-note">Panel del proveedor en esta demostración</p><h2 id="my-proposals-title">Mis propuestas</h2></div><button class="button button-small" type="button" data-open="provider">Perfil de proveedor</button></div>
+      <p class="my-note">Elige tu nombre o negocio en «Perfil de proveedor» para ver tus ofertas locales, modificarlas o retirarlas. Esto no es una cuenta autenticada.</p>
+      <div class="my-grid" id="my-proposals-grid"></div>
+      <p class="my-note" id="my-proposals-empty">Todavía no hay propuestas de prueba asociadas al perfil que has elegido.</p>
+    </section>
+    <section class="my-section shell" id="favoritos" aria-labelledby="favorites-title">
+      <div class="section-heading"><h2 id="favorites-title">Necesidades guardadas</h2></div>
+      <p class="my-note">Favoritos guardados únicamente en este navegador.</p>
+      <div class="my-grid" id="favorites-grid"></div>
+      <p class="my-note" id="favorites-empty">Aún no has guardado ninguna necesidad.</p>
+    </section>
+    <section class="how-section shell" id="como-funciona" aria-labelledby="how-title"><h2 id="how-title">De una necesidad a una solución.</h2><ol class="steps"><li><span class="step-number">1</span><svg class="step-icon" aria-hidden="true"><use href="#document"/></svg><div><h3>1. Publica</h3><p>Cuéntanos qué necesitas<br>y dónde.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">2</span><svg class="step-icon" aria-hidden="true"><use href="#conversation"/></svg><div><h3>2. Compara</h3><p>Compara ofertas con precio fijo<br>de menor a mayor.</p></div><svg class="step-arrow icon" aria-hidden="true"><use href="#arrow"/></svg></li><li><span class="step-number">3</span><svg class="step-icon" aria-hidden="true"><use href="#approved"/></svg><div><h3>3. Elige</h3><p>Revisa las opciones<br>y selecciona la mejor.</p></div></li></ol></section>
 
     <section class="provider-section wide-shell" id="proveedores" aria-labelledby="provider-title"><div class="provider-copy"><h2 id="provider-title">Tu próximo cliente ya sabe lo que necesita.</h2><p>Conecta con solicitudes de tu especialidad.</p><button class="button button-lime" data-open="provider">Quiero ofertar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button></div><div class="provider-photo asset" role="img" aria-label="Proveedor listo para atender nuevas solicitudes"><img src="assets/2026-10-22_diseno-original.png" alt="" width="1086" height="1448" loading="lazy"></div></section>
   </main>
@@ -109,7 +122,7 @@
       <div class="wizard-step" data-wizard-step="1" aria-labelledby="wizard-title-2" hidden>
         <h3 class="wizard-heading" id="wizard-title-2">2. Completa los detalles</h3>
         <label for="request-city">¿Dónde necesitas el bien o servicio?</label>
-        <input id="request-city" name="city" minlength="2" maxlength="80" required list="cities" autocomplete="address-level2" placeholder="Ciudad o zona de entrega o ejecución">
+        <input id="request-city" name="city" minlength="2" maxlength="80" required list="cities" autocomplete="address-level2" placeholder="Ciudad o municipio (sin dirección exacta)">
         <fieldset id="goods-fields" class="goods-fields"><legend>Características del bien</legend><div class="form-columns">
           <div><label for="request-quantity">Cantidad</label><input id="request-quantity" name="quantity" type="number" min="1" max="1000000" step="1" required value="1"></div>
           <div><label for="request-condition">Condición</label><select id="request-condition" name="condition" required><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
@@ -119,11 +132,16 @@
           <div><label for="request-budget">Presupuesto aproximado, COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
           <div><label for="request-date">Fecha deseada (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
         </div>
+        <label for="request-photo">Fotografía de la necesidad (opcional, máximo una)</label>
+        <input id="request-photo" type="file" accept="image/jpeg,image/png,image/webp">
+        <div id="request-photo-preview" class="photo-preview" aria-live="polite"></div>
+        <button id="request-photo-remove" type="button" class="my-action" hidden>Quitar fotografía</button>
+        <p class="field-help">La imagen se comprime y guarda solo en este navegador. No incluyas datos personales ni direcciones.</p>
       </div>
       <div class="wizard-step" data-wizard-step="2" aria-labelledby="wizard-title-3" hidden>
         <h3 class="wizard-heading" id="wizard-title-3">3. Revisa y confirma</h3>
         <div class="review-box" id="wizard-review" aria-live="polite"></div>
-        <p class="privacy-note">No solicitamos tu celular para esta prueba: todavía no existe una conexión real entre personas y proveedores.</p>
+        <p class="privacy-note">En la versión real tendrás que identificarte al final mediante Google o correo electrónico, sin SMS. La identificación con Firebase aún no está implementada en esta prueba.</p>
         <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> Entiendo que mi solicitud solo quedará guardada en este navegador.</label>
       </div>
       <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
@@ -143,32 +161,42 @@
     <p class="card-city"><svg class="icon" aria-hidden="true"><use href="#pin"/></svg><span id="detail-city"></span></p>
     <ul class="request-details" id="detail-meta"></ul>
     <p class="detail-description" id="detail-description"></p>
+    <div class="detail-photo" id="detail-photo" hidden></div>
     <p class="demo-note" id="detail-note"></p>
     <h3 class="detail-subtitle">Propuestas de esta demostración</h3>
+    <p class="field-help">Los precios son fijos y se muestran de menor a mayor (por unidad cuando se ofrecen distintas cantidades). En las solicitudes de ejemplo, solo se muestran las ofertas del perfil local seleccionado. No hay privacidad real sin cuentas y reglas de Firebase.</p>
     <p id="proposals-empty">No hay propuestas guardadas en este navegador.</p>
     <ol class="proposal-list" id="detail-proposals"></ol>
     <p class="form-error" id="detail-error" role="alert" hidden></p>
     <div class="dialog-actions">
       <button class="button" id="open-proposal">Presentar propuesta de prueba</button>
       <button class="button button-secondary" id="resolve-request" hidden>Marcar como resuelta</button>
+      <button class="button button-secondary" id="report-request">Reportar (prueba local)</button>
     </div>
   </dialog>
 
   <dialog id="proposal-dialog" aria-labelledby="proposal-title">
     <div class="dialog-header"><h2 id="proposal-title">Presenta una propuesta</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
     <p id="proposal-request-title" class="dialog-intro"></p>
+    <p class="field-help">Una propuesta activa por proveedor y necesidad. Precio fijo total obligatorio, incluyendo costos aplicables. Una propuesta ya aceptada no se puede modificar unilateralmente.</p>
     <p class="demo-note">Demostración: tu propuesta se guarda solo en este navegador. El comprador no puede recibirla.</p>
     <form id="proposal-form" class="dialog-form">
       <label for="proposal-name">Nombre o negocio</label><input id="proposal-name" name="name" required minlength="2" maxlength="80" autocomplete="organization">
       <label for="proposal-description">Alcance y solución propuesta</label><textarea id="proposal-description" name="description" rows="4" required minlength="15" maxlength="1500" placeholder="Explica qué incluye el bien o servicio y los materiales."></textarea>
       <div class="form-columns">
-        <div><label for="proposal-price">Precio total COP (opcional)</label><input id="proposal-price" name="price" type="number" min="0" step="1" placeholder="Pendiente de diagnóstico"></div>
+        <div><label for="proposal-price">Precio fijo total (COP) *</label><input id="proposal-price" name="price" type="number" min="1" step="1" required placeholder="Total definitivo sin costos adicionales"></div>
         <div><label for="proposal-delivery">Plazo o fecha (opcional)</label><input id="proposal-delivery" name="delivery" maxlength="120" placeholder="Por ejemplo: cinco días"></div>
       </div>
+      <div id="proposal-quantity-wrap"><label for="proposal-quantity">Unidades que ofreces</label><input id="proposal-quantity" name="quantity" type="number" min="1" max="1000000" step="1" value="1" required><p class="field-help">Indica el precio total por esa cantidad. Debe ser divisible entre las unidades para comparar precios unitarios en pesos enteros.</p></div>
       <label for="proposal-exclusions">Exclusiones (opcional)</label><textarea id="proposal-exclusions" name="exclusions" rows="2" maxlength="300" placeholder="Lo que no está incluido"></textarea>
       <label for="proposal-warranty">Garantía y condiciones (opcional)</label><textarea id="proposal-warranty" name="warranty" rows="2" maxlength="300"></textarea>
+      <label for="proposal-photo">Fotografía de la propuesta (opcional, máximo una)</label>
+      <input id="proposal-photo" type="file" accept="image/jpeg,image/png,image/webp">
+      <div id="proposal-photo-preview" class="photo-preview" aria-live="polite"></div>
+      <button id="proposal-photo-remove" type="button" class="my-action" hidden>Quitar fotografía</button>
+      <p class="field-help">El chat y el envío de fotos por mensajes se habilitarán al integrar Firebase. No intercambies información personal en la demostración.</p>
       <p class="form-error" id="proposal-error" role="alert" hidden></p>
-      <button class="button" type="submit">Guardar propuesta de prueba</button>
+      <div class="dialog-actions"><button class="button button-secondary" id="proposal-save-draft" type="button">Guardar borrador</button><button class="button" type="submit">Guardar propuesta de prueba</button></div>
     </form>
   </dialog>
 
