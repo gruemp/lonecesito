@@ -210,7 +210,10 @@ export function decodeState(raw){
     state.draft={data:buildDraft(parsed.draft.data),editingRequestId};
   }
   if(parsed.proposalDraft&&typeof parsed.proposalDraft==='object'){
-    state.proposalDraft={...parsed.proposalDraft,description:optionalText(parsed.proposalDraft.description,1500,'el borrador'),price:optionalText(parsed.proposalDraft.price,20,'el borrador'),quantity:optionalText(parsed.proposalDraft.quantity,10,'el borrador')};
+    const draft=parsed.proposalDraft;
+    if(typeof draft.requestId==='string'&&requestIds.has(draft.requestId)){
+      state.proposalDraft={requestId:draft.requestId,name:typeof draft.name==='string'?draft.name.slice(0,80):'',description:typeof draft.description==='string'?draft.description.slice(0,1500):'',price:typeof draft.price==='string'?draft.price.slice(0,20):'',quantity:typeof draft.quantity==='string'?draft.quantity.slice(0,10):'',delivery:typeof draft.delivery==='string'?draft.delivery.slice(0,120):'',warranty:typeof draft.warranty==='string'?draft.warranty.slice(0,300):'',exclusions:typeof draft.exclusions==='string'?draft.exclusions.slice(0,300):'',picture:pictureOrEmpty(draft.picture)};
+    }
   }
   if(typeof parsed.name==='string'&&parsed.name.trim().length>=2&&parsed.name.length<=40)state.name=parsed.name.trim();
   if(parsed.provider){try{state.provider={name:cleanText(parsed.provider.name,2,80,'El nombre'),specialty:cleanText(parsed.provider.specialty,3,120,'La especialidad'),city:cleanText(parsed.provider.city,2,80,'La ciudad')};}catch{}}
@@ -602,6 +605,8 @@ function init(){
     proposalPicture=proposal?.picture||'';
     const draft=state.proposalDraft;
     if(!proposal&&draft?.requestId===request.id){
+      $('#proposal-name').value=draft.name||$('#proposal-name').value;
+      proposalPicture=draft.picture||'';
       $('#proposal-description').value=draft.description||'';
       $('#proposal-price').value=draft.price||'';
       $('#proposal-quantity').value=draft.quantity||1;
@@ -794,7 +799,7 @@ function init(){
   $('#proposal-save-draft').addEventListener('click',()=>{
     const form=$('#proposal-form');
     const data=Object.fromEntries(new FormData(form));
-    const draft={...data,requestId:currentRequestId};
+    const draft={...data,requestId:currentRequestId,picture:proposalPicture};
     if(persistState(storage,{...state,proposalDraft:draft})){
       state={...state,proposalDraft:draft};$('#proposal-dialog').close();showToast('Borrador de propuesta guardado solo en este navegador.');
     }else showToast('No se pudo guardar el borrador de propuesta.');
