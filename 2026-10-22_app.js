@@ -478,9 +478,9 @@ function init(){
   }
   function setWizardStep(step){
     wizardStep=Math.min(2,Math.max(0,step));
-    $('.wizard-step').forEach((element,i)=>{element.hidden=i!==wizardStep;});
+    $$('.wizard-step').forEach((element,i)=>{element.hidden=i!==wizardStep;});
     $('#wizard-status').textContent='Paso '+(wizardStep+1)+' de 3: '+wizardTitles[wizardStep];
-    $('.wizard-bars span').forEach((element,i)=>element.classList.toggle('is-complete',i<=wizardStep));
+    $$('.wizard-bars span').forEach((element,i)=>element.classList.toggle('is-complete',i<=wizardStep));
     $('#wizard-back').hidden=wizardStep===0;
     $('#wizard-next').hidden=wizardStep===2;
     $('#wizard-submit').hidden=wizardStep!==2;
@@ -681,7 +681,7 @@ function init(){
       showToast('Cambio guardado en esta demostración local.');
     }catch(error){showToast(error.message);}
   }
-  $('[data-open]').forEach(button=>button.addEventListener('click',()=>{
+  $$('[data-open]').forEach(button=>button.addEventListener('click',()=>{
     const kind=button.dataset.open;
     if(kind==='provider'&&state.provider){$('#provider-name').value=state.provider.name;$('#provider-specialty').value=state.provider.specialty;$('#provider-city').value=state.provider.city;}
     if(kind==='access')$('#access-name').value=state.name;
