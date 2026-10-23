@@ -479,7 +479,7 @@ function init(){
         ...(p.status==='activa'&&request.status==='abierta'?[['accept','Aceptar'],...(request.category==='bienes'?[['partial','Aceptar menos unidades']]:[])]:[]),
         ['chat','Conversar (próximamente)'],['report','Reportar (prueba)'],
         ['discard',p.discarded?'Recuperar':'Descartar']
-      ]:p.status==='activa'?[['chat','Conversar (próximamente)'],['edit','Modificar mi oferta'],['withdraw','Retirar']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
+      ]:p.status==='activa'?[['edit','Modificar mi oferta'],['withdraw','Retirar'],['chat','Conversar (próximamente)']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
       for(const [action,label] of buttons){const button=el('button','my-action',label);button.type='button';button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);}
       const main=actions.firstElementChild;
       if(main)item.append(main);
