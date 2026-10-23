@@ -230,7 +230,7 @@ function init(){
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
   let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
-  const records=()=>[...state.requests,...EXAMPLES];
+  const records=()=>[...state.requests,...EXAMPLES.map(example=>({...example,status:'abierta'}))];
   const findRequest=id=>records().find(request=>request.id===id);
   const svg=(name,className='icon')=>{
     const element=document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -628,11 +628,14 @@ function init(){
         if(!window.confirm('¿Retirar esta propuesta? Se conservará en el historial.'))return;
         state={...state,proposals:withdrawProposal(state.proposals,id)};
       }else if(action==='confirm-old'){
+        if(request.status!=='abierta')throw new Error('Primero debe reactivarse la necesidad.');
         if(!window.confirm('¿Confirmas que el precio fijo '+money(proposal.price)+' sigue vigente?'))return;
         state={...state,proposals:confirmOldProposal(state.proposals,id)};
       }else if(action==='confirm-partial'){
         if(!window.confirm('¿Aceptas vender '+proposal.pendingQuantity+' unidades al precio unitario de '+money(proposalUnitPrice(proposal))+'?'))return;
-        state={...state,proposals:confirmPartial(state.proposals,id)};
+        const proposals=confirmPartial(state.proposals,id);
+        const requests=request.status==='abierta'&&requestedRemaining(request,proposals)===0?updateLocalRequestStatus(state.requests,request.id,'en_proceso'):state.requests;
+        state={...state,proposals,requests};
       }else if(action==='discard'){
         if(!mine)throw new Error('Solo el comprador puede organizar las propuestas de su necesidad.');
         state={...state,proposals:discardProposal(state.proposals,id,!proposal.discarded)};
