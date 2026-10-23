@@ -289,7 +289,92 @@ function init(){
     openDialog('detail');
   }
 
-  $$('[data-open]').forEach(button=>button.addEventListener('click',()=>{
+
+  const wizardTitles=['¿Qué necesitas?','Detalles de la necesidad','Revisar y confirmar'];
+  const draftFields=['title','city','category','subcategory','description','budget','quantity','condition','desiredDate'];
+  function wizardData(){
+    const input={};
+    for(const key of draftFields){
+      const item=$('#publish-form').elements.namedItem(key);
+      input[key]=item&&!item.disabled?item.value:'';
+    }
+    return input;
+  }
+  function reviewWizard(){
+    const values=wizardData();
+    const rows=[
+      ['Necesito',CATEGORIES[values.category]+' · '+(SUBCATEGORIES[values.category]?.[values.subcategory]||'Otra categoría')],
+      ['Solicitud',values.title],
+      ['Lugar',values.city],
+      ['Detalles',values.description],
+      ...(values.category==='bienes'?[['Cantidad',values.quantity],['Condición',values.condition]]:[]),
+      ['Presupuesto',values.budget?values.budget+' COP':'Prefiero recibir cotizaciones'],
+      ['Fecha deseada',values.desiredDate||'Por definir']
+    ];
+    const box=$('#wizard-review');
+    box.replaceChildren(...rows.map(([label,value])=>{
+      const row=document.createElement('p');row.className='review-row';
+      const strong=document.createElement('strong');strong.textContent=label+': ';
+      row.append(strong,document.createTextNode(value));return row;
+    }));
+  }
+  function setWizardStep(step){
+    wizardStep=Math.min(2,Math.max(0,step));
+    $('.wizard-step').forEach((element,i)=>{element.hidden=i!==wizardStep;});
+    $('#wizard-status').textContent='Paso '+(wizardStep+1)+' de 3: '+wizardTitles[wizardStep];
+    $('.wizard-bars span').forEach((element,i)=>element.classList.toggle('is-complete',i<=wizardStep));
+    $('#wizard-back').hidden=wizardStep===0;
+    $('#wizard-next').hidden=wizardStep===2;
+    $('#wizard-submit').hidden=wizardStep!==2;
+    if(wizardStep===2)reviewWizard();
+  }
+  function validateWizardStep(){
+    const group=$('.wizard-step[data-wizard-step="'+wizardStep+'"]');
+    for(const field of group.querySelectorAll('input,select,textarea')){
+      if(!field.disabled&&!field.checkValidity()){field.reportValidity();return false;}
+    }
+    return true;
+  }
+  function startPublish(request=null,overrides=null){
+    clearTimeout(draftTimer);
+    const activeDraft=!request&&state.draft;
+    const editing=activeDraft?.editingRequestId&&state.requests.find(r=>r.id===activeDraft.editingRequestId&&r.status==='abierta');
+    const values=request||activeDraft?.data||{};
+    editingRequestId=request?.id||editing?.id||null;
+    const form=$('#publish-form');form.reset();
+    const kind=values.category==='servicios'?'servicios':'bienes';
+    $('#request-category').value=kind;populatePublishSubcategories();
+    for(const key of draftFields){
+      if(key==='category')continue;
+      const item=form.elements.namedItem(key);
+      if(item&&values[key]!=null&&values[key]!=='')item.value=String(values[key]);
+    }
+    if(overrides?.title)$('#request-title').value=overrides.title;
+    if(overrides?.city)$('#request-city').value=overrides.city;
+    $('#publish-title').textContent=editingRequestId?'Edita tu necesidad':'Publica lo que necesitas';
+    $('#wizard-submit').textContent=editingRequestId?'Guardar cambios de prueba':'Guardar solicitud de prueba';
+    $('#publish-error').hidden=true;$('#publish-error').textContent='';
+    $('#draft-status').textContent=activeDraft&&!request?'Borrador local recuperado. Puedes continuarlo o editarlo.':'';
+    setWizardStep(0);openDialog('publish');
+  }
+  function saveWizardDraft(closeDialog=false){
+    const next={...state,draft:{data:buildDraft(wizardData()),editingRequestId}};
+    if(!persistState(storage,next)){
+      setError('publish-error',new Error('No fue posible guardar el borrador en este navegador.'));return false;
+    }
+    state=next;
+    $('#draft-status').textContent='Borrador guardado en este navegador.';
+    if(closeDialog){clearTimeout(draftTimer);$('#publish-dialog').close();showToast('Borrador guardado. Puedes continuarlo cuando vuelvas a publicar.');}
+    return true;
+  }
+  function scheduleDraftSave(){
+    clearTimeout(draftTimer);
+    draftTimer=setTimeout(()=>{
+      if($('#publish-dialog').open)saveWizardDraft(false);
+    },600);
+  }
+
+  $('[data-open]').forEach(button=>button.addEventListener('click',()=>{
     const kind=button.dataset.open;
     if(kind==='provider'&&state.provider){$('#provider-name').value=state.provider.name;$('#provider-specialty').value=state.provider.specialty;$('#provider-city').value=state.provider.city;}
     if(kind==='access')$('#access-name').value=state.name;
