@@ -184,7 +184,7 @@ export function updateLocalRequestStatus(requests,id,status){
   return requests.map(r=>r.id===id?{...r,status}:r);
 }
 export function decodeState(raw){
-  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null,proposalDraft:null,favorites:[],seen:{},reports:[]};
+  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null,proposalDraft:null,favorites:[],seen:{},reports:[],acceptances:[]};
   if(!raw)return state;
   let parsed;try{parsed=JSON.parse(raw);}catch{return state;}
   if(!parsed||typeof parsed!=='object'||parsed.version!==1)return state;
@@ -220,16 +220,36 @@ export function decodeState(raw){
   if(Array.isArray(parsed.favorites))state.favorites=[...new Set(parsed.favorites.filter(id=>requestIds.has(id)))].slice(0,200);
   if(parsed.seen&&typeof parsed.seen==='object'&&!Array.isArray(parsed.seen))for(const [id,at] of Object.entries(parsed.seen))if(requestIds.has(id)&&validTimestamp(at))state.seen[id]=at;
   if(Array.isArray(parsed.reports))state.reports=parsed.reports.slice(-30).filter(v=>v&&typeof v==='object').map(v=>({requestId:String(v.requestId||'').slice(0,120),reason:String(v.reason||'').slice(0,300),at:validTimestamp(v.at)}));
+  if(Array.isArray(parsed.acceptances)){
+    const seen=new Set(),own=new Set(state.requests.map(r=>r.id));
+    for(const item of parsed.acceptances.slice(0,200)){
+      const id=item?.requestId;
+      if(typeof id!=='string'||!requestIds.has(id)||own.has(id)||seen.has(id))continue;
+      const acceptedAt=validTimestamp(item.acceptedAt);if(!acceptedAt)continue;
+      seen.add(id);state.acceptances.push({requestId:id,acceptedAt});
+    }
+  }
   return state;
 }
 export function persistState(storage,state){
   try{storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{return false;}
 }
 
-export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','mis-propuestas','favoritos']);
+export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','aceptadas']);
 export function resolveScreen(hash){
   const value=String(hash||'').replace(/^#/,'');
+  if(value==='mis-propuestas')return 'aceptadas';
+  if(value==='favoritos')return 'necesidades';
   return SCREEN_IDS.includes(value)?value:'inicio';
+}
+export function acceptNeedLocally(state,request){
+  if(!request||request.status!=='abierta')throw new Error('Solo se pueden aceptar necesidades abiertas.');
+  const isOwn=state.requests?.some(item=>item.id===request.id);
+  if(isOwn)throw new Error('No puedes aceptar tu propia necesidad.');
+  if(!EXAMPLES.some(item=>item.id===request.id))throw new Error('No se encontró la necesidad.');
+  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aceptaste esta necesidad en este navegador.');
+  const entry={requestId:request.id,acceptedAt:new Date().toISOString()};
+  return {...state,acceptances:[...(state.acceptances||[]),entry]};
 }
 
 export function applyScreenNavigation(root,screenId){
@@ -249,7 +269,7 @@ function init(){
   const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
-  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
+  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
   function activateScreen(screenId){
     applyScreenNavigation(document,screenId);
