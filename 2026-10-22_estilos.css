@@ -17,3 +17,10 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
 @media(max-width:680px){.shell{width:calc(100% - 20px)}.compact-header-inner{height:53px}.compact-brand{font-size:17px}.header-actions{gap:2px}.header-actions .text-button{font-size:12px;padding:6px}.header-actions .button{font-size:12px}.screen-navigation{gap:3px;padding-top:6px;padding-bottom:6px}.screen-navigation a{font-size:12px;min-height:35px;padding:7px 9px}.app-screen{padding-top:12px}.hero{padding-top:clamp(20px,5vh,42px)}.hero h1{font-size:29px}.hero-description{margin-bottom:13px}.request-composer{padding:10px}.composer-bottom{gap:7px}.composer-bottom>.button{min-width:104px;padding-inline:9px}.compact-next-step{font-size:13px}.request-grid,.my-grid{grid-template-columns:1fr;gap:7px}.request-card,.my-card{padding:10px}.request-card h3{font-size:14px}.section-heading{margin-bottom:10px}.listing-controls{grid-template-columns:1fr;gap:7px}.form-columns{grid-template-columns:1fr 1fr}.dialog-header h2,dialog>h2{font-size:18px}dialog{padding:13px;max-height:calc(100dvh - 12px)}.my-empty{flex-direction:column;align-items:stretch;gap:9px}.my-empty .button{width:100%}.wizard-actions .button{min-height:36px;padding:7px 10px;font-size:12px}}
 @media(max-width:350px){.composer-bottom{flex-direction:column}.composer-bottom>.button{width:100%}.screen-navigation a{padding-inline:7px;font-size:11px}.form-columns{grid-template-columns:1fr}.compact-brand-mark{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Las cinco vistas deben permanecer accesibles sin desplazamiento lateral en celular. */
+@media(max-width:680px){
+  .screen-navigation{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;overflow:visible;white-space:normal}
+  .screen-navigation a{display:grid;place-items:center;min-width:0;min-height:40px;padding:6px 2px;font-size:11px;line-height:1.15;white-space:normal}
+}
+@media(max-width:380px){.screen-navigation a{font-size:10px;padding-inline:1px}}
