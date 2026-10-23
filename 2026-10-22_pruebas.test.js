@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen,applyScreenNavigation} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen,applyScreenNavigation,EXAMPLES,acceptNeedLocally} from './2026-10-22_app.js';
 import {readFileSync} from 'node:fs';
 
 const req={id:'necesidad-1',title:'Necesito empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',description:'Necesito empaques con el logo del negocio.',quantity:10,condition:'cualquiera',status:'abierta'};
@@ -178,23 +178,29 @@ test('un fallo de almacenamiento no se presenta como guardado exitoso',()=>{
   assert.equal(persistState({setItem(k,v){values.set(k,v);}},st),true);
   assert.equal(JSON.parse(values.get(STORAGE_KEY)).version,1);
 });
-test('el HTML contiene formularios, filtros, foto única, controles y textos de demo',()=>{
+test('el HTML incluye formularios solo para quien publica, filtros y aceptación directa',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
   assert.equal(new Set(ids).size,ids.length);
-  for(const id of ['hero-form','list-city','request-photo','request-photo-preview','proposal-photo','proposal-price','proposal-quantity','favorites-grid','my-proposals-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','report-request']){
+  for(const id of ['hero-form','list-city','request-photo','request-photo-preview','accepted-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','accept-request']){
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
   }
   for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
   assert.ok(html.includes('sin SMS'));
-  assert.ok(html.includes('Propuestas sin límite'));
+  assert.ok(html.includes('Aceptar necesidad'));
+  assert.ok(!html.includes('id="proposal-form"'));
+  assert.ok(!html.includes('id="provider-form"'));
+  assert.ok(!html.includes('id="access-form"'));
+  assert.deepEqual([...html.matchAll(/<form\b[^>]*\bid="([^"]+)"/g)].map(m=>m[1]),['hero-form','publish-form']);
 });
 
-test('la navegación compacta admite cinco vistas y recupera inicio ante rutas desconocidas',()=>{
-  assert.deepEqual(SCREEN_IDS,['inicio','necesidades','mis-necesidades','mis-propuestas','favoritos']);
+test('la navegación compacta distingue publicar de aceptar',()=>{
+  assert.deepEqual(SCREEN_IDS,['inicio','necesidades','mis-necesidades','aceptadas']);
   for(const id of SCREEN_IDS)assert.equal(resolveScreen('#'+id),id);
   assert.equal(resolveScreen('#una-pagina-antigua'),'inicio');
   assert.equal(resolveScreen(''),'inicio');
+  assert.equal(resolveScreen('#mis-propuestas'),'aceptadas');
+  assert.equal(resolveScreen('#favoritos'),'necesidades');
 });
 test('la portada y las listas no cargan imágenes automáticamente',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
@@ -202,7 +208,8 @@ test('la portada y las listas no cargan imágenes automáticamente',()=>{
   assert.equal(/rel="preload"[^>]*as="image"/i.test(html),false);
   assert.ok(html.includes('Ver detalles'));
   assert.ok(html.includes('¿Qué necesitas?'));
-  assert.ok(html.includes('Ver necesidades para ofertar'));
+  assert.ok(html.includes('Ver necesidades para aceptar'));
+  assert.ok(!html.includes('Ver necesidades para ofertar'));
   assert.ok(html.includes('href="#necesidades" data-explore'));
 });
 test('solo una vista está visible al iniciar y todas tienen su navegación correspondiente',()=>{
@@ -219,7 +226,7 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(screens,[...SCREEN_IDS]);
 });
-test('las fotos se revelan bajo demanda también en formularios y propuestas',()=>{
+test('las fotos se revelan bajo demanda en el formulario de necesidad y los detalles',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   assert.ok(js.includes("button.addEventListener('click',()=>{"));
@@ -228,8 +235,9 @@ test('las fotos se revelan bajo demanda también en formularios y propuestas',()
   assert.ok(js.includes("const image=pictureNode(data,caption)"));
   assert.ok(js.includes("addPictureToggle(box,current,'Fotografía seleccionada')"));
   assert.ok(js.includes("addPictureToggle(photo,request.picture"));
-  assert.ok(js.includes("addPictureToggle(reveal,p.picture"));
-  assert.ok(html.includes('id="request-photo-preview"')&&html.includes('id="proposal-photo-preview"'));
+  assert.ok(js.includes("addPictureToggle(reveal,request.picture"));
+  assert.ok(html.includes('id="request-photo-preview"'));
+  assert.ok(!html.includes('id="proposal-photo-preview"'));
   assert.ok(html.includes('id="detail-photo"'));
 });
 test('las secciones adicionales aparecen solo a petición del usuario',()=>{
@@ -270,4 +278,47 @@ test('la navegación se activa tras los cambios de URL y al cargar la página',(
   assert.ok(js.includes("activateScreen(window.location.hash)"));
   for(const screen of SCREEN_IDS)assert.ok(html.includes('href="#'+screen+'" data-screen-link="'+screen+'"'));
   assert.equal(/(?:^|[^$])\$\(['"][^'"]+['"]\)\.forEach/m.test(js),false,'No iterar querySelector con forEach');
+});
+
+test('aceptar una necesidad requiere un clic, sin oferta ni identidad del proveedor',()=>{
+  const request={...EXAMPLES[0],status:'abierta'};
+  const initial=decodeState(null);
+  const next=acceptNeedLocally(initial,request);
+  assert.equal(next.acceptances.length,1);
+  assert.equal(next.acceptances[0].requestId,request.id);
+  assert.equal(typeof next.acceptances[0].acceptedAt,'string');
+  assert.equal(Object.hasOwn(next.acceptances[0],'price'),false);
+  assert.equal(Object.hasOwn(next.acceptances[0],'name'),false);
+  assert.equal(initial.acceptances.length,0);
+  assert.equal(initial.proposals.length,0);
+});
+test('no permite aceptar dos veces la misma necesidad ni la propia',()=>{
+  const request={...EXAMPLES[0],status:'abierta'};
+  const accepted=acceptNeedLocally(decodeState(null),request);
+  assert.throws(()=>acceptNeedLocally(accepted,request),/Ya aceptaste/);
+  assert.throws(()=>acceptNeedLocally({...decodeState(null),requests:[{...req}]},{...req}),/tu propia/);
+  assert.throws(()=>acceptNeedLocally(decodeState(null),{...request,status:'cancelada'}),/abiertas/);
+  assert.throws(()=>acceptNeedLocally(decodeState(null),{...request,id:'inventada'}),/No se encontró/);
+});
+test('las aceptaciones locales sobreviven recarga sin duplicados ni entradas inválidas',()=>{
+  const acceptedAt='2026-10-23T18:20:00.000Z';
+  const valid={requestId:'empaques',acceptedAt};
+  const recovered=decodeState(JSON.stringify({version:1,acceptances:[valid,valid,{requestId:'inventada',acceptedAt},{requestId:'filtracion',acceptedAt:'no-fecha'}]}));
+  assert.deepEqual(recovered.acceptances,[valid]);
+  const original={...req,id:'mia'};
+  const owned=decodeState(JSON.stringify({version:1,requests:[original],acceptances:[{requestId:'mia',acceptedAt}]}));
+  assert.deepEqual(owned.acceptances,[]);
+});
+test('la interfaz del proveedor no contiene acciones para crear propuestas ni formularios',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.equal(/id="(?:proposal|provider|access)-(?:form|dialog)"/.test(html),false);
+  assert.ok(html.includes('data-accept-request="empaques"'));
+  assert.ok(html.includes('id="accepted-grid"'));
+  assert.ok(js.includes("acceptNeedLocally(state,request)"));
+  assert.ok(js.includes("grid.addEventListener('click'"));
+  assert.ok(!js.includes("$('#proposal-form')"));
+  assert.ok(!js.includes("$('#provider-form')"));
+  assert.ok(!js.includes("function openProposalFor("));
+  assert.ok(!js.includes("function proposalAction("));
 });

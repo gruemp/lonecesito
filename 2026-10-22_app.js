@@ -184,7 +184,7 @@ export function updateLocalRequestStatus(requests,id,status){
   return requests.map(r=>r.id===id?{...r,status}:r);
 }
 export function decodeState(raw){
-  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null,proposalDraft:null,favorites:[],seen:{},reports:[]};
+  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null,proposalDraft:null,favorites:[],seen:{},reports:[],acceptances:[]};
   if(!raw)return state;
   let parsed;try{parsed=JSON.parse(raw);}catch{return state;}
   if(!parsed||typeof parsed!=='object'||parsed.version!==1)return state;
@@ -220,16 +220,36 @@ export function decodeState(raw){
   if(Array.isArray(parsed.favorites))state.favorites=[...new Set(parsed.favorites.filter(id=>requestIds.has(id)))].slice(0,200);
   if(parsed.seen&&typeof parsed.seen==='object'&&!Array.isArray(parsed.seen))for(const [id,at] of Object.entries(parsed.seen))if(requestIds.has(id)&&validTimestamp(at))state.seen[id]=at;
   if(Array.isArray(parsed.reports))state.reports=parsed.reports.slice(-30).filter(v=>v&&typeof v==='object').map(v=>({requestId:String(v.requestId||'').slice(0,120),reason:String(v.reason||'').slice(0,300),at:validTimestamp(v.at)}));
+  if(Array.isArray(parsed.acceptances)){
+    const seen=new Set(),own=new Set(state.requests.map(r=>r.id));
+    for(const item of parsed.acceptances.slice(0,200)){
+      const id=item?.requestId;
+      if(typeof id!=='string'||!requestIds.has(id)||own.has(id)||seen.has(id))continue;
+      const acceptedAt=validTimestamp(item.acceptedAt);if(!acceptedAt)continue;
+      seen.add(id);state.acceptances.push({requestId:id,acceptedAt});
+    }
+  }
   return state;
 }
 export function persistState(storage,state){
   try{storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{return false;}
 }
 
-export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','mis-propuestas','favoritos']);
+export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','aceptadas']);
 export function resolveScreen(hash){
   const value=String(hash||'').replace(/^#/,'');
+  if(value==='mis-propuestas')return 'aceptadas';
+  if(value==='favoritos')return 'necesidades';
   return SCREEN_IDS.includes(value)?value:'inicio';
+}
+export function acceptNeedLocally(state,request){
+  if(!request||request.status!=='abierta')throw new Error('Solo se pueden aceptar necesidades abiertas.');
+  const isOwn=state.requests?.some(item=>item.id===request.id);
+  if(isOwn)throw new Error('No puedes aceptar tu propia necesidad.');
+  if(!EXAMPLES.some(item=>item.id===request.id))throw new Error('No se encontró la necesidad.');
+  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aceptaste esta necesidad en este navegador.');
+  const entry={requestId:request.id,acceptedAt:new Date().toISOString()};
+  return {...state,acceptances:[...(state.acceptances||[]),entry]};
 }
 
 export function applyScreenNavigation(root,screenId){
@@ -249,7 +269,7 @@ function init(){
   const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
-  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
+  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
   function activateScreen(screenId){
     applyScreenNavigation(document,screenId);
@@ -281,7 +301,6 @@ function init(){
     state=next;error.hidden=true;return true;
   }
   function setError(id,error){const element=$(`#${id}`);element.textContent=error.message||'Revisa los datos e inténtalo de nuevo.';element.hidden=false;}
-  function updateAccess(){const button=$('#access-button');button.textContent=state.name?`Hola, ${state.name.split(/\s+/)[0].slice(0,16)}`:'Ingresar';}
   function applyFilter(category=currentCategory){
     currentCategory=category;
     $$('.filter').forEach(button=>{const selected=button.dataset.category===category;button.classList.toggle('is-active',selected);button.setAttribute('aria-pressed',String(selected));});
@@ -362,9 +381,14 @@ function init(){
     const date=el('p','card-published',request.createdAt?'Publicada: '+formatDate(request.createdAt):'');
     const actions=el('div','card-actions');
     const btn=el('button','card-link','Ver detalles ');btn.type='button';btn.dataset.request=request.id;btn.append(svg('arrow'));
-    const fav=el('button','my-action favorite-toggle',state.favorites.includes(request.id)?'Guardada':'Guardar');
-    fav.type='button';fav.dataset.favorite=request.id;fav.setAttribute('aria-pressed',String(state.favorites.includes(request.id)));
-    actions.append(btn,fav);content.append(category,title,city);
+    const mine=state.requests.some(r=>r.id===request.id);
+    if(!mine){
+      const accepted=state.acceptances.some(a=>a.requestId===request.id);
+      const accept=el('button','button button-small',accepted?'Aceptada':'Aceptar necesidad');
+      accept.type='button';accept.dataset.acceptRequest=request.id;accept.disabled=accepted;
+      actions.append(accept);
+    }
+    actions.append(btn);content.append(category,title,city);
     if(date.textContent)content.append(date);
     content.append(actions);article.append(content);
     if(request.picture){const reveal=el('div','card-photo-toggle');addPictureToggle(reveal,request.picture,'Fotografía de '+request.title);article.append(reveal);}
@@ -373,7 +397,12 @@ function init(){
   function renderOwnRequests(){
     grid.querySelectorAll('[data-user-request]').forEach(card=>card.remove());
     const fragment=document.createDocumentFragment();state.requests.forEach(request=>fragment.append(addUserCard(request)));grid.prepend(fragment);
-    populateCities();applyFilter();renderMyRequests();renderMyProposals();renderFavorites();
+    populateCities();applyFilter();renderMyRequests();renderAccepted();
+    for(const button of grid.querySelectorAll('[data-accept-request]')){
+      const accepted=state.acceptances.some(a=>a.requestId===button.dataset.acceptRequest);
+      button.disabled=accepted;
+      button.textContent=accepted?'Aceptada':'Aceptar necesidad';
+    }
   }
   function renderMyRequests(){
     const container=$('#my-requests-grid'),requests=state.requests;
@@ -384,9 +413,7 @@ function init(){
       const title=el('h3','',request.title),status=el('span','my-state my-state-'+request.status,
         ({resuelta:'Resuelta',cancelada:'Cancelada',en_proceso:'En proceso',abierta:'Abierta'})[request.status]);
       top.append(title,status);
-      const offers=state.proposals.filter(p=>p.requestId===request.id&&!['retirada','historica','acuerdo_cancelado'].includes(p.status));
-      const unread=offers.filter(p=>p.createdAt&&!state.seen[request.id]||p.createdAt&&state.seen[request.id]&&p.createdAt>state.seen[request.id]).length;
-      const info=el('p','my-card-info',request.city+' · '+CATEGORIES[request.category]+' · '+offers.length+' propuestas'+(unread?' · '+unread+' nuevas':''));
+      const info=el('p','my-card-info',request.city+' · '+CATEGORIES[request.category]+' · Visible solo en este navegador');
       const actions=el('div','my-card-actions');
       const choices=[['view','Ver detalles'],...(request.status==='abierta'?[['edit','Editar'],['resolve','Marcar resuelta'],['cancel','Cancelar']]:[]),...(request.status==='en_proceso'?[['resolve','Marcar resuelta'],['reopen','Reabrir ofertas'],['cancel','Cancelar']]:[]),...(request.status==='cancelada'?[['reopen','Reactivar']]:[])];
       for(const [action,label] of choices){const button=el('button','my-action',label);button.type='button';button.dataset.action=action;button.dataset.id=request.id;actions.append(button);}
@@ -401,37 +428,16 @@ function init(){
       return article;
     }));
   }
-  function renderFavorites(){
-    const list=$('#favorites-grid');
-    list.replaceChildren(...state.favorites.map(id=>findRequest(id)).filter(r=>r&&r.status==='abierta').map(r=>{
-      const item=el('article','my-card'),title=el('h3','',r.title),city=el('p','my-card-info',r.city);
-      const view=el('button','my-action','Ver solicitud');view.dataset.request=r.id;
-      const remove=el('button','my-action','Quitar de favoritos');remove.dataset.favorite=r.id;
-      item.append(title,city,view,remove);return item;
-    }));
-    $('#favorites-empty').hidden=list.children.length>0;
-  }
-  function renderMyProposals(){
-    const list=$('#my-proposals-grid'),name=state.provider?.name||state.name;
-    const mine=state.proposals.filter(p=>name&&p.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'));
-    list.replaceChildren(...mine.map(p=>{
-      const req=findRequest(p.requestId),item=el('article','my-card'),header=el('h3','',req?.title||'Necesidad');
-      const status=el('p','my-card-info','Estado: '+labelProposal(p.status)+' · '+(p.price==null?'Sin precio registrado':money(p.price)));
-      const actions=el('div','my-card-actions');
-      for(const [action,text] of [['view','Ver necesidad'],...(['activa','pendiente_confirmacion','por_confirmar'].includes(p.status)?[['edit','Modificar'],['withdraw','Retirar']]:[]),...(p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:[]),...(p.status==='por_confirmar'?[['confirm-partial','Confirmar venta parcial']]:[])]){
-        const button=el('button','my-action',text);
-        button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);
-      }
-      item.append(header,status);
-      const mainAction=actions.firstElementChild;
-      if(mainAction)item.append(mainAction);
-      if(actions.children.length){
-        const options=el('details','card-options');
-        options.append(el('summary','','Más opciones'),actions);item.append(options);
-      }
-      return item;
-    }));
-    $('#my-proposals-empty').hidden=mine.length>0;
+  function renderAccepted(){
+    const list=$('#accepted-grid');
+    list.replaceChildren(...state.acceptances.map(entry=>{
+      const request=findRequest(entry.requestId);if(!request)return null;
+      const card=el('article','my-card');
+      card.append(el('h3','',request.title),el('p','my-card-info',request.city+' · Aceptada en esta demostración'));
+      const button=el('button','my-action','Ver detalles');button.type='button';button.dataset.request=request.id;
+      card.append(button);return card;
+    }).filter(Boolean));
+    $('#accepted-empty').hidden=list.children.length>0;
   }
   function changeOwnStatus(id,status){
     try{
@@ -442,8 +448,16 @@ function init(){
       renderOwnRequests();return true;
     }catch(e){showToast(e.message);return false;}
   }
-  function labelProposal(status){
-    return ({activa:'Disponible',retirada:'Retirada',aceptada:'Aceptada',por_confirmar:'Venta parcial pendiente',pendiente_confirmacion:'Precio por confirmar',historica:'Oferta antigua sin precio',acuerdo_cancelado:'Acuerdo cancelado'})[status]||status;
+  function acceptCurrentNeed(id){
+    const request=findRequest(id);
+    try{
+      const next=acceptNeedLocally(state,request);
+      if(!persistState(storage,next))throw new Error('No se pudo guardar la aceptación en este navegador.');
+      state=next;
+      renderOwnRequests();
+      if($('#detail-dialog').open)showRequest(id);
+      showToast('Aceptación de prueba guardada solo aquí. No se ha notificado a nadie.');
+    }catch(error){showToast(error.message);}
   }
   function showRequest(id){
     const request=findRequest(id);if(!request)return;currentRequestId=id;
@@ -453,62 +467,22 @@ function init(){
     $('#detail-city').textContent=request.city;
     $('#detail-description').textContent=request.description;
     const photo=$('#detail-photo');photo.replaceChildren();
-    photo.hidden=!request.picture;
-    addPictureToggle(photo,request.picture,'Fotografía de la necesidad');
+    photo.hidden=!request.picture;addPictureToggle(photo,request.picture,'Fotografía de la necesidad');
     const meta=[];
-    if(request.category==='bienes'){if(request.quantity)meta.push('Cantidad solicitada: '+request.quantity);meta.push('Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'})[request.condition]);}
-    meta.push(request.budget!=null?'Presupuesto máximo orientativo: '+money(request.budget):'Presupuesto: sin indicar');
+    if(request.category==='bienes'){if(request.quantity)meta.push('Cantidad: '+request.quantity);meta.push('Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'})[request.condition]);}
+    if(request.budget!=null)meta.push('Presupuesto orientativo: '+money(request.budget));
     if(request.desiredDate)meta.push('Fecha deseada: '+request.desiredDate);
     if(request.createdAt)meta.push('Publicada: '+formatDate(request.createdAt));
     if(request.status!=='abierta')meta.push('Estado: '+({resuelta:'Resuelta',cancelada:'Cancelada',en_proceso:'En proceso'})[request.status]);
-    if(mine&&request.category==='bienes')meta.push('Unidades pendientes: '+requestedRemaining(request,state.proposals));
     $('#detail-meta').replaceChildren(...meta.map(t=>el('li','',t)));
-    const all=state.proposals.filter(p=>p.requestId===id);
-    const name=state.provider?.name||state.name;
-    const visible=mine?all:all.filter(p=>name&&p.name.toLocaleLowerCase('es')===name.toLocaleLowerCase('es'));
-    const sorted=sortProposals(visible,request.category).sort((a,b)=>Number(a.discarded)-Number(b.discarded));
-    const list=$('#detail-proposals');
-    list.replaceChildren(...sorted.map(p=>{
-      const item=el('li','proposal-summary'+(p.discarded?' is-discarded':''));
-      const h=el('strong','',p.name+' · '+labelProposal(p.status));item.append(h);
-      const price=el('p','proposal-price',p.price!=null?money(p.price)+' total'+(request.category==='bienes'?' · '+money(proposalUnitPrice(p))+' / unidad':''):'Precio sin registrar (oferta heredada)');
-      const desc=el('p','',p.description+' · Cantidad: '+(request.category==='bienes'?p.quantity:'Servicio')+
-        (p.delivery?' · Plazo: '+p.delivery:'')+(p.warranty?' · Garantía: '+p.warranty:'')+(p.exclusions?' · Exclusiones: '+p.exclusions:''));
-      item.append(price);
-      const extra=el('details','offer-extra');
-      extra.append(el('summary','','Condiciones e historial'),desc);
-      if(p.createdAt)extra.append(el('p','card-published','Presentada: '+formatDate(p.createdAt)+(p.updatedAt&&p.updatedAt!==p.createdAt?' · Modificada':'') ));
-      if(p.priceHistory.length)extra.append(el('p','card-published','Precios anteriores: '+p.priceHistory.map(v=>money(v.price)).join(', ')));
-      item.append(extra);
-      if(p.picture){const reveal=el('div','proposal-photo-toggle');addPictureToggle(reveal,p.picture,'Fotografía de la propuesta de '+p.name);item.append(reveal);}
-      const actions=el('div','proposal-actions');
-      const buttons=mine?[
-        ...(p.status==='activa'&&request.status==='abierta'?[['accept','Aceptar'],...(request.category==='bienes'?[['partial','Aceptar menos unidades']]:[])]:[]),
-        ['chat','Conversar (próximamente)'],['report','Reportar (prueba)'],
-        ['discard',p.discarded?'Recuperar':'Descartar']
-      ]:p.status==='activa'?[['edit','Modificar mi oferta'],['withdraw','Retirar'],['chat','Conversar (próximamente)']]:p.status==='pendiente_confirmacion'?[['confirm-old','Confirmar precio']]:p.status==='por_confirmar'?[['confirm-partial','Confirmar cantidad']]:[];
-      for(const [action,label] of buttons){const button=el('button','my-action',label);button.type='button';button.dataset.proposalAction=action;button.dataset.id=p.id;actions.append(button);}
-      const main=actions.firstElementChild;
-      if(main)item.append(main);
-      if(actions.children.length){
-        const more=el('details','card-options');more.append(el('summary','','Más acciones'),actions);item.append(more);
-      }
-      return item;
-    }));
-    $('#proposals-empty').hidden=visible.length>0;
-    $('#detail-note').textContent=mine?
-      'Comparación de prueba visible únicamente en este navegador. El acceso privado real se implementará con Firebase. '+all.length+' propuestas registradas.':
-      'Solicitud ilustrativa o ajena. Solo se muestran las propuestas del perfil de prueba seleccionado en este navegador. No existe comunicación real.';
-    const open=request.status==='abierta';
-    $('#open-proposal').disabled=!open;
-    $('#open-proposal').textContent=open?'Presentar propuesta de prueba':'No recibe nuevas propuestas';
+    const already=state.acceptances.some(a=>a.requestId===id);
+    $('#accept-request').hidden=mine;
+    $('#accept-request').disabled=already||request.status!=='abierta';
+    $('#accept-request').textContent=already?'Ya la aceptaste':request.status!=='abierta'?'Necesidad no disponible':'Aceptar necesidad';
     $('#resolve-request').hidden=!mine||!['abierta','en_proceso'].includes(request.status);
-    $('#report-request').hidden=false;
-    if(mine){
-      const at=new Date().toISOString();
-      state={...state,seen:{...state.seen,[id]:at}};
-      persistState(storage,state);renderMyRequests();
-    }
+    $('#detail-note').textContent=mine?
+      'Esta necesidad solo existe en tu navegador. Otras personas no podrán verla ni aceptarla hasta implementar el servicio real.':
+      'Aceptación de demostración: no se envían datos, mensajes ni notificaciones a quien publicó la necesidad.';
     openDialog('detail');
   }
 
@@ -605,7 +579,7 @@ function init(){
 
 
   function refreshPhotoPreview(kind){
-    const current=kind==='request'?wizardPicture:proposalPicture;
+    const current=wizardPicture;
     const box=$('#'+kind+'-photo-preview');
     box.replaceChildren();
     addPictureToggle(box,current,'Fotografía seleccionada');
@@ -635,123 +609,25 @@ function init(){
       reader.readAsDataURL(file);
     });
   }
-  for(const kind of ['request','proposal']){
+  for(const kind of ['request']){
     $('#'+kind+'-photo').addEventListener('change',async e=>{
       const input=e.currentTarget;
       if(!input.files?.[0])return;
       try{
         const data=await compressImage(input.files[0]);
-        if(kind==='request'){wizardPicture=data;scheduleDraftSave();}
-        else proposalPicture=data;
+        wizardPicture=data;scheduleDraftSave();
         refreshPhotoPreview(kind);
       }catch(error){showToast(error.message);}
       input.value='';
     });
     $('#'+kind+'-photo-remove').addEventListener('click',()=>{
-      if(kind==='request'){wizardPicture='';scheduleDraftSave();}
-      else proposalPicture='';
+      wizardPicture='';scheduleDraftSave();
       refreshPhotoPreview(kind);
     });
   }
-  function openProposalFor(request,proposal=null){
-    currentRequestId=request.id;editingProposalId=proposal?.id||null;
-    const form=$('#proposal-form');form.reset();
-    $('#proposal-title').textContent=proposal?'Modificar propuesta de prueba':'Presenta una propuesta';
-    $('#proposal-request-title').textContent=request.title;
-    $('#proposal-name').value=proposal?.name||state.provider?.name||state.name;
-    $('#proposal-name').readOnly=!!proposal;
-    $('#proposal-description').value=proposal?.description||'';
-    $('#proposal-price').value=proposal?.price??'';
-    $('#proposal-quantity').value=proposal?.quantity||Math.min(1,request.quantity||1);
-    $('#proposal-quantity-wrap').hidden=request.category!=='bienes';
-    $('#proposal-quantity').disabled=request.category!=='bienes';
-    $('#proposal-delivery').value=proposal?.delivery||'';
-    $('#proposal-exclusions').value=proposal?.exclusions||'';
-    $('#proposal-warranty').value=proposal?.warranty||'';
-    proposalPicture=proposal?.picture||'';
-    const draft=state.proposalDraft;
-    if(!proposal&&draft?.requestId===request.id){
-      $('#proposal-name').value=draft.name||$('#proposal-name').value;
-      proposalPicture=draft.picture||'';
-      $('#proposal-description').value=draft.description||'';
-      $('#proposal-price').value=draft.price||'';
-      $('#proposal-quantity').value=draft.quantity||1;
-      $('#proposal-delivery').value=draft.delivery||'';
-      $('#proposal-warranty').value=draft.warranty||'';
-      $('#proposal-exclusions').value=draft.exclusions||'';
-    }
-    refreshPhotoPreview('proposal');
-    openDialog('proposal');
-  }
-  function proposalAction(action,id){
-    const proposal=state.proposals.find(p=>p.id===id);
-    if(!proposal)return;
-    const request=findRequest(proposal.requestId);
-    if(!request)return;
-    const mine=state.requests.some(r=>r.id===request.id);
-    const identity=state.provider?.name||state.name;
-    try{
-      if(['edit','withdraw','confirm-old','confirm-partial'].includes(action)&&(!identity||identity.toLocaleLowerCase('es')!==proposal.name.toLocaleLowerCase('es'))){
-        throw new Error('Selecciona el perfil local de este proveedor para administrar su propuesta.');
-      }
-      if(action==='chat'){
-        $('#chat-context').textContent='Necesidad: '+request.title+' · Proveedor: '+proposal.name+' · Precio fijo: '+(proposal.price==null?'No registrado':money(proposal.price));
-        openDialog('chat');return;
-      }
-      if(action==='report'){
-        if(!mine)throw new Error('Este reporte de propuesta corresponde al comprador de la necesidad.');
-        const reason=window.prompt('Describe el problema con esta propuesta. El reporte será una prueba local, no será enviado.');
-        if(!reason?.trim())return;
-        const reports=[...state.reports,{requestId:request.id,reason:('Propuesta '+proposal.name+': '+reason.trim()).slice(0,300),at:new Date().toISOString()}].slice(-30);
-        if(save({...state,reports},'detail-error'))showToast('Reporte guardado localmente. Nadie ha sido notificado.');
-        return;
-      }
-      if(action==='view'){showRequest(request.id);return;}
-      if(action==='edit'){if(proposal.status!=='activa')throw new Error('Solo puedes modificar una propuesta activa.');$('#detail-dialog').close();openProposalFor(request,proposal);return;}
-      if(action==='withdraw'){
-        if(!window.confirm('¿Retirar esta propuesta? Se conservará en el historial.'))return;
-        state={...state,proposals:withdrawProposal(state.proposals,id)};
-      }else if(action==='confirm-old'){
-        if(request.status!=='abierta')throw new Error('Primero debe reactivarse la necesidad.');
-        if(!window.confirm('¿Confirmas que el precio fijo '+money(proposal.price)+' sigue vigente?'))return;
-        state={...state,proposals:confirmOldProposal(state.proposals,id)};
-      }else if(action==='confirm-partial'){
-        if(!window.confirm('¿Aceptas vender '+proposal.pendingQuantity+' unidades al precio unitario de '+money(proposalUnitPrice(proposal))+'?'))return;
-        const proposals=confirmPartial(state.proposals,id);
-        const requests=request.status==='abierta'&&requestedRemaining(request,proposals)===0?updateLocalRequestStatus(state.requests,request.id,'en_proceso'):state.requests;
-        state={...state,proposals,requests};
-      }else if(action==='discard'){
-        if(!mine)throw new Error('Solo el comprador puede organizar las propuestas de su necesidad.');
-        state={...state,proposals:discardProposal(state.proposals,id,!proposal.discarded)};
-      }else if(action==='accept'||action==='partial'){
-        if(!mine)throw new Error('Solo el comprador de esta necesidad puede aceptar una propuesta.');
-        if(request.status!=='abierta')throw new Error('La necesidad ya no recibe ofertas.');
-        const remaining=requestedRemaining(request,state.proposals);
-        let qty=request.category==='bienes'?Math.min(proposal.quantity,remaining):1;
-        if(action==='partial'){
-          const answer=window.prompt('¿Cuántas unidades deseas aceptar de esta propuesta? (máximo '+Math.min(proposal.quantity,remaining)+')',String(qty));
-          if(answer==null)return;
-          qty=positiveQuantity(answer,'cantidad');
-        }
-        const summary='Proveedor: '+proposal.name+'\nCantidad: '+qty+'\nPrecio total: '+money(proposalUnitPrice(proposal)*qty)+'\n'+(qty<proposal.quantity?'Necesita confirmación del proveedor.':'La propuesta quedará aceptada.')+'\n¿Continuar?';
-        if(!window.confirm(summary))return;
-        const proposals=acceptProposal(state.proposals,request,id,qty);
-        let requests=state.requests;
-        if(requestedRemaining(request,proposals)===0&&!proposals.some(p=>p.requestId===id&&p.status==='por_confirmar')){
-          requests=updateLocalRequestStatus(state.requests,request.id,'en_proceso');
-        }
-        state={...state,proposals,requests};
-      }else return;
-      if(!persistState(storage,state))throw new Error('No se pudo guardar el cambio.');
-      renderOwnRequests();if($('#detail-dialog').open)showRequest(request.id);
-      showToast('Cambio guardado en esta demostración local.');
-    }catch(error){showToast(error.message);}
-  }
   $$('[data-open]').forEach(button=>button.addEventListener('click',()=>{
     const kind=button.dataset.open;
-    if(kind==='provider'&&state.provider){$('#provider-name').value=state.provider.name;$('#provider-specialty').value=state.provider.specialty;$('#provider-city').value=state.provider.city;}
-    if(kind==='access')$('#access-name').value=state.name;
-    if(kind==='publish')startPublish();else openDialog(kind);
+    if(kind==='publish')startPublish();
   }));
   $$('.close-dialog').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   $$('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{
@@ -770,14 +646,7 @@ function init(){
     if(!changeOwnStatus(request.id,'resuelta'))return;
     $('#detail-dialog').close();showToast('Necesidad resuelta. Se conserva en tu historial local.');
   });
-  $('#report-request').addEventListener('click',()=>{
-    const reason=window.prompt('Describe qué quieres reportar. Esta prueba guarda el reporte solo en tu navegador: nadie lo recibirá.');
-    if(!reason?.trim())return;
-    const reports=[...state.reports,{requestId:currentRequestId,reason:reason.trim().slice(0,300),at:new Date().toISOString()}].slice(-30);
-    if(save({...state,reports},'detail-error'))showToast('Reporte de prueba guardado localmente. NO ha sido enviado a ningún equipo.');
-  });
   $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';currentCity='all';searchQuery='';$('#request-search').value='';populateSubcategories();populateCities();applyFilter();}));
-  $$('.mobile-nav a,.mobile-nav button').forEach(link=>link.addEventListener('click',()=>{$('.mobile-nav').open=false;}));
   $('#hero-form').addEventListener('submit',event=>{
     event.preventDefault();
     startPublish(null,{title:$('#hero-need').value.trim(),city:$('#hero-city').value.trim()});
@@ -845,66 +714,17 @@ function init(){
     }
   });
   grid.addEventListener('click',event=>{
-    const fav=event.target.closest('[data-favorite]');if(fav){event.preventDefault();toggleFavorite(fav.dataset.favorite);return;}
-    const button=event.target.closest('[data-request]');if(button)showRequest(button.dataset.request);
+    const accept=event.target.closest('[data-accept-request]');
+    if(accept){acceptCurrentNeed(accept.dataset.acceptRequest);return;}
+    const button=event.target.closest('[data-request]');
+    if(button)showRequest(button.dataset.request);
   });
-  function toggleFavorite(id){
-    const favorites=state.favorites.includes(id)?state.favorites.filter(v=>v!==id):[...state.favorites,id];
-    if(persistState(storage,{...state,favorites})){state={...state,favorites};renderOwnRequests();}
-    else showToast('No se pudieron guardar los favoritos.');
-  }
-  $('#favorites-grid').addEventListener('click',e=>{
-    const fav=e.target.closest('[data-favorite]');if(fav){toggleFavorite(fav.dataset.favorite);return;}
-    const view=e.target.closest('[data-request]');if(view)showRequest(view.dataset.request);
+  $('#accept-request').addEventListener('click',()=>acceptCurrentNeed(currentRequestId));
+  $('#accepted-grid').addEventListener('click',event=>{
+    const button=event.target.closest('[data-request]');
+    if(button)showRequest(button.dataset.request);
   });
-  $('#my-proposals-grid').addEventListener('click',e=>{const btn=e.target.closest('[data-proposal-action]');if(btn)proposalAction(btn.dataset.proposalAction,btn.dataset.id);});
-  $('#detail-proposals').addEventListener('click',e=>{const btn=e.target.closest('[data-proposal-action]');if(btn)proposalAction(btn.dataset.proposalAction,btn.dataset.id);});
-  $('#open-proposal').addEventListener('click',()=>{
-    const request=findRequest(currentRequestId);if(!request||request.status!=='abierta')return;
-    $('#detail-dialog').close();openProposalFor(request);
-  });
-  $('#proposal-save-draft').addEventListener('click',()=>{
-    const form=$('#proposal-form');
-    const data=Object.fromEntries(new FormData(form));
-    const draft={...data,requestId:currentRequestId,picture:proposalPicture};
-    if(persistState(storage,{...state,proposalDraft:draft})){
-      state={...state,proposalDraft:draft};$('#proposal-dialog').close();showToast('Borrador de propuesta guardado solo en este navegador.');
-    }else showToast('No se pudo guardar el borrador de propuesta.');
-  });
-  $('#proposal-form').addEventListener('submit',event=>{
-    event.preventDefault();
-    try{
-      const request=findRequest(currentRequestId);
-      if(!request)throw new Error('Selecciona una solicitud válida.');
-      if(request.status!=='abierta')throw new Error('Esta necesidad no recibe nuevas propuestas.');
-      const values={...Object.fromEntries(new FormData(event.currentTarget)),requestId:currentRequestId,picture:proposalPicture,quantity:request.category==='bienes'?$('#proposal-quantity').value:'1'};
-      const proposals=editingProposalId?changeProposal(state.proposals,editingProposalId,values):appendProposal(state.proposals,values);
-      const profile=state.provider||{name:values.name,specialty:'Ofertas de prueba',city:request.city};
-      if(!save({...state,proposals,provider:profile,proposalDraft:null},'proposal-error'))return;
-      editingProposalId=null;$('#proposal-dialog').close();event.currentTarget.reset();renderOwnRequests();showRequest(currentRequestId);
-      showToast('Propuesta de prueba guardada localmente. No se ha enviado a ningún comprador.');
-    }catch(error){setError('proposal-error',error);}
-  });
-  $('#provider-form').addEventListener('submit',event=>{
-    event.preventDefault();
-    try{
-      const values=Object.fromEntries(new FormData(event.currentTarget));
-      const provider={name:cleanText(values.name,2,80,'El nombre'),specialty:cleanText(values.specialty,3,120,'La especialidad'),city:cleanText(values.city,2,80,'La ciudad')};
-      if(!save({...state,provider},'provider-error'))return;
-      $('#provider-dialog').close();renderMyProposals();showToast('Perfil de proveedor de prueba guardado en este navegador. No verifica tu identidad.');
-      window.location.hash='#necesidades';
-      activateScreen('necesidades');
-    }catch(error){setError('provider-error',error);}
-  });
-  $('#access-form').addEventListener('submit',event=>{
-    event.preventDefault();
-    try{
-      const name=cleanText(new FormData(event.currentTarget).get('name'),2,40,'El nombre');
-      if(!save({...state,name},'access-error'))return;
-      updateAccess();renderMyProposals();$('#access-dialog').close();showToast('Bienvenido, '+name+'. Este acceso es una simulación local, no una cuenta real.');
-    }catch(error){setError('access-error',error);}
-  });
-  populatePublishSubcategories();populateSubcategories();populateCities();updateAccess();renderOwnRequests();
+  populatePublishSubcategories();populateSubcategories();populateCities();renderOwnRequests();
   activateScreen(window.location.hash);
 
 }
