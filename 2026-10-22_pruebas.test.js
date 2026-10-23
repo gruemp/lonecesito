@@ -70,13 +70,13 @@ test('el proveedor puede cambiar el precio antes de la aceptación con historial
 });
 test('ordena ofertas por precio unitario para bienes',()=>{
   const offers=[
-    normalizeProposal(offer('A',120000,4)),
-    normalizeProposal(offer('B',150000,6)),
-    normalizeProposal(offer('C',280000,10))
+    normalizeProposal(offer('Proveedor A',120000,4)),
+    normalizeProposal(offer('Proveedor B',150000,6)),
+    normalizeProposal(offer('Proveedor C',280000,10))
   ];
   assert.equal(proposalUnitPrice(offers[1]),25000);
-  assert.deepEqual(sortProposals(offers,'bienes').map(p=>p.name),['B','C','A']);
-  assert.deepEqual(sortProposals(offers,'servicios').map(p=>p.name),['A','B','C']);
+  assert.deepEqual(sortProposals(offers,'bienes').map(p=>p.name),['Proveedor B','Proveedor C','Proveedor A']);
+  assert.deepEqual(sortProposals(offers,'servicios').map(p=>p.name),['Proveedor A','Proveedor B','Proveedor C']);
 });
 test('aceptar una oferta completa reserva las unidades para ese comprador',()=>{
   const request={...req,quantity:5};
@@ -138,7 +138,7 @@ test('las solicitudes pueden cerrarse desde abierta o en proceso',()=>{
   assert.throws(()=>updateLocalRequestStatus(initial,'no-existe','resuelta'),/No se encontró/);
 });
 test('la recuperación admite solicitudes antiguas y precios sin registrar como históricos',()=>{
-  const state=decodeState(JSON.stringify({version:1,requests:[{...req,id:'vieja',category:'productos'}],proposals:[{...offer('Proveedor Viejo'),price:null}]}));
+  const state=decodeState(JSON.stringify({version:1,requests:[{...req,id:'vieja',category:'productos'}],proposals:[{...offer('Proveedor Viejo'),requestId:'vieja',price:null}]}));
   assert.equal(state.requests[0].category,'bienes');
   assert.equal(state.proposals.length,1);
   assert.equal(state.proposals[0].status,'historica');
@@ -146,7 +146,7 @@ test('la recuperación admite solicitudes antiguas y precios sin registrar como 
 });
 test('la recuperación de propuestas antiguas ya no aplica límite de tres',()=>{
   const offers=Array.from({length:7},(_,i)=>offer('Empresa '+i,100000));
-  const state=decodeState(JSON.stringify({version:1,proposals:offers}));
+  const state=decodeState(JSON.stringify({version:1,requests:[req],proposals:offers}));
   assert.equal(state.proposals.length,7);
 });
 test('los borradores conservan campos permitidos y descartan contactos privados',()=>{
