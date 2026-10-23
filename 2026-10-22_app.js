@@ -398,6 +398,11 @@ function init(){
     grid.querySelectorAll('[data-user-request]').forEach(card=>card.remove());
     const fragment=document.createDocumentFragment();state.requests.forEach(request=>fragment.append(addUserCard(request)));grid.prepend(fragment);
     populateCities();applyFilter();renderMyRequests();renderAccepted();
+    for(const button of grid.querySelectorAll('[data-accept-request]')){
+      const accepted=state.acceptances.some(a=>a.requestId===button.dataset.acceptRequest);
+      button.disabled=accepted;
+      button.textContent=accepted?'Aceptada':'Aceptar necesidad';
+    }
   }
   function renderMyRequests(){
     const container=$('#my-requests-grid'),requests=state.requests;
@@ -574,7 +579,7 @@ function init(){
 
 
   function refreshPhotoPreview(kind){
-    const current=kind==='request'?wizardPicture:proposalPicture;
+    const current=wizardPicture;
     const box=$('#'+kind+'-photo-preview');
     box.replaceChildren();
     addPictureToggle(box,current,'Fotografía seleccionada');
@@ -610,15 +615,13 @@ function init(){
       if(!input.files?.[0])return;
       try{
         const data=await compressImage(input.files[0]);
-        if(kind==='request'){wizardPicture=data;scheduleDraftSave();}
-        else proposalPicture=data;
+        wizardPicture=data;scheduleDraftSave();
         refreshPhotoPreview(kind);
       }catch(error){showToast(error.message);}
       input.value='';
     });
     $('#'+kind+'-photo-remove').addEventListener('click',()=>{
-      if(kind==='request'){wizardPicture='';scheduleDraftSave();}
-      else proposalPicture='';
+      wizardPicture='';scheduleDraftSave();
       refreshPhotoPreview(kind);
     });
   }
