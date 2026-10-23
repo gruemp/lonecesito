@@ -232,20 +232,27 @@ export function resolveScreen(hash){
   return SCREEN_IDS.includes(value)?value:'inicio';
 }
 
+export function applyScreenNavigation(root,screenId){
+  const selected=resolveScreen(screenId);
+  for(const section of root.querySelectorAll('.app-screen')){
+    section.hidden=section.id!==selected;
+  }
+  for(const link of root.querySelectorAll('[data-screen-link]')){
+    if(link.dataset.screenLink===selected)link.setAttribute('aria-current','page');
+    else link.removeAttribute('aria-current');
+  }
+  return selected;
+}
+
 function init(){
   const $=selector=>document.querySelector(selector);
-  const $$=selector=>[...document.querySelectorAll(selector)];
+  const $=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
   let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let proposalPicture='';let editingProposalId=null;let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
   function activateScreen(screenId){
-    const selected=resolveScreen(screenId);
-    $('.app-screen').forEach(section=>{section.hidden=section.id!==selected;});
-    $('[data-screen-link]').forEach(link=>{
-      if(link.dataset.screenLink===selected)link.setAttribute('aria-current','page');
-      else link.removeAttribute('aria-current');
-    });
+    applyScreenNavigation(document,screenId);
     window.scrollTo(0,0);
   }
   window.addEventListener('hashchange',()=>activateScreen(window.location.hash));
