@@ -135,6 +135,6 @@ test('new navigation, three wizard steps and personal section have distinct elem
   for(const i of ['0','1','2'])assert.ok(html.includes('data-wizard-step="'+i+'"'));
   assert.ok(html.includes('Necesito algo'));
   assert.ok(html.includes('Puedo ofrecerlo'));
-  const ids=[...html.matchAll(/\\bid="([^"]+)"/g)].map(match=>match[1]);
+  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
   assert.equal(new Set(ids).size,ids.length);
 });
