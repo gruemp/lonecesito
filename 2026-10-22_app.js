@@ -75,7 +75,7 @@ export function normalizeRequest(input){
 }
 export function normalizeProposal(input,{legacy=false}={}){
   const price=input?.price==null||input.price===''?legacy?null:requiredPrice(input?.price):requiredPrice(input.price);
-  const quantity=positiveQuantity(input?.quantity||1,'cantidad ofrecida');
+  const quantity=positiveQuantity(input?.quantity==null||input.quantity===''?1:input.quantity,'cantidad ofrecida');
   if(price!=null&&price%quantity!==0)throw new Error('El precio total debe permitir un precio unitario en pesos enteros.');
   let status=PROPOSAL_STATES.includes(input?.status)?input.status:'activa';
   if(price===null)status='historica';
