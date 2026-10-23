@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen,applyScreenNavigation} from './2026-10-22_app.js';
 import {readFileSync} from 'node:fs';
 
 const req={id:'necesidad-1',title:'Necesito empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',description:'Necesito empaques con el logo del negocio.',quantity:10,condition:'cualquiera',status:'abierta'};
@@ -202,7 +202,8 @@ test('la portada y las listas no cargan imágenes automáticamente',()=>{
   assert.equal(/rel="preload"[^>]*as="image"/i.test(html),false);
   assert.ok(html.includes('Ver detalles'));
   assert.ok(html.includes('¿Qué necesitas?'));
-  assert.ok(html.includes('Puedo ofrecerlo'));
+  assert.ok(html.includes('Ver necesidades para ofertar'));
+  assert.ok(html.includes('href="#necesidades" data-explore'));
 });
 test('solo una vista está visible al iniciar y todas tienen su navegación correspondiente',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
@@ -237,4 +238,36 @@ test('las secciones adicionales aparecen solo a petición del usuario',()=>{
   assert.ok(html.includes('<details class="compact-filters"'));
   assert.ok(html.includes('id="more-filters"'));
   assert.ok(html.includes('id="screen-navigation"'));
+});
+
+test('el menú muestra la vista elegida y oculta todas las demás',()=>{
+  const screens=SCREEN_IDS.map(id=>({id,hidden:id!=='inicio'}));
+  const links=SCREEN_IDS.map(id=>({
+    dataset:{screenLink:id},
+    attributes:new Map(),
+    setAttribute(name,value){this.attributes.set(name,value);},
+    removeAttribute(name){this.attributes.delete(name);}
+  }));
+  const root={
+    querySelectorAll(selector){
+      if(selector==='.app-screen')return screens;
+      if(selector==='[data-screen-link]')return links;
+      throw Error('Selector inesperado: '+selector);
+    }
+  };
+  for(const selected of SCREEN_IDS){
+    assert.equal(applyScreenNavigation(root,'#'+selected),selected);
+    assert.deepEqual(screens.filter(el=>!el.hidden).map(el=>el.id),[selected]);
+    assert.deepEqual(links.filter(el=>el.attributes.get('aria-current')==='page').map(el=>el.dataset.screenLink),[selected]);
+  }
+  assert.equal(applyScreenNavigation(root,'#inexistente'),'inicio');
+  assert.deepEqual(screens.filter(el=>!el.hidden).map(el=>el.id),['inicio']);
+});
+test('la navegación se activa tras los cambios de URL y al cargar la página',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(js.includes("window.addEventListener('hashchange',()=>activateScreen(window.location.hash))"));
+  assert.ok(js.includes("activateScreen(window.location.hash)"));
+  for(const screen of SCREEN_IDS)assert.ok(html.includes('href="#'+screen+'" data-screen-link="'+screen+'"'));
+  assert.equal(/(?:^|[^$])\$\(['"][^'"]+['"]\)\.forEach/m.test(js),false,'No iterar querySelector con forEach');
 });
