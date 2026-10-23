@@ -39,7 +39,7 @@ export function normalizeRequest(input){
   const subcategory=Object.hasOwn(SUBCATEGORIES[category],input?.subcategory)?input.subcategory:'otros';
   const amount=optionalAmount(input?.budget,'el presupuesto');
   const desiredDate=optionalText(input?.desiredDate,10,'la fecha deseada');
-  if(desiredDate&&!/^\d{4}-\d{2}-\d{2}$/.test(desiredDate))throw new Error('Revisa la fecha deseada.');
+  if(desiredDate){const parsed=new Date(`${desiredDate}T00:00:00Z`);if(!/^\d{4}-\d{2}-\d{2}$/.test(desiredDate)||Number.isNaN(parsed.getTime())||parsed.toISOString().slice(0,10)!==desiredDate)throw new Error('Revisa la fecha deseada.');}
   let quantity=null,condition=null;
   if(category==='bienes'){
     if(input?.quantity!=null&&input.quantity!==''){
@@ -244,7 +244,7 @@ function init(){
     if(event.target!==dialog)return;const bounds=dialog.getBoundingClientRect();
     if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)dialog.close();
   }));
-  $('.filter').forEach(button=>button.addEventListener('click',()=>{currentSubcategory='all';populateSubcategories();applyFilter(button.dataset.category);}));
+  $$('.filter').forEach(button=>button.addEventListener('click',()=>{currentCategory=button.dataset.category;currentSubcategory='all';populateSubcategories();applyFilter(currentCategory);}));
   $('#list-subcategory').addEventListener('change',event=>{currentSubcategory=event.target.value;applyFilter();});
   $('#request-search').addEventListener('input',event=>{searchQuery=event.target.value.trim().toLocaleLowerCase('es').slice(0,120);applyFilter();});
   $('#request-category').addEventListener('change',populatePublishSubcategories);
@@ -255,7 +255,7 @@ function init(){
     if(!save(next,'detail-error'))return;
     $('#detail-dialog').close();renderOwnRequests();showToast('Necesidad marcada como resuelta en este navegador.');
   });
-  $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>applyFilter('all')));
+  $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';searchQuery='';$('#request-search').value='';populateSubcategories();applyFilter('all');}));
   $$('.mobile-nav a,.mobile-nav button').forEach(link=>link.addEventListener('click',()=>{$('.mobile-nav').open=false;}));
 
   $('#hero-form').addEventListener('submit',event=>{
