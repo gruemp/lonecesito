@@ -1,6 +1,28 @@
 # lonecesito
 Portal de necesidades LoNecesito: publica lo que buscas y recibe propuestas de proveedores.
 
+## Etapa de mejoras acordadas — 23 de octubre de 2026 (rama en revisión)
+
+**Estado:** cambios desarrollados en `codex/mejoras-acordadas-2026-10-23`; todavía **no publicados**. No existe backend ni conexión entre usuarios.
+
+**Especificación y alcance completo:** [Decisiones acordadas y pendientes de Firebase](docs/decisiones-y-alcance-2026-10-23.md).
+
+La rama incluye:
+- Publicación guiada con prellenado desde «¿Qué necesitas?», bienes y servicios, fecha opcional, ciudad obligatoria y **una fotografía opcional** por necesidad visible en ficha y detalle.
+- **Propuestas ilimitadas**, pero una activa por nombre de proveedor y necesidad; precios **fijos y obligatorios**; orden por precio total o unitario, cantidades diferentes, cambios, historial, retiro y reoferta.
+- Aceptación de propuestas, cantidades parciales con confirmación del proveedor, estado «En proceso», cancelación, resolución, reapertura e historial; ofertas antiguas pendientes de confirmar después de reactivar.
+- Perfil de proveedor local, panel «Mis propuestas», favoritos, borradores de necesidades y propuestas, filtro por ciudad, contador de ofertas nuevas y reportes locales (que **no se envían**).
+- Vista preparatoria para conversaciones privadas con botones de envío **deshabilitados** hasta implementar el backend.
+
+**Seguridad y realismo:** no hay identificación real, privacidad entre usuarios, chat que conecte personas, moderación efectiva ni notificaciones push. Todos los registros quedan en un único navegador y el nombre de proveedor no verifica ninguna identidad. No usar para comercializar ni contratar servicios.
+
+**Firebase sigue pendiente** para la etapa final, por decisión del propietario. Registro mediante Google o correo, **sin SMS**; Cloud Firestore, chat seguro, permisos, fotos, notificaciones, reportes y sincronización real se integrarán antes de operar.
+
+**Pruebas:** 23 escenarios de lógica y estructura verificados mediante ejecución aislada de funciones; se mantiene pendiente ejecutar `npm run check && npm test` y las pruebas completas en navegador y móvil. La publicación requiere autorización expresa.
+
+---
+
+
 ## Primera versión
 
 Implementación de la imagen de diseño aprobada, con portada, categorías, solicitudes, proceso y sección para proveedores. HTML, CSS y JavaScript sin dependencias de ejecución. Incluye adaptación móvil e interacciones de demostración.

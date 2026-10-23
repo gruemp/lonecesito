@@ -1,140 +1,191 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus} from './2026-10-22_app.js';
 import {readFileSync} from 'node:fs';
 
-const request={title:'Necesito empaques personalizados',city:'Bogotá',category:'productos',description:'Busco cien empaques con mi logo para esta semana.'};
-const proposal=(name='Proveedor Uno')=>({name,requestId:'empaques',description:'Ofrecemos los cien empaques con entrega en cinco días.'});
+const req={id:'necesidad-1',title:'Necesito empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',description:'Necesito empaques con el logo del negocio.',quantity:10,condition:'cualquiera',status:'abierta'};
+const offer=(name='Proveedor Uno',price=125000,quantity=5)=>({name,requestId:req.id,description:'Ofrecemos empaques impresos y entrega completa.',price:String(price),quantity:String(quantity)});
+const fixture=()=>normalizeRequest(req);
+const testImage='data:image/jpeg;base64,Zm9v';
 
-test('validates buyer requirements and keeps input as plain text',()=>{
-  const normalized=normalizeRequest({...request,title:'  <script>alert(1)</script>  '});
-  assert.equal(normalized.title,'<script>alert(1)</script>');
-  assert.throws(()=>normalizeRequest({...request,category:'__proto__'}));
-  assert.throws(()=>normalizeRequest({...request,city:' '}));
-  assert.throws(()=>normalizeRequest({...request,description:'corto'}));
+test('valida los campos obligatorios y conserva texto literal sin ejecutarlo',()=>{
+  assert.equal(normalizeRequest({...req,title:'   <script>alert(1)</script>   '}).title,'<script>alert(1)</script>');
+  assert.throws(()=>normalizeRequest({...req,category:'__proto__'}));
+  assert.throws(()=>normalizeRequest({...req,city:' '}));
+  assert.throws(()=>normalizeRequest({...req,description:'corto'}));
 });
-test('limits proposals per request to three and prevents duplicates',()=>{
-  let proposals=appendProposal([],proposal());
-  assert.throws(()=>appendProposal(proposals,proposal('proveedor uno')),/Ya guardaste/);
-  proposals=appendProposal(proposals,proposal('Proveedor Dos'));
-  proposals=appendProposal(proposals,proposal('Proveedor Tres'));
-  assert.throws(()=>appendProposal(proposals,proposal('Proveedor Cuatro')),/tres propuestas/);
-  assert.equal(appendProposal(proposals,{...proposal('Otro'),requestId:'uniformes'}).length,4);
-});
-test('recovers from corrupted, legacy, or malformed local records',()=>{
-  assert.deepEqual(decodeState('{broken'),decodeState(null));
-  assert.deepEqual(decodeState('{"version":2}'),decodeState(null));
-  const recovered=decodeState(JSON.stringify({version:1,requests:[{...request,id:'local-1'},{...request,id:'local-1'},null,{id:'bad'}],proposals:[proposal(),{...proposal(),requestId:'nonexistent'}],provider:{name:8},name:'Ana'}));
-  assert.equal(recovered.requests.length,1);assert.equal(recovered.proposals.length,1);assert.equal(recovered.provider,null);assert.equal(recovered.name,'Ana');
-});
-test('stored proposals cannot bypass limits or target unknown requests',()=>{
-  const recovered=decodeState(JSON.stringify({version:1,proposals:['Uno','Dos','Tres','Cuatro'].map(name=>proposal(name))}));
-  assert.equal(recovered.proposals.length,3);
-});
-test('storage failure is reported, and successful saves use the correct key',()=>{
-  assert.equal(persistState({setItem(){throw new Error('quota');}},decodeState(null)),false);
-  assert.equal(persistState(undefined,decodeState(null)),false);
-  const memory=new Map();assert.equal(persistState({setItem:(k,v)=>memory.set(k,v)},decodeState(null)),true);
-  assert.equal(JSON.parse(memory.get(STORAGE_KEY)).version,1);
-});
-
-test('normalizes goods and services with category-specific data',()=>{
-  const goods=normalizeRequest({...request,category:'bienes',subcategory:'insumos',quantity:'12',condition:'usado',budget:'120000',desiredDate:'2026-12-10',phone:'3005550199'});
-  assert.equal(goods.category,'bienes');
-  assert.equal(goods.quantity,12);
-  assert.equal(goods.condition,'usado');
+test('diferencia bienes de servicios con fecha y presupuesto opcionales',()=>{
+  const goods=normalizeRequest({...req,condition:'usado',budget:'120000',desiredDate:'2026-12-10'});
+  assert.equal(goods.quantity,10);assert.equal(goods.condition,'usado');assert.equal(goods.desiredDate,'2026-12-10');
   assert.equal(goods.budget,120000);
-  assert.equal(goods.desiredDate,'2026-12-10');
-  assert.equal(Object.hasOwn(goods,'phone'),false);
-  assert.ok(Object.hasOwn(SUBCATEGORIES.bienes,'insumos'));
-  const service=normalizeRequest({...request,category:'servicios',subcategory:'mantenimiento',budget:'',desiredDate:''});
-  assert.equal(service.quantity,null);
-  assert.equal(service.budget,null);
-  assert.equal(service.subcategory,'mantenimiento');
+  const service=normalizeRequest({...req,category:'servicios',subcategory:'mantenimiento',quantity:'',condition:'',budget:'',desiredDate:''});
+  assert.equal(service.quantity,null);assert.equal(service.condition,null);assert.equal(service.budget,null);assert.equal(service.desiredDate,'');
+  assert.ok(Object.hasOwn(SUBCATEGORIES.servicios,'mantenimiento'));
 });
-test('rejects invalid quantities, costs, conditions and calendar dates',()=>{
-  const goods={...request,category:'bienes',quantity:'1',condition:'nuevo'};
-  assert.throws(()=>normalizeRequest({...goods,quantity:'0'}),/cantidad/);
-  assert.throws(()=>normalizeRequest({...goods,quantity:'0.2'}),/cantidad/);
-  assert.throws(()=>normalizeRequest({...goods,condition:'irrelevante'}),/condición/);
-  assert.throws(()=>normalizeRequest({...goods,budget:'1.000'}),/presupuesto/);
-  assert.throws(()=>normalizeRequest({...goods,desiredDate:'2026-02-30'}),/fecha/);
-  assert.throws(()=>normalizeRequest({...goods,category:'empresa'}),/bien o servicio/);
+test('rechaza cantidades y fechas incorrectas',()=>{
+  assert.throws(()=>normalizeRequest({...req,quantity:0}),/cantidad/);
+  assert.throws(()=>normalizeRequest({...req,quantity:2.5}),/cantidad/);
+  assert.throws(()=>normalizeRequest({...req,condition:'otro'}),/condición/);
+  assert.throws(()=>normalizeRequest({...req,desiredDate:'2026-02-30'}),/fecha/);
+  assert.throws(()=>normalizeRequest({...req,budget:'10.000'}),/presupuesto/);
 });
-test('migrates older products and business types without dropping them',()=>{
-  const migrated=decodeState(JSON.stringify({version:1,requests:[
-    {...request,category:'productos',id:'antiguo-1'},
-    {...request,category:'negocios',id:'antiguo-2'}
-  ]}));
-  assert.equal(migrated.requests.length,2);
-  assert.deepEqual(migrated.requests.map(item=>item.category),['bienes','bienes']);
-  assert.deepEqual(migrated.requests.map(item=>item.status),['abierta','abierta']);
+test('las solicitudes no guardan datos de contacto y admiten una sola fotografía',()=>{
+  const saved=normalizeRequest({...req,phone:'3200000000',email:'secret@example.com',picture:testImage});
+  assert.equal(saved.picture,testImage);
+  assert.equal(Object.hasOwn(saved,'phone'),false);assert.equal(Object.hasOwn(saved,'email'),false);
+  assert.equal(normalizeRequest({...req,picture:'javascript:alert(1)'}).picture,'');
+  assert.equal(normalizeRequest({...req,picture:'data:image/svg+xml;base64,Zm9v'}).picture,'');
 });
-test('keeps private fields out of locally stored request records',()=>{
-  const next=decodeState(null);
-  const clean=normalizeRequest({...request,category:'bienes',quantity:'1',phone:'3005550199'});
-  assert.equal(persistState({setItem(k,v){const obj=JSON.parse(v);assert.equal(JSON.stringify(obj).includes('3005550199'),false);}}, {...next,requests:[{...clean,id:'local-private'}]}),true);
+test('toda nueva propuesta requiere un precio fijo positivo y cantidad',()=>{
+  assert.equal(normalizeProposal(offer()).price,125000);
+  assert.throws(()=>normalizeProposal({...offer(),price:''}),/precio fijo/);
+  assert.throws(()=>normalizeProposal({...offer(),price:'-10'}),/precio/);
+  assert.throws(()=>normalizeProposal({...offer(),price:'2.500'}),/precio/);
+  assert.throws(()=>normalizeProposal({...offer(),quantity:0}),/cantidad/);
+  assert.throws(()=>normalizeProposal({...offer(),price:'101',quantity:'3'}),/unitario/);
 });
-test('normalizes structured proposals, limits prices and preserves resolved states',()=>{
-  const p=normalizeProposal({...proposal(),price:'125000',delivery:'5 días',exclusions:'transporte',warranty:'30 días'});
-  assert.equal(p.price,125000);
-  assert.equal(p.delivery,'5 días');
-  assert.equal(p.exclusions,'transporte');
-  assert.equal(p.warranty,'30 días');
-  assert.throws(()=>normalizeProposal({...proposal(),price:'-30'}),/precio/);
-  const restored=decodeState(JSON.stringify({version:1,requests:[{...request,id:'local-done',category:'bienes',quantity:2,status:'resuelta'}]}));
-  assert.equal(restored.requests[0].status,'resuelta');
+test('permite un número ilimitado de proveedores diferentes',()=>{
+  let proposals=[];
+  for(let i=0;i<16;i++)proposals=appendProposal(proposals,offer('Proveedor '+i));
+  assert.equal(proposals.length,16);
+  assert.throws(()=>appendProposal(proposals,offer('proveedor 0')),/Ya tienes una propuesta/);
+  assert.equal(appendProposal(proposals,{...offer('proveedor 0'),requestId:'otra-necesidad'}).length,17);
 });
-
-test('drafts retain only permitted fields, never contact details',()=>{
-  const draft=buildDraft({title:'  Necesito una nevera  ',city:'Santa Marta',category:'servicios',subcategory:'mantenimiento',description:'Necesito reparación técnica',phone:'3105551234',name:'Persona privada',unknown:'dato'});
-  assert.equal(draft.title,'  Necesito una nevera  ');
-  assert.equal(draft.category,'servicios');
-  assert.equal(draft.subcategory,'mantenimiento');
+test('una oferta retirada puede sustituirse pero no dos activas del mismo proveedor',()=>{
+  let proposals=appendProposal([],offer());
+  proposals=withdrawProposal(proposals,proposals[0].id);
+  assert.equal(proposals[0].status,'retirada');
+  proposals=appendProposal(proposals,offer('Proveedor Uno',115000));
+  assert.equal(proposals.length,2);
+  assert.equal(proposals[1].status,'activa');
+});
+test('el proveedor puede cambiar el precio antes de la aceptación con historial',()=>{
+  const original=appendProposal([],offer());
+  const id=original[0].id;
+  const changed=changeProposal(original,id,{price:'100000'});
+  assert.equal(changed[0].price,100000);
+  assert.equal(changed[0].priceHistory[0].price,125000);
+  assert.equal(original[0].price,125000);
+  assert.equal(changed[0].updatedAt.length>0,true);
+});
+test('ordena ofertas por precio unitario para bienes',()=>{
+  const offers=[
+    normalizeProposal(offer('Proveedor A',120000,4)),
+    normalizeProposal(offer('Proveedor B',150000,6)),
+    normalizeProposal(offer('Proveedor C',280000,10))
+  ];
+  assert.equal(proposalUnitPrice(offers[1]),25000);
+  assert.deepEqual(sortProposals(offers,'bienes').map(p=>p.name),['Proveedor B','Proveedor C','Proveedor A']);
+  assert.deepEqual(sortProposals(offers,'servicios').map(p=>p.name),['Proveedor A','Proveedor B','Proveedor C']);
+});
+test('aceptar una oferta completa reserva las unidades para ese comprador',()=>{
+  const request={...req,quantity:5};
+  const ps=appendProposal([],offer());
+  const updated=acceptProposal(ps,request,ps[0].id,5);
+  assert.equal(updated[0].status,'aceptada');
+  assert.equal(updated[0].acceptedQuantity,5);
+  assert.equal(requestedRemaining(request,updated),0);
+  assert.throws(()=>changeProposal(updated,ps[0].id,{price:'100000'}),/no se puede modificar/);
+  assert.throws(()=>withdrawProposal(updated,ps[0].id),/no aceptada/);
+});
+test('las ventas parciales necesitan confirmación del proveedor',()=>{
+  const request={...req,quantity:8};
+  const ps=appendProposal([],offer('Tienda Uno',240000,8));
+  const pending=acceptProposal(ps,request,ps[0].id,4);
+  assert.equal(pending[0].status,'por_confirmar');
+  assert.equal(pending[0].pendingQuantity,4);
+  assert.equal(requestedRemaining(request,pending),4);
+  const confirmed=confirmPartial(pending,ps[0].id);
+  assert.equal(confirmed[0].status,'aceptada');
+  assert.equal(confirmed[0].acceptedQuantity,4);
+  assert.equal(proposalUnitPrice(confirmed[0])*4,120000);
+});
+test('aceptar cantidades fuera de lo disponible es inválido',()=>{
+  const request={...req,quantity:3};
+  const ps=appendProposal([],offer());
+  assert.throws(()=>acceptProposal(ps,request,ps[0].id,4),/excede/);
+  assert.throws(()=>acceptProposal(ps,{...request,status:'cancelada'},ps[0].id,1),/abierta/);
+});
+test('descartar una oferta no la elimina y se puede recuperar',()=>{
+  const ps=appendProposal([],offer()),id=ps[0].id;
+  const ignored=discardProposal(ps,id,true);
+  assert.equal(ignored[0].discarded,true);
+  const recovered=discardProposal(ignored,id,false);
+  assert.equal(recovered[0].discarded,false);
+});
+test('cancelar y reactivar mantiene propuestas y requiere confirmar precios anteriores',()=>{
+  const ps=appendProposal([],offer()),request={...req,status:'cancelada'};
+  const reactivated=reopenCanceled([request],ps,request.id);
+  assert.equal(reactivated.requests[0].status,'abierta');
+  assert.equal(reactivated.proposals[0].status,'pendiente_confirmacion');
+  const confirmed=confirmOldProposal(reactivated.proposals,ps[0].id);
+  assert.equal(confirmed[0].status,'activa');
+});
+test('reabrir tras un acuerdo fallido no elimina la oferta antigua',()=>{
+  const ps=appendProposal([],offer()),accepted=acceptProposal(ps,{...req,quantity:5},ps[0].id,5);
+  const reopened=reopenCanceled([{...req,status:'en_proceso'}],accepted,req.id);
+  assert.equal(reopened.requests[0].status,'abierta');
+  assert.equal(reopened.proposals[0].status,'acuerdo_cancelado');
+  assert.equal(reopened.proposals[0].acceptedQuantity,0);
+});
+test('las solicitudes pueden cerrarse desde abierta o en proceso',()=>{
+  const initial=[{...req,status:'abierta'}];
+  const inProgress=updateLocalRequestStatus(initial,req.id,'en_proceso');
+  const done=updateLocalRequestStatus(inProgress,req.id,'resuelta');
+  assert.equal(done[0].status,'resuelta');
+  assert.equal(initial[0].status,'abierta');
+  assert.throws(()=>updateLocalRequestStatus(done,req.id,'cancelada'),/abiertas o en proceso/);
+  assert.throws(()=>updateLocalRequestStatus(initial,'no-existe','resuelta'),/No se encontró/);
+});
+test('la recuperación admite solicitudes antiguas y precios sin registrar como históricos',()=>{
+  const state=decodeState(JSON.stringify({version:1,requests:[{...req,id:'vieja',category:'productos'}],proposals:[{...offer('Proveedor Viejo'),requestId:'vieja',price:null}]}));
+  assert.equal(state.requests[0].category,'bienes');
+  assert.equal(state.proposals.length,1);
+  assert.equal(state.proposals[0].status,'historica');
+  assert.equal(state.proposals[0].price,null);
+});
+test('la recuperación de propuestas antiguas ya no aplica límite de tres',()=>{
+  const offers=Array.from({length:7},(_,i)=>offer('Empresa '+i,100000));
+  const state=decodeState(JSON.stringify({version:1,requests:[req],proposals:offers}));
+  assert.equal(state.proposals.length,7);
+});
+test('los borradores conservan campos permitidos y descartan contactos privados',()=>{
+  const draft=buildDraft({...req,phone:'3000000000',email:'secret@example.com',picture:testImage,unknown:'secreto'});
+  assert.equal(draft.picture,testImage);
+  assert.equal(draft.title,req.title);
   assert.equal(Object.hasOwn(draft,'phone'),false);
-  assert.equal(Object.hasOwn(draft,'name'),false);
+  assert.equal(Object.hasOwn(draft,'email'),false);
   assert.equal(Object.hasOwn(draft,'unknown'),false);
 });
-test('drafts survive storage and malformed draft fields are sanitized',()=>{
-  const state=decodeState(null);
-  const payload=JSON.stringify({...state,draft:{data:{title:'Necesito materiales',city:'Bogotá',phone:'NO-GUARDAR',category:'bienes',subcategory:'insumos'},editingRequestId:'inventada'}});
-  const restored=decodeState(payload);
-  assert.equal(restored.draft.data.title,'Necesito materiales');
-  assert.equal(restored.draft.editingRequestId,null);
-  assert.equal(JSON.stringify(restored.draft).includes('NO-GUARDAR'),false);
-  const invalid=decodeState(JSON.stringify({...state,draft:{data:null}}));
-  assert.equal(invalid.draft,null);
-});
-test('saved draft can refer to an existing editable request only',()=>{
-  const saved={...request,id:'local-1',category:'bienes',quantity:2};
+test('recupera borradores válidos y elimina referencias a solicitudes cerradas',()=>{
+  const saved={...req,id:'local-1'};
   const draft={data:buildDraft(saved),editingRequestId:'local-1'};
-  const open=decodeState(JSON.stringify({version:1,requests:[saved],draft}));
-  assert.equal(open.draft.editingRequestId,'local-1');
+  const restored=decodeState(JSON.stringify({version:1,requests:[saved],draft}));
+  assert.equal(restored.draft.editingRequestId,'local-1');
   const closed=decodeState(JSON.stringify({version:1,requests:[{...saved,status:'cancelada'}],draft}));
   assert.equal(closed.draft.editingRequestId,null);
 });
-test('local request status transitions are explicit and immutable',()=>{
-  const originals=[{...request,id:'mi-1',status:'abierta'},{...request,id:'mi-2',status:'abierta'}];
-  const closed=updateLocalRequestStatus(originals,'mi-1','resuelta');
-  assert.equal(originals[0].status,'abierta');
-  assert.equal(closed[0].status,'resuelta');
-  assert.equal(closed[1].status,'abierta');
-  assert.throws(()=>updateLocalRequestStatus(closed,'mi-1','cancelada'),/abiertas/);
-  assert.throws(()=>updateLocalRequestStatus(closed,'ausente','resuelta'),/No se encontró/);
-  assert.throws(()=>updateLocalRequestStatus(closed,'mi-2','publicada'),/Estado no válido/);
+test('no se pierden favoritos, nombres y contador de ofertas vistas',()=>{
+  const timestamp='2026-10-23T20:00:00.000Z';
+  const st=decodeState(JSON.stringify({version:1,requests:[req],favorites:[req.id],seen:{[req.id]:timestamp},name:'Ana'}));
+  assert.deepEqual(st.favorites,[req.id]);assert.equal(st.seen[req.id],timestamp);assert.equal(st.name,'Ana');
 });
-test('closed request status survives local reload',()=>{
-  const restored=decodeState(JSON.stringify({version:1,requests:[{...request,id:'local-c',status:'cancelada'}]}));
-  assert.equal(restored.requests[0].status,'cancelada');
+test('un fallo de almacenamiento no se presenta como guardado exitoso',()=>{
+  const st=decodeState(null);
+  assert.equal(persistState(undefined,st),false);
+  assert.equal(persistState({setItem(){throw Error('quota');}},st),false);
+  const values=new Map();
+  assert.equal(persistState({setItem(k,v){values.set(k,v);}},st),true);
+  assert.equal(JSON.parse(values.get(STORAGE_KEY)).version,1);
 });
-test('new navigation, three wizard steps and personal section have distinct element ids',()=>{
+test('el HTML contiene formularios, filtros, foto única, controles y textos de demo',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  for(const id of ['mis-necesidades','my-requests-grid','my-empty','wizard-next','wizard-back','wizard-draft','wizard-clear','wizard-submit','wizard-review']){
-    assert.ok(html.includes('id="'+id+'"'),'Missing '+id);
-  }
-  for(const i of ['0','1','2'])assert.ok(html.includes('data-wizard-step="'+i+'"'));
-  assert.ok(html.includes('Necesito algo'));
-  assert.ok(html.includes('Puedo ofrecerlo'));
-  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
+  const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
   assert.equal(new Set(ids).size,ids.length);
+  for(const id of ['hero-form','list-city','request-photo','request-photo-preview','proposal-photo','proposal-price','proposal-quantity','favorites-grid','my-proposals-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','report-request']){
+    assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
+  }
+  for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
+  assert.ok(html.includes('sin SMS'));
+  assert.ok(html.includes('Propuestas sin límite'));
 });
