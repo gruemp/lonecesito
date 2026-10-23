@@ -141,7 +141,7 @@ function init(){
   const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
-  let currentCategory='all';let currentSubcategory='all';let searchQuery='';let currentRequestId=null;let toastTimeout;
+  let currentCategory='all';let currentSubcategory='all';let searchQuery='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;
   const grid=$('#request-grid');
   const records=()=>[...state.requests,...EXAMPLES];
   const findRequest=id=>records().find(request=>request.id===id);
@@ -175,7 +175,7 @@ function init(){
     [...grid.children].forEach(card=>{
       const request=findRequest(card.dataset.id);
       const text=`${request?.title||''} ${request?.description||''} ${request?.city||''}`.toLocaleLowerCase('es');
-      card.hidden=!request||(category!=='all'&&request.category!==category)||(currentSubcategory!=='all'&&request.subcategory!==currentSubcategory)||(searchQuery&&!text.includes(searchQuery));
+      card.hidden=!request||request.status==='cancelada'||(category!=='all'&&request.category!==category)||(currentSubcategory!=='all'&&request.subcategory!==currentSubcategory)||(searchQuery&&!text.includes(searchQuery));
       if(!card.hidden)visible++;
     });
     $('#empty-state').hidden=visible>0;
@@ -210,13 +210,43 @@ function init(){
     const title=document.createElement('h3');title.textContent=request.title;
     const city=document.createElement('p');city.className='card-city';city.append(svg('pin'),document.createTextNode(request.city));
     const button=document.createElement('button');button.className='card-link';button.dataset.request=request.id;button.append(document.createTextNode('Ver solicitud '),svg('arrow'));button.setAttribute('aria-label',`Ver solicitud: ${request.title}`);
-    if(request.status==='resuelta'){const status=document.createElement('p');status.className='request-status';status.textContent='Necesidad resuelta';content.append(status);}
+    if(request.status!=='abierta'){const status=document.createElement('p');status.className='request-status';status.textContent=request.status==='resuelta'?'Necesidad resuelta':'Solicitud cancelada';content.append(status);}
     content.append(category,title,city,button);article.append(photo,content);return article;
   }
   function renderOwnRequests(){
     grid.querySelectorAll('[data-user-request]').forEach(card=>card.remove());
-    const fragment=document.createDocumentFragment();state.requests.forEach(request=>fragment.append(addUserCard(request)));grid.prepend(fragment);applyFilter();
+    const fragment=document.createDocumentFragment();state.requests.forEach(request=>fragment.append(addUserCard(request)));grid.prepend(fragment);applyFilter();renderMyRequests();
   }
+
+  function renderMyRequests(){
+    const container=$('#my-requests-grid');
+    const requests=state.requests;
+    $('#my-count').textContent=requests.length?'('+requests.length+')':'';
+    $('#my-empty').hidden=requests.length>0;
+    container.replaceChildren(...requests.map(request=>{
+      const article=document.createElement('article');article.className='my-card';
+      const top=document.createElement('div');top.className='my-card-top';
+      const heading=document.createElement('h3');heading.textContent=request.title;
+      const status=document.createElement('span');status.className='my-state my-state-'+request.status;
+      status.textContent=request.status==='resuelta'?'Resuelta':request.status==='cancelada'?'Cancelada':'Abierta';
+      top.append(heading,status);
+      const info=document.createElement('p');info.className='my-card-info';
+      info.textContent=request.city+' · '+CATEGORIES[request.category]+' · '+state.proposals.filter(p=>p.requestId===request.id).length+' de 3 propuestas de prueba';
+      const actions=document.createElement('div');actions.className='my-card-actions';
+      for(const [action,label] of [['view','Ver detalles'],...(request.status==='abierta'?[['edit','Editar'],['resolve','Marcar resuelta'],['cancel','Cancelar']]:[])]){
+        const button=document.createElement('button');button.type='button';button.className='my-action';button.dataset.action=action;button.dataset.id=request.id;
+        button.textContent=label;actions.append(button);
+      }
+      article.append(top,info,actions);return article;
+    }));
+  }
+  function changeOwnStatus(id,status){
+    const next={...state,requests:updateLocalRequestStatus(state.requests,id,status)};
+    if(next.draft?.editingRequestId===id)next.draft=null;
+    if(!save(next,'detail-error')){showToast('No se pudo guardar. Comprueba el almacenamiento del navegador.');return false;}
+    renderOwnRequests();return true;
+  }
+
   function showRequest(id){
     const request=findRequest(id);if(!request)return;currentRequestId=id;
     $('#detail-title').textContent=request.title;
@@ -231,7 +261,7 @@ function init(){
     if(request.budget!=null)meta.push(`Presupuesto aproximado: ${new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(request.budget)}`);
     else meta.push('Presupuesto: prefiero recibir cotizaciones');
     if(request.desiredDate)meta.push(`Fecha deseada: ${request.desiredDate}`);
-    if(request.status==='resuelta')meta.push('Estado: necesidad resuelta');
+    if(request.status==='resuelta')meta.push('Estado: necesidad resuelta');if(request.status==='cancelada')meta.push('Estado: solicitud cancelada');
     const metaList=$('#detail-meta');
     metaList.replaceChildren(...meta.map(value=>{const item=document.createElement('li');item.textContent=value;return item;}));
     const proposals=state.proposals.filter(proposal=>proposal.requestId===id);
@@ -252,10 +282,10 @@ function init(){
     $('#proposals-empty').hidden=proposals.length>0;
     const isSample=EXAMPLES.some(r=>r.id===id);
     $('#detail-note').textContent=`${isSample?'Solicitud ilustrativa.':'Solicitud de prueba guardada en este navegador.'} ${proposals.length} de 3 propuestas de prueba guardadas. No hay envío a compradores ni proveedores.`;
-    const disabled=proposals.length>=3||request.status==='resuelta';
+    const disabled=proposals.length>=3||request.status!=='abierta';
     $('#open-proposal').disabled=disabled;
-    $('#open-proposal').textContent=request.status==='resuelta'?'Solicitud resuelta':proposals.length>=3?'Tres propuestas de prueba guardadas':'Presentar propuesta de prueba';
-    $('#resolve-request').hidden=isSample||request.status==='resuelta';
+    $('#open-proposal').textContent=request.status!=='abierta'?'Solicitud cerrada':proposals.length>=3?'Tres propuestas de prueba guardadas':'Presentar propuesta de prueba';
+    $('#resolve-request').hidden=isSample||request.status!=='abierta';
     openDialog('detail');
   }
 
