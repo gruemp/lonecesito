@@ -1,4 +1,20 @@
 # lonecesito
+## Flujo simplificado: aceptar necesidades, sin propuestas ni formularios de proveedor
+
+Desde esta actualización, **las personas que necesitan ayuda publican** mediante el formulario guiado; **quienes pueden resolverla únicamente exploran y pulsan «Aceptar necesidad»**. Se eliminan de la interfaz la redacción de cotizaciones, precios de proveedores, perfiles de proveedor, propuestas y sus formularios.
+
+- Menú compacto: Inicio, Explorar, Necesidades y Aceptadas.
+- Aceptación de prueba con un solo clic, sin precio, nombre, descripción ni registro solicitado al ayudante.
+- Un navegador no puede aceptar dos veces una misma necesidad ni aceptar una que creó él mismo.
+- Las solicitudes ilustrativas permiten probar este comportamiento. Las solicitudes publicadas desde el navegador propio siguen siendo invisibles para otras personas hasta que exista Firebase.
+- «Aceptadas» conserva las acciones de prueba localmente. Las propuestas de versiones anteriores siguen conservadas en el almacenamiento local para no borrar historial, pero ya no pueden crearse desde la interfaz.
+- Las fotos se muestran solo al pulsar «Ver foto». El formulario de publicación continúa disponible exclusivamente para quien quiera crear una necesidad.
+
+**Limitación crítica:** la aceptación no llega a un comprador real y no crea contratos ni reservas. No hay usuarios múltiples ni identidades verificadas. El control de roles y la aceptación real dependen de Firebase, todavía pendiente de integración.
+
+**Pruebas:** 34 casos de lógica y estructura verificados, incluida la prohibición de autoaceptación, duplicados y los formularios de proveedor eliminados.
+
+---
 ## Rediseño compacto — rama para revisión
 
 Rama: `codex/interfaz-compacta-sin-imagenes-2026-10-23`.
