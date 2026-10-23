@@ -378,7 +378,7 @@ function init(){
     const kind=button.dataset.open;
     if(kind==='provider'&&state.provider){$('#provider-name').value=state.provider.name;$('#provider-specialty').value=state.provider.specialty;$('#provider-city').value=state.provider.city;}
     if(kind==='access')$('#access-name').value=state.name;
-    openDialog(kind);
+    if(kind==='publish')startPublish();else openDialog(kind);
   }));
   $$('.close-dialog').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
   $$('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{
@@ -391,30 +391,64 @@ function init(){
   $('#request-category').addEventListener('change',populatePublishSubcategories);
   $('#resolve-request').addEventListener('click',()=>{
     const request=state.requests.find(item=>item.id===currentRequestId);
-    if(!request||request.status==='resuelta')return;
-    const next={...state,requests:state.requests.map(item=>item.id===request.id?{...item,status:'resuelta'}:item)};
-    if(!save(next,'detail-error'))return;
-    $('#detail-dialog').close();renderOwnRequests();showToast('Necesidad marcada como resuelta en este navegador.');
+    if(!request||request.status!=='abierta')return;
+    if(!window.confirm('¿Marcar esta solicitud de prueba como resuelta?'))return;
+    if(!changeOwnStatus(request.id,'resuelta'))return;
+    $('#detail-dialog').close();showToast('Necesidad marcada como resuelta en este navegador.');
   });
   $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';searchQuery='';$('#request-search').value='';populateSubcategories();applyFilter('all');}));
   $$('.mobile-nav a,.mobile-nav button').forEach(link=>link.addEventListener('click',()=>{$('.mobile-nav').open=false;}));
 
   $('#hero-form').addEventListener('submit',event=>{
-    event.preventDefault();$('#request-title').value=$('#hero-need').value.trim();$('#request-city').value=$('#hero-city').value.trim();openDialog('publish');
-    if($('#request-title').value.length>=8&&$('#request-city').value.length>=2)$('#request-description').focus();
+    event.preventDefault();
+    startPublish(null,{title:$('#hero-need').value.trim(),city:$('#hero-city').value.trim()});
   });
+  $('#wizard-next').addEventListener('click',()=>{
+    if(validateWizardStep()){saveWizardDraft(false);setWizardStep(wizardStep+1);}
+  });
+  $('#wizard-back').addEventListener('click',()=>setWizardStep(wizardStep-1));
+  $('#wizard-draft').addEventListener('click',()=>saveWizardDraft(true));
+  $('#publish-form').addEventListener('input',scheduleDraftSave);
+  $('#publish-form').addEventListener('change',scheduleDraftSave);
   $('#publish-form').addEventListener('submit',event=>{
     event.preventDefault();
+    if(wizardStep!==2||!validateWizardStep())return;
     try{
-      if(state.requests.length>=50)throw new Error('Esta demostración admite hasta 50 solicitudes en este navegador.');
-      const request=normalizeRequest(Object.fromEntries(new FormData(event.currentTarget)));
-      const id=window.crypto?.randomUUID?.()||`local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      if(!save({...state,requests:[{...request,id},...state.requests]},'publish-error'))return;
-      $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();currentCategory='all';currentSubcategory='all';populateSubcategories();renderOwnRequests();
-      $('#necesidades').scrollIntoView({block:'start'});showToast('Solicitud de prueba guardada en este navegador. No se ha enviado a proveedores.');
+      const previous=editingRequestId?state.requests.find(item=>item.id===editingRequestId):null;
+      if(editingRequestId&&!previous)throw new Error('La solicitud que editabas ya no está disponible.');
+      if(previous&&previous.status!=='abierta')throw new Error('Una solicitud cerrada no puede editarse.');
+      if(!previous&&state.requests.length>=50)throw new Error('Esta demostración admite hasta 50 solicitudes en este navegador.');
+      const request=normalizeRequest({...wizardData(),status:previous?.status||'abierta'});
+      const id=previous?.id||(window.crypto?.randomUUID?.()||'local-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+      const requests=previous?state.requests.map(item=>item.id===id?{...request,id}:item):[{...request,id},...state.requests];
+      if(!save({...state,requests,draft:null},'publish-error'))return;
+      clearTimeout(draftTimer);editingRequestId=null;
+      $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();setWizardStep(0);
+      currentCategory='all';currentSubcategory='all';populateSubcategories();renderOwnRequests();
+      $('#mis-necesidades').scrollIntoView({block:'start'});
+      showToast(previous?'Solicitud de prueba actualizada en este navegador.':'Solicitud de prueba guardada. Revísala en Mis necesidades.');
     }catch(error){setError('publish-error',error);}
   });
-  grid.addEventListener('click',event=>{const button=event.target.closest('[data-request]');if(button)showRequest(button.dataset.request);});
+  $('#my-requests-grid').addEventListener('click',event=>{
+    const button=event.target.closest('[data-action][data-id]');
+    if(!button)return;
+    const id=button.dataset.id;
+    const request=state.requests.find(item=>item.id===id);
+    if(!request)return;
+    if(button.dataset.action==='view'){showRequest(id);return;}
+    if(request.status!=='abierta')return;
+    if(button.dataset.action==='edit'){startPublish(request);return;}
+    if(button.dataset.action==='resolve'){
+      if(window.confirm('¿Marcar esta solicitud de prueba como resuelta?')){
+        if(changeOwnStatus(id,'resuelta'))showToast('Solicitud marcada como resuelta.');
+      }
+    }else if(button.dataset.action==='cancel'){
+      if(window.confirm('¿Cancelar esta solicitud de prueba? Ya no aparecerá entre las necesidades abiertas.')){
+        if(changeOwnStatus(id,'cancelada'))showToast('Solicitud de prueba cancelada.');
+      }
+    }
+  });
+    grid.addEventListener('click',event=>{const button=event.target.closest('[data-request]');if(button)showRequest(button.dataset.request);});
   $('#open-proposal').addEventListener('click',()=>{
     const request=findRequest(currentRequestId);if(!request)return;
     $('#detail-dialog').close();$('#proposal-request-title').textContent=request.title;$('#proposal-name').value=state.provider?.name||state.name;openDialog('proposal');
@@ -422,7 +456,7 @@ function init(){
   $('#proposal-form').addEventListener('submit',event=>{
     event.preventDefault();
     try{
-      const request=findRequest(currentRequestId);if(!request)throw new Error('Selecciona una solicitud válida.');if(request.status==='resuelta')throw new Error('Esta necesidad ya está resuelta.');
+      const request=findRequest(currentRequestId);if(!request)throw new Error('Selecciona una solicitud válida.');if(request.status!=='abierta')throw new Error('Esta necesidad de prueba está cerrada.');
       const proposals=appendProposal(state.proposals,{...Object.fromEntries(new FormData(event.currentTarget)),requestId:currentRequestId});
       if(!save({...state,proposals},'proposal-error'))return;
       $('#proposal-dialog').close();event.currentTarget.reset();showRequest(currentRequestId);showToast('Propuesta de prueba guardada únicamente en este navegador.');
