@@ -30,3 +30,21 @@ La rama `codex/modelo-pagina-2026-10-23` adapta la demostración al esquema de `
 - La prueba sigue **sin servidor ni comunicación entre usuarios**; no habilita contratación, pagos ni contactos comerciales.
 
 Se añadieron cinco pruebas a las cinco preexistentes. Las **10 pruebas** se ejecutaron y aprobaron en un entorno JavaScript aislado durante la preparación de la rama; queda pendiente ejecutar `npm run check`, `npm test` y la revisión visual/móvil en un entorno de desarrollo antes de fusionar. La publicación de esta actualización fue autorizada expresamente. Continúa siendo una demostración local; la publicación no equivale a lanzamiento comercial, backend operativo ni recepción de solicitudes reales.
+
+
+## Etapa 1 de usabilidad — revisión preparada el 23-10-2026
+
+Rama propuesta: `codex/usabilidad-etapa1-2026-10-23`. Se apoya en el diseño y en el modelo de bienes/servicios ya presentes en `codex/diseno-original`.
+
+- **Inicio:** dos rutas explícitas («Necesito algo» y «Puedo ofrecerlo»).
+- **Publicación:** asistente de tres pasos (tipo/título/categoría; lugar/detalles; revisión/confirmación), validación de campos y navegación anterior/siguiente con teclado.
+- **Borradores:** guardado automático y manual en el mismo navegador, recuperación al reabrir y opción para descartarlos. No se guarda teléfono ni se establece cuenta de usuario.
+- **Mis necesidades:** muestra solo solicitudes locales; permite consultar, editar las abiertas, marcar como resueltas o cancelarlas. Los ejemplos ilustrativos no aparecen como solicitudes propias.
+- **Diseño:** acciones y fichas adaptadas a pantallas pequeñas; se mantiene el aspecto visual original.
+- **Compatibilidad:** conserva la clave de almacenamiento local `lonecesito-demo-v1`, los registros de prueba ya guardados y los tipos heredados.
+
+**Alcance:** no existen cuentas reales, servidor compartido, mensajería entre usuarios, verificación, pagos ni contratación real. El usuario no debe introducir datos personales sensibles. Esta etapa no añade backend ni autoriza explotación comercial.
+
+**Pruebas:** ampliadas de 10 a 16. Se ejecutaron con éxito en un entorno JavaScript aislado usando las funciones reales y comprobaciones estructurales de HTML. Quedan pendientes la ejecución con Node mediante `npm run check && npm test`, pruebas visuales en navegador real, accesibilidad y comprobaciones móviles. No afirmar que estas últimas se realizaron.
+
+**Despliegue:** esta rama está destinada a revisión en Pull Request, no fusionada ni publicada automáticamente.
