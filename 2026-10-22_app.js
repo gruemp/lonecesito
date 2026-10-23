@@ -533,6 +533,133 @@ function init(){
     },600);
   }
 
+
+  function refreshPhotoPreview(kind){
+    const current=kind==='request'?wizardPicture:proposalPicture;
+    const box=$('#'+kind+'-photo-preview');
+    box.replaceChildren();
+    if(current){const image=pictureNode(current,'Fotografía seleccionada');box.append(image);}
+    $('#'+kind+'-photo-remove').hidden=!current;
+  }
+  async function compressImage(file){
+    if(!file||!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>6000000)throw new Error('Selecciona una foto JPG, PNG o WebP de hasta 6 MB.');
+    return new Promise((resolve,reject)=>{
+      const image=new Image();
+      const reader=new FileReader();
+      reader.onerror=()=>reject(new Error('No fue posible leer la fotografía.'));
+      reader.onload=()=>{
+        image.onerror=()=>reject(new Error('No se pudo abrir la fotografía.'));
+        image.onload=()=>{
+          try{
+            const max=960,scale=Math.min(1,max/Math.max(image.width,image.height));
+            const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));
+            const ctx=canvas.getContext('2d');
+            ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
+            const data=canvas.toDataURL('image/jpeg',0.72);
+            if(data.length>MAX_PICTURE_LENGTH)throw new Error('La imagen sigue siendo demasiado grande. Intenta otra fotografía.');
+            resolve(data);
+          }catch(error){reject(error);}
+        };
+        image.src=String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  for(const kind of ['request','proposal']){
+    $('#'+kind+'-photo').addEventListener('change',async e=>{
+      const input=e.currentTarget;
+      if(!input.files?.[0])return;
+      try{
+        const data=await compressImage(input.files[0]);
+        if(kind==='request'){wizardPicture=data;scheduleDraftSave();}
+        else proposalPicture=data;
+        refreshPhotoPreview(kind);
+      }catch(error){showToast(error.message);}
+      input.value='';
+    });
+    $('#'+kind+'-photo-remove').addEventListener('click',()=>{
+      if(kind==='request'){wizardPicture='';scheduleDraftSave();}
+      else proposalPicture='';
+      refreshPhotoPreview(kind);
+    });
+  }
+  function openProposalFor(request,proposal=null){
+    currentRequestId=request.id;editingProposalId=proposal?.id||null;
+    const form=$('#proposal-form');form.reset();
+    $('#proposal-title').textContent=proposal?'Modificar propuesta de prueba':'Presenta una propuesta';
+    $('#proposal-request-title').textContent=request.title;
+    $('#proposal-name').value=proposal?.name||state.provider?.name||state.name;
+    $('#proposal-name').readOnly=!!proposal;
+    $('#proposal-description').value=proposal?.description||'';
+    $('#proposal-price').value=proposal?.price??'';
+    $('#proposal-quantity').value=proposal?.quantity||Math.min(1,request.quantity||1);
+    $('#proposal-quantity-wrap').hidden=request.category!=='bienes';
+    $('#proposal-quantity').disabled=request.category!=='bienes';
+    $('#proposal-delivery').value=proposal?.delivery||'';
+    $('#proposal-exclusions').value=proposal?.exclusions||'';
+    $('#proposal-warranty').value=proposal?.warranty||'';
+    proposalPicture=proposal?.picture||'';
+    const draft=state.proposalDraft;
+    if(!proposal&&draft?.requestId===request.id){
+      $('#proposal-description').value=draft.description||'';
+      $('#proposal-price').value=draft.price||'';
+      $('#proposal-quantity').value=draft.quantity||1;
+      $('#proposal-delivery').value=draft.delivery||'';
+      $('#proposal-warranty').value=draft.warranty||'';
+      $('#proposal-exclusions').value=draft.exclusions||'';
+    }
+    refreshPhotoPreview('proposal');
+    openDialog('proposal');
+  }
+  function proposalAction(action,id){
+    const proposal=state.proposals.find(p=>p.id===id);
+    if(!proposal)return;
+    const request=findRequest(proposal.requestId);
+    if(!request)return;
+    const mine=state.requests.some(r=>r.id===request.id);
+    const identity=state.provider?.name||state.name;
+    try{
+      if(['edit','withdraw','confirm-old','confirm-partial'].includes(action)&&(!identity||identity.toLocaleLowerCase('es')!==proposal.name.toLocaleLowerCase('es'))){
+        throw new Error('Selecciona el perfil local de este proveedor para administrar su propuesta.');
+      }
+      if(action==='view'){showRequest(request.id);return;}
+      if(action==='edit'){if(proposal.status!=='activa')throw new Error('Solo puedes modificar una propuesta activa.');$('#detail-dialog').close();openProposalFor(request,proposal);return;}
+      if(action==='withdraw'){
+        if(!window.confirm('¿Retirar esta propuesta? Se conservará en el historial.'))return;
+        state={...state,proposals:withdrawProposal(state.proposals,id)};
+      }else if(action==='confirm-old'){
+        if(!window.confirm('¿Confirmas que el precio fijo '+money(proposal.price)+' sigue vigente?'))return;
+        state={...state,proposals:confirmOldProposal(state.proposals,id)};
+      }else if(action==='confirm-partial'){
+        if(!window.confirm('¿Aceptas vender '+proposal.pendingQuantity+' unidades al precio unitario de '+money(proposalUnitPrice(proposal))+'?'))return;
+        state={...state,proposals:confirmPartial(state.proposals,id)};
+      }else if(action==='discard'){
+        if(!mine)throw new Error('Solo el comprador puede organizar las propuestas de su necesidad.');
+        state={...state,proposals:discardProposal(state.proposals,id,!proposal.discarded)};
+      }else if(action==='accept'||action==='partial'){
+        if(!mine)throw new Error('Solo el comprador de esta necesidad puede aceptar una propuesta.');
+        if(request.status!=='abierta')throw new Error('La necesidad ya no recibe ofertas.');
+        const remaining=requestedRemaining(request,state.proposals);
+        let qty=request.category==='bienes'?Math.min(proposal.quantity,remaining):1;
+        if(action==='partial'){
+          const answer=window.prompt('¿Cuántas unidades deseas aceptar de esta propuesta? (máximo '+Math.min(proposal.quantity,remaining)+')',String(qty));
+          if(answer==null)return;
+          qty=positiveQuantity(answer,'cantidad');
+        }
+        const summary='Proveedor: '+proposal.name+'\nCantidad: '+qty+'\nPrecio total: '+money(proposalUnitPrice(proposal)*qty)+'\n'+(qty<proposal.quantity?'Necesita confirmación del proveedor.':'La propuesta quedará aceptada.')+'\n¿Continuar?';
+        if(!window.confirm(summary))return;
+        const proposals=acceptProposal(state.proposals,request,id,qty);
+        let requests=state.requests;
+        if(requestedRemaining(request,proposals)===0&&!proposals.some(p=>p.requestId===id&&p.status==='por_confirmar')){
+          requests=updateLocalRequestStatus(state.requests,request.id,'en_proceso');
+        }
+        state={...state,proposals,requests};
+      }else return;
+      if(!persistState(storage,state))throw new Error('No se pudo guardar el cambio.');
+      renderOwnRequests();if($('#detail-dialog').open)showRequest(request.id);
+      showToast('Cambio guardado en esta demostración local.');
+    }catch(error){showToast(error.message);}
+  }
   $('[data-open]').forEach(button=>button.addEventListener('click',()=>{
     const kind=button.dataset.open;
     if(kind==='provider'&&state.provider){$('#provider-name').value=state.provider.name;$('#provider-specialty').value=state.provider.specialty;$('#provider-city').value=state.provider.city;}
@@ -544,20 +671,26 @@ function init(){
     if(event.target!==dialog)return;const bounds=dialog.getBoundingClientRect();
     if(event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)dialog.close();
   }));
-  $$('.filter').forEach(button=>button.addEventListener('click',()=>{currentCategory=button.dataset.category;currentSubcategory='all';populateSubcategories();applyFilter(currentCategory);}));
-  $('#list-subcategory').addEventListener('change',event=>{currentSubcategory=event.target.value;applyFilter();});
-  $('#request-search').addEventListener('input',event=>{searchQuery=event.target.value.trim().toLocaleLowerCase('es').slice(0,120);applyFilter();});
+  $$('.filter').forEach(button=>button.addEventListener('click',()=>{currentCategory=button.dataset.category;currentSubcategory='all';populateSubcategories();applyFilter();}));
+  $('#list-subcategory').addEventListener('change',e=>{currentSubcategory=e.target.value;applyFilter();});
+  $('#list-city').addEventListener('change',e=>{currentCity=e.target.value;applyFilter();});
+  $('#request-search').addEventListener('input',e=>{searchQuery=e.target.value.trim().toLocaleLowerCase('es').slice(0,120);applyFilter();});
   $('#request-category').addEventListener('change',populatePublishSubcategories);
   $('#resolve-request').addEventListener('click',()=>{
-    const request=state.requests.find(item=>item.id===currentRequestId);
-    if(!request||request.status!=='abierta')return;
-    if(!window.confirm('¿Marcar esta solicitud de prueba como resuelta?'))return;
+    const request=state.requests.find(r=>r.id===currentRequestId);
+    if(!request||!['abierta','en_proceso'].includes(request.status))return;
+    if(!window.confirm('¿Confirmas que ya recibiste el producto o se completó el servicio?'))return;
     if(!changeOwnStatus(request.id,'resuelta'))return;
-    $('#detail-dialog').close();showToast('Necesidad marcada como resuelta en este navegador.');
+    $('#detail-dialog').close();showToast('Necesidad resuelta. Se conserva en tu historial local.');
   });
-  $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';searchQuery='';$('#request-search').value='';populateSubcategories();applyFilter('all');}));
+  $('#report-request').addEventListener('click',()=>{
+    const reason=window.prompt('Describe qué quieres reportar. Esta prueba guarda el reporte solo en tu navegador: nadie lo recibirá.');
+    if(!reason?.trim())return;
+    const reports=[...state.reports,{requestId:currentRequestId,reason:reason.trim().slice(0,300),at:new Date().toISOString()}].slice(-30);
+    if(save({...state,reports},'detail-error'))showToast('Reporte de prueba guardado localmente. NO ha sido enviado a ningún equipo.');
+  });
+  $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';currentCity='all';searchQuery='';$('#request-search').value='';populateSubcategories();populateCities();applyFilter();}));
   $$('.mobile-nav a,.mobile-nav button').forEach(link=>link.addEventListener('click',()=>{$('.mobile-nav').open=false;}));
-
   $('#hero-form').addEventListener('submit',event=>{
     event.preventDefault();
     startPublish(null,{title:$('#hero-need').value.trim(),city:$('#hero-city').value.trim()});
@@ -578,10 +711,10 @@ function init(){
     clearTimeout(draftTimer);
     if(wizardSubmitted){wizardSubmitted=false;return;}
     const data=buildDraft(wizardData());
-    if(data.title.trim()||data.city.trim()||data.description.trim())saveWizardDraft(false);
+    if(data.title.trim()||data.city.trim()||data.description.trim()||data.picture)saveWizardDraft(false);
   });
   $('#publish-form').addEventListener('keydown',event=>{
-    if(event.key==='Enter'&&wizardStep<2&&event.target.matches('input:not([type=checkbox])')){
+    if(event.key==='Enter'&&wizardStep<2&&event.target.matches('input:not([type=checkbox]):not([type=file])')){
       event.preventDefault();$('#wizard-next').click();
     }
   });
@@ -596,47 +729,71 @@ function init(){
       if(previous&&previous.status!=='abierta')throw new Error('Una solicitud cerrada no puede editarse.');
       if(!previous&&state.requests.length>=50)throw new Error('Esta demostración admite hasta 50 solicitudes en este navegador.');
       const request=normalizeRequest({...wizardData(),createdAt:previous?.createdAt||new Date().toISOString(),status:previous?.status||'abierta'});
-      const id=previous?.id||(window.crypto?.randomUUID?.()||'local-'+Date.now()+'-'+Math.random().toString(36).slice(2));
+      const id=previous?.id||newId('local');
       const requests=previous?state.requests.map(item=>item.id===id?{...request,id}:item):[{...request,id},...state.requests];
       if(!save({...state,requests,draft:null},'publish-error'))return;
       clearTimeout(draftTimer);editingRequestId=null;wizardSubmitted=true;
       $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();setWizardStep(0);
-      currentCategory='all';currentSubcategory='all';populateSubcategories();renderOwnRequests();
+      currentCategory='all';currentSubcategory='all';currentCity='all';populateSubcategories();renderOwnRequests();
       $('#mis-necesidades').scrollIntoView({block:'start'});
-      showToast(previous?'Solicitud de prueba actualizada en este navegador.':'Solicitud de prueba guardada. Revísala en Mis necesidades.');
+      showToast(previous?'Necesidad de prueba actualizada.':'Necesidad de prueba guardada. La publicación real requerirá identificarte con Firebase.');
     }catch(error){setError('publish-error',error);}
   });
   $('#my-requests-grid').addEventListener('click',event=>{
-    const button=event.target.closest('[data-action][data-id]');
-    if(!button)return;
-    const id=button.dataset.id;
-    const request=state.requests.find(item=>item.id===id);
-    if(!request)return;
-    if(button.dataset.action==='view'){showRequest(id);return;}
-    if(request.status!=='abierta')return;
-    if(button.dataset.action==='edit'){startPublish(request);return;}
-    if(button.dataset.action==='resolve'){
-      if(window.confirm('¿Marcar esta solicitud de prueba como resuelta?')){
-        if(changeOwnStatus(id,'resuelta'))showToast('Solicitud marcada como resuelta.');
-      }
-    }else if(button.dataset.action==='cancel'){
-      if(window.confirm('¿Cancelar esta solicitud de prueba? Ya no aparecerá entre las necesidades abiertas.')){
-        if(changeOwnStatus(id,'cancelada'))showToast('Solicitud de prueba cancelada.');
-      }
+    const button=event.target.closest('[data-action][data-id]');if(!button)return;
+    const id=button.dataset.id,request=state.requests.find(r=>r.id===id);if(!request)return;
+    const action=button.dataset.action;
+    if(action==='view'){showRequest(id);return;}
+    if(action==='edit'&&request.status==='abierta'){startPublish(request);return;}
+    if(action==='resolve'&&window.confirm('¿Confirmas que el producto fue entregado o el servicio terminó?')){
+      if(changeOwnStatus(id,'resuelta'))showToast('Necesidad resuelta.');
+    }else if(action==='cancel'&&window.confirm('¿Cancelar esta necesidad de prueba? Se conservará en tu historial.')){
+      if(changeOwnStatus(id,'cancelada'))showToast('Necesidad cancelada.');
+    }else if(action==='reopen'&&window.confirm('¿Reabrir la necesidad? Los precios anteriores necesitarán confirmación del proveedor.')){
+      try{
+        const next=reopenCanceled(state.requests,state.proposals,id);
+        if(save({...state,...next},'detail-error')){renderOwnRequests();showToast('Necesidad reactivada. Precios anteriores pendientes de confirmación.');}
+      }catch(error){showToast(error.message);}
     }
   });
-    grid.addEventListener('click',event=>{const button=event.target.closest('[data-request]');if(button)showRequest(button.dataset.request);});
+  grid.addEventListener('click',event=>{
+    const fav=event.target.closest('[data-favorite]');if(fav){event.preventDefault();toggleFavorite(fav.dataset.favorite);return;}
+    const button=event.target.closest('[data-request]');if(button)showRequest(button.dataset.request);
+  });
+  function toggleFavorite(id){
+    const favorites=state.favorites.includes(id)?state.favorites.filter(v=>v!==id):[...state.favorites,id];
+    if(persistState(storage,{...state,favorites})){state={...state,favorites};renderOwnRequests();}
+    else showToast('No se pudieron guardar los favoritos.');
+  }
+  $('#favorites-grid').addEventListener('click',e=>{
+    const fav=e.target.closest('[data-favorite]');if(fav){toggleFavorite(fav.dataset.favorite);return;}
+    const view=e.target.closest('[data-request]');if(view)showRequest(view.dataset.request);
+  });
+  $('#my-proposals-grid').addEventListener('click',e=>{const btn=e.target.closest('[data-proposal-action]');if(btn)proposalAction(btn.dataset.proposalAction,btn.dataset.id);});
+  $('#detail-proposals').addEventListener('click',e=>{const btn=e.target.closest('[data-proposal-action]');if(btn)proposalAction(btn.dataset.proposalAction,btn.dataset.id);});
   $('#open-proposal').addEventListener('click',()=>{
-    const request=findRequest(currentRequestId);if(!request)return;
-    $('#detail-dialog').close();$('#proposal-request-title').textContent=request.title;$('#proposal-name').value=state.provider?.name||state.name;openDialog('proposal');
+    const request=findRequest(currentRequestId);if(!request||request.status!=='abierta')return;
+    $('#detail-dialog').close();openProposalFor(request);
+  });
+  $('#proposal-save-draft').addEventListener('click',()=>{
+    const form=$('#proposal-form');
+    const data=Object.fromEntries(new FormData(form));
+    const draft={...data,requestId:currentRequestId};
+    if(persistState(storage,{...state,proposalDraft:draft})){
+      state={...state,proposalDraft:draft};$('#proposal-dialog').close();showToast('Borrador de propuesta guardado solo en este navegador.');
+    }else showToast('No se pudo guardar el borrador de propuesta.');
   });
   $('#proposal-form').addEventListener('submit',event=>{
     event.preventDefault();
     try{
-      const request=findRequest(currentRequestId);if(!request)throw new Error('Selecciona una solicitud válida.');if(request.status!=='abierta')throw new Error('Esta necesidad de prueba está cerrada.');
-      const proposals=appendProposal(state.proposals,{...Object.fromEntries(new FormData(event.currentTarget)),requestId:currentRequestId});
-      if(!save({...state,proposals},'proposal-error'))return;
-      $('#proposal-dialog').close();event.currentTarget.reset();showRequest(currentRequestId);showToast('Propuesta de prueba guardada únicamente en este navegador.');
+      const request=findRequest(currentRequestId);
+      if(!request)throw new Error('Selecciona una solicitud válida.');
+      if(request.status!=='abierta')throw new Error('Esta necesidad no recibe nuevas propuestas.');
+      const values={...Object.fromEntries(new FormData(event.currentTarget)),requestId:currentRequestId,picture:proposalPicture,quantity:request.category==='bienes'?$('#proposal-quantity').value:'1'};
+      const proposals=editingProposalId?changeProposal(state.proposals,editingProposalId,values):appendProposal(state.proposals,values);
+      if(!save({...state,proposals,proposalDraft:null},'proposal-error'))return;
+      editingProposalId=null;$('#proposal-dialog').close();event.currentTarget.reset();renderOwnRequests();showRequest(currentRequestId);
+      showToast('Propuesta de prueba guardada localmente. No se ha enviado a ningún comprador.');
     }catch(error){setError('proposal-error',error);}
   });
   $('#provider-form').addEventListener('submit',event=>{
@@ -645,7 +802,8 @@ function init(){
       const values=Object.fromEntries(new FormData(event.currentTarget));
       const provider={name:cleanText(values.name,2,80,'El nombre'),specialty:cleanText(values.specialty,3,120,'La especialidad'),city:cleanText(values.city,2,80,'La ciudad')};
       if(!save({...state,provider},'provider-error'))return;
-      $('#provider-dialog').close();showToast('Perfil de prueba guardado en este navegador. Ya puedes explorar las solicitudes.');applyFilter('all');$('#necesidades').scrollIntoView({block:'start'});
+      $('#provider-dialog').close();renderMyProposals();showToast('Perfil de proveedor de prueba guardado en este navegador. No verifica tu identidad.');
+      $('#necesidades').scrollIntoView({block:'start'});
     }catch(error){setError('provider-error',error);}
   });
   $('#access-form').addEventListener('submit',event=>{
@@ -653,10 +811,11 @@ function init(){
     try{
       const name=cleanText(new FormData(event.currentTarget).get('name'),2,40,'El nombre');
       if(!save({...state,name},'access-error'))return;
-      updateAccess();$('#access-dialog').close();showToast(`Bienvenido, ${name}. Estás usando una demostración local.`);
+      updateAccess();renderMyProposals();$('#access-dialog').close();showToast('Bienvenido, '+name+'. Este acceso es una simulación local, no una cuenta real.');
     }catch(error){setError('access-error',error);}
   });
-  populatePublishSubcategories();populateSubcategories();updateAccess();renderOwnRequests();
+  populatePublishSubcategories();populateSubcategories();populateCities();updateAccess();renderOwnRequests();
+
 }
 
 if(typeof document!=='undefined')init();
