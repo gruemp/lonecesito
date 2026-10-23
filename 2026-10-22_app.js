@@ -308,7 +308,7 @@ function init(){
       ['Lugar',values.city],
       ['Detalles',values.description],
       ...(values.category==='bienes'?[['Cantidad',values.quantity],['Condición',values.condition]]:[]),
-      ['Presupuesto',values.budget?values.budget+' COP':'Prefiero recibir cotizaciones'],
+      ['Presupuesto',values.budget!==''?values.budget+' COP':'Prefiero recibir cotizaciones'],
       ['Fecha deseada',values.desiredDate||'Por definir']
     ];
     const box=$('#wizard-review');
@@ -327,6 +327,8 @@ function init(){
     $('#wizard-next').hidden=wizardStep===2;
     $('#wizard-submit').hidden=wizardStep!==2;
     if(wizardStep===2)reviewWizard();
+    const heading=$('.wizard-step[data-wizard-step="'+wizardStep+'"] .wizard-heading');
+    if(heading){heading.setAttribute('tabindex','-1');heading.focus({preventScroll:true});}
   }
   function validateWizardStep(){
     const group=$('.wizard-step[data-wizard-step="'+wizardStep+'"]');
@@ -424,7 +426,7 @@ function init(){
     if(data.title.trim()||data.city.trim()||data.description.trim())saveWizardDraft(false);
   });
   $('#publish-form').addEventListener('keydown',event=>{
-    if(event.key==='Enter'&&wizardStep<2&&event.target.matches('input:not([type=checkbox]),select')){
+    if(event.key==='Enter'&&wizardStep<2&&event.target.matches('input:not([type=checkbox])')){
       event.preventDefault();$('#wizard-next').click();
     }
   });
