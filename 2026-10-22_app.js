@@ -141,7 +141,7 @@ function init(){
   const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
-  let currentCategory='all';let currentSubcategory='all';let searchQuery='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;
+  let currentCategory='all';let currentSubcategory='all';let searchQuery='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
   const records=()=>[...state.requests,...EXAMPLES];
   const findRequest=id=>records().find(request=>request.id===id);
@@ -335,9 +335,10 @@ function init(){
     }
     return true;
   }
-  function startPublish(request=null,overrides=null){
+  function startPublish(request=null,overrides=null,ignoreDraft=false){
     clearTimeout(draftTimer);
-    const activeDraft=!request&&state.draft;
+    wizardSubmitted=false;
+    const activeDraft=!request&&!ignoreDraft&&state.draft;
     const editing=activeDraft?.editingRequestId&&state.requests.find(r=>r.id===activeDraft.editingRequestId&&r.status==='abierta');
     const values=request||activeDraft?.data||{};
     editingRequestId=request?.id||editing?.id||null;
@@ -355,6 +356,7 @@ function init(){
     $('#wizard-submit').textContent=editingRequestId?'Guardar cambios de prueba':'Guardar solicitud de prueba';
     $('#publish-error').hidden=true;$('#publish-error').textContent='';
     $('#draft-status').textContent=activeDraft&&!request?'Borrador local recuperado. Puedes continuarlo o editarlo.':'';
+    $('#wizard-clear').hidden=!activeDraft||!!request;
     setWizardStep(0);openDialog('publish');
   }
   function saveWizardDraft(closeDialog=false){
@@ -408,6 +410,24 @@ function init(){
   });
   $('#wizard-back').addEventListener('click',()=>setWizardStep(wizardStep-1));
   $('#wizard-draft').addEventListener('click',()=>saveWizardDraft(true));
+  $('#wizard-clear').addEventListener('click',()=>{
+    if(!window.confirm('¿Descartar el borrador guardado y comenzar una nueva solicitud?'))return;
+    clearTimeout(draftTimer);
+    const next={...state,draft:null};
+    if(!persistState(storage,next)){setError('publish-error',new Error('No se pudo borrar el borrador.'));return;}
+    state=next;startPublish(null,null,true);
+  });
+  $('#publish-dialog').addEventListener('close',()=>{
+    clearTimeout(draftTimer);
+    if(wizardSubmitted){wizardSubmitted=false;return;}
+    const data=buildDraft(wizardData());
+    if(data.title.trim()||data.city.trim()||data.description.trim())saveWizardDraft(false);
+  });
+  $('#publish-form').addEventListener('keydown',event=>{
+    if(event.key==='Enter'&&wizardStep<2&&event.target.matches('input:not([type=checkbox]),select')){
+      event.preventDefault();$('#wizard-next').click();
+    }
+  });
   $('#publish-form').addEventListener('input',scheduleDraftSave);
   $('#publish-form').addEventListener('change',scheduleDraftSave);
   $('#publish-form').addEventListener('submit',event=>{
@@ -422,7 +442,7 @@ function init(){
       const id=previous?.id||(window.crypto?.randomUUID?.()||'local-'+Date.now()+'-'+Math.random().toString(36).slice(2));
       const requests=previous?state.requests.map(item=>item.id===id?{...request,id}:item):[{...request,id},...state.requests];
       if(!save({...state,requests,draft:null},'publish-error'))return;
-      clearTimeout(draftTimer);editingRequestId=null;
+      clearTimeout(draftTimer);editingRequestId=null;wizardSubmitted=true;
       $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();setWizardStep(0);
       currentCategory='all';currentSubcategory='all';populateSubcategories();renderOwnRequests();
       $('#mis-necesidades').scrollIntoView({block:'start'});
