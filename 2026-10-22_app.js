@@ -55,7 +55,7 @@ export function normalizeRequest(input){
     category,subcategory,
     description:cleanText(input.description,15,1500,'Los detalles'),
     budget:amount,desiredDate,quantity,condition,
-    status:input?.status==='resuelta'?'resuelta':'abierta'
+    status:['resuelta','cancelada'].includes(input?.status)?input.status:'abierta'
   };
 }
 
@@ -79,8 +79,30 @@ export function appendProposal(proposals,input){
   return [...proposals,proposal];
 }
 
+
+const DRAFT_FIELDS=Object.freeze({title:120,city:80,category:24,subcategory:40,description:1500,budget:20,quantity:12,condition:24,desiredDate:10});
+export function buildDraft(input){
+  const draft={};
+  for(const [key,max] of Object.entries(DRAFT_FIELDS)){
+    const value=input?.[key];
+    draft[key]=typeof value==='string'?value.slice(0,max):(value==null?'':String(value).slice(0,max));
+  }
+  if(!Object.hasOwn(CATEGORIES,draft.category))draft.category='bienes';
+  if(!Object.hasOwn(SUBCATEGORIES[draft.category],draft.subcategory))draft.subcategory='otros';
+  if(!['nuevo','usado','cualquiera'].includes(draft.condition))draft.condition='cualquiera';
+  return draft;
+}
+
+export function updateLocalRequestStatus(requests,id,status){
+  if(!['resuelta','cancelada'].includes(status))throw new Error('Estado no válido.');
+  const target=requests.find(request=>request.id===id);
+  if(!target)throw new Error('No se encontró la solicitud.');
+  if(target.status!=='abierta')throw new Error('Solo se pueden cerrar solicitudes abiertas.');
+  return requests.map(request=>request.id===id?{...request,status}:request);
+}
+
 export function decodeState(raw){
-  const state={version:1,requests:[],proposals:[],provider:null,name:''};
+  const state={version:1,requests:[],proposals:[],provider:null,name:'',draft:null};
   if(!raw)return state;
   let parsed;try{parsed=JSON.parse(raw);}catch{return state;}
   if(!parsed||typeof parsed!=='object'||parsed.version!==1)return state;
@@ -100,6 +122,10 @@ export function decodeState(raw){
     for(const proposal of parsed.proposals.slice(0,159)){
       try{if(requestIds.has(proposal.requestId))state.proposals=appendProposal(state.proposals,proposal);}catch{/* Ignore invalid or excess proposals. */}
     }
+  }
+  if(parsed.draft&&typeof parsed.draft==='object'&&parsed.draft.data&&typeof parsed.draft.data==='object'){
+    const editingRequestId=typeof parsed.draft.editingRequestId==='string'&&state.requests.some(r=>r.id===parsed.draft.editingRequestId&&r.status==='abierta')?parsed.draft.editingRequestId:null;
+    state.draft={data:buildDraft(parsed.draft.data),editingRequestId};
   }
   if(typeof parsed.name==='string'&&parsed.name.trim().length>=2&&parsed.name.length<=40)state.name=parsed.name.trim();
   if(parsed.provider){try{state.provider={name:cleanText(parsed.provider.name,2,80,'El nombre'),specialty:cleanText(parsed.provider.specialty,3,120,'La especialidad'),city:cleanText(parsed.provider.city,2,80,'La ciudad')};}catch{/* Ignore an invalid profile. */}}
