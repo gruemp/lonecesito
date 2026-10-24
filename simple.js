@@ -1,7 +1,7 @@
 import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
 
 const $=id=>document.getElementById(id);
-const pages=['inicio','necesidades','mis-publicaciones','publicar'];
+const pages=['necesidades','mis-publicaciones','publicar'];
 const STORAGE='lonecesito-publicaciones-demo-v1';
 const state={mode:'loading',user:null,items:[],editingId:null,firebase:null,waitingForAuth:false,saving:false};
 const el=(tag,cls,value)=>{
@@ -29,9 +29,9 @@ function saveLocal(items){
 }
 function showView(){
   const page=window.location.hash.slice(1);
-  const screen=pages.includes(page)?page:'inicio';
+  const screen=pages.includes(page)?page:'necesidades';
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
-    state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
+    state.waitingForAuth=true;showAuth();window.location.hash='#necesidades';return;
   }
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
@@ -85,6 +85,8 @@ function contactIcon(kind){
   svg.classList.add('contact-icon');
   const paths=kind==='call'?
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
+    kind==='photo'?
+    ['M3 4h18v16H3z','M8 8.5h.01','m3 18 5-6 4 4 3-3 4 5']:
     ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
      'M8.2 8.3c.3-.6.9-.8 1.4-.3l1 1.2-.7 1.1c.7 1.5 1.9 2.7 3.4 3.4l1.1-.7 1.2 1c.5.5.3 1.1-.3 1.4-.8.4-1.7.5-2.6.1a9.3 9.3 0 0 1-4.6-4.6c-.4-.9-.3-1.8.1-2.6z'];
   for(const d of paths){
@@ -110,23 +112,35 @@ function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
   const title=String(record.title||derivedTitle(description)).trim()||'Necesidad publicada';
+  const main=el('div','publication-main');
+  const copy=el('div','publication-copy');
   const heading=el('div','publication-heading');
-  const h=el('h3','',title);
-  heading.append(h);
-  article.append(heading);
+  heading.append(el('h3','',title));
+  copy.append(heading);
 
-  // Evitar repetir la primera línea cuando el título proviene del mismo texto.
-  // Toda la descripción sigue visible, repartida entre título y cuerpo.
+  // Cuerpo completo en un solo texto, también para registros antiguos.
   const fullText=legacyDetails(record,{forCard:true});
   const rest=fullText.startsWith(title)?fullText.slice(title.length).trimStart():fullText;
-  if(rest)article.append(el('p','publication-description',rest));
+  if(rest)copy.append(el('p','publication-description',rest));
 
-
+  // Zona de fotografía SIEMPRE a la derecha, incluso sin imagen cargada.
+  const media=el('div','publication-media');
+  media.setAttribute('aria-label','Imagen del producto o servicio');
   const photo=String(record.picture||'');
   if(/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(photo)){
     const img=el('img','publication-photo');
-    img.src=photo;img.alt='Fotografía de '+title;img.loading='lazy';article.append(img);
+    img.src=photo;
+    img.alt='Fotografía de '+title;
+    img.loading='lazy';
+    media.append(img);
+  }else{
+    const placeholder=el('span','photo-placeholder');
+    placeholder.setAttribute('aria-hidden','true');
+    placeholder.append(contactIcon('photo'));
+    media.append(placeholder);
   }
+  main.append(copy,media);
+  article.append(main);
 
   const contact=el('div','contact-box');
   let contactNumber='';
@@ -285,7 +299,7 @@ $('auth-google').addEventListener('click',async()=>{
 });
 $('auth-logout').addEventListener('click',async()=>{
   if(!state.firebase)return;
-  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#inicio';}
+  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#necesidades';}
   catch(error){feedback('auth-feedback',authError(error));}
 });
 function authError(error){
