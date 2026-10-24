@@ -99,17 +99,20 @@ function renderCard(record,owner){
     img.src=photo;img.alt='Fotografía de '+title;img.loading='lazy';article.append(img);
   }
   const contact=el('div','contact-box');
-  // En todas las fichas visibles el número es un enlace.
-  if(record.contactPhone&&(record.example===true||record.contactConsent===true)){
-    const label=el('span','contact-label','WhatsApp de contacto');
-    const text=record.example===true?String(record.contactPhone):'+'+normalizeWhatsApp(record.contactPhone);
-    const linked=phoneLink(record,text,'contact-phone');
+  // El número visible se enlaza a WhatsApp; las muestras abren WhatsApp sin destinatario.
+  let contactNumber='';
+  try{
+    if(record.example===true)contactNumber=String(record.contactPhone||'');
+    else if(record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
+  }catch{contactNumber='';}
+  if(contactNumber){
+    contact.append(el('span','contact-label','WhatsApp de contacto'));
+    const linked=phoneLink(record,contactNumber,'contact-phone');
     const action=phoneLink(record,'Contactar por WhatsApp ↗','whatsapp-button');
-    contact.append(label);
     if(linked)contact.append(linked);
     if(action)contact.append(action);
   }else{
-    // Caso excepcional: archivo antiguo sin contacto válido, visible solo a su autor.
+    // Un dato antiguo inválido solo se muestra al dueño para corregirlo.
     contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
   }
   article.append(contact);
