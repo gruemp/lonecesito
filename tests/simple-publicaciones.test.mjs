@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.13');
+  assert.equal(APP_VERSION,'2.2.14');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -564,15 +564,17 @@ test('las instrucciones de continuidad incluyen la papelera adicional',()=>{
 
 
 
-test('cuatro pestañas en el orden aprobado y dos filas en PC y móvil',()=>{
+test('cuatro pestañas: una fila en PC y dos en móvil, en orden lógico',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
  const nav=html.match(/<nav class="top-nav"[^>]*>([\s\S]*?)<\/nav>/);
  assert.ok(nav);
  const links=[...nav[1].matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]);
- assert.deepEqual(links,['inicio','mis-publicaciones','necesidades','publicar']);
- assert.match(css,/\.site-header \.top-nav\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.deepEqual(links,['inicio','publicar','mis-publicaciones','necesidades']);
+ assert.match(css,/\.site-header \.top-nav\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.site-header \.top-nav\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/\.home-visual-screen \.welcome-banner img\{[^}]*max-height:calc\(100dvh - 140px\)/);
+ assert.match(css,/\.home-visual-screen \.welcome-banner img\{[^}]*object-fit:contain/);
 });
 test('tercera imagen ocupa Inicio, sin fichas ni buscador',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
