@@ -241,6 +241,17 @@ export function persistState(storage,state){
   try{storage.setItem(STORAGE_KEY,JSON.stringify(state));return true;}catch{return false;}
 }
 
+export function cityChoice(city,optionValues){
+  const value=typeof city==='string'?city.trim():'';
+  if(!value)return {selection:'',custom:''};
+  if(optionValues.includes(value)&&value!=='__otra__')return {selection:value,custom:''};
+  return {selection:'__otra__',custom:value};
+}
+export function chosenCity(selection,custom){
+  const value=selection==='__otra__'?custom:selection;
+  return typeof value==='string'?value.trim():'';
+}
+
 export const SCREEN_IDS=Object.freeze(['inicio','necesidades','mis-necesidades','aceptadas']);
 export function resolveScreen(hash){
   const value=String(hash||'').replace(/^#/,'');
@@ -511,17 +522,9 @@ function init(){
   function setCityChoice(city){
     const select=$('#request-city');
     const input=$('#request-city-other');
-    const value=typeof city==='string'?city.trim():'';
-    if(!value){
-      select.value='';
-      input.value='';
-    }else if([...select.options].some(option=>option.value===value&&value!=='__otra__')){
-      select.value=value;
-      input.value='';
-    }else{
-      select.value='__otra__';
-      input.value=value;
-    }
+    const choice=cityChoice(city,[...select.options].map(option=>option.value));
+    select.value=choice.selection;
+    input.value=choice.custom;
     updateOtherCityField();
   }
   const wizardTitles=['¿Qué necesitas?','Detalles de la necesidad','Revisar y confirmar'];
@@ -532,7 +535,7 @@ function init(){
       const item=$('#publish-form').elements.namedItem(key);
       input[key]=item&&!item.disabled?item.value:'';
     }
-    input.city=$('#request-city').value==='__otra__'?$('#request-city-other').value:$('#request-city').value;
+    input.city=chosenCity($('#request-city').value,$('#request-city-other').value);
     input.picture=wizardPicture;
     return input;
   }
