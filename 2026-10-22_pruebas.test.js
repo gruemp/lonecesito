@@ -549,7 +549,7 @@ test('la lista solo muestra títulos sin fotos inicialmente en las tres seccione
   assert.ok(js.includes('renderNeedList(grid,records()'));
   assert.ok(js.includes('renderNeedList(container,state.requests'));
   assert.ok(js.includes('renderNeedList(list,accepted'));
-  assert.ok(html.includes('Toca cualquier nombre para abrir su información'));
+  assert.ok(html.includes('Toca el nombre de una necesidad para ver su descripción'));
 });
 
 
