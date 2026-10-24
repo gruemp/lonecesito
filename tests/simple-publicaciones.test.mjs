@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.4');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.4<\/span>/);
+  assert.equal(APP_VERSION,'2.2.5');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.5<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -82,7 +82,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.4/);
+  assert.match(html,/Versión 2\.2\.5/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -127,7 +127,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.4/);
+  assert.match(html,/Versión 2\.2\.5/);
 });
 
 
@@ -222,7 +222,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.4/);
+  assert.match(html,/Versión 2\.2\.5/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -246,12 +246,11 @@ test('hay exactamente tres enlaces de navegación superior y están en el orden 
 });
 test('las tres acciones de navegación no se repiten en portada ni en Mis publicaciones',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  const home=html.split('<section id="inicio"')[1].split('</section>')[0];
+  assert.doesNotMatch(html,/id="inicio"|id="home-title"|class="hero"|hero-actions|action-card|personal-link/);
   const mine=html.split('<section id="mis-publicaciones"')[1].split('</section>')[0];
-  assert.doesNotMatch(home,/hero-actions|action-card|personal-link|href="#publicar"|href="#necesidades"|href="#mis-publicaciones"/);
   assert.doesNotMatch(mine,/section-actions|href="#publicar"/);
   assert.equal((html.match(/href="#publicar"/g)||[]).length,1);
-  assert.equal((html.match(/href="#necesidades"/g)||[]).length,1);
+  assert.equal((html.match(/href="#necesidades"/g)||[]).length,2); // Marca y barra principal
   assert.equal((html.match(/href="#mis-publicaciones"/g)||[]).length,1);
 });
 test('la cabecera queda visible al desplazarse y botones diferenciados en móvil',()=>{
@@ -274,5 +273,76 @@ test('las preferencias permanentes reflejan los tres accesos sin Gemini',()=>{
     assert.match(content,/exactamente tres botones/i);
     assert.match(content,/Gemini/);
     assert.match(content,/no.*duplicad|sin.*duplicad/i);
+  }
+});
+
+
+test('desaparecen los dos textos identificados en las capturas, sin portada vacía',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.doesNotMatch(html,/Publica lo que necesitas\. Encuentra quién puede ofrecerlo\./);
+  assert.doesNotMatch(html,/LoNecesito · Publica lo que necesitas\. Contacta directamente por WhatsApp\./);
+  assert.doesNotMatch(html,/<footer\b/);
+  assert.doesNotMatch(html,/id="inicio"/);
+  assert.match(html,/<section id="necesidades"[^>]+aria-labelledby="browse-title">/);
+  assert.match(js,/const pages=\['necesidades','mis-publicaciones','publicar'\]/);
+  assert.match(js,/const screen=pages\.includes\(page\)\?page:'necesidades'/);
+});
+test('solo dos campos de publicación con micrófono y foto dentro del editor',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const editor=html.split('<form id="publish-form"')[1].split('</form>')[0];
+  assert.equal([...editor.matchAll(/<(?:textarea|input|select)\b/g)].length,2);
+  assert.match(editor,/id="voice-button"/);
+  assert.match(editor,/id="add-photo"/);
+  assert.match(editor,/id="photo-preview"/);
+  assert.match(html,/id="photo-picker" type="file"[^>]* hidden /);
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(css,/\.entry-toolbar\{position:absolute;/);
+  assert.match(css,/\.voice-tool\.listening\{/);
+  assert.match(css,/\.photo-preview\[hidden\]\{display:none!important\}/);
+});
+test('dictado del navegador en español con permiso, detener y teclado convencional',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/window\.SpeechRecognition\|\|window\.webkitSpeechRecognition/);
+  assert.match(js,/instance\.lang='es-CO'/);
+  assert.match(js,/instance\.interimResults=false/);
+  assert.match(js,/instance\.start\(\)/);
+  assert.match(js,/function stopDictation\(\)/);
+  assert.match(js,/current\.abort\(\)/);
+  assert.match(js,/setMicState\(true\)/);
+  assert.match(js,/textarea\.value=\(textarea\.value\+join\+transcript\)\.slice\(0,4000\)/);
+  assert.match(js,/micrófono del teclado/);
+});
+test('las fichas tienen una imagen derecha y marcador cuando no hay fotografía',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(js,/const main=el\('div','publication-main'\)/);
+  assert.match(js,/const copy=el\('div','publication-copy'\)/);
+  assert.match(js,/const media=el\('div','publication-media'\)/);
+  assert.match(js,/main\.append\(copy,media\)/);
+  assert.match(js,/placeholder\.append\(contactIcon\('photo'\)\)/);
+  assert.match(js,/img\.loading='lazy'/);
+  assert.match(css,/\.publication-main\{display:grid;grid-template-columns:minmax\(0,1fr\) clamp\(90px,25vw,180px\)/);
+  assert.match(css,/\.publication-media\{[^}]*aspect-ratio:4\/3/);
+  assert.match(css,/\.publication-media \.publication-photo\{[^}]*object-fit:cover/);
+});
+test('fotografía opcional comprimida y editable; reglas admiten cambios del dueño',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
+  assert.match(js,/async function encodePhoto\(file\)/);
+  assert.match(js,/canvas\.toDataURL\('image\/jpeg',quality\)/);
+  assert.match(js,/encoded\.length<380000/);
+  assert.match(js,/if\(pictureDraft\)data\.picture=pictureDraft/);
+  assert.match(js,/if\(current\.picture&&!pictureDraft\)updated\.picture=api\.deleteField\(\)/);
+  assert.match(rules,/data\.picture\.size\(\) <= 400000/);
+  assert.match(rules,/'contactConsent','picture'/);
+});
+test('preferencias permanentes actualizadas con dictado, imagen y eliminación de textos',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  for(const content of [agents,guide]){
+    assert.match(content,/micrófono/i);
+    assert.match(content,/imagen.*derecha|derecha.*imagen|foto.*derecha/i);
+    assert.match(content,/no.*portada|portada.*no|quitar los textos/i);
   }
 });
