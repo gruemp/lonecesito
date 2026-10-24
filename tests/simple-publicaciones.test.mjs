@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.0');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.0<\/span>/);
+  assert.equal(APP_VERSION,'2.2.1');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.1<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -82,7 +82,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/description\.startsWith\(title\)\?description\.slice\(title\.length\)\.trimStart\(\):description/);
-  assert.match(html,/Versión 2\.2\.0/);
+  assert.match(html,/Versión 2\.2\.1/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('número y acción de WhatsApp están separados y apuntan al endpoint API',()=>{
@@ -95,4 +95,37 @@ test('número y acción de WhatsApp están separados y apuntan al endpoint API',
   assert.equal(parsed.pathname,'/send');
   assert.equal(parsed.searchParams.get('phone'),'573001234567');
   assert.match(parsed.searchParams.get('text'),/Reparación de nevera/);
+});
+
+
+test('las fichas ilustrativas se generan mediante el mismo modelo de los dos campos',()=>{
+  assert.equal(EXAMPLE_PUBLICATIONS.length,3);
+  for(const sample of EXAMPLE_PUBLICATIONS){
+    assert.equal(sample.example,true);
+    assert.deepEqual(
+      Object.keys(sample).sort(),
+      ['id','example','description','title','contactPhone','contactConsent'].sort()
+    );
+    const rebuilt=cleanPublication({description:sample.description,contactPhone:sample.contactPhone});
+    assert.equal(sample.title,rebuilt.title);
+    assert.equal(sample.description,rebuilt.description);
+    assert.equal(sample.contactPhone,rebuilt.contactPhone);
+    assert.equal(sample.contactConsent,true);
+    assert.match(sample.description,/\n/);
+    assert.ok(sample.description.length>90);
+    for(const oldField of ['city','category','subcategory','budget','quantity','desiredDate','picture','condition']){
+      assert.equal(Object.hasOwn(sample,oldField),false,oldField);
+    }
+  }
+});
+test('el diseño de ejemplos y fichas reales es idéntico salvo el destino seguro de WhatsApp',()=>{
+  const code=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(code,/function renderCard\(record,owner\)/);
+  assert.match(code,/visible\.map\(item=>renderCard\(item,false\)\)/);
+  assert.match(code,/if\(record.example===true\|\|record.contactConsent===true\)contactNumber='\+'\+normalizeWhatsApp\(record.contactPhone\)/);
+  assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
+  assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
+  assert.doesNotMatch(html,/mode-notice|example-note/);
+  assert.match(html,/Versión 2\.2\.1/);
 });

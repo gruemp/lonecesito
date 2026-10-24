@@ -116,11 +116,10 @@ function renderCard(record,owner){
   const contact=el('div','contact-box');
   let contactNumber='';
   try{
-    if(record.example===true)contactNumber=String(record.contactPhone||'');
-    else if(record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
+    if(record.example===true||record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
   }catch{contactNumber='';}
   if(contactNumber){
-    // Número y acción son enlaces independientes, ambos al endpoint api.whatsapp.com/send.
+    // Igual presentación para publicaciones y ejemplos; sin destinatario real para ejemplos.
     const numberLink=phoneLink(record,contactNumber,'contact-phone');
     const chatLink=phoneLink(record,'Abrir WhatsApp ↗','whatsapp-button');
     if(numberLink)contact.append(numberLink);
