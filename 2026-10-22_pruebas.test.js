@@ -332,7 +332,7 @@ test('la interfaz del proveedor no contiene acciones para crear propuestas ni fo
 test('una sola letra sirve como título de necesidad y no hay límite fijo de longitud',()=>{
   assert.equal(normalizeRequest({...req,title:'A'}).title,'A');
   assert.equal(normalizeRequest({...req,title:' ñ '}).title,'ñ');
-  const long='Producto de prueba '.repeat(1000);
+  const long='Producto de prueba '.repeat(1000).trim();
   assert.equal(normalizeRequest({...req,title:long}).title,long);
   assert.equal(buildDraft({...req,title:long}).title,long);
   assert.throws(()=>normalizeRequest({...req,title:'   '}),/Escribe/);
@@ -369,7 +369,7 @@ test('el menú contiene textos completos y se distribuye en dos columnas móvile
   assert.ok(css.includes('white-space:normal'));
 });
 test('un título largo sobrevive al ciclo de almacenamiento y recarga',()=>{
-  const title='Necesito '.repeat(800);
+  const title='Necesito '.repeat(800).trim();
   const saved={...req,id:'titulo-largo',title};
   const st=decodeState(JSON.stringify({version:1,requests:[saved]}));
   assert.equal(st.requests.length,1);
