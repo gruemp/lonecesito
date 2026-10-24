@@ -1,4 +1,21 @@
 # lonecesito
+## Interfaz vigente: listas compactas de títulos expandibles
+
+- En **Soluciona una necesidad y gana dinero por ello**, **Mis necesidades publicadas para que otros ofrezcan solucionarlas** y **Necesidades de terceros aceptadas para solucionar**, cada necesidad aparece inicialmente como **una sola línea clicable con su nombre**, sin imagen, fecha, descripción, botones ni espacios entre renglones.
+- Para consultar información, tocar el nombre abre debajo la ficha de esa necesidad **en la propia lista**, sin abrir otra página ni ventana emergente.
+- Al desplegarla se muestran título completo, ciudad, categoría, cantidad, condición, presupuesto/fecha cuando corresponden, descripción, fotografía y acciones aplicables. Al cerrarla desaparece el contenido adicional.
+- **Las imágenes no se construyen ni se muestran mientras la fila está cerrada.** Esto permite recorrer más nombres rápidamente y ahorrar recursos al cargar listas.
+- El comportamiento es idéntico en computadora y celular. Se usan `<details>` y `<summary>` nativos para accesibilidad mediante teclado y compatibilidad móvil.
+- Cada renglón conserva bordes divisores muy finos, sin huecos entre filas, y los títulos excesivamente largos muestran puntos suspensivos en la lista; el título íntegro aparece al expandir.
+- Se conservan la publicación guiada, selección de ciudad, filtros, historial, aceptación sin formulario y datos en el almacenamiento local.
+
+**Validación:** 51 pruebas de lógica y estructura aprobadas en ejecución aislada, sin selectores HTML faltantes. Pendiente validar el aspecto visual en navegadores y teléfonos físicos.
+
+**Todavía es una demostración local:** no existen publicaciones compartidas ni aceptaciones transmitidas entre usuarios, hasta integrar Firebase.
+
+Las secciones antiguas de este README describen etapas ya sustituidas.
+
+---
 ## Fichas completas directamente en las listas (diseño actual)
 
 - Las secciones **Soluciona una necesidad y gana dinero por ello**, **Mis necesidades publicadas para que otros ofrezcan solucionarlas** y **Necesidades de terceros aceptadas para solucionar** utilizan el **mismo modelo de ficha**.
