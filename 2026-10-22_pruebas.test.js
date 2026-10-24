@@ -482,7 +482,7 @@ test('cada contexto conserva una acción directa y no muestra Detalles',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   for(const instruction of [
     "makeButton('Aceptar necesidad','accept',true)",
-    "makeButton('Necesidad aceptada','accepted',true,true)",
+    "makeButton('Ya aplicaste a esta necesidad','accepted',true,true)",
     "makeButton('Marcar como resuelta','resolve',true)",
     "makeButton('Editar necesidad','edit')",
     "makeButton('Cancelar necesidad','cancel')",
@@ -1056,7 +1056,7 @@ test('desaparecen los avisos redundantes en secciones, footer y publicación',()
 test('los mensajes dinámicos de éxito no incluyen comentarios sobre navegador o modo de prueba',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   for(const marker of [
-    "showToast('Necesidad aceptada.')",
+    "showToast('Ya aplicaste a esta necesidad.')",
     "previous?'Necesidad actualizada.':'Necesidad guardada.'",
     "'Borrador guardado.'",
     "editingRequestId?'Guardar cambios':'Guardar necesidad'",
@@ -1223,4 +1223,14 @@ test('la cascada nueva respeta la estructura responsiva y listas compactas',()=>
   assert.ok(css.includes('.need-list-title{'));
   assert.ok(css.includes('white-space:nowrap'));
   assert.ok(css.includes('text-overflow:ellipsis'));
+});
+
+test('la aceptación ya registrada se presenta como Ya aplicaste a esta necesidad',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(js.includes("makeButton('Ya aplicaste a esta necesidad','accepted',true,true)"));
+  assert.ok(js.includes("showToast('Ya aplicaste a esta necesidad.')"));
+  assert.ok(js.includes("throw new Error('Ya aplicaste a esta necesidad.')"));
+  assert.ok(!js.includes("makeButton('Necesidad aceptada'"));
+  assert.ok(!js.includes("showToast('Necesidad aceptada.')"));
+  assert.ok(js.includes("makeButton('Aceptar necesidad','accept',true)"));
 });
