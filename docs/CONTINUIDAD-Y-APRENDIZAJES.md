@@ -1,7 +1,7 @@
 # LoNecesito — entrega, aprendizajes y continuidad
 
 **Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión:** 2.2.10  
+**Versión:** 2.2.11  
 **Web:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
@@ -114,3 +114,7 @@ El cierre de interfaz no implica backend completo: Firebase sigue sin configurac
 La caja de necesidad conserva un único texto libre. Inmediatamente debajo, y siempre en una sola fila, hay un campo telefónico con el icono de teléfono a su izquierda y el marcador `Ej: 300 123 4567` dentro; después aparecen el botón de imagen, el micrófono y el **botón verde solo con el icono de avión de papel**, sin texto. La etiqueta telefónica es accesible pero invisible. Para publicar basta tocar el icono o pulsar Enter desde el teléfono o el área de necesidad; Shift+Enter permite saltos de línea en la descripción. Si está editando, el envío se interpreta como guardar y existe un botón X para cancelar, también en la misma fila. La vista previa de imagen se aloja dentro del cuadro de necesidad y no reduce la anchura de la caja de teléfono.
 
 Verificar específicamente los anchos estrechos de celulares, teclados de composición (IME), inserción de saltos de línea, envío nativo y prevención de duplicados. El servicio Firebase sigue pendiente: no dar por finalizado el backend.
+
+## Actualización 2.2.11 — papelera en la edición
+
+Al editar una necesidad propia, además de poder eliminarla desde su ficha, aparece un **icono de papelera rojo** en la misma fila de teléfono, fotografía, micrófono, enviar/guardar y X para cancelar. Solo se ve al editar; confirma antes de borrar y únicamente el dueño puede hacerlo. Cancelar la eliminación conserva la edición; terminarla correctamente retorna a «Mis publicaciones». La fila permanece compacta en móviles. Hay que revisar visualmente la anchura de la caja de teléfono en pantallas estrechas. Firebase sigue sin configurar.
