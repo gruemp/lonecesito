@@ -2467,3 +2467,35 @@ dialog{
   :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-title{font-size:17px}
   .dialog-form .wizard-heading{font-size:17px}
 }
+
+
+/* Encabezados interiores: título centrado, explicación justificada.
+   Selectores específicos posteriores a la cascada de estilos existente. */
+:is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading{
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+#necesidades > .section-heading > div{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+:is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading h2{
+  width:100%;
+  max-width:100%;
+  margin-inline:auto;
+  text-align:center;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+#necesidades > .section-heading .section-description,
+:is(#mis-necesidades,#aceptadas) > .section-usage{
+  max-width:70ch;
+  margin-inline:auto;
+  text-align:justify;
+  text-align-last:left;
+  text-justify:inter-word;
+  hyphens:auto;
+  overflow-wrap:anywhere;
+}
