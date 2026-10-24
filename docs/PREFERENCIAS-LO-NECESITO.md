@@ -8,7 +8,7 @@ Es un tablón sencillo de necesidades de bienes y servicios. Una persona publica
 
 Flujos aprobados:
 - Publicar una necesidad, indicando su descripción completa y WhatsApp.
-- Ver/buscar publicaciones y abrir el teléfono de contacto en WhatsApp.
+- Ver/buscar publicaciones, llamar al autor con el icono del teléfono o escribirle usando el icono de WhatsApp.
 - Consultar **Mis publicaciones** y editar o eliminar **únicamente las propias**.
 
 Funciones descartadas, no reintroducir:
@@ -20,7 +20,7 @@ Funciones descartadas, no reintroducir:
 
 La pantalla Publicar debe tener:
 1. **Una caja grande de texto**: «¿Qué necesitas?». Allí el autor redacta todo: nombre o tipo de producto/servicio, lugar, características, cantidad, presupuesto, condición, fecha, observaciones. **No se deben extraer esos datos a campos separados**.
-2. **Una entrada para «Número de WhatsApp»**. El usuario debe conocer que el teléfono será público y abrirá WhatsApp en las fichas.
+2. **Una entrada para «Número de WhatsApp»**. El teléfono no aparece como texto en las fichas, pero estará expuesto en los enlaces públicos para llamadas y WhatsApp. El usuario debe conocerlo antes de publicar.
 
 El guardado puede derivar datos internos imprescindibles (identificador, autor, fecha técnica de creación y un título calculado de la primera línea), pero **no debe solicitar más campos** al usuario. Mantener las reglas de validación y acceso, y la protección de datos personales.
 
@@ -28,12 +28,12 @@ El guardado puede derivar datos internos imprescindibles (identificador, autor, 
 
 - **Título**: primera frase/línea derivada de lo que el usuario escribió, visualmente diferenciado, sin volver a repetirla en el cuerpo.
 - **Cuerpo único y completo**: todo el resto del texto del requerimiento. **No** crear recuadros separados, chips, filas, badges ni columnas para ciudad, ubicación, presupuesto, cantidad, condición, categoría o fecha. Si existen campos históricos, incorporarlos a este mismo cuerpo de texto, legibles y sin perder información.
-- **Contacto**: número visible y **clicable**, con destino \`https://api.whatsapp.com/send?phone=<numero_normalizado>&text=<mensaje_codificado>\`; botón aparte «Abrir WhatsApp» puede usar el mismo destino.
+- **Contacto**: la ficha muestra **solo dos botones con iconos, sin números escritos ni textos visibles**. Icono de teléfono: enlace `tel:+<numero_normalizado>`, abre la aplicación de marcado del celular. Icono de WhatsApp: enlace `https://api.whatsapp.com/send?phone=<numero_normalizado>&text=<mensaje_codificado>`, abre la conversación. Cada icono necesita `aria-label` y `title` explicativos para accesibilidad. Mantener ambos botones compactos, próximos y diferenciados por color.
 - **Administración**: botones «Editar» y «Eliminar» únicamente cuando el visitante es autor. No mostrar acciones de aceptación, resolución, aplicación o seguimiento.
-- **Ejemplos**: mismos datos de entrada, transformación, render y CSS que una ficha real. Deben verse idénticos, no contener los antiguos campos. Usar números de demostración sin dirigir a terceros; WhatsApp de una muestra se abre sin destinatario preseleccionado.
+- **Ejemplos**: mismos datos de entrada, transformación, render y CSS que una ficha real. Deben verse idénticos y mostrar los dos iconos. El de llamada se ve **deshabilitado**, porque no debe marcar un número ficticio ni de terceros; el de WhatsApp abre la aplicación sin destinatario preseleccionado. No contener campos antiguos.
 - Evitar ruido visual, textos repetidos y carteles que expliquen que los ejemplos son pruebas.
 
-Nota de seguridad: el formato \`api.whatsapp.com/send\` es un enlace de apertura de WhatsApp y **no** autoriza un envío automático ni implica que se use la Cloud API empresarial. El formulario real debe explicar la exposición pública del teléfono. Los ejemplos no deben usar números de terceros.
+Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la aplicación de marcado; **no garantiza ni ejecuta una llamada automática**. El formato `api.whatsapp.com/send` es un enlace de apertura de WhatsApp, **no** la Cloud API de mensajería empresarial. Que el número no aparezca escrito **no significa que sea secreto**: un visitante puede inspeccionar la URL `tel:` o el enlace de WhatsApp. El formulario debe informar esa exposición. Los ejemplos no deben usar números de terceros.
 
 ## 4. Preferencias de presentación
 
@@ -45,7 +45,7 @@ Nota de seguridad: el formato \`api.whatsapp.com/send\` es un enlace de apertura
 - Todos los **párrafos y textos explicativos/descriptivos deben verse justificados**; ajustar interlineado, guiones y el último renglón para evitar espacios antiestéticos.
 - **Títulos preferiblemente centrados**, salvo cuando la lectura de fichas o listados resulte más clara a la izquierda. Jerarquía uniforme, separación equilibrada y tamaño moderado.
 - Botones/etiquetas/números: no justificar artificialmente textos cortos; centrar o alinear según legibilidad y zonas táctiles cómodas.
-- Acciones vinculadas a un mismo elemento: visualmente independientes pero próximas, p. ej. número / WhatsApp y Editar / Eliminar.
+- Acciones vinculadas a un mismo elemento: visualmente independientes pero próximas, p. ej. icono de llamada / icono de WhatsApp y Editar / Eliminar.
 - Evitar banners, avisos, mensajes y explicaciones redundantes que distraigan. Solo errores o confirmaciones funcionales pertinentes y discretos.
 - Portada sencilla: acceso claro a «Publicar lo que necesito», «Ver necesidades» y «Mis publicaciones». No volver al menú de solicitudes aceptadas.
 - Mantener buen contraste, lectura accesible, adaptación a distintos anchos y sin desbordamiento horizontal.
@@ -60,7 +60,7 @@ Al inicio de **todas** las pantallas hay una barra discreta que muestra **solo �
 
 ## 6. Ejemplos y cambios futuros
 
-**Toda modificación visual o del modelo requiere revisar inmediatamente las publicaciones de ejemplo.** Deben reflejar cómo se vería una ficha real escrita en la versión actual, incluida la información redactada en una sola entrada y el enlace a WhatsApp. Probar muestras que incluyan lugar, cantidad y presupuesto dentro del texto, para detectar si aparecen por error recuadros de datos estructurados.
+**Toda modificación visual o del modelo requiere revisar inmediatamente las publicaciones de ejemplo.** Deben reflejar cómo se vería una ficha real escrita en la versión actual, incluida la información redactada en una sola entrada y los dos iconos de contacto. Probar muestras que incluyan lugar, cantidad y presupuesto dentro del texto, para detectar si aparecen por error recuadros de datos estructurados.
 
 No hacer cambios solo en la ficha real dejando los ejemplos atrás ni usar fixtures con estructuras abandonadas.
 
