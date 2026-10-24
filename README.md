@@ -1,4 +1,18 @@
 # lonecesito
+## Diseño actual: descripciones justificadas y avisos discretos
+
+- Las descripciones dentro de las fichas expandidas se muestran con **alineación justificada**, preservando los saltos de línea del autor y usando `hyphens:auto` en español para favorecer el ajuste móvil.
+- Se eliminó la nota repetitiva en cada necesidad acerca de guardado en este navegador, ausencia de notificaciones y modo demostración. La ficha termina directamente en sus acciones o estado.
+- Se retiraron los avisos de demostración redundantes de las secciones, del panel inicial de publicación y del footer; el encabezado de Explorar se concentra en su función. El footer queda con la marca LoNecesito.
+- Se conservó la **confirmación obligatoria del asistente**, ahora redactada de forma breve sin repetir el aviso local, así como el consejo para no subir información sensible en fotografías.
+- Los textos de confirmación tras guardar, aceptar, recuperar borrador o resolver se expresan de forma concisa. El comportamiento, los datos guardados, la aceptación y los filtros no se modificaron.
+- Se conservan los ejemplos ilustrativos de necesidades, que no son publicaciones de compradores reales; eliminar avisos visuales no significa que exista un backend.
+
+**Importante:** La aplicación sigue siendo una demostración local sin Firebase ni comunicación real entre usuarios; únicamente se redujo el texto repetido dentro de la interfaz.
+
+**Verificación:** 88 pruebas de lógica y estructura aprobadas; los identificadores HTML siguen siendo únicos, los selectores JS están presentes y el CSS es válido estructuralmente. Pruebas en teléfonos físicos pendientes.
+
+---
 ## Rediseño visual premium v2 (octubre de 2026)
 
 - Nueva composición de **portada** con encabezado equilibrado, logo centrado, título más legible, superficie blanca y cuatro acciones diferenciadas por color, tamaño y jerarquía. Las acciones siguen apareciendo **solo en Inicio**.
