@@ -210,7 +210,7 @@ test('el HTML inicial no añade imágenes antes de entrar a Explorar',()=>{
   assert.ok(html.includes('¿Qué necesitas?'));
   assert.ok(html.includes('Soluciona una necesidad y gana dinero por ello'));
   assert.ok(html.includes('Mis necesidades publicadas'));
-  assert.ok(html.includes('Necesidades aceptadas'));
+  assert.ok(html.includes('Necesidades de terceros aceptadas para solucionar'));
   assert.ok(html.includes('id="request-grid"'));
   assert.ok(!html.includes('Ver necesidades para ofertar'));
   assert.ok(html.includes('href="#necesidades" data-explore'));
@@ -219,7 +219,7 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   for(const id of SCREEN_IDS){
     assert.ok(html.includes('id="'+id+'" data-screen="'+id+'"')||html.includes('id="'+id+'"')&&html.includes('data-screen="'+id+'"'));
-    assert.ok(html.includes('data-screen-link="'+id+'"'));
+    if(['mis-necesidades','aceptadas'].includes(id))assert.ok(html.includes('data-screen-link="'+id+'"'));
   }
   for(const id of SCREEN_IDS.filter(id=>id!=='inicio')){
     const element=new RegExp('<section[^>]*id="'+id+'"[^>]*>');
@@ -229,21 +229,21 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(screens,[...SCREEN_IDS]);
 });
-test('las fotos se revelan en formularios y detalles, pero son automáticas en Explorar',()=>{
+test('las fotos aparecen directamente en detalle y formulario, sin botón Ver foto',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(js.includes("button.addEventListener('click',()=>{"));
-  assert.ok(js.includes("const show=frame.hidden;"));
-  assert.ok(js.includes("frame.replaceChildren();"));
-  assert.ok(js.includes("const image=pictureNode(data,caption)"));
-  assert.ok(js.includes("addPictureToggle(box,current,'Fotografía seleccionada')"));
-  assert.ok(js.includes("addPictureToggle(photo,request.picture"));
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(js.includes('function showPictureInline(container,data,caption)'));
+  assert.ok(js.includes("showPictureInline(photo,request.picture"));
+  assert.ok(js.includes("showPictureInline(box,current,'Fotografía seleccionada')"));
+  assert.equal(js.includes('addPictureToggle'),false);
+  assert.equal(js.includes("'Ver foto'"),false);
+  assert.equal(js.includes("'Ocultar foto'"),false);
   assert.ok(js.includes("const image=pictureNode(request.picture"));
   assert.ok(js.includes("'request-card-media'+(request.picture?' has-photo':' no-photo')"));
-  assert.ok(js.includes("el('span','no-photo-label','Sin foto')"));
+  assert.ok(html.includes('id="detail-overview"')&&html.includes('id="detail-photo"'));
   assert.ok(html.includes('id="request-photo-preview"'));
-  assert.ok(!html.includes('id="proposal-photo-preview"'));
-  assert.ok(html.includes('id="detail-photo"'));
+  assert.ok(css.includes('.detail-overview.has-photo{grid-template-columns:'));
 });
 test('las secciones adicionales aparecen solo a petición del usuario',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
@@ -255,7 +255,7 @@ test('las secciones adicionales aparecen solo a petición del usuario',()=>{
 
 test('el menú muestra la vista elegida y oculta todas las demás',()=>{
   const screens=SCREEN_IDS.map(id=>({id,hidden:id!=='inicio'}));
-  const links=SCREEN_IDS.map(id=>({
+  const links=['mis-necesidades','aceptadas'].map(id=>({
     dataset:{screenLink:id},
     attributes:new Map(),
     setAttribute(name,value){this.attributes.set(name,value);},
@@ -271,7 +271,7 @@ test('el menú muestra la vista elegida y oculta todas las demás',()=>{
   for(const selected of SCREEN_IDS){
     assert.equal(applyScreenNavigation(root,'#'+selected),selected);
     assert.deepEqual(screens.filter(el=>!el.hidden).map(el=>el.id),[selected]);
-    assert.deepEqual(links.filter(el=>el.attributes.get('aria-current')==='page').map(el=>el.dataset.screenLink),[selected]);
+    assert.deepEqual(links.filter(el=>el.attributes.get('aria-current')==='page').map(el=>el.dataset.screenLink),links.some(link=>link.dataset.screenLink===selected)?[selected]:[]);
   }
   assert.equal(applyScreenNavigation(root,'#inexistente'),'inicio');
   assert.deepEqual(screens.filter(el=>!el.hidden).map(el=>el.id),['inicio']);
@@ -281,7 +281,10 @@ test('la navegación se activa tras los cambios de URL y al cargar la página',(
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   assert.ok(js.includes("window.addEventListener('hashchange',()=>activateScreen(window.location.hash))"));
   assert.ok(js.includes("activateScreen(window.location.hash)"));
-  for(const screen of SCREEN_IDS)assert.ok(html.includes('href="#'+screen+'" data-screen-link="'+screen+'"'));
+  for(const screen of ['mis-necesidades','aceptadas'])assert.ok(html.includes('href="#'+screen+'" data-screen-link="'+screen+'"'));
+  assert.ok(html.includes('href="#inicio"'));
+  assert.ok(html.includes('href="#necesidades" data-explore'));
+  assert.equal(html.includes('data-screen-link="necesidades"'),false);
   assert.equal(/(?:^|[^$])\$\(['"][^'"]+['"]\)\.forEach/m.test(js),false,'No iterar querySelector con forEach');
 });
 
@@ -359,14 +362,24 @@ test('cada tarjeta de Explorar separa texto, resumen y foto lateral automática'
   assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 106px'));
   assert.ok(css.includes('border-left:5px solid'));
 });
-test('el menú contiene textos completos y se distribuye en dos columnas móviles',()=>{
+test('los accesos de mis necesidades y aceptadas están centrados bajo Publicar',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  for(const name of ['Soluciona una necesidad y gana dinero por ello','Mis necesidades publicadas','Necesidades aceptadas']){
+  for(const name of ['Soluciona una necesidad y gana dinero por ello','Mis necesidades publicadas para que otros ofrezcan solucionarlas','Necesidades de terceros aceptadas para solucionar']){
     assert.ok(html.includes(name),'Falta '+name);
   }
-  assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+  assert.ok(css.includes('#screen-navigation{'));
+  assert.ok(css.includes('width:min(calc(100% - 20px),480px)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr)'));
+  assert.ok(css.includes('min-height:70px'));
   assert.ok(css.includes('white-space:normal'));
+  assert.ok(css.includes('.hero .publish-cta{margin:18px auto 0'));
+  assert.ok(css.includes('.hero .compact-next-step .solve-cta{'));
+  assert.equal(/data-screen-link="necesidades"/.test(html),false);
+  const heroEnd=html.indexOf('</section>',html.indexOf('id="inicio"'));
+  const navPos=html.indexOf('id="screen-navigation"');
+  assert.ok(navPos>heroEnd,'Los accesos deben quedar después de la portada, nunca encima');
+  assert.equal([...html.matchAll(/data-screen-link=/g)].length,2);
 });
 test('un título largo sobrevive al ciclo de almacenamiento y recarga',()=>{
   const title='Necesito '.repeat(800).trim();
@@ -431,4 +444,26 @@ test('se sigue exigiendo ciudad válida al guardar la necesidad',()=>{
   assert.throws(()=>normalizeRequest({...req,city:''}),/ciudad/);
   assert.throws(()=>normalizeRequest({...req,city:'X'}),/ciudad/);
   assert.equal(normalizeRequest({...req,city:'Fundación'}).city,'Fundación');
+});
+
+test('botones de acceso y acciones primarias poseen tamaño cómodo para celular',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(css.includes('#screen-navigation a{'));
+  assert.ok(css.includes('min-height:70px;'));
+  assert.ok(css.includes('min-height:65px;'));
+  assert.ok(css.includes('.section-primary-action{display:flex;justify-content:center'));
+  assert.ok(css.includes('.filter,.my-action,.card-link{min-height:43px}'));
+  assert.ok(html.includes('class="section-primary-action"'));
+});
+test('foto de detalle aparece automáticamente a la derecha del resumen',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(js.includes("classList.toggle('has-photo',Boolean(request.picture))"));
+  assert.ok(js.includes("showPictureInline(photo,request.picture"));
+  assert.ok(js.includes("photo.hidden=!request.picture;"));
+  assert.ok(html.includes('class="detail-overview" id="detail-overview"'));
+  const detail=html.slice(html.indexOf('id="detail-overview"'),html.indexOf('id="detail-note"'));
+  assert.ok(detail.indexOf('id="detail-description"')<detail.indexOf('id="detail-photo"'));
+  assert.equal(js.includes("'Ver foto'"),false);
 });
