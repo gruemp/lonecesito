@@ -304,7 +304,7 @@ test('aceptar una necesidad requiere un clic, sin oferta ni identidad del provee
 test('no permite aceptar dos veces la misma necesidad ni la propia',()=>{
   const request={...EXAMPLES[0],status:'abierta'};
   const accepted=acceptNeedLocally(decodeState(null),request);
-  assert.throws(()=>acceptNeedLocally(accepted,request),/Ya aceptaste/);
+  assert.throws(()=>acceptNeedLocally(accepted,request),/Ya aplicaste/);
   assert.throws(()=>acceptNeedLocally({...decodeState(null),requests:[{...req}]},{...req}),/tu propia/);
   assert.throws(()=>acceptNeedLocally(decodeState(null),{...request,status:'cancelada'}),/abiertas/);
   assert.throws(()=>acceptNeedLocally(decodeState(null),{...request,id:'inventada'}),/No se encontró/);
