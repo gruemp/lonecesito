@@ -1,3 +1,18 @@
+# LoNecesito — versión 2.2.6 · cierre de la interfaz
+
+La edición de la **interfaz** queda consolidada con fotografías ampliables: al tocar una fotografía en cualquier punto de la ficha o su miniatura en el editor, se abre un visor en primer plano que permite verla **completa sin recortes** y cerrarla con X, Escape o toque fuera.
+
+**Documentación principal para continuar sin perder preferencias:**
+- **[Instrucciones para cualquier IA](AGENTS.md)**.
+- **[Preferencias y decisiones de LoNecesito](docs/PREFERENCIAS-LO-NECESITO.md)**.
+- **[Entrega, aprendizajes, estado técnico y pasos pendientes](docs/CONTINUIDAD-Y-APRENDIZAJES.md)**.
+
+**Estado:** GitHub Pages distribuye la interfaz. Firebase aún no tiene configuración de proyecto en `firebase-config.js`: en modo local **las publicaciones no se comparten entre visitantes**. Configurar autenticación, Firestore y desplegar reglas es un paso posterior de infraestructura. También siguen pendientes la prueba visual en dispositivos físicos y la ejecución del emulador de Firestore.
+
+La información histórica de versiones anteriores que aparece más abajo no prevalece sobre estos tres documentos.
+
+---
+
 # Versión 2.2.5 — dictado, fotografía lateral y portada sin textos redundantes
 
 - Eliminados exactamente los textos grandes de portada y del pie señalados en las capturas; la URL principal abre directamente el listado «Ver necesidades», manteniendo los tres botones permanentes.

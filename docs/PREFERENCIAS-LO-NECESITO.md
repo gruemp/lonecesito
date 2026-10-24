@@ -61,6 +61,14 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 - Quien publica puede adjuntar una fotografía opcional mediante **icono integrado en la caja de necesidad**. No añadir un campo visible más a los dos existentes. Reducir resolución y tamaño antes de almacenar; conservar o quitar la foto durante la edición y adaptar las reglas de actualización en Firestore.
 - Los ejemplos siguen mostrando el mismo espacio a la derecha y los mismos controles que las fichas reales, sin textos de prueba intrusivos.
 
+### Imagen ampliada y continuidad del proyecto (actualización 2.2.6)
+
+- **Al tocar cualquier parte de una fotografía real** en una ficha, abrir un visor modal en primer plano. Mostrar el archivo **completo y sin recortes** con ajuste `object-fit: contain` sobre fondo oscuro; no abrir otra página ni navegar lejos de la necesidad.
+- El visor debe tener una **X** fácil de alcanzar, cerrarse con **Escape** y con toque sobre el fondo fuera de la imagen; mantener accesibilidad (botón con nombre, foco y retorno a la publicación).
+- Permitir la misma ampliación al tocar la miniatura de la fotografía dentro del editor. Las fichas sin imagen mantienen su marcador a la derecha, pero ese marcador no debe aparentar una fotografía real ni abrir un visor vacío.
+- La presentación lateral compacta de las fotos en las fichas sigue intacta y los ejemplos usan exactamente el mismo componente.
+- **Cierre de diseño:** esta iteración se da por completada en versión 2.2.6. La descripción de aprendizajes, del estado técnico y de las tareas restantes para publicar un servicio multiusuario se encuentra en **[CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md)**. La configuración y el despliegue de Firebase siguen siendo tareas independientes.
+
 ## 5. Versión de publicación visible
 
 Al inicio de **todas** las pantallas hay una barra discreta que muestra **solo «Versión X.Y.Z»**, sin fecha, enlaces, avisos ni notas adicionales. Aumentar en **cada modificación que se publique**, incluso si es solo visual o textual. Sincronizar:

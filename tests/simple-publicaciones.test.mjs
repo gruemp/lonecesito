@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.5');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.5<\/span>/);
+  assert.equal(APP_VERSION,'2.2.6');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.6<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -82,7 +82,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.5/);
+  assert.match(html,/Versión 2\.2\.6/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -127,7 +127,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.5/);
+  assert.match(html,/Versión 2\.2\.6/);
 });
 
 
@@ -222,7 +222,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.5/);
+  assert.match(html,/Versión 2\.2\.6/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -345,4 +345,58 @@ test('preferencias permanentes actualizadas con dictado, imagen y eliminación d
     assert.match(content,/imagen.*derecha|derecha.*imagen|foto.*derecha/i);
     assert.match(content,/no.*portada|portada.*no|quitar los textos/i);
   }
+});
+
+
+test('al tocar cualquier punto de una fotografía de la ficha se abre el visor completo',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/const enlarge=el\('button','publication-photo-button'\)/);
+  assert.match(card,/enlarge\.append\(img\)/);
+  assert.match(card,/enlarge\.addEventListener\('click',\(\)=>openImageViewer\(photo,title\)\)/);
+  assert.match(card,/media\.append\(enlarge\)/);
+  assert.match(card,/const placeholder=el\('span','photo-placeholder'\)/);
+  assert.doesNotMatch(card,/placeholder\.addEventListener\('click'/);
+  assert.match(css,/\.publication-photo-button\{[^}]*width:100%;height:100%/);
+});
+test('visor muestra imagen sin recortes y permite cerrar con X, fondo o Escape',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(html,/<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-dialog-title">/);
+  assert.match(html,/id="close-image"[^>]*aria-label="Cerrar fotografía"/);
+  assert.match(html,/id="image-dialog-photo" alt=""/);
+  assert.match(js,/function openImageViewer\(src,title\)/);
+  assert.match(js,/if\(!dialog\.open\)dialog\.showModal\(\)/);
+  assert.match(js,/\$\('close-image'\)\.addEventListener\('click',\(\)=>\$\('image-dialog'\)\.close\(\)\)/);
+  assert.match(js,/if\(event\.target===\$\('image-dialog'\)\)\$\('image-dialog'\)\.close\(\)/);
+  assert.match(js,/image-dialog'\)\.addEventListener\('close'/);
+  assert.match(css,/#image-dialog-photo\{[^}]*object-fit:contain/);
+  assert.match(css,/\.image-dialog::backdrop\{/);
+  assert.match(css,/@media\(max-width:600px\)\{\.image-dialog\{/);
+  // El elemento dialog admite Escape sin añadir un atajo propio.
+});
+test('la miniatura del editor también permite ampliar sin cambiar los dos campos',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(html,/id="preview-photo" type="button"[^>]*aria-label="Ampliar la fotografía seleccionada"/);
+  assert.match(html,/<img id="photo-preview-image" alt="Foto seleccionada">/);
+  assert.match(js,/\$\('preview-photo'\)\.addEventListener\('click',\(\)=>\{/);
+  assert.match(js,/if\(pictureDraft\)openImageViewer\(pictureDraft,'la publicación'\)/);
+  const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
+  assert.equal([...form.matchAll(/<(?:input|textarea|select)\b/g)].length,2);
+});
+test('queda entrega transportable con estado Firebase y aprendizajes sin prometer producción',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
+  const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
+  for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
+  assert.match(guide,/object-fit: contain/);
+  assert.match(handoff,/2\.2\.6/);
+  assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
+  assert.match(handoff,/Aprendizajes del diseño/);
+  assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
+  assert.match(handoff,/Escape/);
 });
