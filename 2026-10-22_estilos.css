@@ -1209,3 +1209,332 @@ dialog{
 :is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n)[open] > .need-list-summary:hover{
   background:var(--row-open);
 }
+
+
+/* =============================================================
+   FICHAS DESPLEGADAS · Composición visual final
+   Respeta los tracks de .need-card-overview y el listado compacto.
+   CSS exclusivamente; ninguna interacción, dato o DOM adicional.
+   ============================================================= */
+
+/* La tarjeta aprovecha el acento pastel de la fila que la contiene. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card{
+  --card-accent:var(--row-accent,#338366);
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:21px 22px 19px;
+  gap:0;
+  border:1px solid #d8e2dc;
+  border-left:4px solid var(--card-accent);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 3px 10px rgba(30,61,43,.055);
+}
+/* El encabezado agrupa clasificación y estado sin competir con el título. */
+.need-list-content .need-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  min-width:0;
+  padding:0 0 15px;
+  margin:0 0 17px;
+  border-bottom:1px solid #e5ede7;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card-head .category{
+  display:inline-block;
+  max-width:100%;
+  margin:0;
+  padding:6px 10px;
+  border:1px solid #d6e5da;
+  border-radius:7px;
+  background:#edf5ef;
+  color:#235846;
+  font-size:11px;
+  font-weight:800;
+  line-height:1.35;
+  letter-spacing:.035em;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card[data-kind="servicios"] .need-card-head .category{
+  border-color:#e8dcbf;
+  background:#fbf5e5;
+  color:#75571e;
+}
+.need-list-content .need-card-head .my-state{
+  margin:0;
+  flex:0 0 auto;
+  padding:6px 10px;
+  border-radius:7px;
+  font-size:11px;
+  line-height:1.35;
+  font-weight:800;
+}
+/* Se mantienen las dos columnas originales: el texto crece,
+   la imagen no invade las fichas ni estira el contenido. */
+.need-list-content .need-card-overview{
+  display:grid;
+  align-items:start;
+  min-width:0;
+  gap:clamp(12px,2.3vw,22px);
+  margin:0;
+}
+.need-list-content .need-card-copy{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+  min-width:0;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-title{
+  width:100%;
+  margin:0 0 12px;
+  color:#183c30;
+  font-size:clamp(19px,2.65vw,24px);
+  font-weight:820;
+  line-height:1.24;
+  letter-spacing:-.025em;
+  overflow-wrap:anywhere;
+  hyphens:auto;
+  white-space:normal;
+}
+.need-list-content .need-card-copy .card-city{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:0 0 12px;
+  color:#466556;
+  font-size:13px;
+  line-height:1.45;
+  font-weight:680;
+  overflow-wrap:anywhere;
+}
+.need-list-content .need-card-copy .card-city .icon{
+  width:17px;
+  height:17px;
+  flex:0 0 17px;
+  margin:0;
+  color:#4b8669;
+}
+.need-list-content .need-card-meta{
+  width:100%;
+  min-width:0;
+  margin:0 0 14px;
+  padding:12px 13px 12px 30px;
+  border:1px solid #e2eae3;
+  border-radius:9px;
+  background:#f6f9f6;
+  color:#4d6155;
+  font-size:12px;
+  line-height:1.48;
+  list-style:disc outside;
+}
+.need-list-content .need-card-meta li{
+  margin:0;
+  padding:0;
+  overflow-wrap:anywhere;
+}
+.need-list-content .need-card-meta li+li{margin-top:5px}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-description{
+  width:100%;
+  margin:0;
+  color:#2d4136;
+  font-size:14px;
+  font-weight:400;
+  line-height:1.6;
+  letter-spacing:normal;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+/* Marco real para foto opcional, centrada, sin recorte ni deformación. */
+.need-list-content .need-card-photo{
+  display:grid;
+  align-self:start;
+  place-items:center;
+  width:100%;
+  min-width:0;
+  min-height:154px;
+  max-height:250px;
+  margin:0;
+  padding:9px;
+  border:1px solid #dbe5dd;
+  border-radius:11px;
+  background:#f2f6f3;
+  overflow:hidden;
+}
+.need-list-content .need-card-photo img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-width:100%;
+  max-height:230px;
+  border-radius:6px;
+  object-fit:contain;
+}
+.need-list-content .need-card-photo.no-photo{
+  background:#f5f7f5;
+  border:1px dashed #c9d8cd;
+}
+.need-list-content .need-card-photo .no-photo-label{
+  color:#5f7567;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.45;
+  text-align:center;
+}
+/* Nota informativa y área de acciones ordenadas en bandas propias. */
+.need-list-content .need-card-note{
+  margin:18px 0 0;
+  padding:12px 14px;
+  border:1px solid #e1eae1;
+  border-radius:9px;
+  background:#f5f8f5;
+  color:#546c5d;
+  font-size:12px;
+  line-height:1.55;
+  font-weight:450;
+  overflow-wrap:anywhere;
+}
+.need-list-content .need-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:stretch;
+  justify-content:center;
+  gap:10px;
+  width:100%;
+  margin:15px 0 0;
+  padding:0;
+}
+.need-list-content .need-card-actions .need-card-primary{
+  flex:1 1 100%;
+  width:100%;
+  min-height:48px;
+  padding:11px 16px;
+  border-radius:9px;
+  font-size:14px;
+  line-height:1.35;
+  font-weight:800;
+  text-align:center;
+}
+.need-list-content .need-card-actions .need-card-secondary{
+  flex:1 1 160px;
+  min-width:0;
+  min-height:44px;
+  padding:10px 13px;
+  border-radius:9px;
+  background:#fff;
+  border:1px solid #bdd0c4;
+  color:#285a47;
+  font-size:13px;
+  line-height:1.35;
+  font-weight:750;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+.need-list-content .need-card-actions .need-action-resolve{
+  background:#265f87;
+  border-color:#265f87;
+  color:#fff;
+}
+.need-list-content .need-card-actions .need-action-reopen{
+  background:#245d49;
+  border-color:#245d49;
+  color:#fff;
+}
+.need-list-content .need-card-actions .need-action-cancel{
+  color:#94392f;
+  border:1px solid #e1b2ad;
+  background:#fff3f0;
+}
+.need-list-content .need-card-actions .need-action-accepted:disabled{
+  background:#fcf0d7;
+  color:#73511b;
+  border:1px solid #dfc396;
+  opacity:1;
+}
+.need-list-content .need-card-actions .need-card-finished{
+  width:100%;
+  padding:12px 15px;
+  border-radius:9px;
+  background:#e7f2e9;
+  color:#245743;
+  text-align:center;
+  font-size:13px;
+  line-height:1.45;
+}
+
+/* Breakpoints existentes, sin cambiar la cuadrícula ni el ancho base. */
+@media(max-width:680px){
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card{
+    padding:15px 13px;
+    border-left-width:4px;
+    border-radius:10px;
+  }
+  .need-list-content .need-card-head{
+    padding-bottom:11px;
+    margin-bottom:12px;
+    gap:7px 9px;
+  }
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card-head .category{
+    padding:5px 7px;
+    font-size:10px;
+  }
+  .need-list-content .need-card-head .my-state{padding:5px 8px;font-size:10px}
+  .need-list-content .need-card-overview{gap:10px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-title{
+    margin-bottom:10px;
+    font-size:18px;
+    line-height:1.26;
+  }
+  .need-list-content .need-card-copy .card-city{font-size:12px;gap:4px;margin-bottom:9px}
+  .need-list-content .need-card-copy .card-city .icon{width:15px;height:15px;flex-basis:15px}
+  .need-list-content .need-card-meta{
+    margin-bottom:11px;
+    padding:9px 9px 9px 23px;
+    border-radius:8px;
+    font-size:11.5px;
+    line-height:1.45;
+  }
+  .need-list-content .need-card-meta li+li{margin-top:4px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-description{
+    font-size:12.5px;
+    line-height:1.55;
+  }
+  .need-list-content .need-card-photo{
+    min-height:118px;
+    max-height:205px;
+    padding:5px;
+    border-radius:8px;
+  }
+  .need-list-content .need-card-photo img{max-height:190px}
+  .need-list-content .need-card-note{
+    margin-top:13px;
+    padding:10px 11px;
+    font-size:11.5px;
+  }
+  .need-list-content .need-card-actions{gap:8px;margin-top:12px}
+  .need-list-content .need-card-actions .need-card-primary{
+    min-height:45px;
+    padding:10px 12px;
+    font-size:13px;
+  }
+  .need-list-content .need-card-actions .need-card-secondary{
+    flex-basis:120px;
+    min-height:43px;
+    padding:9px 10px;
+    font-size:12px;
+  }
+}
+@media(max-width:380px){
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card{padding:12px 9px}
+  .need-list-content .need-card-head{gap:6px;margin-bottom:10px}
+  .need-list-content .need-card-overview{gap:8px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-title{font-size:16px}
+  .need-list-content .need-card-meta{padding:8px 7px 8px 20px;font-size:11px}
+  .need-list-content .need-card-photo{min-height:105px}
+  .need-list-content .need-card-actions .need-card-secondary{flex-basis:100%}
+}
