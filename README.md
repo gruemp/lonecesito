@@ -1,3 +1,15 @@
+# Versión 2.2.4 — tres botones permanentes de navegación
+
+La barra superior concentra los únicos tres accesos principales, siempre visibles al desplazarse: **Publicar lo que necesito** (verde), **Ver necesidades** (azul) y **Mis publicaciones** (ámbar).
+
+La portada ya no repite esos accesos, ni «Mis publicaciones» añade un botón «Crear publicación» innecesario. Los botones mantienen colores distintos, resaltan la pantalla actual y se adaptan a celulares pequeños.
+
+La búsqueda continúa funcionando sin Gemini ni otras integraciones de inteligencia artificial, conforme a la decisión vigente.
+
+Se actualizaron [AGENTS.md](AGENTS.md) y [Preferencias de LoNecesito](docs/PREFERENCIAS-LO-NECESITO.md) para que otras IA respeten estas reglas.
+
+---
+
 # Versión 2.2.3 — iconos de llamada y WhatsApp
 
 - Cada ficha presenta **dos botones compactos con iconos y sin texto visible**: teléfono (azul) y WhatsApp (verde). **El número ya no aparece escrito** en la ficha.

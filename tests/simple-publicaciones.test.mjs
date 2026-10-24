@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.3');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.3<\/span>/);
+  assert.equal(APP_VERSION,'2.2.4');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.4<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -82,7 +82,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.3/);
+  assert.match(html,/Versión 2\.2\.4/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -127,7 +127,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.3/);
+  assert.match(html,/Versión 2\.2\.4/);
 });
 
 
@@ -222,7 +222,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.3/);
+  assert.match(html,/Versión 2\.2\.4/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -231,5 +231,48 @@ test('AGENTS y la guía documentan el marcador de llamada y los iconos sin núme
     assert.match(content,/tel:\+/);
     assert.match(content,/no mostrar el número|no aparece como texto|sin números escritos/i);
     assert.match(content,/icono.*WhatsApp/i);
+  }
+});
+
+
+test('hay exactamente tres enlaces de navegación superior y están en el orden aprobado',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const nav=html.match(/<nav class="top-nav"[^>]*>([\s\S]*?)<\/nav>/);
+  assert.ok(nav,'Falta la barra de navegación');
+  const links=[...nav[1].matchAll(/<a class="([^"]+)" href="#([^"]+)" data-nav="([^"]+)">([^<]+)<\/a>/g)];
+  assert.deepEqual(links.map(item=>item[2]),['publicar','necesidades','mis-publicaciones']);
+  assert.deepEqual(links.map(item=>item[3]),['publicar','necesidades','mis-publicaciones']);
+  assert.deepEqual(links.map(item=>item[4]),['Publicar lo que necesito','Ver necesidades','Mis publicaciones']);
+});
+test('las tres acciones de navegación no se repiten en portada ni en Mis publicaciones',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const home=html.split('<section id="inicio"')[1].split('</section>')[0];
+  const mine=html.split('<section id="mis-publicaciones"')[1].split('</section>')[0];
+  assert.doesNotMatch(home,/hero-actions|action-card|personal-link|href="#publicar"|href="#necesidades"|href="#mis-publicaciones"/);
+  assert.doesNotMatch(mine,/section-actions|href="#publicar"/);
+  assert.equal((html.match(/href="#publicar"/g)||[]).length,1);
+  assert.equal((html.match(/href="#necesidades"/g)||[]).length,1);
+  assert.equal((html.match(/href="#mis-publicaciones"/g)||[]).length,1);
+});
+test('la cabecera queda visible al desplazarse y botones diferenciados en móvil',()=>{
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(css,/\.site-header\{position:sticky;top:0;z-index:60;/);
+  assert.match(css,/\.top-nav\{display:grid;grid-template-columns:/);
+  for(const className of ['nav-publish','nav-browse','nav-mine']){
+    assert.ok(css.includes('.top-nav .'+className+'{'),className);
+  }
+  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.top-nav\{display:grid;grid-template-columns:/);
+  assert.doesNotMatch(css,/\.hero-actions|\.action-card\b|\.personal-link/);
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/node\.dataset\.nav===screen/);
+  assert.match(js,/node\.setAttribute\('aria-current','page'\)/);
+});
+test('las preferencias permanentes reflejan los tres accesos sin Gemini',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  for(const content of [agents,guide]){
+    assert.match(content,/exactamente tres botones/i);
+    assert.match(content,/Gemini/);
+    assert.match(content,/no.*duplicad|sin.*duplicad/i);
   }
 });
