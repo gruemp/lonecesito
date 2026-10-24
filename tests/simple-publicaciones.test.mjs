@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.10');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.10<\/span>/);
+  assert.equal(APP_VERSION,'2.2.11');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.11<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -84,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.10/);
+  assert.match(html,/Versión 2\.2\.11/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -129,7 +129,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.10/);
+  assert.match(html,/Versión 2\.2\.11/);
 });
 
 
@@ -224,7 +224,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número quedará disponible en los enlaces públicos de llamada y WhatsApp/);
-  assert.match(html,/Versión 2\.2\.10/);
+  assert.match(html,/Versión 2\.2\.11/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -396,7 +396,7 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.10/);
+  assert.match(handoff,/2\.2\.11/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
@@ -558,7 +558,7 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
   const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
   const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
   for(const content of [agents,guide,handoff]){
-    assert.match(content,/2\.2\.10/);
+    assert.match(content,/2\.2\.11/);
     assert.match(content,/una sola fila/i);
     assert.match(content,/cinco iconos|cinco botones/i);
   }
@@ -617,8 +617,51 @@ test('el icono de envío permanece al crear y al guardar cambios',()=>{
 test('las instrucciones para futuras IA describen la nueva fila y el teclado',()=>{
   for(const path of ['../AGENTS.md','../docs/PREFERENCIAS-LO-NECESITO.md','../docs/CONTINUIDAD-Y-APRENDIZAJES.md']){
     const content=readFileSync(new URL(path,import.meta.url),'utf8');
-    assert.match(content,/2\.2\.10/);
+    assert.match(content,/2\.2\.11/);
     assert.match(content,/Shift\+Enter|Shift \+ Enter/);
     assert.match(content,/Ej: 300 123 4567/);
+  }
+});
+
+
+test('el editor muestra papelera y X en la misma fila únicamente en edición',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const controls=html.split('<div class="publish-controls">')[1].split('</div>')[0];
+  assert.match(controls,/id="delete-edit" type="button"[^>]*aria-label="Eliminar publicación" hidden/);
+  assert.match(controls,/id="delete-edit"[\s\S]*?<svg[\s\S]*?<path d="M3 6h18"/);
+  assert.ok(controls.indexOf('id="save-button"')<controls.indexOf('id="delete-edit"'));
+  assert.ok(controls.indexOf('id="delete-edit"')<controls.indexOf('id="cancel-edit"'));
+  assert.match(js,/\$\('delete-edit'\)\.hidden=true/);
+  assert.match(js,/\$\('delete-edit'\)\.hidden=false/);
+  assert.match(js,/\$\('delete-edit'\)\.addEventListener\('click',async\(\)=>\{/);
+});
+test('el icono de eliminación del editor confirma, protege al dueño y vuelve al listado al terminar',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/const record=state\.items\.find\(item=>item\.id===state\.editingId\)/);
+  assert.match(js,/if\(!record\|\|!canManage\(record,currentUid\(\)\)\)/);
+  assert.match(js,/const deleted=await deleteRecord\(record\)/);
+  assert.match(js,/if\(deleted\)\{\s*resetForm\(\);\s*window\.location\.hash='#mis-publicaciones';\s*showView\(\)/);
+  assert.match(js,/if\(!window\.confirm\('¿Eliminar definitivamente esta publicación\?'\)\)return false/);
+  assert.match(js,/return true/);
+  assert.match(js,/state\.saving=true/);
+  assert.match(js,/\$\('delete-edit'\)\.disabled=true/);
+});
+test('el editor mantiene una única fila responsive con espacio para la papelera',()=>{
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(css,/#publish-form \.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(5,44px\)\}/);
+  assert.match(css,/@media\(max-width:450px\)[\s\S]*?\.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(5,37px\)\}/);
+  assert.match(css,/@media\(max-width:345px\)[\s\S]*?\.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(5,32px\);gap:3px\}/);
+  assert.match(css,/#publish-form \.delete-edit-button\{[^}]*min-height:46px/);
+  assert.match(css,/#publish-form \.delete-edit-button:disabled/);
+});
+test('las instrucciones de continuidad incluyen la papelera adicional',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
+  for(const file of [agents,guide,handoff]){
+    assert.match(file,/2\.2\.11/);
+    assert.match(file,/papelera/i);
+    assert.match(file,/mis publicaciones/i);
   }
 });
