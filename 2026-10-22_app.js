@@ -1,8 +1,50 @@
 export const STORAGE_KEY = 'lonecesito-demo-v1';
 export const CATEGORIES = Object.freeze({bienes:'Bienes',servicios:'Servicios'});
 export const SUBCATEGORIES = Object.freeze({
-  bienes:Object.freeze({insumos:'Insumos y materiales',vestuario:'Ropa y uniformes',repuestos:'Tecnología y repuestos',otros:'Otros bienes'}),
-  servicios:Object.freeze({mantenimiento:'Mantenimiento y reparaciones',profesionales:'Servicios profesionales',tecnologia:'Tecnología y soporte',otros:'Otros servicios'})
+  bienes:Object.freeze({
+    insumos:'Insumos y materiales',
+    vestuario:'Ropa y uniformes',
+    repuestos:'Tecnología y repuestos',
+    alimentos:'Alimentos y bebidas',
+    hogar:'Hogar y decoración',
+    muebles:'Muebles y mobiliario',
+    electrodomesticos:'Electrodomésticos',
+    electronica:'Celulares, computadores y electrónica',
+    construccion:'Materiales de construcción',
+    ferreteria:'Ferretería y herramientas',
+    automotriz:'Vehículos y autopartes',
+    salud:'Salud y cuidado personal',
+    belleza:'Belleza y cosmética',
+    papeleria:'Papelería y oficina',
+    deportivos:'Deportes y recreación',
+    mascotas:'Mascotas y suministros',
+    agro:'Agro, plantas y jardinería',
+    infantiles:'Bebés, niños y juguetes',
+    industriales:'Equipos y suministros industriales',
+    otros:'Otros bienes'
+  }),
+  servicios:Object.freeze({
+    mantenimiento:'Mantenimiento y reparaciones',
+    profesionales:'Servicios profesionales',
+    tecnologia:'Tecnología y soporte',
+    hogar_servicios:'Aseo y servicios del hogar',
+    plomeria:'Plomería y electricidad',
+    obras:'Construcción y remodelación',
+    transporte:'Transporte, mudanzas y domicilios',
+    educacion:'Educación y clases',
+    diseno:'Diseño, publicidad y mercadeo',
+    eventos:'Eventos y celebraciones',
+    belleza_servicios:'Belleza y cuidado personal',
+    salud_servicios:'Salud y bienestar',
+    mascotas_servicios:'Cuidado de mascotas',
+    automotriz_servicios:'Mecánica y servicios de vehículos',
+    agro_servicios:'Jardinería y labores agrícolas',
+    alimentacion:'Cocina y alimentación',
+    fotografia:'Fotografía y video',
+    turismo:'Turismo y guías',
+    seguridad:'Seguridad y vigilancia',
+    otros:'Otros servicios'
+  })
 });
 export const EXAMPLES = Object.freeze([
   {id:'empaques',title:'Necesito 100 empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',quantity:100,condition:'cualquiera',description:'Busco 100 empaques de cartón para mi negocio. La propuesta debe incluir medidas disponibles, personalización, precio total y plazo de entrega. Solicitud ilustrativa; no corresponde a un comprador real.'},
@@ -790,4 +832,4 @@ function init(){
 
 }
 
-if(typeof document!=='undefined')init();
+if(typeof document!=='undefined' && !window.LoNecesitoFirebaseConfig?.apiKey) init();
