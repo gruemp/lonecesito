@@ -501,6 +501,29 @@ function init(){
     openDialog('detail');
   }
 
+  function updateOtherCityField(){
+    const other=$('#request-city').value==='__otra__';
+    $('#city-other-fields').hidden=!other;
+    const input=$('#request-city-other');
+    input.disabled=!other;
+    input.required=other;
+  }
+  function setCityChoice(city){
+    const select=$('#request-city');
+    const input=$('#request-city-other');
+    const value=typeof city==='string'?city.trim():'';
+    if(!value){
+      select.value='';
+      input.value='';
+    }else if([...select.options].some(option=>option.value===value&&value!=='__otra__')){
+      select.value=value;
+      input.value='';
+    }else{
+      select.value='__otra__';
+      input.value=value;
+    }
+    updateOtherCityField();
+  }
   const wizardTitles=['¿Qué necesitas?','Detalles de la necesidad','Revisar y confirmar'];
   const draftFields=['title','city','category','subcategory','description','budget','quantity','condition','desiredDate'];
   function wizardData(){
@@ -509,6 +532,7 @@ function init(){
       const item=$('#publish-form').elements.namedItem(key);
       input[key]=item&&!item.disabled?item.value:'';
     }
+    input.city=$('#request-city').value==='__otra__'?$('#request-city-other').value:$('#request-city').value;
     input.picture=wizardPicture;
     return input;
   }
@@ -562,12 +586,12 @@ function init(){
     const kind=values.category==='servicios'?'servicios':'bienes';
     $('#request-category').value=kind;populatePublishSubcategories();
     for(const key of draftFields){
-      if(key==='category')continue;
+      if(key==='category'||key==='city')continue;
       const item=form.elements.namedItem(key);
       if(item&&values[key]!=null&&values[key]!=='')item.value=String(values[key]);
     }
     if(overrides?.title)$('#request-title').value=overrides.title;
-    if(overrides?.city)$('#request-city').value=overrides.city;
+    setCityChoice(overrides?.city||values.city||'');
     $('#publish-title').textContent=editingRequestId?'Edita tu necesidad':'Publica lo que necesitas';
     $('#wizard-submit').textContent=editingRequestId?'Guardar cambios de prueba':'Guardar solicitud de prueba';
     $('#publish-error').hidden=true;$('#publish-error').textContent='';
@@ -662,9 +686,9 @@ function init(){
     $('#detail-dialog').close();showToast('Necesidad resuelta. Se conserva en tu historial local.');
   });
   $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';currentCity='all';searchQuery='';$('#request-search').value='';populateSubcategories();populateCities();applyFilter();}));
-  $('#hero-form').addEventListener('submit',event=>{
-    event.preventDefault();
-    startPublish(null,{title:$('#hero-need').value.trim(),city:$('#hero-city').value.trim()});
+  $('#request-city').addEventListener('change',()=>{
+    updateOtherCityField();
+    scheduleDraftSave();
   });
   $('#wizard-next').addEventListener('click',()=>{
     if(validateWizardStep()){saveWizardDraft(false);setWizardStep(wizardStep+1);}
@@ -704,7 +728,7 @@ function init(){
       const requests=previous?state.requests.map(item=>item.id===id?{...request,id}:item):[{...request,id},...state.requests];
       if(!save({...state,requests,draft:null},'publish-error'))return;
       clearTimeout(draftTimer);editingRequestId=null;wizardSubmitted=true;
-      $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();$('#hero-form').reset();setWizardStep(0);
+      $('#publish-dialog').close();event.currentTarget.reset();populatePublishSubcategories();setWizardStep(0);
       currentCategory='all';currentSubcategory='all';currentCity='all';populateSubcategories();renderOwnRequests();
       window.location.hash='#mis-necesidades';
       activateScreen('mis-necesidades');
