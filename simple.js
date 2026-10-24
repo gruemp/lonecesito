@@ -85,6 +85,8 @@ function contactIcon(kind){
   svg.classList.add('contact-icon');
   const paths=kind==='call'?
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
+    kind==='share'?
+    ['M12 16V3','m7 8 5-5 5 5','M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5']:
     kind==='photo'?
     ['M3 4h18v16H3z','M8 8.5h.01','m3 18 5-6 4 4 3-3 4 5']:
     ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
@@ -155,11 +157,6 @@ function renderCard(record,owner){
     enlarge.append(img);
     enlarge.addEventListener('click',()=>openImageViewer(photo,title));
     media.append(enlarge);
-  }else{
-    const placeholder=el('span','photo-placeholder');
-    placeholder.setAttribute('aria-hidden','true');
-    placeholder.append(contactIcon('photo'));
-    media.append(placeholder);
   }
   main.append(copy,media);
   article.append(main);
@@ -189,6 +186,14 @@ function renderCard(record,owner){
   }else{
     contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
   }
+  // Todas las fichas pueden compartirse como una imagen PNG, sin intermediarios.
+  const share=el('button','contact-action share-action');
+  share.type='button';
+  share.title='Compartir ficha como imagen PNG';
+  share.setAttribute('aria-label','Compartir ficha en formato PNG');
+  share.append(contactIcon('share'));
+  share.addEventListener('click',()=>sharePublicationPng(record));
+  contact.append(share);
   article.append(contact);
 
   if(owner&&record.example!==true&&canManage(record,currentUid())){
