@@ -1,4 +1,17 @@
 # lonecesito
+## Portada actual: un botón de publicación y ciudad móvil compatible
+
+- La portada solo presenta **«Publicar una necesidad»** como botón de acción principal. Se eliminó el formulario previo de título/ciudad y el botón redundante de la cabecera. Al pulsar se abre directamente el asistente de tres pasos.
+- En el asistente, el municipio se selecciona mediante un **`select` nativo de HTML**, compatible con Android, iOS y PC, en lugar de depender de `datalist` y las sugerencias del teclado.
+- La opción **«Otra ciudad o municipio…»** muestra un campo para escribir manualmente el nombre. Se mantiene la validación de ciudad obligatoria y los valores se recuperan correctamente del borrador o de una necesidad en edición.
+- Se conserva la aceptación directa sin formularios para los usuarios que ayudan, los títulos desde un solo carácter y las tarjetas individuales con foto lateral en la sección de exploración.
+- Validación: **43 pruebas** de lógica y estructura ejecutadas en JavaScript aislado, HTML sin identificadores duplicados y CSS estructuralmente válido. Pruebas visuales en dispositivos reales no incluidas.
+
+**Nota:** la plataforma continúa siendo una demostración local; Firebase, perfiles reales y comunicación entre usuarios siguen pendientes.
+
+Las instrucciones de secciones históricas relativas al antiguo formulario de portada ya no están vigentes.
+
+---
 ## Diseño vigente — títulos libres, fotos laterales y necesidades separadas
 
 Interfaz ajustada en octubre de 2026:

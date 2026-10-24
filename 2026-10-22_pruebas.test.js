@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen,applyScreenNavigation,EXAMPLES,acceptNeedLocally} from './2026-10-22_app.js';
+import {normalizeRequest,normalizeProposal,appendProposal,sortProposals,proposalUnitPrice,changeProposal,withdrawProposal,discardProposal,acceptProposal,confirmPartial,requestedRemaining,reopenCanceled,confirmOldProposal,decodeState,persistState,STORAGE_KEY,SUBCATEGORIES,buildDraft,updateLocalRequestStatus,SCREEN_IDS,resolveScreen,applyScreenNavigation,EXAMPLES,acceptNeedLocally,cityChoice,chosenCity} from './2026-10-22_app.js';
 import {readFileSync} from 'node:fs';
 
 const req={id:'necesidad-1',title:'Necesito empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',description:'Necesito empaques con el logo del negocio.',quantity:10,condition:'cualquiera',status:'abierta'};
@@ -182,7 +182,7 @@ test('el HTML incluye formularios solo para quien publica, filtros y aceptación
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
   assert.equal(new Set(ids).size,ids.length);
-  for(const id of ['hero-form','list-city','request-photo','request-photo-preview','accepted-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','accept-request']){
+  for(const id of ['hero-publish','request-city','request-city-other','city-other-fields','list-city','request-photo','request-photo-preview','accepted-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','accept-request']){
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
   }
   for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
@@ -191,7 +191,7 @@ test('el HTML incluye formularios solo para quien publica, filtros y aceptación
   assert.ok(!html.includes('id="proposal-form"'));
   assert.ok(!html.includes('id="provider-form"'));
   assert.ok(!html.includes('id="access-form"'));
-  assert.deepEqual([...html.matchAll(/<form\b[^>]*\bid="([^"]+)"/g)].map(m=>m[1]),['hero-form','publish-form']);
+  assert.deepEqual([...html.matchAll(/<form\b[^>]*\bid="([^"]+)"/g)].map(m=>m[1]),['publish-form']);
 });
 
 test('la navegación compacta distingue publicar de aceptar',()=>{
@@ -337,9 +337,9 @@ test('una sola letra sirve como título de necesidad y no hay límite fijo de lo
   assert.equal(buildDraft({...req,title:long}).title,long);
   assert.throws(()=>normalizeRequest({...req,title:'   '}),/Escribe/);
 });
-test('la entrada inicial y el título del asistente no imponen maxlength ni minlength',()=>{
+test('el título del asistente sigue sin imponer longitud mínima ni máxima',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  for(const id of ['hero-need','request-title']){
+  for(const id of ['request-title']){
     const tag=html.match(new RegExp('<input[^>]+id="'+id+'"[^>]*>'));
     assert.ok(tag,'Falta el campo '+id);
     assert.equal(/(?:minlength|maxlength)=/.test(tag[0]),false,'Hay una restricción de caracteres en '+id);
@@ -375,4 +375,60 @@ test('un título largo sobrevive al ciclo de almacenamiento y recarga',()=>{
   assert.equal(st.requests.length,1);
   assert.equal(st.requests[0].title,title);
   assert.equal(buildDraft({...req,title}).title,title);
+});
+
+test('la portada tiene un solo botón principal y no presenta formularios ni botón en cabecera',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const hero=html.match(/<section class="hero[^>]*>[\s\S]*?<\/section>/);
+  const header=html.match(/<header[\s\S]*?<\/header>/);
+  assert.ok(hero&&header);
+  assert.ok(hero[0].includes('id="hero-publish"'));
+  assert.ok(hero[0].includes('Publicar una necesidad'));
+  assert.equal([...hero[0].matchAll(/<button\b/g)].length,1);
+  assert.equal(/<form\b|<input\b/.test(hero[0]),false);
+  assert.equal(/data-open="publish"/.test(header[0]),false);
+  assert.ok(js.includes("if(kind==='publish')startPublish();"));
+  assert.equal(js.includes("$('#hero-form')"),false);
+  assert.ok(css.includes('.hero .publish-cta{'));
+});
+test('el selector de ciudad ofrece opciones nativas en teléfonos y acepta otros municipios',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const select=html.match(/<select id="request-city"[\s\S]*?<\/select>/);
+  assert.ok(select);
+  assert.ok(select[0].includes('<option value="Santa Marta">'));
+  assert.ok(select[0].includes('<option value="Bogotá">'));
+  assert.ok(select[0].includes('<option value="__otra__">'));
+  assert.ok(select[0].includes('required'));
+  assert.ok(html.includes('id="request-city-other"'));
+  assert.ok(html.includes('id="city-other-fields" hidden'));
+  assert.equal(html.includes('<datalist id="cities"'),false);
+  assert.equal(/id="request-city"[^>]+list="cities"/.test(html),false);
+  assert.ok(js.includes("$('#request-city').addEventListener('change'"));
+  assert.ok(js.includes("input.required=other"));
+  assert.ok(js.includes("input.disabled=!other"));
+});
+test('un municipio fuera de la lista se recupera sin pérdida en un borrador',()=>{
+  const options=['','Santa Marta','Bogotá','__otra__'];
+  assert.deepEqual(cityChoice('Santa Marta',options),{selection:'Santa Marta',custom:''});
+  assert.deepEqual(cityChoice('Fundación',options),{selection:'__otra__',custom:'Fundación'});
+  assert.deepEqual(cityChoice('  Ciénaga ',options),{selection:'__otra__',custom:'Ciénaga'});
+  assert.deepEqual(cityChoice('',options),{selection:'',custom:''});
+  assert.equal(chosenCity('__otra__','Ciénaga'),'Ciénaga');
+  assert.equal(chosenCity('Santa Marta',''),'Santa Marta');
+  assert.equal(chosenCity('', ''),'');
+  const draft=buildDraft({...req,city:'Fundación'});
+  assert.equal(draft.city,'Fundación');
+  const saved=decodeState(JSON.stringify({version:1,draft:{data:draft}}));
+  assert.equal(saved.draft.data.city,'Fundación');
+  assert.deepEqual(cityChoice(saved.draft.data.city,options),{selection:'__otra__',custom:'Fundación'});
+});
+test('se sigue exigiendo ciudad válida al guardar la necesidad',()=>{
+  const options=['','Santa Marta','Bogotá','__otra__'];
+  assert.equal(chosenCity(cityChoice('Santa Marta',options).selection,''),'Santa Marta');
+  assert.throws(()=>normalizeRequest({...req,city:''}),/ciudad/);
+  assert.throws(()=>normalizeRequest({...req,city:'X'}),/ciudad/);
+  assert.equal(normalizeRequest({...req,city:'Fundación'}).city,'Fundación');
 });
