@@ -176,3 +176,52 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
   #request-grid .request-card-media{width:90px;height:104px}
   #request-grid .request-card .card-actions .button{font-size:10px}
 }
+
+
+/* Portada de acción única: una sola llamada clara a publicar. */
+.hero-copy{max-width:680px}
+.hero .publish-cta{
+  width:min(100%,480px);
+  min-height:68px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:18px 25px;
+  margin-top:22px;
+  border-radius:17px;
+  border:1px solid #1b5142;
+  background:linear-gradient(112deg,#113e35 0%,#216753 100%);
+  box-shadow:0 13px 28px rgba(13,64,47,.2),inset 0 1px rgba(255,255,255,.14);
+  font-size:clamp(17px,2.2vw,21px);
+  font-weight:800;
+  letter-spacing:-.02em;
+  text-align:left;
+}
+.hero .publish-cta .icon{width:24px;height:24px;transition:transform .16s ease}
+.hero .publish-cta:hover,.hero .publish-cta:focus-visible{
+  background:linear-gradient(112deg,#194f40 0%,#28785e 100%);
+  box-shadow:0 15px 30px rgba(13,64,47,.25);
+}
+.hero .publish-cta:hover .icon{transform:translateX(3px)}
+.hero .compact-next-step{margin-top:22px}
+/* Select nativo fiable en Android, iOS y navegadores de escritorio. */
+#request-city{
+  display:block;
+  width:100%;
+  min-height:47px;
+  background-color:#fff;
+  cursor:pointer;
+  color:var(--ink);
+}
+#request-city:invalid{color:#5e7166}
+#city-other-fields{margin-top:4px}
+#city-other-fields:not([hidden]){display:grid;gap:7px}
+#city-select-note{margin:3px 0 8px}
+@media(max-width:680px){
+  .hero .publish-cta{width:100%;min-height:63px;padding:16px 20px;font-size:18px}
+  .hero .publish-cta .icon{width:22px;height:22px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero .publish-cta .icon{transition:none}
+}
