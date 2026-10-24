@@ -264,7 +264,7 @@ export function acceptNeedLocally(state,request){
   const isOwn=state.requests?.some(item=>item.id===request.id);
   if(isOwn)throw new Error('No puedes aceptar tu propia necesidad.');
   if(!EXAMPLES.some(item=>item.id===request.id))throw new Error('No se encontró la necesidad.');
-  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aceptaste esta necesidad en este navegador.');
+  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aceptaste esta necesidad.');
   const entry={requestId:request.id,acceptedAt:new Date().toISOString()};
   return {...state,acceptances:[...(state.acceptances||[]),entry]};
 }
@@ -313,7 +313,7 @@ function init(){
   function save(next,errorId=null){
     const error=errorId?$(`#${errorId}`):null;
     if(!persistState(storage,next)){
-      const message='No se pudo guardar. Revisa si tu navegador permite almacenamiento local e inténtalo de nuevo.';
+      const message='No se pudo guardar. Comprueba el almacenamiento disponible e inténtalo de nuevo.';
       if(error){error.textContent=message;error.hidden=false;}
       else showToast(message);
       return false;
@@ -433,11 +433,6 @@ function init(){
     }
     overview.append(copy,photo);
 
-    const note=context==='aceptadas'?
-      'Aceptada en este navegador. La persona que publicó la necesidad no ha recibido ninguna notificación.':
-      own?'Publicada solo en este navegador; otros usuarios aún no pueden verla.':
-      'Demostración: aceptar no contacta al comprador ni crea un acuerdo real.';
-    const contextNote=el('p','need-card-note',note);
     const actions=el('div','need-card-actions');
     const makeButton=(label,action,primary=false,disabled=false)=>{
       const button=el('button',primary?'button need-card-primary':'my-action need-card-secondary',label);
@@ -466,7 +461,7 @@ function init(){
     }else{
       actions.append(makeButton('No disponible','unavailable',true,true));
     }
-    article.append(head,overview,contextNote,actions);
+    article.append(head,overview,actions);
     return article;
   }
   function compactNeedRow(request,context,expanded=false){
@@ -529,10 +524,10 @@ function init(){
     const request=findRequest(id);
     try{
       const next=acceptNeedLocally(state,request);
-      if(!persistState(storage,next))throw new Error('No se pudo guardar la aceptación en este navegador.');
+      if(!persistState(storage,next))throw new Error('No se pudo registrar la aceptación.');
       state=next;
       renderOwnRequests();
-      showToast('Aceptación de prueba guardada solo aquí. No se ha notificado a nadie.');
+      showToast('Necesidad aceptada.');
     }catch(error){showToast(error.message);}
   }
   function updateOtherCityField(){
@@ -619,19 +614,19 @@ function init(){
     if(overrides?.title)$('#request-title').value=overrides.title;
     setCityChoice(overrides?.city||values.city||'');
     $('#publish-title').textContent=editingRequestId?'Edita tu necesidad':'Publica lo que necesitas';
-    $('#wizard-submit').textContent=editingRequestId?'Guardar cambios de prueba':'Guardar solicitud de prueba';
+    $('#wizard-submit').textContent=editingRequestId?'Guardar cambios':'Guardar necesidad';
     $('#publish-error').hidden=true;$('#publish-error').textContent='';
-    $('#draft-status').textContent=activeDraft&&!request?'Borrador local recuperado. Puedes continuarlo o editarlo.':'';
+    $('#draft-status').textContent=activeDraft&&!request?'Borrador recuperado. Puedes continuarlo o editarlo.':'';
     $('#wizard-clear').hidden=!activeDraft||!!request;
     openDialog('publish');setWizardStep(0);
   }
   function saveWizardDraft(closeDialog=false){
     const next={...state,draft:{data:buildDraft(wizardData()),editingRequestId}};
     if(!persistState(storage,next)){
-      setError('publish-error',new Error('No fue posible guardar el borrador en este navegador.'));return false;
+      setError('publish-error',new Error('No fue posible guardar el borrador.'));return false;
     }
     state=next;
-    $('#draft-status').textContent='Borrador guardado en este navegador.';
+    $('#draft-status').textContent='Borrador guardado.';
     if(closeDialog){clearTimeout(draftTimer);$('#publish-dialog').close();showToast('Borrador guardado. Puedes continuarlo cuando vuelvas a publicar.');}
     return true;
   }
@@ -740,7 +735,7 @@ function init(){
       const previous=editingRequestId?state.requests.find(item=>item.id===editingRequestId):null;
       if(editingRequestId&&!previous)throw new Error('La solicitud que editabas ya no está disponible.');
       if(previous&&previous.status!=='abierta')throw new Error('Una solicitud cerrada no puede editarse.');
-      if(!previous&&state.requests.length>=50)throw new Error('Esta demostración admite hasta 50 solicitudes en este navegador.');
+      if(!previous&&state.requests.length>=50)throw new Error('Has alcanzado el límite de 50 necesidades.');
       const request=normalizeRequest({...wizardData(),createdAt:previous?.createdAt||new Date().toISOString(),status:previous?.status||'abierta'});
       const id=previous?.id||newId('local');
       const requests=previous?state.requests.map(item=>item.id===id?{...request,id}:item):[{...request,id},...state.requests];
@@ -750,7 +745,7 @@ function init(){
       currentCategory='all';currentSubcategory='all';currentCity='all';populateSubcategories();renderOwnRequests();
       window.location.hash='#mis-necesidades';
       activateScreen('mis-necesidades');
-      showToast(previous?'Necesidad de prueba actualizada.':'Necesidad de prueba guardada. La publicación real requerirá identificarte con Firebase.');
+      showToast(previous?'Necesidad actualizada.':'Necesidad guardada.');
     }catch(error){setError('publish-error',error);}
   });
   function handleNeedAction(action,id){
@@ -764,11 +759,11 @@ function init(){
     }
     if(action==='resolve'&&['abierta','en_proceso'].includes(request.status)){
       if(window.confirm('¿Confirmas que recibiste el producto o terminó el servicio?')&&changeOwnStatus(id,'resuelta'))
-        showToast('Necesidad resuelta. Se conserva en tu historial local.');
+        showToast('Necesidad resuelta.');
       return;
     }
     if(action==='cancel'&&['abierta','en_proceso'].includes(request.status)){
-      if(window.confirm('¿Cancelar esta necesidad? Se conservará en tu historial local.')&&changeOwnStatus(id,'cancelada'))
+      if(window.confirm('¿Cancelar esta necesidad?')&&changeOwnStatus(id,'cancelada'))
         showToast('Necesidad cancelada.');
       return;
     }
