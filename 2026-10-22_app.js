@@ -443,6 +443,7 @@ function init(){
       const button=el('button',primary?'button need-card-primary':'my-action need-card-secondary',label);
       button.type='button';
       button.dataset.action=action;
+      button.classList.add('need-action-'+action);
       button.dataset.id=request.id;
       button.disabled=disabled;
       return button;
