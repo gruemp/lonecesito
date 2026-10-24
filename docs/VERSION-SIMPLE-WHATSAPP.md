@@ -1,6 +1,16 @@
 # LoNecesito — versión simplificada de publicaciones y WhatsApp
 
-Esta rama implementa una interfaz **sin aceptar necesidades, sin aplicaciones de terceros, sin propuestas ni estados de resolución**.
+**Versión 2.0.0 (24/10/2026).** Esta rama implementa una interfaz **sin aceptar necesidades, sin aplicaciones de terceros, sin propuestas ni estados de resolución**.
+
+## Control de versiones
+
+La versión aparece al comienzo de la página. Cada publicación posterior deberá tener un número nuevo y su correspondiente registro de cambios.
+
+## Fichas de publicación
+
+Se muestran tipo, categoría específica cuando existe, título, ciudad, descripción, cantidad y estado de productos, presupuesto, fecha deseada, imagen si existe y teléfono de contacto. El número de la publicación real es un enlace a WhatsApp.
+
+En modo de prueba aparecen tres fichas ilustrativas con todos sus campos y un teléfono señalado como ficticio. Los números ficticios se muestran, pero no son enlaces de WhatsApp para evitar contactar a terceros ajenos. No son solicitudes reales.
 
 ## Qué permite
 1. Publicar una necesidad de producto o servicio, con WhatsApp visible mediante autorización explícita.
