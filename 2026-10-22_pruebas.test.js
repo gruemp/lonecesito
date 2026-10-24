@@ -640,7 +640,7 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
@@ -799,7 +799,7 @@ test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
 test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(js.includes("const row=el('details','need-list-row')"));
   assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
@@ -897,7 +897,7 @@ test('las filas cerradas siguen compactas y las fichas se crean únicamente al a
 test('la nueva capa visual mantiene los tres contextos y los controles existentes',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const id of ['request-grid','my-requests-grid','accepted-grid','publish-form','request-city','request-photo-preview'])
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
@@ -913,7 +913,7 @@ test('el rediseño premium conserva la navegación y las pantallas originales',(
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  assert.ok(html.includes('20261023-titulos-todas-vistas-1'));
+  assert.ok(html.includes('20261023-centrado-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(css.includes('LO NECESITO / VISUAL V2'));
   for(const id of ['inicio','necesidades','mis-necesidades','aceptadas','request-grid','my-requests-grid','accepted-grid','publish-form'])
@@ -1176,4 +1176,51 @@ test('nuevas tonalidades de títulos y fondos alcanzan contraste AA',()=>{
     const a=lum(fg),b=lum(bg);
     assert.ok((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Contraste insuficiente '+fg+'/'+bg);
   }
+});
+
+
+test('los títulos de las tres secciones se centran sin cambiar su tamaño',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(layer.includes(':is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading{'));
+  assert.ok(layer.includes('justify-content:center'));
+  assert.ok(layer.includes('align-items:center'));
+  assert.ok(layer.includes('text-align:center'));
+  assert.ok(layer.includes(':is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading h2{'));
+  assert.ok(layer.includes('margin-inline:auto'));
+  assert.equal(/font-size:/.test(layer),false,'La alineación no debe modificar el tamaño de los títulos');
+  for(const id of ['requests-title','my-title','accepted-title'])assert.ok(html.includes('id="'+id+'"'));
+});
+test('las explicaciones de las tres secciones quedan justificadas y con última línea natural',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  for(const piece of [
+    '#necesidades > .section-heading .section-description,',
+    ':is(#mis-necesidades,#aceptadas) > .section-usage{',
+    'text-align:justify',
+    'text-align-last:left',
+    'text-justify:inter-word',
+    'hyphens:auto',
+    'overflow-wrap:anywhere'
+  ])assert.ok(layer.includes(piece),'Falta regla de justificación: '+piece);
+  assert.ok(html.includes('class="section-description"'));
+  assert.equal((html.match(/class="section-usage"/g)||[]).length,2);
+  assert.ok(layer.includes('max-width:70ch'));
+});
+test('la cascada nueva respeta la estructura responsiva y listas compactas',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  assert.equal(/grid-template-columns|padding:|min-height:/.test(layer),false);
+  assert.ok(layer.includes('#necesidades > .section-heading > div{'));
+  assert.ok(layer.includes('width:100%'));
+  assert.ok(layer.includes('min-width:0'));
+  assert.ok(js.includes("renderNeedList(grid,records(),'explorar')"));
+  assert.ok(js.includes("renderNeedList(container,state.requests,'propias')"));
+  assert.ok(js.includes("renderNeedList(list,accepted,'aceptadas')"));
+  assert.ok(css.includes('.need-list-title{'));
+  assert.ok(css.includes('white-space:nowrap'));
+  assert.ok(css.includes('text-overflow:ellipsis'));
 });
