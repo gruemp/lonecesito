@@ -1,3 +1,9 @@
+# Versión 2.2.11 — eliminar desde el editor
+
+Ahora, mientras se edita una publicación propia, aparece un **botón de papelera** junto al icono de guardar y la X para cancelar, **en la misma fila**. La papelera pide confirmación; al cancelar la eliminación conserva la edición y al completarla vuelve a «Mis publicaciones». Al crear, papelera y X permanecen ocultos. También se sigue pudiendo eliminar desde el icono de la ficha. El diseño mantiene botones compactos y accesibles, con versión visible incrementada a 2.2.11.
+
+---
+
 # Versión 2.2.10 — envío sin texto y teléfono en fila única
 
 El área «¿Qué necesitas?» mantiene una sola caja. Inmediatamente debajo hay **una fila horizontal** con icono de teléfono, una caja que muestra **«Ej: 300 123 4567»** dentro, icono para imagen, icono para dictar y botón verde con **solo un icono de avión de papel**. No se muestra «Número de WhatsApp» ni «Publicar necesidad» en esa fila. Enter publica; Shift+Enter añade una línea cuando se está escribiendo en la descripción. Editar usa el mismo icono con nombre accesible «Guardar cambios» y permite cancelar mediante X.
