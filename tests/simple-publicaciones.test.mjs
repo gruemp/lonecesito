@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.11');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.11<\/span>/);
+  assert.equal(APP_VERSION,'2.2.12');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.12<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -84,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.11/);
+  assert.match(html,/Versión 2\.2\.12/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -129,7 +129,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.11/);
+  assert.match(html,/Versión 2\.2\.12/);
 });
 
 
@@ -224,7 +224,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número quedará disponible en los enlaces públicos de llamada y WhatsApp/);
-  assert.match(html,/Versión 2\.2\.11/);
+  assert.match(html,/Versión 2\.2\.12/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -396,7 +396,7 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.11/);
+  assert.match(handoff,/2\.2\.12/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
@@ -558,7 +558,7 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
   const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
   const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
   for(const content of [agents,guide,handoff]){
-    assert.match(content,/2\.2\.11/);
+    assert.match(content,/2\.2\.12/);
     assert.match(content,/una sola fila/i);
     assert.match(content,/cinco iconos|cinco botones/i);
   }
@@ -617,7 +617,7 @@ test('el icono de envío permanece al crear y al guardar cambios',()=>{
 test('las instrucciones para futuras IA describen la nueva fila y el teclado',()=>{
   for(const path of ['../AGENTS.md','../docs/PREFERENCIAS-LO-NECESITO.md','../docs/CONTINUIDAD-Y-APRENDIZAJES.md']){
     const content=readFileSync(new URL(path,import.meta.url),'utf8');
-    assert.match(content,/2\.2\.11/);
+    assert.match(content,/2\.2\.12/);
     assert.match(content,/Shift\+Enter|Shift \+ Enter/);
     assert.match(content,/Ej: 300 123 4567/);
   }
@@ -660,8 +660,41 @@ test('las instrucciones de continuidad incluyen la papelera adicional',()=>{
   const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
   const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
   for(const file of [agents,guide,handoff]){
-    assert.match(file,/2\.2\.11/);
+    assert.match(file,/2\.2\.12/);
     assert.match(file,/papelera/i);
     assert.match(file,/mis publicaciones/i);
+  }
+});
+
+
+test('el banner escogido se muestra solo en primera pestaña antes del buscador',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const browse=html.split('<section id="necesidades"')[1].split('</section>')[0];
+  const mine=html.split('<section id="mis-publicaciones"')[1].split('</section>')[0];
+  const editor=html.split('<section id="publicar"')[1].split('</section>')[0];
+  assert.match(browse,/<figure class="welcome-banner">/);
+  assert.match(browse,/src="assets\/lonecesito-presentacion\.webp"/);
+  assert.ok(browse.indexOf('class="welcome-banner"')<browse.indexOf('class="search-panel"'));
+  assert.doesNotMatch(mine,/welcome-banner|lonecesito-presentacion/);
+  assert.doesNotMatch(editor,/welcome-banner|lonecesito-presentacion/);
+  assert.equal((html.match(/lonecesito-presentacion\.webp/g)||[]).length,1);
+});
+test('la ilustración se presenta completa, responsive y con texto alternativo',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(html,/src="assets\/lonecesito-presentacion\.webp" width="1440" height="810"/);
+  assert.match(html,/alt="LoNecesito: publica lo que necesitas, otras personas ven tu publicación y te contactan directamente por llamada o WhatsApp\."/);
+  assert.match(css,/#necesidades \.welcome-banner\{[^}]*width:100%;[^}]*max-width:1030px/);
+  assert.match(css,/#necesidades \.welcome-banner img\{[^}]*width:100%;[^}]*height:auto;[^}]*object-fit:contain/);
+  assert.match(css,/@media\(max-width:600px\)\{[^}]*\.welcome-banner\{/);
+});
+test('se documentó para otras IA la imagen elegida y su función real',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const preferences=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
+  for(const document of [agents,preferences,handoff]){
+    assert.match(document,/2\.2\.12/);
+    assert.match(document,/assets\/lonecesito-presentacion\.webp/);
+    assert.match(document,/llamada|WhatsApp/);
   }
 });
