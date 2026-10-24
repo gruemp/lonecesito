@@ -1,5 +1,5 @@
 /* Versión visible en la portada. Incrementar al publicar cada nueva modificación. */
-export const APP_VERSION = '2.0.0';
+export const APP_VERSION = '2.0.1';
 export const APP_VERSION_DATE = '24/10/2026';
 
 /* Ejemplos claramente ficticios: jamás redirigir su teléfono a una persona real. */

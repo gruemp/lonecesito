@@ -1,3 +1,12 @@
+# Versión 2.0.1 · 24/10/2026
+
+- Solo se muestra el número de versión en la franja superior.
+- Se retiraron de la interfaz los avisos de modo de prueba, la explicación de los ejemplos, las etiquetas adicionales y el enlace «Ver cambios».
+- Se mantienen las fichas completas y los números de contacto; los números de muestra no generan enlaces hacia terceros.
+- El funcionamiento de almacenamiento local, cuando Firebase no está configurado, **no cambia**. Su limitación sigue documentada para la operación del sitio.
+
+---
+
 # LoNecesito — propuesta de interfaz simplificada con WhatsApp
 
 **Versión preparada: 2.0.0 · 24/10/2026.** La página de esta rama contiene exclusivamente: publicar necesidades, consultar publicaciones, contactar directamente al autor por WhatsApp, y editar o eliminar las publicaciones propias. No incluye aceptaciones ni registro de interesados.

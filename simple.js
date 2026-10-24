@@ -1,4 +1,4 @@
-import {APP_VERSION,APP_VERSION_DATE,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,canManage,normalizeWhatsApp} from './simple-model.js';
+import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,canManage,normalizeWhatsApp} from './simple-model.js';
 
 const $ = id => document.getElementById(id);
 const pages = ['inicio', 'necesidades', 'mis-publicaciones', 'publicar'];
@@ -82,8 +82,8 @@ function whatsappLink(record,label,className){
 }
 function renderCard(record,owner){
   const example=record.example===true;
-  const article=el('article','publication-card'+(example?' example-card':''));
-  const tag=el('span','publication-kind',(example?'EJEMPLO FICTICIO · ':'')+(record.category==='bienes'?'PRODUCTO':'SERVICIO'));
+  const article=el('article','publication-card');
+  const tag=el('span','publication-kind',record.category==='bienes'?'PRODUCTO':'SERVICIO');
   article.append(tag,el('h3','',record.title||'Sin título'));
   article.append(el('p','publication-city','⌖  '+String(record.city||'Sin ciudad')));
   article.append(el('p','publication-description',record.description||''));
@@ -108,9 +108,9 @@ function renderCard(record,owner){
   const contact=el('div','contact-box');
   const number=readablePhone(record.contactPhone);
   if(example){
-    contact.append(el('span','contact-label','Teléfono de ejemplo · no contactar'));
-    contact.append(el('span','example-phone',record.contactPhone||'300 000 0000'));
-    contact.append(el('p','example-warning','Esta es una ficha ilustrativa. El número no corresponde a una persona que haya publicado una necesidad y no abre WhatsApp.'));
+    // Datos de muestra, sin enlace: evita iniciar un chat hacia un número que no pertenece a un publicador.
+    contact.append(el('span','contact-label','Teléfono de contacto'));
+    contact.append(el('span','contact-phone-static',record.contactPhone||'300 000 0000'));
   }else if(number&&record.contactConsent===true){
     contact.append(el('span','contact-label','WhatsApp de contacto'));
     const phoneLink=whatsappLink(record,number,'contact-phone');
@@ -163,7 +163,6 @@ function render(){
   const list=$('browse-list');
   list.replaceChildren(...visible.map(item=>renderCard(item,false)));
   $('browse-empty').hidden=visible.length!==0;
-  $('example-note').hidden=!(state.mode==='demo'&&visible.some(item=>item.example));
   const own=state.items.filter(item=>canManage(item,currentUid()));
   $('mine-list').replaceChildren(...own.map(item=>renderCard(item,true)));
   $('mine-empty').hidden=own.length!==0;
@@ -357,15 +356,12 @@ function authError(error){
   return 'No se pudo acceder: '+String(error.message||'revisa tus datos.');
 }
 async function boot(){
-  $('release-version').textContent='Versión de publicación '+APP_VERSION+' · '+APP_VERSION_DATE;
+  $('release-version').textContent='Versión '+APP_VERSION;
   toggleGoods();
   const config=window.LoNecesitoFirebaseConfig||{};
   const configured=['apiKey','authDomain','projectId','appId'].every(key=>Boolean(config[key]));
   if(!configured){
     state.mode='demo';state.items=readLocal();
-    const notice=$('mode-notice');
-    notice.textContent='Modo de prueba: las publicaciones se guardan únicamente en este navegador y no son visibles para otras personas. Para que el portal funcione públicamente hace falta configurar Firebase.';
-    notice.hidden=false;
     render();showView();
     return;
   }
@@ -394,17 +390,14 @@ async function boot(){
         .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
       render();
     },error=>{
-      const n=$('mode-notice');n.hidden=false;
-      n.textContent='No se pueden consultar las publicaciones: '+error.message;
-      toast('Error de conexión con el servicio.');
+      toast('No se pudieron cargar las publicaciones.');
     });
     render();showView();
   }catch(error){
     state.mode='error';
-    const notice=$('mode-notice');
-    notice.textContent='La conexión con el servicio no está disponible. No se guardarán publicaciones: '+error.message;
-    notice.hidden=false;
     $('save-button').disabled=true;
+    feedback('form-feedback','No se pueden guardar publicaciones: el servicio no está disponible.');
+    toast('No hay conexión con el servicio de publicaciones.');
     render();showView();
   }
 }

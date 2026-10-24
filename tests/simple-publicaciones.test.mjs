@@ -54,10 +54,9 @@ test('interfaz conecta cada teléfono con WhatsApp y limita edición al propieta
 
 test('la publicación muestra versión en lo más alto de la página',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.0.0');
-  assert.equal(APP_VERSION_DATE,'24/10/2026');
+  assert.equal(APP_VERSION,'2.0.1');
   assert.ok(html.indexOf('class="release-bar"') < html.indexOf('<header class="site-header">'));
-  assert.match(html,/Versión de publicación 2\.0\.0/);
+  assert.match(html,/Versión 2\.0\.1/);
 });
 test('todos los ejemplos incluyen contacto ficticio, categoría y descripción',()=>{
   assert.ok(EXAMPLE_PUBLICATIONS.length>=3);
@@ -75,6 +74,17 @@ test('las fichas incluyen todos los campos, incluso valores opcionales',()=>{
   }
   assert.match(code,/whatsappLink\(record,number,'contact-phone'\)/);
   assert.match(code,/whatsappLink\(record,'Contactar por WhatsApp ↗','whatsapp-button'\)/);
-  assert.match(code,/example-card/);
+  assert.match(code,/contact-phone-static/);
   assert.doesNotMatch(code,/makeButton\('Aceptar necesidad'/);
+});
+
+test('la web solo muestra el número de versión, sin avisos ni enlaces de prueba',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(html,/<span id="release-version">Versión 2\.0\.1<\/span>/);
+  assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios|Versión 2\.0\.1 ·/);
+  assert.doesNotMatch(js,/mode-notice|example-note|example-warning|EJEMPLO FICTICIO|Modo de prueba:/);
+  assert.doesNotMatch(css,/\.mode-notice|\.example-warning|\.examples-note|\.example-card/);
+  assert.match(js,/contact-phone-static/);
 });
