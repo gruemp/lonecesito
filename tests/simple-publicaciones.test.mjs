@@ -1,90 +1,70 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {APP_VERSION,APP_VERSION_DATE,EXAMPLE_PUBLICATIONS,normalizeWhatsApp,whatsappUrl,cleanPublication,canManage} from '../simple-model.js';
+import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,normalizeWhatsApp,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage} from '../simple-model.js';
 
-const sample={
-  title:'Necesito reparar una nevera',category:'servicios',city:'Santa Marta',
-  description:'Busco alguien que repare una nevera que dejó de enfriar.',
-  contactPhone:'300 123 4567',contactConsent:true,budget:'',picture:''
+const input={
+  description:'Necesito que reparen una nevera que dejó de enfriar. Estoy en Santa Marta. Mi presupuesto es de 150.000 pesos.',
+  contactPhone:'300 123 4567'
 };
-
-test('celular colombiano sin indicativo se normaliza a +57',()=>{
-  assert.equal(normalizeWhatsApp('300 123 4567'),'573001234567');
-  assert.equal(normalizeWhatsApp('+57 300 123 4567'),'573001234567');
+test('la interfaz muestra exactamente dos entradas de publicación',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
+  assert.match(form,/id="need-description"/);
+  assert.match(form,/id="need-phone"/);
+  assert.equal([...form.matchAll(/<(?:textarea|input|select)\b/g)].length,2);
+  for(const old of ['need-category','need-city','need-title','need-budget','need-picture','need-quantity','need-condition','need-consent'])assert.doesNotMatch(form,new RegExp(old));
 });
-test('WhatsApp codifica un mensaje por solicitud sin inventar un contacto',()=>{
-  const link=whatsappUrl('3001234567','Reparar nevera');
-  assert.ok(link.startsWith('https://wa.me/573001234567?text='));
-  assert.ok(decodeURIComponent(link).includes('Reparar nevera'));
+test('se conserva la versión visible y sin avisos de pruebas',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.equal(APP_VERSION,'2.1.0');
+  assert.match(html,/<span id="release-version">Versión 2\.1\.0<\/span>/);
+  assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
+  assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
-test('no se admiten teléfonos peligrosos o incompletos',()=>{
-  for(const value of ['javascript:alert(1)','1234','+57001','300<script>','00 123 45']){
-    assert.throws(()=>normalizeWhatsApp(value));
-  }
-});
-test('para publicar se exige autorización expresa del WhatsApp público',()=>{
-  assert.throws(()=>cleanPublication({...sample,contactConsent:false}),/Autoriza/);
-  const need=cleanPublication(sample);
+test('el modelo almacena únicamente la necesidad, teléfono y título derivado',()=>{
+  const need=cleanPublication(input);
+  assert.deepEqual(Object.keys(need).sort(),['contactConsent','contactPhone','description','title']);
+  assert.equal(need.description,input.description);
   assert.equal(need.contactPhone,'573001234567');
   assert.equal(need.contactConsent,true);
-  assert.equal(need.budget,null);
+  assert.equal(need.title,derivedTitle(input.description));
 });
-test('el autor puede administrar y los visitantes ajenos no',()=>{
-  const record={ownerUid:'usuario-1'};
-  assert.equal(canManage(record,'usuario-1'),true);
-  assert.equal(canManage(record,'usuario-2'),false);
-  assert.equal(canManage(record,null),false);
+test('se admite un texto largo y se rechazan necesidades vacías',()=>{
+  const need=cleanPublication({...input,description:'Necesito '+ 'detalles '.repeat(150)});
+  assert.ok(need.description.length>1000);
+  assert.throws(()=>cleanPublication({...input,description:'abc'}));
+  assert.throws(()=>cleanPublication({...input,description:'a'.repeat(4001)}));
 });
-test('el HTML implementa navegación sencilla, sin aceptación de terceros',()=>{
-  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(html,/id="browse-list"/);
-  assert.match(html,/id="mine-list"/);
-  assert.match(html,/id="need-phone"/);
-  assert.match(html,/id="need-consent"/);
-  assert.doesNotMatch(html,/Aceptar necesidad|Mostrar interés|Solicitudes de interés/);
+test('WhatsApp real abre el número de la ficha',()=>{
+  const href=whatsappUrl('+57 300 123 4567',input.description);
+  assert.match(href,/^https:\/\/wa\.me\/573001234567\?text=/);
+  assert.match(decodeURIComponent(href),/reparen una nevera/);
 });
-test('interfaz conecta cada teléfono con WhatsApp y limita edición al propietario',()=>{
-  const code=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(code,/whatsappUrl\(record\.contactPhone,record\.title\)/);
-  assert.match(code,/canManage\(record,currentUid\(\)\)/);
-  assert.match(code,/deleteDoc\(/);
-  assert.match(code,/textContent/);
+test('teléfonos de ejemplo abren WhatsApp sin apuntar a un tercero',()=>{
+  assert.ok(EXAMPLE_PUBLICATIONS.length>0);
+  const url=exampleWhatsappUrl(EXAMPLE_PUBLICATIONS[0].description);
+  assert.match(url,/^https:\/\/wa\.me\/\?text=/);
+  assert.doesNotMatch(url,/3000000000/);
 });
-
-test('la publicación muestra versión en lo más alto de la página',()=>{
-  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.0.1');
-  assert.ok(html.indexOf('class="release-bar"') < html.indexOf('<header class="site-header">'));
-  assert.match(html,/Versión 2\.0\.1/);
+test('validar indicativo y proteger publicaciones propias',()=>{
+  assert.equal(normalizeWhatsApp('3001234567'),'573001234567');
+  assert.throws(()=>normalizeWhatsApp('javascript:alert(1)'));
+  assert.equal(canManage({ownerUid:'a'},'a'),true);
+  assert.equal(canManage({ownerUid:'a'},'b'),false);
 });
-test('todos los ejemplos incluyen contacto ficticio, categoría y descripción',()=>{
-  assert.ok(EXAMPLE_PUBLICATIONS.length>=3);
-  for(const row of EXAMPLE_PUBLICATIONS){
-    assert.equal(row.example,true);
-    assert.ok(row.contactPhone);
-    assert.ok(row.city && row.title && row.description);
-    assert.ok(['bienes','servicios'].includes(row.category));
-  }
-});
-test('las fichas incluyen todos los campos, incluso valores opcionales',()=>{
-  const code=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  for(const field of ['subcategory','quantity','condition','budget','desiredDate','picture','contactPhone']){
-    assert.ok(code.includes('record.'+field),'Campo faltante en ficha: '+field);
-  }
-  assert.match(code,/whatsappLink\(record,number,'contact-phone'\)/);
-  assert.match(code,/whatsappLink\(record,'Contactar por WhatsApp ↗','whatsapp-button'\)/);
-  assert.match(code,/contact-phone-static/);
-  assert.doesNotMatch(code,/makeButton\('Aceptar necesidad'/);
-});
-
-test('la web solo muestra el número de versión, sin avisos ni enlaces de prueba',()=>{
-  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+test('las fichas tienen teléfono enlazado y sin acciones de aceptar o resolver',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  assert.match(html,/<span id="release-version">Versión 2\.0\.1<\/span>/);
-  assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios|Versión 2\.0\.1 ·/);
-  assert.doesNotMatch(js,/mode-notice|example-note|example-warning|EJEMPLO FICTICIO|Modo de prueba:/);
-  assert.doesNotMatch(css,/\.mode-notice|\.example-warning|\.examples-note|\.example-card/);
-  assert.match(js,/contact-phone-static/);
+  assert.match(js,/phoneLink\(record,text,'contact-phone'\)/);
+  assert.match(js,/whatsappUrl\(number,record.description\|\|record.title\)/);
+  assert.match(js,/exampleWhatsappUrl\(record.description\|\|record.title\)/);
+  assert.match(js,/editRecord\(record\)/);
+  assert.match(js,/deleteRecord\(record\)/);
+  assert.doesNotMatch(js,/Aceptar necesidad|Marcar como resuelta|Me interesa atender/);
+});
+test('los registros antiguos conservan sus detalles al editarse',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/function legacyDetails\(record\)/);
+  for(const field of ['city','subcategory','quantity','condition','budget','desiredDate'])assert.ok(js.includes('record.'+field));
+  assert.match(js,/deleteField\(\)/);
 });
