@@ -289,3 +289,194 @@ async function launchFirebase(){
     notify('Error al cargar necesidades: '+e.message);
     $('#empty-state').hidden=false;$('#empty-state').textContent='No se pudieron consultar las necesidades.';
   });
+
+  async function submitApplication(id){
+    const req=state.requests.find(r=>r.id===id);
+    if(!req||req.status!=='abierta')throw Error('Esta necesidad ya no está disponible.');
+    if(!state.user||!state.profile?.discloseConsent)throw Error('Completa tu perfil antes de aplicar.');
+    if(req.ownerUid===state.user.uid)throw Error('No puedes aplicar a tu propia necesidad.');
+    if(state.applied.has(id)){notify('Ya aplicaste a esta necesidad.');return;}
+    const uid=state.user.uid,batch=writeBatch(db);
+    batch.set(doc(db,'requests',id,'applications',uid),{
+      uid,name:state.profile.name,phone:state.profile.phone,appliedAt:serverTimestamp()
+    });
+    batch.set(doc(db,'applicationsByUser',uid,'items',id),{
+      requestId:id,appliedAt:serverTimestamp()
+    });
+    await batch.commit();
+    state.applied.add(id);renderAll();notify('Ya aplicaste a esta necesidad.');
+  }
+  async function clickAction(button){
+    if(button.disabled)return;
+    const id=button.dataset.id,action=button.dataset.realAction;
+    button.disabled=true;
+    try{
+      if(action==='apply'){
+        if(!state.user||!state.profile?.discloseConsent){
+          state.pending=id;openAccount();return;
+        }
+        await submitApplication(id);return;
+      }
+      const request=state.requests.find(x=>x.id===id);
+      if(!request||request.ownerUid!==state.user?.uid)throw Error('Acceso no autorizado.');
+      if(action==='edit'){await openPublish(request);return;}
+      if(action==='resolve'&&!confirm('¿Marcar esta necesidad como resuelta?'))return;
+      if(action==='cancel'&&!confirm('¿Cancelar esta necesidad?'))return;
+      const status={resolve:'resuelta',cancel:'cancelada',reopen:'abierta'}[action];
+      if(!status)return;
+      await updateDoc(doc(db,'requests',id),{status});
+      notify('Estado actualizado.');
+    }catch(e){notify(e.message);}
+    finally{button.disabled=false;}
+  }
+  for(const id of ['request-grid','my-requests-grid','accepted-grid']){
+    $('#'+id).onclick=e=>{
+      const button=e.target.closest('button[data-real-action][data-id]');
+      if(button)clickAction(button);
+    };
+  }
+  function fillCategories(){
+    const kind=$('#request-category').value;
+    $('#request-subcategory').replaceChildren(...Object.entries(SUBCATEGORIES[kind]||SUBCATEGORIES.bienes).map(([id,label])=>new Option(label,id)));
+    const goods=kind==='bienes';$('#goods-fields').hidden=!goods;
+    $('#goods-fields').querySelectorAll('input,select').forEach(x=>{x.disabled=!goods;x.required=goods;});
+  }
+  $('#request-category').onchange=fillCategories;
+  function chooseCity(){
+    const other=$('#request-city').value==='__otra__';
+    $('#city-other-fields').hidden=!other;
+    $('#request-city-other').disabled=!other;$('#request-city-other').required=other;
+  }
+  $('#request-city').onchange=chooseCity;
+  const wizardSteps=$$('.wizard-step');
+  function wizardData(){
+    const read=id=>$('#'+id).value;
+    return {
+      title:read('request-title'),category:read('request-category'),
+      subcategory:read('request-subcategory'),
+      city:read('request-city')==='__otra__'?read('request-city-other'):read('request-city'),
+      quantity:read('request-quantity'),condition:read('request-condition'),
+      description:read('request-description'),budget:read('request-budget'),
+      desiredDate:read('request-date'),picture:state.picture
+    };
+  }
+  function wizardStep(n){
+    state.step=Math.max(0,Math.min(2,n));
+    wizardSteps.forEach((x,i)=>x.hidden=i!==state.step);
+    $('#wizard-status').textContent='Paso '+(state.step+1)+' de 3';
+    $$('.wizard-bars span').forEach((x,i)=>x.classList.toggle('is-complete',i<=state.step));
+    $('#wizard-back').hidden=state.step===0;
+    $('#wizard-next').hidden=state.step===2;
+    $('#wizard-submit').hidden=state.step!==2;
+    if(state.step===2){
+      const data=wizardData(),box=$('#wizard-review');box.replaceChildren();
+      for(const [k,value] of [
+        ['Tipo',CATEGORIES[data.category]],
+        ['Categoría',SUBCATEGORIES[data.category]?.[data.subcategory]],
+        ['Solicitud',data.title],
+        ['Ciudad',data.city],
+        ['Descripción',data.description]
+      ]){
+        const row=el('p','review-row');row.append(el('strong','',k+': '),document.createTextNode(value||''));box.append(row);
+      }
+    }
+  }
+  function validateStep(){
+    const step=wizardSteps[state.step];
+    for(const input of step.querySelectorAll('input,select,textarea')){
+      if(!input.disabled&&!input.checkValidity()){input.reportValidity();return false;}
+    }
+    return true;
+  }
+  function setPicture(data){
+    state.picture=data;
+    const preview=$('#request-photo-preview');preview.replaceChildren();
+    if(data){const img=el('img','uploaded-picture');img.src=data;img.alt='Fotografía seleccionada';preview.append(img);}
+    $('#request-photo-remove').hidden=!data;
+  }
+  $('#request-photo').onchange=async e=>{
+    const file=e.target.files?.[0];if(!file)return;
+    try{
+      if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>6000000)
+        throw Error('Selecciona una fotografía JPG, PNG o WebP de hasta 6 MB.');
+      const uri=await new Promise((resolve,reject)=>{
+        const reader=new FileReader();reader.onload=()=>resolve(reader.result);
+        reader.onerror=()=>reject(Error('No se pudo leer la fotografía.'));reader.readAsDataURL(file);
+      });
+      const img=await new Promise((resolve,reject)=>{
+        const node=new Image();node.onload=()=>resolve(node);node.onerror=()=>reject(Error('No se pudo abrir la fotografía.'));node.src=uri;
+      });
+      const scale=Math.min(1,700/Math.max(img.width,img.height));
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.max(1,Math.round(img.width*scale));
+      canvas.height=Math.max(1,Math.round(img.height*scale));
+      const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      const picture=canvas.toDataURL('image/jpeg',.67);
+      if(picture.length>400000)throw Error('La fotografía es demasiado grande. Selecciona otra más pequeña.');
+      setPicture(picture);
+    }catch(error){notify(error.message);}
+    finally{e.target.value='';}
+  };
+  $('#request-photo-remove').onclick=()=>setPicture('');
+  async function openPublish(request=null){
+    if(!state.user){openAccount();notify('Inicia sesión para publicar.');return;}
+    if(!state.profile){openAccount();return;}
+    state.edit=request?.id||null;
+    $('#publish-form').reset();setPicture('');fillCategories();chooseCity();
+    let data=request;
+    if(!request){
+      try{const draft=await getDoc(doc(db,'drafts',state.user.uid));if(draft.exists())data=draft.data().data;}
+      catch(e){notify('No se pudo recuperar el borrador: '+e.message);}
+    }
+    if(data){
+      $('#request-category').value=data.category==='servicios'?'servicios':'bienes';fillCategories();
+      for(const [key,id] of Object.entries({
+        subcategory:'request-subcategory',title:'request-title',description:'request-description',
+        quantity:'request-quantity',condition:'request-condition',budget:'request-budget',desiredDate:'request-date'
+      }))if(data[key]!==null&&data[key]!==undefined)$('#'+id).value=String(data[key]);
+      const cityIsListed=[...$('#request-city').options].some(x=>x.value===data.city);
+      $('#request-city').value=cityIsListed?data.city:'__otra__';
+      $('#request-city-other').value=cityIsListed?'':data.city||'';
+      chooseCity();setPicture(data.picture||'');
+    }
+    $('#publish-title').textContent=request?'Edita tu necesidad':'Publica lo que necesitas';
+    $('#wizard-submit').textContent=request?'Guardar cambios':'Guardar necesidad';
+    $('#publish-error').hidden=true;$('#publish-error').textContent='';
+    $('#wizard-clear').hidden=true;
+    wizardStep(0);$('#publish-dialog').showModal();
+  }
+  $$('[data-open="publish"]').forEach(x=>x.onclick=()=>openPublish());
+  $('.close-dialog').onclick=()=>$('#publish-dialog').close();
+  $('#wizard-next').onclick=()=>{if(validateStep())wizardStep(state.step+1);};
+  $('#wizard-back').onclick=()=>wizardStep(state.step-1);
+  $('#wizard-draft').onclick=async()=>{
+    if(!state.user){openAccount();return;}
+    try{
+      await setDoc(doc(db,'drafts',state.user.uid),{
+        data:wizardData(),editingRequestId:state.edit||'',updatedAt:serverTimestamp()
+      });
+      $('#publish-dialog').close();notify('Borrador guardado.');
+    }catch(e){notify('No se pudo guardar el borrador: '+e.message);}
+  };
+  $('#publish-form').onsubmit=async e=>{
+    e.preventDefault();if(!validateStep())return;
+    const error=$('#publish-error');error.hidden=true;
+    try{
+      if(!state.user||!state.profile)throw Error('Inicia sesión y completa tu perfil.');
+      const normalized=normalizeRequest(wizardData());
+      const data={...normalized};delete data.createdAt;
+      if(state.edit){
+        const own=state.requests.find(x=>x.id===state.edit);
+        if(own?.ownerUid!==state.user.uid)throw Error('Solo puedes editar tus propias necesidades.');
+        await updateDoc(doc(db,'requests',state.edit),data);
+      }else{
+        await addDoc(collection(db,'requests'),{...data,ownerUid:state.user.uid,createdAt:serverTimestamp()});
+      }
+      try{await deleteDoc(doc(db,'drafts',state.user.uid));}catch{}
+      $('#publish-dialog').close();state.edit=null;setPicture('');
+      location.hash='#mis-necesidades';notify('Necesidad guardada.');
+    }catch(ex){error.textContent=ex.message;error.hidden=false;}
+  };
+  // Solo se muestran los cuatro accesos originales de Inicio.
+  fillCategories();populateFilters();renderAll();activateScreen();
+}
