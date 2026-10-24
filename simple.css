@@ -153,3 +153,15 @@ dialog::backdrop{background:#10271e99}
  .publication-facts dt,.publication-facts dd{font-size:12px}
  .release-bar{font-size:11px}
 }
+
+/* Versión 2.1.0: una sola caja para toda la necesidad y otra para WhatsApp. */
+#publish-form{max-width:740px;gap:22px}
+#need-description{min-height:235px;padding:16px;font-size:15px;line-height:1.68;resize:vertical}
+#need-phone{font-size:17px;min-height:52px}
+#publish-form .field-help{margin-top:9px;font-size:12px;line-height:1.55}
+.publication-card h3{text-align:center;max-width:70ch;margin:4px auto 14px}
+.publication-description{margin:10px 0 19px;font-size:15px;line-height:1.7;text-align:justify;text-align-last:left;white-space:pre-wrap;overflow-wrap:break-word}
+.contact-phone{display:inline-block;max-width:100%;padding:9px 12px;border-radius:9px}
+.contact-phone:hover,.contact-phone:focus-visible{background:#d9efdf}
+.search-panel{max-width:860px}
+@media(max-width:680px){#need-description{min-height:220px;font-size:14px}.publication-description{font-size:14px}}

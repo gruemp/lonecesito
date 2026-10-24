@@ -4,16 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#17493e">
-  <meta name="description" content="LoNecesito: publica productos o servicios que buscas y contacta directamente por WhatsApp a quienes publican necesidades.">
+  <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261024-v201">
+  <link rel="stylesheet" href="simple.css?v=20261024-v210">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261024-v201"></script>
+  <script type="module" src="simple.js?v=20261024-v210"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
-<div class="release-bar" role="note"><span id="release-version">Versión 2.0.1</span></div>
+<div class="release-bar" role="note"><span id="release-version">Versión 2.1.0</span></div>
 <header class="site-header">
   <div class="shell header-layout">
     <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
@@ -29,16 +29,16 @@
     <div class="hero">
       <p class="eyebrow">PRODUCTOS Y SERVICIOS</p>
       <h1 id="home-title">Publica lo que necesitas. Encuentra quién puede ofrecerlo.</h1>
-      <p class="hero-description">Publica una necesidad o descubre lo que otras personas están buscando. Si puedes venderles un producto o prestarles un servicio, contáctalas directamente por WhatsApp.</p>
+      <p class="hero-description">Escribe lo que necesitas y tu número de WhatsApp. Quien pueda ayudarte podrá contactarte directamente.</p>
       <div class="hero-actions">
         <a class="action-card primary" href="#publicar">
           <span class="action-symbol" aria-hidden="true">✎</span>
-          <span class="action-words"><strong>Publicar lo que necesito</strong><small>Describe el producto o servicio que buscas.</small></span>
+          <span class="action-words"><strong>Publicar lo que necesito</strong><small>Escribe tu necesidad y tu WhatsApp.</small></span>
           <span aria-hidden="true">→</span>
         </a>
         <a class="action-card secondary" href="#necesidades">
           <span class="action-symbol" aria-hidden="true">⌕</span>
-          <span class="action-words"><strong>Ver necesidades</strong><small>Encuentra publicaciones y comunícate por WhatsApp.</small></span>
+          <span class="action-words"><strong>Ver necesidades</strong><small>Consulta publicaciones y contacta por WhatsApp.</small></span>
           <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -49,15 +49,11 @@
   <section id="necesidades" class="screen shell content-screen" aria-labelledby="browse-title" hidden>
     <div class="page-heading">
       <h2 id="browse-title">Necesidades publicadas</h2>
-      <p>Consulta lo que otras personas necesitan. Si puedes ofrecer el producto o prestar el servicio, usa el número de WhatsApp que aparece en la publicación.</p>
+      <p>Lee cada necesidad y pulsa el número para hablar directamente por WhatsApp.</p>
     </div>
     <div class="search-panel">
       <label for="search">Buscar necesidades</label>
-      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="Producto, servicio o ciudad…">
-      <div class="filter-fields">
-        <div><label for="type-filter">Tipo</label><select id="type-filter"><option value="all">Productos y servicios</option><option value="bienes">Productos</option><option value="servicios">Servicios</option></select></div>
-        <div><label for="city-filter">Ciudad o municipio</label><select id="city-filter"><option value="all">Todas las ciudades</option></select></div>
-      </div>
+      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="¿Qué estás buscando?">
     </div>
     <div id="browse-list" class="publication-list" aria-live="polite"></div>
     <p id="browse-empty" class="empty-message" hidden>No hay publicaciones que coincidan con la búsqueda.</p>
@@ -66,7 +62,7 @@
   <section id="mis-publicaciones" class="screen shell content-screen" aria-labelledby="mine-title" hidden>
     <div class="page-heading">
       <h2 id="mine-title">Mis publicaciones</h2>
-      <p>Aquí puedes consultar las necesidades que has publicado, editarlas o eliminarlas.</p>
+      <p>Consulta tus necesidades. Si algo cambia, puedes editar o eliminar la publicación.</p>
     </div>
     <div class="section-actions"><a class="button primary-button" href="#publicar">Crear publicación</a></div>
     <div id="mine-list" class="publication-list" aria-live="polite"></div>
@@ -76,50 +72,18 @@
   <section id="publicar" class="screen shell content-screen" aria-labelledby="publish-title" hidden>
     <div class="page-heading">
       <h2 id="publish-title">Publica lo que necesitas</h2>
-      <p>Describe lo que buscas e indica un número de WhatsApp para que puedan contactarte directamente.</p>
+      <p>Solo escribe tu necesidad y un teléfono de WhatsApp para recibir contactos.</p>
     </div>
     <form id="publish-form" class="publish-form">
-      <p id="edit-info" class="inline-notice" hidden>Estás editando tu publicación.</p>
       <div class="form-field">
-        <label for="need-category">¿Buscas un producto o un servicio?</label>
-        <select id="need-category" name="category" required><option value="bienes">Producto</option><option value="servicios">Servicio</option></select>
+        <label for="need-description">¿Qué necesitas?</label>
+        <textarea id="need-description" name="description" rows="8" maxlength="4000" minlength="10" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
       </div>
       <div class="form-field">
-        <label for="need-title">Título de la publicación</label>
-        <input id="need-title" name="title" maxlength="120" minlength="5" placeholder="Ej. Necesito reparar una nevera" required>
+        <label for="need-phone">Número de WhatsApp</label>
+        <input id="need-phone" name="contactPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="Ej. 300 123 4567" required>
+        <p class="field-help">Al publicar, este número será visible y se podrá pulsar para iniciar una conversación por WhatsApp.</p>
       </div>
-      <div class="form-field">
-        <label for="need-city">Ciudad o municipio</label>
-        <input id="need-city" name="city" maxlength="80" minlength="2" placeholder="Ej. Santa Marta" required>
-      </div>
-      <div class="form-field">
-        <label for="need-description">Descripción</label>
-        <textarea id="need-description" name="description" rows="5" maxlength="1500" minlength="15" placeholder="Explica las características, condiciones y demás detalles importantes." required></textarea>
-      </div>
-      <fieldset id="goods-fields" class="goods-fields">
-        <legend>Detalles del producto (opcional)</legend>
-        <div class="filter-fields">
-          <div class="form-field"><label for="need-quantity">Cantidad</label><input id="need-quantity" name="quantity" type="number" min="1" max="1000000" step="1" placeholder="Ej. 2"></div>
-          <div class="form-field"><label for="need-condition">Estado</label><select id="need-condition" name="condition"><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
-        </div>
-      </fieldset>
-      <div class="form-field">
-        <label for="need-budget">Presupuesto aproximado en COP (opcional)</label>
-        <input id="need-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Puedes dejarlo vacío">
-      </div>
-      <div class="form-field">
-        <label for="need-picture">Fotografía (opcional)</label>
-        <input id="need-picture" type="file" accept="image/jpeg,image/png,image/webp">
-        <p class="field-help">No incluyas documentos de identidad ni direcciones exactas en las fotografías.</p>
-        <div id="picture-preview" class="picture-preview"></div>
-        <button id="remove-picture" class="text-button" type="button" hidden>Quitar fotografía</button>
-      </div>
-      <div class="form-field">
-        <label for="need-phone">Número de WhatsApp para recibir contactos</label>
-        <input id="need-phone" name="contactPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="Ej. 300 123 4567 o +57 300 123 4567" required>
-        <p class="field-help">Si escribes un celular colombiano de 10 dígitos, se agregará el indicativo +57.</p>
-      </div>
-      <label class="consent"><input id="need-consent" type="checkbox" required><span>Autorizo que mi número de WhatsApp aparezca públicamente en esta publicación, para que las personas puedan contactarme directamente.</span></label>
       <p id="form-feedback" class="feedback" role="alert" hidden></p>
       <div class="form-actions">
         <button id="save-button" type="submit" class="button primary-button">Publicar necesidad</button>

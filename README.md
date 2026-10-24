@@ -1,3 +1,16 @@
+# Versión 2.1.0 · 24/10/2026
+
+- Para publicar se utilizan **solo dos campos**: descripción completa de la necesidad y número de WhatsApp.
+- Se elimina la captura individual de título, categoría, ciudad, presupuesto, fecha, cantidad y fotografía. El encabezado de la ficha se genera a partir de la primera línea de la descripción.
+- En las fichas el número es pulsable y abre WhatsApp. En ejemplos sin destinatario real, WhatsApp se abre sin número asignado.
+- Las publicaciones anteriores pueden editarse; sus detalles existentes pasan al texto único y se conservan las fotografías ya almacenadas.
+- La versión visible se actualiza a 2.1.0 y siguen sin aparecer avisos repetitivos sobre pruebas.
+- Los controles del autor siguen siendo únicamente Editar y Eliminar.
+
+**Pendiente operativo:** Firebase sigue sin configurar en el repositorio. La página puede desplegarse, pero todavía no comparte publicaciones entre navegadores diferentes. Se requiere revisión de privacidad antes de operar con contactos reales.
+
+---
+
 # Versión 2.0.1 · 24/10/2026
 
 - Solo se muestra el número de versión en la franja superior.

@@ -1,55 +1,71 @@
 import test,{before,after} from 'node:test';
 import {readFileSync} from 'node:fs';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
-import {collection,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc,serverTimestamp} from 'firebase/firestore';
+import {collection,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc,deleteField,serverTimestamp} from 'firebase/firestore';
 
 let env;
-const OWNER='owner-a',OTHER='other-b';
-const data=(owner=OWNER)=>({
-  ownerUid:owner,title:'Necesito reparar una nevera',category:'servicios',city:'Santa Marta',
-  description:'Busco una reparación de mi nevera porque dejó de enfriar.',
-  contactPhone:'573001234567',contactConsent:true,budget:null,quantity:null,condition:null,
-  picture:'',createdAt:serverTimestamp()
+const A='usuario-a',B='usuario-b';
+const publication=(owner=A)=>({
+  ownerUid:owner,
+  title:'Necesito reparar una nevera',
+  description:'Necesito reparar una nevera que no está enfriando y estoy en Santa Marta.',
+  contactPhone:'573001234567',
+  contactConsent:true,
+  createdAt:serverTimestamp()
 });
 const db=uid=>env.authenticatedContext(uid).firestore();
 
 before(async()=>{
-  if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('Ejecuta las pruebas con Firebase Emulator: npm run test:rules.');
+  if(!process.env.FIRESTORE_EMULATOR_HOST)throw Error('Ejecuta npm run test:rules.');
   env=await initializeTestEnvironment({
     projectId:'demo-lonecesito-privacidad',
     firestore:{rules:readFileSync(new URL('../firestore.rules',import.meta.url),'utf8')}
   });
-  await env.withSecurityRulesDisabled(async c=>{
-    await setDoc(doc(c.firestore(),'requests','public-existing'),data(OWNER));
+  await env.withSecurityRulesDisabled(async ctx=>{
+    await setDoc(doc(ctx.firestore(),'requests','existente'),publication(A));
+    await setDoc(doc(ctx.firestore(),'requests','antigua'),{
+      ...publication(A),category:'bienes',city:'Santa Marta',
+      subcategory:'Electrodomésticos',quantity:1,
+      condition:'usado',budget:null,desiredDate:'',status:'abierta',picture:''
+    });
   });
 });
 after(async()=>{if(env)await env.cleanup();});
 
-test('todos pueden ver publicaciones y teléfonos autorizados',async()=>{
-  const anonymous=env.unauthenticatedContext().firestore();
-  await assertSucceeds(getDoc(doc(anonymous,'requests','public-existing')));
-  await assertSucceeds(getDocs(collection(anonymous,'requests')));
+test('las publicaciones se pueden leer sin iniciar sesión',async()=>{
+  const anon=env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(anon,'requests','existente')));
+  await assertSucceeds(getDocs(collection(anon,'requests')));
 });
-test('solo un usuario autenticado puede publicar a su nombre',async()=>{
-  await assertSucceeds(setDoc(doc(db(OWNER),'requests','valid-new'),data(OWNER)));
-  await assertFails(setDoc(doc(db(OTHER),'requests','impersonated'),data(OWNER)));
-  await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(),'requests','anonymous'),data(OWNER)));
+test('solo el autor autenticado puede publicar',async()=>{
+  await assertSucceeds(setDoc(doc(db(A),'requests','nueva'),publication(A)));
+  await assertFails(setDoc(doc(db(B),'requests','suplantada'),publication(A)));
+  await assertFails(setDoc(doc(env.unauthenticatedContext().firestore(),'requests','anonima'),publication(A)));
 });
-test('WhatsApp y consentimiento son obligatorios',async()=>{
-  await assertFails(setDoc(doc(db(OWNER),'requests','without-phone'),{...data(OWNER),contactPhone:''}));
-  await assertFails(setDoc(doc(db(OWNER),'requests','without-consent'),{...data(OWNER),contactConsent:false}));
-  await assertFails(setDoc(doc(db(OWNER),'requests','bad-phone'),{...data(OWNER),contactPhone:'123'}));
-  await assertFails(setDoc(doc(db(OWNER),'requests','extra'),{...data(OWNER),privateEmail:'secreto@ejemplo.test'}));
+test('se rechazan números inválidos, campos innecesarios y solicitudes vacías',async()=>{
+  await assertFails(setDoc(doc(db(A),'requests','sintelefono'),{...publication(A),contactPhone:''}));
+  await assertFails(setDoc(doc(db(A),'requests','sinconsentimiento'),{...publication(A),contactConsent:false}));
+  await assertFails(setDoc(doc(db(A),'requests','informacionextra'),{...publication(A),email:'usuario@ejemplo.com'}));
+  await assertFails(setDoc(doc(db(A),'requests','textoinsuficiente'),{...publication(A),description:'abc'}));
 });
-test('solo el propietario puede editar o eliminar',async()=>{
-  const path='public-existing';
-  await assertFails(updateDoc(doc(db(OTHER),'requests',path),{title:'Alterado por tercero'}));
-  await assertFails(deleteDoc(doc(db(OTHER),'requests',path)));
-  await assertFails(updateDoc(doc(db(OWNER),'requests',path),{ownerUid:OTHER}));
-  await assertSucceeds(updateDoc(doc(db(OWNER),'requests',path),{title:'Necesito reparar una nevera pronto'}));
-  await assertSucceeds(deleteDoc(doc(db(OWNER),'requests',path)));
+test('solo el propietario modifica o elimina sus solicitudes',async()=>{
+  await assertFails(updateDoc(doc(db(B),'requests','existente'),{description:'Texto modificado por otra cuenta.'}));
+  await assertFails(deleteDoc(doc(db(B),'requests','existente')));
+  await assertFails(updateDoc(doc(db(A),'requests','existente'),{ownerUid:B}));
+  await assertSucceeds(updateDoc(doc(db(A),'requests','existente'),{description:'Necesito reparar la nevera; contactarme por WhatsApp.'}));
+  await assertSucceeds(deleteDoc(doc(db(A),'requests','existente')));
 });
-test('no se pueden crear aplicaciones, propuestas ni perfiles',async()=>{
-  await assertFails(setDoc(doc(db(OTHER),'requests','valid-new','applications',OTHER),{uid:OTHER}));
-  await assertFails(setDoc(doc(db(OWNER),'profiles',OWNER),{name:'Persona'}));
+test('una publicación antigua puede migrar al texto único preservando su dueño',async()=>{
+  await assertSucceeds(updateDoc(doc(db(A),'requests','antigua'),{
+    description:'Necesito reparar una nevera. Ciudad: Santa Marta. Cantidad: 1. Estado: usado.',
+    title:'Necesito reparar una nevera',
+    category:deleteField(),city:deleteField(),subcategory:deleteField(),
+    quantity:deleteField(),condition:deleteField(),budget:deleteField(),
+    desiredDate:deleteField(),status:deleteField()
+  }));
+  await assertFails(updateDoc(doc(db(B),'requests','antigua'),{description:'Cambio ilegal desde otra cuenta.'}));
+});
+test('no se permite registrar interesados ni datos de terceros',async()=>{
+  await assertFails(setDoc(doc(db(B),'requests','nueva','applications',B),{uid:B}));
+  await assertFails(setDoc(doc(db(A),'profiles',A),{phone:'573001234567'}));
 });
