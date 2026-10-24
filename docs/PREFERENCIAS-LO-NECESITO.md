@@ -29,12 +29,12 @@
 
 La página comienza con **cuatro botones**, en el siguiente orden de lectura y de foco: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
 
-- **PC (ancho superior a 680 px):** una sola fila horizontal con los cuatro botones, alineada en ambos extremos con los márgenes de la imagen de Inicio. Los dos elementos comparten ancho responsivo ajustado también a la altura disponible, para mostrar completa la imagen 16:9 al 100 % de zoom.
+- **PC (ancho superior a 680 px):** una sola fila horizontal con los cuatro botones, alineada en ambos extremos con los márgenes de la imagen de Inicio. Los dos elementos comparten ancho responsivo ajustado también a la altura disponible, para mostrar completa la imagen 1819:865 al 100 % de zoom.
 - **Móvil (hasta 680 px):** dos filas, con **Inicio / Publicar lo que necesito** arriba y **Mis publicaciones / Ver necesidades** abajo.
 
 - Mantener la barra arriba y el acceso visible mientras se navega.
 - No duplicar pestañas ni ocultarlas; conservar sus cuatro colores e indicación de selección.
-- Primera pestaña: **Inicio**. Solo muestra la **tercera ilustración aprobada** que enseña el flujo «Publica → La ven → Te contactan», en el archivo **assets/lonecesito-presentacion.webp**; no cambiar por la primera o segunda ilustración. Debe quedar **plenamente visible**, centrada, conservando su relación de aspecto y encajada tanto en el ancho como en la altura disponible, sin recortes ni otros contenidos añadidos.
+- Primera pestaña: **Inicio**. Solo muestra la **primera ilustración aprobada de dos pasos**: «1. Publica lo que necesitas» (licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp), en **assets/lonecesito-presentacion-dos-pasos.png** (1819 × 865). La versión anterior de tres pasos no está activa y la variante posterior con mayonesa está descartada. Mostrar completa, centrada y sin distorsión, sin añadir otros contenidos.
 - Segunda pestaña: **Publicar lo que necesito**. Editor compacto.
 - Tercera pestaña: **Mis publicaciones**. Solo registros propios y sus acciones de edición/eliminación.
 - Cuarta pestaña: **Ver necesidades**. Buscador y lista de necesidades publicadas **reales**, sin imagen introductoria dentro de esta pestaña.
