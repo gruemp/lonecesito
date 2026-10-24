@@ -7,32 +7,35 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261024-v2212">
+  <link rel="stylesheet" href="simple.css?v=20261024-v2213">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261024-v2212"></script>
+  <script type="module" src="simple.js?v=20261024-v2213"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
-<div class="release-bar" role="note"><span id="release-version">Versión 2.2.12</span></div>
 <header class="site-header">
   <div class="shell header-layout">
-    <a class="brand" href="#necesidades" aria-label="LoNecesito, ver necesidades"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
+    <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
     <nav class="top-nav" aria-label="Navegación principal">
-      <a class="nav-publish" href="#publicar" data-nav="publicar">Publicar lo que necesito</a>
-      <a class="nav-browse" href="#necesidades" data-nav="necesidades">Ver necesidades</a>
+      <a class="nav-home" href="#inicio" data-nav="inicio">Inicio</a>
       <a class="nav-mine" href="#mis-publicaciones" data-nav="mis-publicaciones">Mis publicaciones</a>
+      <a class="nav-browse" href="#necesidades" data-nav="necesidades">Ver necesidades</a>
+      <a class="nav-publish" href="#publicar" data-nav="publicar">Publicar lo que necesito</a>
     </nav>
     <button id="account-button" class="account-button" type="button" hidden>Iniciar sesión</button>
   </div>
 </header>
 <main id="contenido">
-  <section id="necesidades" class="screen shell content-screen" aria-label="Necesidades publicadas">
+  <section id="inicio" class="screen home-visual-screen" aria-label="Inicio de LoNecesito">
     <figure class="welcome-banner">
-      <img src="assets/lonecesito-presentacion.webp" width="1440" height="810" alt="LoNecesito: publica lo que necesitas, otras personas ven tu publicación y te contactan directamente por llamada o WhatsApp." decoding="async" fetchpriority="high">
+      <img src="assets/lonecesito-presentacion.webp" width="1440" height="810" alt="LoNecesito: una persona publica lo que necesita, otra ve la publicación y la contacta directamente por llamada o WhatsApp." decoding="async" fetchpriority="high">
     </figure>
+  </section>
+
+  <section id="necesidades" class="screen shell content-screen" aria-label="Necesidades publicadas" hidden>
     <div class="search-panel">
       <label for="search">Buscar necesidades</label>
-      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="¿Qué estás buscando?">
+      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="Busca por palabras, partes de palabras o teléfono">
     </div>
     <div id="browse-list" class="publication-list" aria-live="polite"></div>
     <p id="browse-empty" class="empty-message" hidden>No hay publicaciones que coincidan con la búsqueda.</p>
