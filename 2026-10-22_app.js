@@ -468,20 +468,51 @@ function init(){
     article.append(head,overview,contextNote,actions);
     return article;
   }
+  function compactNeedRow(request,context,expanded=false){
+    // Solo se crea el nombre inicialmente. La ficha y su imagen se construyen
+    // cuando el usuario abre esa fila y se retiran al cerrarla.
+    const row=el('details','need-list-row');
+    row.dataset.id=request.id;
+    row.dataset.kind=request.category;
+    row.dataset.context=context;
+    const heading=el('summary','need-list-summary');
+    heading.title=request.title;
+    heading.append(el('span','need-list-title',request.title));
+    const content=el('div','need-list-content');
+    row.append(heading,content);
+    const show=()=>{
+      if(row.open){
+        if(!content.firstChild)content.append(needCard(request,context));
+      }else{
+        content.replaceChildren();
+      }
+    };
+    row.addEventListener('toggle',show);
+    if(expanded){
+      row.open=true;
+      show();
+    }
+    return row;
+  }
+  function renderNeedList(container,requests,context){
+    // Las listas actualizadas conservan abiertas las fichas que el usuario consultaba.
+    const expanded=new Set([...container.querySelectorAll('.need-list-row[open]')].map(row=>row.dataset.id));
+    container.replaceChildren(...requests.map(request=>compactNeedRow(request,context,expanded.has(request.id))));
+  }
   function renderOwnRequests(){
-    grid.replaceChildren(...records().map(request=>needCard(request,'explorar')));
+    renderNeedList(grid,records(),'explorar');
     populateCities();applyFilter();renderMyRequests();renderAccepted();
   }
   function renderMyRequests(){
     const container=$('#my-requests-grid');
     $('#my-count').textContent=state.requests.length?'('+state.requests.length+')':'';
     $('#my-empty').hidden=state.requests.length>0;
-    container.replaceChildren(...state.requests.map(request=>needCard(request,'propias')));
+    renderNeedList(container,state.requests,'propias');
   }
   function renderAccepted(){
     const list=$('#accepted-grid');
     const accepted=state.acceptances.map(item=>findRequest(item.requestId)).filter(Boolean);
-    list.replaceChildren(...accepted.map(request=>needCard(request,'aceptadas')));
+    renderNeedList(list,accepted,'aceptadas');
     $('#accepted-empty').hidden=accepted.length>0;
   }
   function changeOwnStatus(id,status){
