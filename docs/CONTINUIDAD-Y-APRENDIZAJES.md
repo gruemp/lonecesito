@@ -1,7 +1,7 @@
 # LoNecesito — entrega, aprendizajes y continuidad
 
 **Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión:** 2.2.11  
+**Versión:** 2.2.12  
 **Web:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
@@ -118,3 +118,9 @@ Verificar específicamente los anchos estrechos de celulares, teclados de compos
 ## Actualización 2.2.11 — papelera en la edición
 
 Al editar una necesidad propia, además de poder eliminarla desde su ficha, aparece un **icono de papelera rojo** en la misma fila de teléfono, fotografía, micrófono, enviar/guardar y X para cancelar. Solo se ve al editar; confirma antes de borrar y únicamente el dueño puede hacerlo. Cancelar la eliminación conserva la edición; terminarla correctamente retorna a «Mis publicaciones». La fila permanece compacta en móviles. Hay que revisar visualmente la anchura de la caja de teléfono en pantallas estrechas. Firebase sigue sin configurar.
+
+## Actualización 2.2.12 — imagen de bienvenida aprobada
+
+La pantalla inicial `#necesidades` muestra, debajo de la barra de tres botones y antes del buscador, el banner panorámico seleccionado por el usuario: `assets/lonecesito-presentacion.webp` (1440×810). Presenta tres personajes y explica visualmente las tres etapas **Publica → La ven → Te contactan** por llamada o WhatsApp. No representa ofertas ni intercambios internos. Se visualiza completo, ancho 100 %, con altura automática y sin recortes, exclusivamente en la primera pestaña. Los demás flujos de publicación y fichas no cambian. El archivo original generado está asociado a esta conversación como `lonecesito_publica_y_conecta.png`; se subió una copia WebP optimizada al repositorio para que GitHub Pages la sirva sin depender de ChatGPT.
+
+Firebase sigue sin configurar; la existencia de esta imagen no implica que las publicaciones se compartan entre navegadores.

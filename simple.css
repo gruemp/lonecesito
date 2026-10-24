@@ -456,3 +456,27 @@ body:has(.image-dialog[open]){overflow:hidden}
 @media(max-width:345px){
   #publish-form .delete-edit-button svg{width:18px;height:18px}
 }
+
+
+/* Versión 2.2.12: imagen informativa elegida por el usuario, solo en la primera pestaña. */
+#necesidades .welcome-banner{
+  margin:0 auto 12px;
+  width:100%;
+  max-width:1030px;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+#necesidades .welcome-banner img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:16 / 9;
+  object-fit:contain;
+  border:0;
+  border-radius:12px;
+}
+@media(max-width:600px){
+  #necesidades .welcome-banner{margin-bottom:9px}
+  #necesidades .welcome-banner img{border-radius:8px}
+}

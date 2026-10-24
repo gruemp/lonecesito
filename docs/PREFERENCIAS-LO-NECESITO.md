@@ -1,3 +1,11 @@
+## Actualización vigente 2.2.12 — banner en la primera pestaña
+
+- El usuario eligió la **segunda imagen de las dos últimas propuestas**, con tres personajes y la secuencia **«Publica → La ven → Te contactan»**. Usarla sin rediseñarla, en su representación web optimizada `assets/lonecesito-presentacion.webp` (WebP de 1440 × 810, derivado del PNG seleccionado).
+- Colocarla en la vista **Ver necesidades**, que es la pantalla inicial, **inmediatamente debajo de los tres botones superiores y encima del buscador**. No es una cuarta opción ni una pantalla separada.
+- La ilustración debe **ocupar todo el ancho disponible de la pestaña** en PC y móviles, pero mostrarse entera sin cortar (`width:100%; height:auto; object-fit:contain`). Evitar márgenes y textos adicionales que ocupen espacio vertical alrededor.
+- Mostrarla solo en esa primera vista, no en «Mis publicaciones» ni en el editor. No alterar las fichas ni los botones existentes.
+- El sentido de la web sigue siendo exclusivamente publicar lo que uno necesita, verlo y contactar **directamente por llamada o WhatsApp**, sin ofertas publicadas, intercambios o negociación interna.
+
 ## Actualización 2.2.11 — eliminar también desde el editor
 
 Al editar una publicación propia, la fila compacta bajo «¿Qué necesitas?» tiene **teléfono, foto, micrófono, enviar/guardar, papelera roja y X para cancelar**, en ese orden; todos los controles de acción son iconos, sin textos visibles. En la creación no aparecen ni papelera ni X. Al pulsar la papelera se solicita confirmación antes del borrado; si se rechaza no se pierde la edición, y si se confirma y se completa se vuelve a «Mis publicaciones». No duplicar la acción en otra fila. Esta indicación se suma a la posibilidad de eliminar una ficha propia desde su propia barra de iconos.

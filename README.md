@@ -1,3 +1,11 @@
+# Versión 2.2.12 — imagen elegida en la primera pestaña
+
+Se incorporó **la imagen panorámica escogida por el usuario** en la vista inicial «Ver necesidades», debajo de los tres accesos superiores y antes del buscador. El archivo se guarda de manera independiente en el repositorio, en `assets/lonecesito-presentacion.webp`, para que funcione como recurso propio de GitHub Pages. Ocupa todo el ancho disponible, se adapta a móviles y se muestra sin recortes. La secuencia es «Publica → La ven → Te contactan» mediante llamada o WhatsApp.
+
+No se alteran las fichas ni el formulario. Se actualizan las preferencias permanentes y el documento de continuidad. Firebase sigue sin configurar.
+
+---
+
 # Versión 2.2.11 — eliminar desde el editor
 
 Ahora, mientras se edita una publicación propia, aparece un **botón de papelera** junto al icono de guardar y la X para cancelar, **en la misma fila**. La papelera pide confirmación; al cancelar la eliminación conserva la edición y al completarla vuelve a «Mis publicaciones». Al crear, papelera y X permanecen ocultos. También se sigue pudiendo eliminar desde el icono de la ficha. El diseño mantiene botones compactos y accesibles, con versión visible incrementada a 2.2.11.

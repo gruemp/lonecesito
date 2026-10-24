@@ -1,5 +1,5 @@
 /* Versión visible en la portada. Incrementar al publicar cada nueva modificación. */
-export const APP_VERSION = '2.2.11';
+export const APP_VERSION = '2.2.12';
 export const APP_VERSION_DATE = '24/10/2026';
 
 /* Los ejemplos utilizan el mismo formulario y validación que una publicación nueva.
