@@ -223,7 +223,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 });
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
+  assert.match(html,/Tu número quedará disponible en los enlaces públicos de llamada y WhatsApp/);
   assert.match(html,/Versión 2\.2\.10/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
