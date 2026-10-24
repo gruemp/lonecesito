@@ -436,7 +436,7 @@ test('la exportación PNG usa canvas, hoja nativa de compartir o descarga',()=>{
   assert.match(js,/new File\(\[blob\],filename,\{type:'image\/png'\}\)/);
   assert.match(js,/download\.download=filename/);
   assert.match(png,/drawing\.toBlob\(blob=>blob\?resolve\(blob\)/);
-  assert.match(png,/drawWrapped\(ctx,bodyLines,left,bodyY\+32,bodyWidth,46,true\)/);
+  assert.match(png,/drawWrapped\(ctx,bodyLines,left,bodyY\+32,bodyWidth,lineHeight,true\)/);
   assert.match(png,/const bodyHeight=Math\.max\(paragraphHeight,photoHeight\)/);
   assert.match(png,/if\(hasPhone\)/);
   assert.match(png,/const hasPhone=!example&&Boolean\(contactPhone\)/);
