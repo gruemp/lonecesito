@@ -17,6 +17,12 @@ function cleanText(value,min,max,label){
   return text;
 }
 
+function cleanNeedTitle(value){
+  if(typeof value!=='string')throw new Error('Escribe qué necesitas.');
+  const title=value.replace(/\r\n?/g,'\n').trim();
+  if(!title)throw new Error('Escribe al menos una letra o símbolo para indicar qué necesitas.');
+  return title;
+}
 function optionalText(value,max,label){
   if(value==null||value==='')return '';
   if(typeof value!=='string')throw new Error(`Revisa ${label}.`);
@@ -66,7 +72,7 @@ export function normalizeRequest(input){
     if(!['nuevo','usado','cualquiera'].includes(condition))throw new Error('Selecciona la condición del bien.');
   }
   return {
-    title:cleanText(input?.title,8,120,'La descripción breve'),
+    title:cleanNeedTitle(input?.title),
     city:cleanText(input?.city,2,80,'La ciudad o municipio'),
     category,subcategory,description:cleanText(input?.description,15,1500,'Los detalles'),
     budget,desiredDate,quantity,condition,picture:pictureOrEmpty(input?.picture),
@@ -163,12 +169,12 @@ export function confirmOldProposal(proposals,id){
   if(!found||found.status!=='pendiente_confirmacion')throw new Error('La propuesta no necesita confirmación.');
   return proposals.map(p=>p.id===id?{...p,status:'activa',updatedAt:new Date().toISOString()}:p);
 }
-const DRAFT_FIELDS=Object.freeze({title:120,city:80,category:24,subcategory:40,description:1500,budget:20,quantity:12,condition:24,desiredDate:10});
+const DRAFT_FIELDS=Object.freeze({title:null,city:80,category:24,subcategory:40,description:1500,budget:20,quantity:12,condition:24,desiredDate:10});
 export function buildDraft(input){
   const draft={};
   for(const [key,max] of Object.entries(DRAFT_FIELDS)){
     const value=input?.[key];
-    draft[key]=typeof value==='string'?value.slice(0,max):(value==null?'':String(value).slice(0,max));
+    draft[key]=typeof value==='string'?(max==null?value:value.slice(0,max)):(value==null?'':max==null?String(value):String(value).slice(0,max));
   }
   if(!Object.hasOwn(CATEGORIES,draft.category))draft.category='bienes';
   if(!Object.hasOwn(SUBCATEGORIES[draft.category],draft.subcategory))draft.subcategory='otros';
@@ -373,36 +379,45 @@ function init(){
     container.append(button,frame);
   }
   function addUserCard(request){
-    const article=el('article','request-card');article.dataset.id=request.id;article.dataset.kind=request.category;article.dataset.userRequest='true';
+    const mine=state.requests.some(r=>r.id===request.id);
+    const article=el('article','request-card');
+    article.dataset.id=request.id;
+    article.dataset.kind=request.category;
+    if(mine)article.dataset.userRequest='true';
     const content=el('div','card-content');
     const category=el('p','category',CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría'));
     const title=el('h3','',request.title);
+    const description=el('p','card-summary',request.description);
     const city=el('p','card-city',request.city);
     const date=el('p','card-published',request.createdAt?'Publicada: '+formatDate(request.createdAt):'');
     const actions=el('div','card-actions');
-    const btn=el('button','card-link','Ver detalles ');btn.type='button';btn.dataset.request=request.id;btn.append(svg('arrow'));
-    const mine=state.requests.some(r=>r.id===request.id);
+    const details=el('button','card-link','Ver detalles ');
+    details.type='button';details.dataset.request=request.id;details.append(svg('arrow'));
+    actions.append(details);
     if(!mine){
       const accepted=state.acceptances.some(a=>a.requestId===request.id);
       const accept=el('button','button button-small',accepted?'Aceptada':'Aceptar necesidad');
       accept.type='button';accept.dataset.acceptRequest=request.id;accept.disabled=accepted;
       actions.append(accept);
     }
-    actions.append(btn);content.append(category,title,city);
+    content.append(category,title,description,city);
     if(date.textContent)content.append(date);
-    content.append(actions);article.append(content);
-    if(request.picture){const reveal=el('div','card-photo-toggle');addPictureToggle(reveal,request.picture,'Fotografía de '+request.title);article.append(reveal);}
+    content.append(actions);
+    const media=el('div','request-card-media'+(request.picture?' has-photo':' no-photo'));
+    if(request.picture){
+      const image=pictureNode(request.picture,'Fotografía de la necesidad: '+request.title);
+      if(image)media.append(image);
+    }else{
+      const placeholder=el('span','no-photo-label','Sin foto');
+      media.setAttribute('aria-label','No se adjuntó fotografía de esta necesidad');
+      media.append(placeholder);
+    }
+    article.append(content,media);
     return article;
   }
   function renderOwnRequests(){
-    grid.querySelectorAll('[data-user-request]').forEach(card=>card.remove());
-    const fragment=document.createDocumentFragment();state.requests.forEach(request=>fragment.append(addUserCard(request)));grid.prepend(fragment);
+    grid.replaceChildren(...records().map(addUserCard));
     populateCities();applyFilter();renderMyRequests();renderAccepted();
-    for(const button of grid.querySelectorAll('[data-accept-request]')){
-      const accepted=state.acceptances.some(a=>a.requestId===button.dataset.acceptRequest);
-      button.disabled=accepted;
-      button.textContent=accepted?'Aceptada':'Aceptar necesidad';
-    }
   }
   function renderMyRequests(){
     const container=$('#my-requests-grid'),requests=state.requests;

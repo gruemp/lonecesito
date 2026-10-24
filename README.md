@@ -1,4 +1,20 @@
 # lonecesito
+## Diseño vigente — títulos libres, fotos laterales y necesidades separadas
+
+Interfaz ajustada en octubre de 2026:
+
+- El campo inicial **«¿Qué necesitas?»** y el título del asistente no tienen `minlength` ni `maxlength`: **una letra es suficiente**, y el texto completo se conserva en el borrador y la solicitud. Sigue siendo obligatorio escribir algo distinto de espacios. Los detalles, ciudad y demás datos continúan con sus validaciones propias.
+- Menú con los nombres solicitados: **Inicio**, **Soluciona una necesidad y gana dinero por ello**, **Mis necesidades publicadas** y **Necesidades aceptadas**. En pantallas pequeñas se muestra en dos columnas para que los nombres sean legibles.
+- La vista de necesidades genera **una ficha por solicitud**. Cada ficha muestra título, resumen, ciudad, acciones y, en la **misma fila a la derecha**, la foto adjunta cuando existe. No hay que abrirla para verla en esta sección.
+- Si una solicitud no incluye fotografía, su espacio indica **«Sin foto»**; las solicitudes ilustrativas de ejemplo no contienen fotos reales. No se atribuyen imágenes arbitrarias a personas o anuncios.
+- Los anuncios están individualizados mediante separación entre tarjetas, borde, una franja lateral diferente para bienes/servicios y subtítulos legibles.
+- El flujo de aceptación continúa **sin formularios para quienes ayudan**. Los ejemplos pueden aceptarse en modo de prueba; no se establece un acuerdo real ni se intercambian datos entre usuarios.
+
+**Estado técnico:** 39 pruebas de funciones y estructura aprobadas. La verificación visual en dispositivos reales sigue siendo un paso separado. Las funciones multiusuario siguen dependiendo de Firebase, que no está conectado.
+
+Las secciones siguientes se mantienen como **historial del desarrollo**; las indicaciones anteriores sobre fotos ocultas y nombres antiguos del menú ya no corresponden al diseño vigente.
+
+---
 ## Flujo simplificado: aceptar necesidades, sin propuestas ni formularios de proveedor
 
 Desde esta actualización, **las personas que necesitan ayuda publican** mediante el formulario guiado; **quienes pueden resolverla únicamente exploran y pulsan «Aceptar necesidad»**. Se eliminan de la interfaz la redacción de cotizaciones, precios de proveedores, perfiles de proveedor, propuestas y sus formularios.

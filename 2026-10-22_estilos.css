@@ -30,3 +30,149 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
 .request-card .card-content>.button{grid-column:1/-1;justify-self:start;min-height:34px;margin-top:4px}
 #accept-request{flex:1 1 auto}
 @media(max-width:680px){.request-card .card-content>.button{width:100%}}
+
+
+/* Navegación con textos completos, visible en PC y celular. */
+.screen-navigation{
+  display:grid;
+  grid-template-columns:1fr 2.45fr 1.6fr 1.5fr;
+  gap:8px;
+  overflow:visible;
+  white-space:normal;
+  align-items:stretch;
+}
+.screen-navigation a{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:49px;
+  padding:9px 12px;
+  border:1px solid #dae5dc;
+  background:#fff;
+  line-height:1.24;
+  white-space:normal;
+  text-wrap:balance;
+  font-size:12px;
+  font-weight:750;
+}
+.screen-navigation a[aria-current=page]{border-color:var(--green);background:var(--green)}
+.section-description{color:var(--muted);font-size:13px;line-height:1.4;margin:6px 0 0}
+/* Cada necesidad tiene una ficha propia: texto a un lado, fotografía al otro. */
+#request-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+#request-grid .request-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 156px;
+  gap:15px;
+  align-items:stretch;
+  border:1px solid #d0ddd2;
+  border-left:5px solid #4b8a70;
+  border-radius:13px;
+  padding:13px 14px;
+  background:#fff;
+  box-shadow:0 3px 11px rgb(24 60 41 / 7%);
+  min-width:0;
+}
+#request-grid .request-card[data-kind="servicios"]{border-left-color:#b38b46}
+#request-grid .request-card:not([hidden]):hover{border-color:#a3bba8;box-shadow:0 5px 15px rgb(24 60 41 / 10%)}
+#request-grid .request-card .card-content{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
+  min-width:0;
+}
+#request-grid .request-card .category{grid-column:auto;font-size:10px;margin:0}
+#request-grid .request-card h3{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
+  width:100%;
+  font-size:16px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+#request-grid .request-card .card-summary{
+  margin:0;
+  width:100%;
+  color:#52665d;
+  font-size:13px;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  line-clamp:2;
+  overflow:hidden;
+}
+#request-grid .request-card .card-city{margin-top:2px;font-weight:600}
+#request-grid .request-card .card-published{margin:0}
+#request-grid .request-card .card-actions{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:auto;
+  padding-top:5px;
+  grid-column:auto;
+}
+#request-grid .request-card .card-actions .card-link{margin-right:0}
+#request-grid .request-card-media{
+  width:156px;
+  height:132px;
+  min-height:0;
+  border-radius:9px;
+  border:1px solid #dce5dc;
+  overflow:hidden;
+  align-self:center;
+  background:#f0f5ef;
+  display:grid;
+  place-items:center;
+}
+#request-grid .request-card-media img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  max-width:none;
+  max-height:none;
+}
+#request-grid .request-card-media .no-photo-label{
+  font-size:12px;
+  font-weight:650;
+  color:#728079;
+  text-align:center;
+  padding:9px;
+}
+@media(max-width:680px){
+  .screen-navigation{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+  }
+  .screen-navigation a{font-size:12px;min-height:48px;padding:7px 9px}
+  #request-grid{gap:11px}
+  #request-grid .request-card{
+    grid-template-columns:minmax(0,1fr) 106px;
+    gap:10px;
+    padding:11px;
+    border-left-width:4px;
+  }
+  #request-grid .request-card .category{font-size:10px}
+  #request-grid .request-card h3{font-size:14px}
+  #request-grid .request-card .card-summary{font-size:12px}
+  #request-grid .request-card .card-actions{gap:6px}
+  #request-grid .request-card .card-actions .button{font-size:11px;padding:6px 8px;min-height:33px}
+  #request-grid .request-card-media{width:106px;height:115px}
+}
+@media(max-width:370px){
+  .screen-navigation a{font-size:11px}
+  #request-grid .request-card{grid-template-columns:minmax(0,1fr) 90px;gap:8px;padding:9px}
+  #request-grid .request-card-media{width:90px;height:104px}
+  #request-grid .request-card .card-actions .button{font-size:10px}
+}
