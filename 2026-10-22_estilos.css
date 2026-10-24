@@ -2252,3 +2252,15 @@ dialog{
   .need-list-content .need-card-photo{min-height:107px;padding:4px}
   .need-list-content .need-card-actions .need-card-secondary{flex-basis:100%}
 }
+
+
+/* Descripciones justificadas en las tres vistas de necesidades.
+   Se respetan los saltos de línea y los párrafos del autor. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-list-content .need-card .need-card-description{
+  text-align:justify;
+  text-align-last:left;
+  text-justify:inter-word;
+  hyphens:auto;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
