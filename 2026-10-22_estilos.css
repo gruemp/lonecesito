@@ -338,3 +338,163 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
   #screen-navigation a{font-size:14px;padding:12px 13px}
   .hero .compact-next-step .solve-cta{font-size:15px}
 }
+
+
+/* Ficha unificada: la información completa siempre está visible, sin modal ni «detalles». */
+:is(#request-grid,#my-requests-grid,#accepted-grid){
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:16px;
+  width:100%;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+  padding:18px 20px;
+  border:1px solid #cedbd0;
+  border-left:5px solid #42836e;
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 5px 15px rgba(22,54,39,.07);
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card[data-kind="servicios"]{
+  border-left-color:#b48d45;
+}
+.need-card-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+}
+.need-card-head .category{
+  grid-column:auto;
+  margin:0;
+  color:#225d50;
+  letter-spacing:.05em;
+  line-height:1.35;
+  font-size:12px;
+  font-weight:750;
+  text-transform:uppercase;
+  overflow-wrap:anywhere;
+}
+.need-card-head .my-state{flex-shrink:0}
+.need-card-overview{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(116px,29%);
+  align-items:start;
+  gap:18px;
+  min-width:0;
+}
+.need-card-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-title{
+  display:block;
+  width:100%;
+  overflow:visible;
+  -webkit-line-clamp:unset;
+  line-clamp:unset;
+  margin:0;
+  font-size:clamp(19px,2.9vw,25px);
+  line-height:1.2;
+  font-weight:800;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+.need-card-copy .card-city{margin:0;color:#596c62;font-size:14px;font-weight:650}
+.need-card-copy .card-city .icon{width:15px;height:15px}
+.need-card-meta{
+  margin:0;
+  padding-left:21px;
+  color:#586d62;
+  font-size:13px;
+  line-height:1.45;
+}
+.need-card-meta li{margin:2px 0;overflow-wrap:anywhere}
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-description{
+  display:block;
+  -webkit-line-clamp:unset;
+  line-clamp:unset;
+  overflow:visible;
+  margin:0;
+  width:100%;
+  color:#293f35;
+  font-size:14px;
+  line-height:1.48;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+}
+.need-card-photo{
+  width:100%;
+  min-width:0;
+  min-height:155px;
+  max-height:250px;
+  border:1px solid #dce5db;
+  border-radius:12px;
+  overflow:hidden;
+  padding:7px;
+  background:#f6f9f5;
+  display:grid;
+  place-items:center;
+}
+.need-card-photo img{
+  display:block;
+  max-width:100%;
+  width:100%;
+  height:100%;
+  max-height:235px;
+  object-fit:contain;
+  border-radius:7px;
+}
+.need-card-photo.no-photo{background:#f2f6f1}
+.need-card-photo .no-photo-label{font-size:12px;color:#78877d;font-weight:650;text-align:center}
+.need-card-note{
+  margin:0;
+  padding-top:10px;
+  border-top:1px solid #edf1ec;
+  color:#627168;
+  font-size:12px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.need-card-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:stretch;
+  gap:9px;
+  width:100%;
+}
+.need-card-actions .need-card-primary{
+  flex:1 1 100%;
+  min-height:47px;
+  font-size:15px;
+  font-weight:800;
+  border-radius:10px;
+}
+.need-card-actions .need-card-secondary{
+  flex:1 1 142px;
+  min-height:43px;
+  text-align:center;
+  font-size:13px;
+}
+.need-card-actions .need-card-primary:disabled{opacity:.78;background:#edf2eb;color:#4d6559;border-color:#cbd9cd}
+.need-card-finished{display:block;text-align:center;width:100%;padding:10px 14px;color:#245c44;font-weight:750;border-radius:10px;background:#eaf4e9}
+@media(max-width:680px){
+  :is(#request-grid,#my-requests-grid,#accepted-grid){gap:12px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-card{padding:13px 12px;gap:11px;border-radius:13px;border-left-width:4px}
+  .need-card-overview{grid-template-columns:minmax(0,1fr) minmax(90px,36%);gap:10px}
+  .need-card-copy{gap:8px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-title{font-size:19px}
+  .need-card-meta{font-size:12px;padding-left:18px}
+  .need-card-copy .card-city{font-size:13px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-description{font-size:13px}
+  .need-card-photo{min-height:118px;max-height:205px;padding:5px}
+  .need-card-photo img{max-height:195px}
+  .need-card-actions .need-card-primary{min-height:46px;font-size:14px}
+}
+@media(max-width:360px){
+  .need-card-overview{grid-template-columns:minmax(0,1fr) 94px;gap:8px}
+  .need-card-photo{min-height:105px}
+  :is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-title{font-size:17px}
+}
