@@ -46,7 +46,8 @@ test('se rechazan números inválidos, campos innecesarios y solicitudes vacías
   await assertFails(setDoc(doc(db(A),'requests','sintelefono'),{...publication(A),contactPhone:''}));
   await assertFails(setDoc(doc(db(A),'requests','sinconsentimiento'),{...publication(A),contactConsent:false}));
   await assertFails(setDoc(doc(db(A),'requests','informacionextra'),{...publication(A),email:'usuario@ejemplo.com'}));
-  await assertFails(setDoc(doc(db(A),'requests','textoinsuficiente'),{...publication(A),description:'abc'}));
+  await assertFails(setDoc(doc(db(A),'requests','texto-vacio'),{...publication(A),description:''}));
+  await assertSucceeds(setDoc(doc(db(A),'requests','texto-breve'),{...publication(A),description:'X',title:'X'}));
 });
 test('solo el propietario modifica o elimina sus solicitudes',async()=>{
   await assertFails(updateDoc(doc(db(B),'requests','existente'),{description:'Texto modificado por otra cuenta.'}));

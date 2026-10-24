@@ -1,5 +1,5 @@
 import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
-import {makeCardPng} from './card-png.js?v=20261024-v227';
+import {makeCardPng} from './card-png.js?v=20261024-v228';
 
 const $=id=>document.getElementById(id);
 const pages=['necesidades','mis-publicaciones','publicar'];
@@ -58,7 +58,7 @@ function legacyDetails(record,{forCard=false}={}){
     if(normalized.includes(str.toLocaleLowerCase('es')))return;
     lines.push(label+': '+str);
   };
-  if(!forCard&&record.title&&record.title!==derivedTitle(original))add('Necesidad',record.title);
+  if(record.title&&record.title!==derivedTitle(original))add('Necesidad',record.title);
   if(record.category)add('Tipo',record.category==='bienes'?'Producto':'Servicio');
   add('Categoría',record.subcategory);
   add('Ciudad',record.city);
@@ -128,13 +128,11 @@ $('image-dialog').addEventListener('close',()=>{
   $('image-dialog-photo').removeAttribute('src');
 });
 async function sharePublicationPng(record){
-  const title=String(record.title||derivedTitle(record.description)||'Necesidad');
+  const description=legacyDetails(record,{forCard:true})||String(record.description||'');
   try{
     const number=record.example?null:'+'+normalizeWhatsApp(record.contactPhone);
-    const full=legacyDetails(record,{forCard:true});
-    const remainder=full.startsWith(title)?full.slice(title.length).trimStart():full;
     const blob=await makeCardPng({
-      title,description:remainder,picture:record.picture||'',
+      description,picture:record.picture||'',
       contactPhone:number,example:record.example===true
     });
     const filename='lonecesito-necesidad.png';
@@ -143,7 +141,7 @@ async function sharePublicationPng(record){
       const canUseFiles=typeof navigator.canShare==='function'&&navigator.canShare({files:[file]});
       if(canUseFiles){
         try{
-          await navigator.share({files:[file],title:'LoNecesito · '+title});
+          await navigator.share({files:[file],title:'LoNecesito'});
           return;
         }catch(error){
           if(error.name==='AbortError')return;
@@ -167,36 +165,34 @@ async function sharePublicationPng(record){
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
-  const title=String(record.title||derivedTitle(description)).trim()||'Necesidad publicada';
+  const accessibleLabel=String(record.title||derivedTitle(description)).trim()||'Necesidad publicada';
   const main=el('div','publication-main');
   const copy=el('div','publication-copy');
-  const heading=el('div','publication-heading');
-  heading.append(el('h3','',title));
-  copy.append(heading);
 
-  // Cuerpo completo en un solo texto, también para registros antiguos.
-  const fullText=legacyDetails(record,{forCard:true});
-  const rest=fullText.startsWith(title)?fullText.slice(title.length).trimStart():fullText;
-  if(rest)copy.append(el('p','publication-description',rest));
+  // Ficha sin título ni bloques de datos: todo el requerimiento en un único párrafo.
+  const fullText=legacyDetails(record,{forCard:true})||description;
+  copy.append(el('p','publication-description',fullText));
+  main.append(copy);
 
-  // Zona de fotografía SIEMPRE a la derecha, incluso sin imagen cargada.
-  const media=el('div','publication-media');
-  media.setAttribute('aria-label','Imagen del producto o servicio');
+  // Si existe foto, colocarla a la derecha. Sin ella, el texto ocupa todo el ancho.
   const photo=String(record.picture||'');
   if(/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(photo)){
+    main.classList.add('has-photo');
+    const media=el('div','publication-media');
+    media.setAttribute('aria-label','Imagen del producto o servicio');
     const img=el('img','publication-photo');
     img.src=photo;
-    img.alt='Fotografía de '+title;
+    img.alt='Fotografía de '+accessibleLabel;
     img.loading='lazy';
     const enlarge=el('button','publication-photo-button');
     enlarge.type='button';
     enlarge.title='Ver fotografía completa';
-    enlarge.setAttribute('aria-label','Ampliar fotografía de '+title);
+    enlarge.setAttribute('aria-label','Ampliar fotografía de '+accessibleLabel);
     enlarge.append(img);
-    enlarge.addEventListener('click',()=>openImageViewer(photo,title));
+    enlarge.addEventListener('click',()=>openImageViewer(photo,accessibleLabel));
     media.append(enlarge);
+    main.append(media);
   }
-  main.append(copy,media);
   article.append(main);
 
   const contact=el('div','contact-box');
@@ -382,7 +378,6 @@ function resetForm(){
   stopDictation();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
-  $('publish-title').textContent='Publica lo que necesitas';
   $('save-button').textContent='Publicar necesidad';
   $('cancel-edit').hidden=true;
   feedback('form-feedback','');
@@ -394,7 +389,6 @@ function editRecord(record){
   $('need-description').value=legacyDetails(record);
   $('need-phone').value=record.contactPhone||'';
   pictureDraft=record.picture||'';updatePhotoPreview();
-  $('publish-title').textContent='Edita tu publicación';
   $('save-button').textContent='Guardar cambios';
   $('cancel-edit').hidden=false;
   window.location.hash='#publicar';

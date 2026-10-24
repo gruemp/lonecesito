@@ -7,13 +7,13 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261024-v227">
+  <link rel="stylesheet" href="simple.css?v=20261024-v228">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261024-v227"></script>
+  <script type="module" src="simple.js?v=20261024-v228"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
-<div class="release-bar" role="note"><span id="release-version">Versión 2.2.7</span></div>
+<div class="release-bar" role="note"><span id="release-version">Versión 2.2.8</span></div>
 <header class="site-header">
   <div class="shell header-layout">
     <a class="brand" href="#necesidades" aria-label="LoNecesito, ver necesidades"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
@@ -26,11 +26,7 @@
   </div>
 </header>
 <main id="contenido">
-  <section id="necesidades" class="screen shell content-screen" aria-labelledby="browse-title">
-    <div class="page-heading">
-      <h2 id="browse-title">Necesidades publicadas</h2>
-      <p>Encuentra necesidades y contacta directamente por WhatsApp.</p>
-    </div>
+  <section id="necesidades" class="screen shell content-screen" aria-label="Necesidades publicadas">
     <div class="search-panel">
       <label for="search">Buscar necesidades</label>
       <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="¿Qué estás buscando?">
@@ -39,25 +35,17 @@
     <p id="browse-empty" class="empty-message" hidden>No hay publicaciones que coincidan con la búsqueda.</p>
   </section>
 
-  <section id="mis-publicaciones" class="screen shell content-screen" aria-labelledby="mine-title" hidden>
-    <div class="page-heading">
-      <h2 id="mine-title">Mis publicaciones</h2>
-      <p>Edita o elimina tus publicaciones cuando lo necesites.</p>
-    </div>
+  <section id="mis-publicaciones" class="screen shell content-screen" aria-label="Mis publicaciones" hidden>
     <div id="mine-list" class="publication-list" aria-live="polite"></div>
     <p id="mine-empty" class="empty-message" hidden>Aún no tienes publicaciones. Crea la primera cuando lo necesites.</p>
   </section>
 
-  <section id="publicar" class="screen shell content-screen" aria-labelledby="publish-title" hidden>
-    <div class="page-heading">
-      <h2 id="publish-title">Publica lo que necesitas</h2>
-      <p>Describe tu necesidad y deja tu WhatsApp.</p>
-    </div>
+  <section id="publicar" class="screen shell content-screen" aria-label="Publicar necesidad" hidden>
     <form id="publish-form" class="publish-form">
       <div class="form-field">
         <label for="need-description">¿Qué necesitas?</label>
         <div class="need-entry">
-          <textarea id="need-description" name="description" rows="5" maxlength="4000" minlength="10" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
+          <textarea id="need-description" name="description" rows="5" maxlength="4000" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
           <div class="entry-toolbar">
             <div id="photo-preview" class="photo-preview" hidden>
               <button id="preview-photo" type="button" class="preview-photo" title="Ver foto completa" aria-label="Ampliar la fotografía seleccionada"><img id="photo-preview-image" alt="Foto seleccionada"></button>

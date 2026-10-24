@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.7');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.7<\/span>/);
+  assert.equal(APP_VERSION,'2.2.8');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.8<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -33,7 +33,9 @@ test('el modelo almacena únicamente la necesidad, teléfono y título derivado'
 test('se admite un texto largo y se rechazan necesidades vacías',()=>{
   const need=cleanPublication({...input,description:'Necesito '+ 'detalles '.repeat(150)});
   assert.ok(need.description.length>1000);
-  assert.throws(()=>cleanPublication({...input,description:'abc'}));
+  assert.equal(cleanPublication({...input,description:'a'}).description,'a');
+  assert.equal(cleanPublication({...input,description:'abc'}).description,'abc');
+  assert.throws(()=>cleanPublication({...input,description:'   '}));
   assert.throws(()=>cleanPublication({...input,description:'a'.repeat(4001)}));
 });
 test('WhatsApp real abre el número de la ficha',()=>{
@@ -82,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.7/);
+  assert.match(html,/Versión 2\.2\.8/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -127,7 +129,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.7/);
+  assert.match(html,/Versión 2\.2\.8/);
 });
 
 
@@ -140,7 +142,7 @@ test('ninguna ficha contiene bloques separados de ciudad, categoría, presupuest
   const card=js.slice(start,end);
   assert.doesNotMatch(card,/publication-facts|publication-fact|publication-kind|el\('dl'/);
   assert.match(card,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(card,/const rest=fullText\.startsWith\(title\)/);
+  assert.match(card,/copy\.append\(el\('p','publication-description',fullText\)\)/);
   assert.doesNotMatch(css,/\.publication-facts|\.publication-fact\b|\.publication-kind/);
 });
 test('datos heredados pasan al texto único y ejemplos no crean campos separados',()=>{
@@ -165,7 +167,7 @@ test('datos heredados pasan al texto único y ejemplos no crean campos separados
   assert.match(display,/Cantidad: 2/);
   assert.match(display,/Presupuesto: /);
   assert.match(display,/Fecha: 2026-11-01/);
-  assert.doesNotMatch(display,/Necesidad: Busco repuesto/);
+  assert.match(display,/Necesidad: Busco repuesto/);
   for(const sample of EXAMPLE_PUBLICATIONS){
     assert.equal(legacyDetails(sample,{forCard:true}),sample.description);
     assert.equal(Object.hasOwn(sample,'city'),false);
@@ -222,7 +224,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.7/);
+  assert.match(html,/Versión 2\.2\.8/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -284,7 +286,7 @@ test('desaparecen los dos textos identificados en las capturas, sin portada vac�
   assert.doesNotMatch(html,/LoNecesito · Publica lo que necesitas\. Contacta directamente por WhatsApp\./);
   assert.doesNotMatch(html,/<footer\b/);
   assert.doesNotMatch(html,/id="inicio"/);
-  assert.match(html,/<section id="necesidades"[^>]+aria-labelledby="browse-title">/);
+  assert.match(html,/<section id="necesidades"[^>]+aria-label="Necesidades publicadas">/);
   assert.match(js,/const pages=\['necesidades','mis-publicaciones','publicar'\]/);
   assert.match(js,/const screen=pages\.includes\(page\)\?page:'necesidades'/);
 });
@@ -319,10 +321,10 @@ test('las fichas reservan imagen derecha y dejan vacío el espacio si falta foto
   assert.match(js,/const main=el\('div','publication-main'\)/);
   assert.match(js,/const copy=el\('div','publication-copy'\)/);
   assert.match(js,/const media=el\('div','publication-media'\)/);
-  assert.match(js,/main\.append\(copy,media\)/);
+  assert.match(js,/main\.append\(copy\)/);
   assert.doesNotMatch(js,/placeholder\.append\(contactIcon\('photo'\)\)/);
   assert.match(js,/img\.loading='lazy'/);
-  assert.match(css,/\.publication-main\{display:grid;grid-template-columns:minmax\(0,1fr\) clamp\(90px,25vw,180px\)/);
+  assert.match(css,/\.publication-main\.has-photo\{display:grid;grid-template-columns:minmax\(0,1fr\) clamp\(90px,25vw,180px\)/);
   assert.match(css,/\.publication-media\{[^}]*aspect-ratio:4\/3/);
   assert.match(css,/\.publication-media \.publication-photo\{[^}]*object-fit:cover/);
 });
@@ -354,7 +356,7 @@ test('al tocar cualquier punto de una fotografía de la ficha se abre el visor c
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
   assert.match(card,/const enlarge=el\('button','publication-photo-button'\)/);
   assert.match(card,/enlarge\.append\(img\)/);
-  assert.match(card,/enlarge\.addEventListener\('click',\(\)=>openImageViewer\(photo,title\)\)/);
+  assert.match(card,/enlarge\.addEventListener\('click',\(\)=>openImageViewer\(photo,accessibleLabel\)\)/);
   assert.match(card,/media\.append\(enlarge\)/);
   assert.doesNotMatch(card,/photo-placeholder|placeholder\.append/);
   assert.doesNotMatch(card,/placeholder\.addEventListener\('click'/);
@@ -394,7 +396,7 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.7/);
+  assert.match(handoff,/2\.2\.8/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
@@ -406,10 +408,10 @@ test('la descripción está justificada y la columna vacía no tiene marco ni ma
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
-  assert.match(card,/main\.append\(copy,media\)/);
+  assert.match(card,/main\.append\(copy\)/);
   assert.match(card,/const media=el\('div','publication-media'\)/);
   assert.doesNotMatch(card,/placeholder|photo-placeholder|contactIcon\('photo'\)/);
-  assert.match(css,/\.publication-media:empty\{border:0;background:transparent;box-shadow:none\}/);
+  assert.match(css,/\.publication-main:not\(\.has-photo\) \.publication-description\{width:100%\}/);
   assert.match(css,/\.publication-main \.publication-description\{white-space:pre-wrap;text-align:justify;text-align-last:left;hyphens:auto/);
   assert.match(css,/\.publication-media \.publication-photo,\.publication-photo-button \.publication-photo\{object-fit:contain/);
 });
@@ -428,17 +430,17 @@ test('todas las fichas tienen tercer botón para compartir PNG sin palabra Conta
 test('la exportación PNG usa canvas, hoja nativa de compartir o descarga',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
-  assert.match(js,/import \{makeCardPng\} from '.\/card-png\.js\?v=20261024-v227'/);
+  assert.match(js,/import \{makeCardPng\} from '.\/card-png\.js\?v=20261024-v228'/);
   assert.match(js,/async function sharePublicationPng\(record\)/);
   assert.match(js,/navigator\.share\(\{files:\[file\],title:/);
   assert.match(js,/new File\(\[blob\],filename,\{type:'image\/png'\}\)/);
   assert.match(js,/download\.download=filename/);
   assert.match(png,/drawing\.toBlob\(blob=>blob\?resolve\(blob\)/);
-  assert.match(png,/drawWrapped\(ctx,bodyLines,left,bodyY\+32,bodyWidth,46,true\)/);
+  assert.match(png,/drawWrapped\(ctx,bodyLines,left,bodyY\+32,bodyWidth,lineHeight,true\)/);
   assert.match(png,/const bodyHeight=Math\.max\(paragraphHeight,photoHeight\)/);
   assert.match(png,/if\(hasPhone\)/);
   assert.match(png,/const hasPhone=!example&&Boolean\(contactPhone\)/);
-  assert.match(png,/const image=await photoImage\(picture\)/);
+  assert.match(png,/const img=await photoImage\(picture\)/);
 });
 test('las preferencias portables reflejan compartir PNG y espacio en blanco sin imagen',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -448,4 +450,65 @@ test('las preferencias portables reflejan compartir PNG y espacio en blanco sin 
     assert.match(file,/PNG/);
     assert.match(file,/vacío|vacía/);
   }
+});
+
+
+test('se eliminaron los encabezados y párrafos de las tres secciones',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  for(const phrase of [
+    '<h2 id="browse-title">Necesidades publicadas</h2>',
+    'Encuentra necesidades y contacta directamente por WhatsApp.',
+    '<h2 id="mine-title">Mis publicaciones</h2>',
+    'Edita o elimina tus publicaciones cuando lo necesites.',
+    '<h2 id="publish-title">Publica lo que necesitas</h2>',
+    'Describe tu necesidad y deja tu WhatsApp.'
+  ])assert.equal(html.includes(phrase),false,phrase);
+  assert.doesNotMatch(html,/class="page-heading"/);
+  assert.doesNotMatch(js,/\$\('publish-title'\)/);
+  assert.match(html,/id="necesidades"[^>]*aria-label="Necesidades publicadas"/);
+  assert.match(html,/id="publicar"[^>]*aria-label="Publicar necesidad"/);
+});
+test('fichas sin títulos y mostrando toda la necesidad desde la primera palabra',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.doesNotMatch(card,/el\('h3'|publication-heading|append\(heading\)|const rest=/);
+  assert.match(card,/const fullText=legacyDetails\(record,\{forCard:true\}\)\|\|description/);
+  assert.match(card,/copy\.append\(el\('p','publication-description',fullText\)\)/);
+  const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  assert.doesNotMatch(png,/titleLines|fillText\(title|drawWrapped\(ctx,titleLines/);
+});
+test('fichas con altura natural y descripción a ancho completo sin foto',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/main\.append\(copy\)/);
+  assert.match(card,/main\.classList\.add\('has-photo'\)/);
+  assert.match(card,/main\.append\(media\)/);
+  assert.doesNotMatch(card,/main\.append\(copy,media\)/);
+  assert.match(css,/\.publication-main\{display:block;min-width:0\}/);
+  assert.match(css,/\.publication-main\.has-photo\{display:grid;/);
+  assert.match(css,/\.publication-main:not\(\.has-photo\) \.publication-description\{width:100%\}/);
+  assert.match(css,/\.publication-card\{height:auto;min-height:0;/);
+  assert.match(css,/\.publication-main \.publication-description\{margin:0;/);
+});
+test('se aceptan necesidades de una sola letra sin mínimo artificial',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const model=readFileSync(new URL('../simple-model.js',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
+  assert.doesNotMatch(html,/id="need-description"[^>]*minlength=/);
+  assert.doesNotMatch(model,/description\.length<10/);
+  assert.match(rules,/data\.description\.size\(\) >= 1/);
+  assert.equal(cleanPublication({description:'X',contactPhone:'3001234567'}).description,'X');
+  assert.throws(()=>cleanPublication({description:'  ',contactPhone:'3001234567'}));
+});
+test('el PNG no genera título y adapta el ancho y el alto si falta imagen',()=>{
+  const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(png,/const hasPhoto=Boolean\(img\)/);
+  assert.match(png,/const bodyWidth=hasPhoto\?available-imageWidth-imageGap:available/);
+  assert.match(png,/const photoHeight=hasPhoto\?/);
+  assert.match(png,/const bodyHeight=Math\.max\(paragraphHeight,photoHeight\)/);
+  assert.match(js,/const description=legacyDetails\(record,\{forCard:true\}\)/);
+  assert.doesNotMatch(png,/const titleLines=|titleHeight=/);
 });

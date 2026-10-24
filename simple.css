@@ -324,3 +324,21 @@ body:has(.image-dialog[open]){overflow:hidden}
 .share-action:hover{background:#414778}
 .contact-action{border-radius:9px}
 @media(max-width:350px){.contact-box{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.contact-action{padding:6px}}
+
+
+/* Versión 2.2.8. La ficha NO tiene título ni reserva foto cuando está ausente. */
+.content-screen{padding-block:8px 16px}
+.publication-card{height:auto;min-height:0;padding:10px 12px}
+.publication-main{display:block;min-width:0}
+.publication-main.has-photo{display:grid;grid-template-columns:minmax(0,1fr) clamp(90px,25vw,180px);gap:10px;align-items:start}
+.publication-copy{min-width:0}
+.publication-main .publication-description{margin:0;max-width:none;line-height:1.48;text-align:justify;text-align-last:left;white-space:pre-wrap;overflow-wrap:break-word;hyphens:auto;font-size:13.5px}
+.publication-main.has-photo .publication-media{width:100%;min-width:0;aspect-ratio:4/3;border:0;background:transparent}
+.publication-main:not(.has-photo) .publication-description{width:100%}
+.contact-box{margin-top:7px}
+@media(max-width:460px){
+ .content-screen{padding-block:7px 13px}
+ .publication-card{padding:9px 10px}
+ .publication-main.has-photo{grid-template-columns:minmax(0,1fr) clamp(86px,29%,112px);gap:8px}
+ .publication-main .publication-description{font-size:13px;line-height:1.45}
+}

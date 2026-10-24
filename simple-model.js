@@ -1,5 +1,5 @@
 /* Versión visible en la portada. Incrementar al publicar cada nueva modificación. */
-export const APP_VERSION = '2.2.7';
+export const APP_VERSION = '2.2.8';
 export const APP_VERSION_DATE = '24/10/2026';
 
 /* Los ejemplos utilizan el mismo formulario y validación que una publicación nueva.
@@ -42,7 +42,7 @@ export function derivedTitle(description) {
 }
 export function cleanPublication(fields) {
   const description=String(fields.description||'').trim().replace(/\r\n?/g,'\n');
-  if(description.length<10||description.length>4000)throw new Error('Describe tu necesidad en entre 10 y 4.000 caracteres.');
+  if(!description||description.length>4000)throw new Error('Escribe tu necesidad (máximo 4.000 caracteres).');
   const contactPhone=normalizeWhatsApp(fields.contactPhone);
   return {
     description,

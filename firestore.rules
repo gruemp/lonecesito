@@ -15,7 +15,7 @@ service cloud.firestore {
       ])
       && data.ownerUid is string && data.ownerUid.size() > 0
       && data.createdAt is timestamp
-      && data.description is string && data.description.size() >= 10 && data.description.size() <= 4000
+      && data.description is string && data.description.size() >= 1 && data.description.size() <= 4000
       && data.title is string && data.title.size() >= 1 && data.title.size() <= 120
       && data.contactPhone is string && data.contactPhone.matches('^[0-9]{10,15}$')
       && data.contactConsent == true
