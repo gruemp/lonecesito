@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 24 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.15 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.16 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -15,7 +15,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 ## 2. Interfaz actual, no negociable salvo instrucción nueva
 
 - **Navegación:** cuatro pestañas en orden **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**, en **una fila en PC** y **cuadrícula 2 × 2 en móvil**, persistentes al navegar. En PC están alineadas por ambos extremos con la imagen de Inicio.
-- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. El marco 16:9 adapta su ancho a la altura útil de la ventana para aparecer **completo al 100 % de zoom**, coincidiendo horizontalmente con la navegación, sin recortes ni deformaciones; no poner allí buscador ni fichas.
+- **Inicio:** solo la **imagen aprobada de dos pasos**: «1. Publica lo que necesitas» (licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp). Archivo: **assets/lonecesito-presentacion-dos-pasos.png**, 1819 × 865. Se ajusta al viewport para aparecer completa al 100 % de zoom, alineada con la navegación, sin recortes ni deformaciones. La imagen anterior queda como respaldo y la variante con mayonesa fue descartada.
 - **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
 - **Mis publicaciones:** solo las publicaciones creadas por el dueño.
 - **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
@@ -26,7 +26,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - **No mostrar ejemplos ni versión:** no hay necesidades ficticias, números de prueba ni barra «Versión X.Y.Z» en ninguna pantalla. Tampoco avisos de demo que estorben.
 - **Diseño:** máxima economía vertical **sin sacrificar ancho ni claridad**; colores diferenciados, opciones independientes, texto descriptivo justificado con última línea natural; mantener misma experiencia esencial en PC y celular.
 
-**Cambios de opinión registrados y resueltos:** se prefirió finalmente **texto a todo el ancho cuando no hay imagen**, no reserva vacía. Se terminó con **cuatro pestañas**, no tres. **La versión dejó de ser visible** aunque antes se había pedido lo contrario. **Todos los ejemplos se eliminaron** aunque antes habían sido deseados para revisar el diseño. **La tercera imagen** es la elegida actualmente y vive solo en Inicio. Estas elecciones nuevas sustituyen las viejas.
+**Cambios de opinión registrados y resueltos:** se prefirió finalmente **texto a todo el ancho cuando no hay imagen**, no reserva vacía. Se terminó con **cuatro pestañas**, no tres. **La versión dejó de ser visible** aunque antes se había pedido lo contrario. **Todos los ejemplos se eliminaron** aunque antes habían sido deseados para revisar el diseño. **La ilustración aprobada de dos pasos** es la elegida actualmente y vive solo en Inicio. Estas elecciones nuevas sustituyen las viejas.
 
 ## 3. Archivos activos del repositorio
 
@@ -67,7 +67,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - El editor usa **solo dos campos**: libertad total al describir la necesidad y un número para contactar. Micrófono y foto son opciones, no campos obligatorios.
 - Evitar los **mensajes que fastidian**, incluso si son técnicamente precisos: documentar límites del prototipo y pruebas en GitHub y en las respuestas de desarrollo, no ocupar constantemente la UI con ello. Mostrar solo información útil para una acción.
 - El usuario cambia y afina preferencias **a partir de imágenes y capturas**. Actualizar reglas cuando cambie de opinión y **retirar órdenes anteriores**. No conservar dos interpretaciones contradictorias.
-- La tercera ilustración elegida debe ser **la original aprobada** y mostrar solo el propósito real de la web; no confundir el tablón con publicar ofertas, entregar cotizaciones o negociar dentro del sitio.
+- La ilustración vigente es **la primera de dos pasos aprobada por el usuario**: ejemplo con licuadora, no con mayonesa; refleja publicación y contacto directo, sin ofertas ni negociación dentro de la web.
 - La continuidad **debe poder viajar entre distintas IA**: no depender de memoria de chat, mantener Markdown estructurado, enlaces y estado de lo no implementado.
 - Un PR fusionado y un workflow verde **no sustituyen la revisión física** de la experiencia. Informar claramente límites de pruebas.
 
