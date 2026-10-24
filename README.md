@@ -1,4 +1,20 @@
 # lonecesito
+## Fichas completas directamente en las listas (diseño actual)
+
+- Las secciones **Soluciona una necesidad y gana dinero por ello**, **Mis necesidades publicadas para que otros ofrezcan solucionarlas** y **Necesidades de terceros aceptadas para solucionar** utilizan el **mismo modelo de ficha**.
+- Cada ficha identifica de manera independiente categoría, título completo, ciudad, cantidad/condición para bienes, presupuesto y fecha deseada cuando se proporcionan, fecha de publicación cuando existe, descripción íntegra y foto lateral automática (o «Sin foto»).
+- **Se eliminó el botón «Ver detalles» y el diálogo/modal de detalles.** Los datos son visibles sin pulsar ninguna opción. Las fotografías no requieren interacción.
+- Los botones para aceptar, editar, marcar como resuelta, cancelar o reactivar se muestran al pie de la misma ficha de acuerdo con el contexto y estado. Las necesidades aceptadas muestran una confirmación sin añadir formularios.
+- El mismo diseño y un único código de renderizado mantienen la coherencia entre las tres secciones en computador y celular.
+- Se conservan los filtros de exploración, el asistente de publicación de tres pasos, las aceptaciones de demostración y la información almacenada en el navegador.
+
+**Validación:** 47 pruebas de lógica y estructura aprobadas en ejecución aislada; sin referencias a botones o diálogos eliminados. Pendiente comprobar visualmente en dispositivos físicos.
+
+**Alcance:** demostración local. No hay contacto ni notificaciones reales entre personas hasta implementar Firebase.
+
+Los apartados inferiores son históricos y pueden describir interfaces sustituidas por este diseño.
+
+---
 ## Diseño actual: acciones principales centradas y fotografías automáticas
 
 - **No hay botón «Ver foto»**: en Explorar, la imagen adjunta sigue apareciendo a la derecha del resumen de cada solicitud; en el detalle, la foto se muestra automáticamente en una segunda columna; y al subir una foto en el formulario se ve la vista previa de inmediato.
