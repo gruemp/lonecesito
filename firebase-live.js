@@ -92,7 +92,7 @@ async function launchFirebase(){
     $('#account-register').hidden=!isRegister;
     for(const id of ['account-name','account-phone','account-consent'])$('#'+id).required=isRegister;
     $('#account-password').autocomplete=isRegister?'new-password':'current-password';
-    $('#account-submit').textContent=isRegister?'Crear cuenta gratis':'Iniciar sesión';
+    $('#account-submit').textContent=isRegister?'Crear cuenta':'Iniciar sesión';
   };
   $('#account-form').onsubmit=async e=>{
     e.preventDefault();accountError('');
