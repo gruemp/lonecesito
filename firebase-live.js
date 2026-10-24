@@ -59,7 +59,7 @@ async function launchFirebase(){
   function openAccount(){
     accountError('');
     $('#account-form').hidden=!!state.user;
-    $('#profile-form').hidden=!state.user||!!state.profile;
+    $('#profile-form').hidden=!state.user;
     $('#account-logout').hidden=!state.user;
     if(state.user){
       $('#profile-name').value=state.profile?.name||state.user.displayName||'';
@@ -77,10 +77,13 @@ async function launchFirebase(){
   }
   async function saveProfile(info){
     if(!state.user)throw Error('Inicia sesión.');
-    await setDoc(doc(db,'profiles',state.user.uid),{uid:state.user.uid,email:state.user.email||'',...info,createdAt:serverTimestamp()});
+    const uid=state.user.uid,ref=doc(db,'profiles',uid);
+    const saved=await getDoc(ref);
+    await setDoc(ref,{uid,email:state.user.email||'',...info,
+      createdAt:saved.exists()?saved.data().createdAt:serverTimestamp()});
     state.profile=info;
     accountBtn.textContent=info.name;accountDialog.close();
-    if(state.pending){const id=state.pending;state.pending=null;await submitApplication(id);}
+    if(state.pending){const id=state.pending;state.pending=null;await submitApplication(id,info);}
   }
   $('#account-close').onclick=()=>accountDialog.close();
   accountBtn.onclick=openAccount;
@@ -119,7 +122,7 @@ async function launchFirebase(){
     if(state.user){
       try{
         const p=await getDoc(doc(db,'profiles',state.user.uid));
-        state.profile=p.exists()?p.data():null;
+        if(p.exists())state.profile=p.data();
       }catch(e){notify('No se pudo leer el perfil: '+e.message);}
       state.unsubApplied=onSnapshot(collection(db,'applicationsByUser',state.user.uid,'items'),snapshot=>{
         state.applied=new Set(snapshot.docs.map(x=>x.id));renderAll();
@@ -290,15 +293,16 @@ async function launchFirebase(){
     $('#empty-state').hidden=false;$('#empty-state').textContent='No se pudieron consultar las necesidades.';
   });
 
-  async function submitApplication(id){
+  async function submitApplication(id,profileOverride=null){
     const req=state.requests.find(r=>r.id===id);
     if(!req||req.status!=='abierta')throw Error('Esta necesidad ya no está disponible.');
-    if(!state.user||!state.profile?.discloseConsent)throw Error('Completa tu perfil antes de aplicar.');
+    const currentProfile=profileOverride||state.profile;
+    if(!state.user||!currentProfile?.discloseConsent)throw Error('Completa tu perfil antes de aplicar.');
     if(req.ownerUid===state.user.uid)throw Error('No puedes aplicar a tu propia necesidad.');
     if(state.applied.has(id)){notify('Ya aplicaste a esta necesidad.');return;}
     const uid=state.user.uid,batch=writeBatch(db);
     batch.set(doc(db,'requests',id,'applications',uid),{
-      uid,name:state.profile.name,phone:state.profile.phone,appliedAt:serverTimestamp()
+      uid,name:currentProfile.name,phone:currentProfile.phone,appliedAt:serverTimestamp()
     });
     batch.set(doc(db,'applicationsByUser',uid,'items',id),{
       requestId:id,appliedAt:serverTimestamp()
