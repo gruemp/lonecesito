@@ -105,20 +105,20 @@ test('no es posible aplicar dos veces, cambiar el teléfono ni suplantar a otra 
 });
 
 test('no se aplica a necesidades cerradas ni sin consentimiento',async()=>{
-  const blocked=writeBatch(db(B));
-  blocked.set(doc(db(B),'requests','closed','applications',B),{
+  const blockedDb=db(B),blocked=writeBatch(blockedDb);
+  blocked.set(doc(blockedDb,'requests','closed','applications',B),{
     uid:B,name:'Interesado B',phone:'3002223344',appliedAt:serverTimestamp()
   });
-  blocked.set(doc(db(B),'applicationsByUser',B,'items','closed'),{
+  blocked.set(doc(blockedDb,'applicationsByUser',B,'items','closed'),{
     requestId:'closed',appliedAt:serverTimestamp()
   });
   await assertFails(blocked.commit());
 
-  const notConsented=writeBatch(db(D));
-  notConsented.set(doc(db(D),'requests','spoof','applications',D),{
+  const notConsentedDb=db(D),notConsented=writeBatch(notConsentedDb);
+  notConsented.set(doc(notConsentedDb,'requests','spoof','applications',D),{
     uid:D,name:'Persona D',phone:'3004445566',appliedAt:serverTimestamp()
   });
-  notConsented.set(doc(db(D),'applicationsByUser',D,'items','spoof'),{
+  notConsented.set(doc(notConsentedDb,'applicationsByUser',D,'items','spoof'),{
     requestId:'spoof',appliedAt:serverTimestamp()
   });
   await assertFails(notConsented.commit());
