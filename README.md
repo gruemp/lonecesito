@@ -1,3 +1,13 @@
+# Versión 2.2.8 — fichas sin título y sin espacios vacíos
+
+Se retiraron los textos explicativos y encabezados grandes de **Publicar**, **Ver necesidades** y **Mis publicaciones**. Las fichas no muestran títulos: presentan todo el texto de la necesidad justificado, con una altura que depende del contenido. Las descripciones pueden contener desde un solo carácter (no se aceptan vacías).
+
+Si hay foto, aparece a la derecha; si no la hay, el texto se extiende por todo el ancho. La exportación PNG utiliza la misma distribución. Los botones de llamada, WhatsApp, compartir, editar y eliminar no cambian. Se actualizaron [AGENTS.md](AGENTS.md), [preferencias](docs/PREFERENCIAS-LO-NECESITO.md) y [documento de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
+
+La interfaz está publicada mediante GitHub Pages; la configuración de Firebase y el servicio compartido siguen pendientes.
+
+---
+
 # Versión 2.2.7 — foto opcional y compartir fichas como PNG
 
 Cada ficha reserva una zona a la derecha: si hay foto, se ajusta sin recortes; si no hay, queda completamente vacía, sin borde, fondo ni icono. El texto de la necesidad permanece justificado y no invade esa columna. No aparece el título «Contactar».
