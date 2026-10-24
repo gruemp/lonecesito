@@ -627,7 +627,7 @@ test('las instrucciones para futuras IA describen la nueva fila y el teclado',()
 test('el editor muestra papelera y X en la misma fila únicamente en edición',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const controls=html.split('<div class="publish-controls">')[1].split('</div>')[0];
+  const controls=html.split('<div class="publish-controls">')[1].split('</div>\n      <p id="form-feedback"')[0];
   assert.match(controls,/id="delete-edit" type="button"[^>]*aria-label="Eliminar publicación" hidden/);
   assert.match(controls,/id="delete-edit"[\s\S]*?<svg[\s\S]*?<path d="M3 6h18"/);
   assert.ok(controls.indexOf('id="save-button"')<controls.indexOf('id="delete-edit"'));
