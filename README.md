@@ -1,4 +1,16 @@
 # lonecesito
+## Jerarquía visual uniforme para todos los títulos (octubre de 2026)
+
+- Los títulos de **Inicio**, **Explorar**, **Mis necesidades publicadas** y **Necesidades de terceros aceptadas** comparten escala tipográfica, márgenes y alineación coherentes. Los títulos interiores conservan un tono identificador de su sección, sin perder contraste ni cambiar sus nombres.
+- El contador junto al título de Mis necesidades se diferencia visualmente con una etiqueta azul que desaparece cuando no hay publicaciones.
+- En las tres listas, los nombres permanecen en **una sola línea** y siguen abriendo la ficha al pulsarlos. En la ficha abierta, el título completo tiene jerarquía superior a ubicación, estado y características; no se cambia la columna de fotografía.
+- El diálogo para publicar usa una escala coherente para su **título y los tres subtítulos de pasos**, así como en las leyendas de campos y el progreso.
+- Los cuatro accesos principales de Inicio mantienen sus colores, posiciones y funciones, con títulos tipográficamente uniformes.
+- El cambio visual se limita a CSS y al identificador de caché de CSS en HTML; **el archivo JS, los datos, la navegación, la publicación y la aceptación no se modifican**.
+
+**Comprobación:** 95 pruebas de lógica y estructura completadas; los ajustes móviles usan los puntos de ruptura existentes (680 px y 380 px) y no sustituyen las cuadrículas originales. La revisión visual en dispositivos físicos sigue pendiente.
+
+---
 ## Diseño actual: descripciones justificadas y avisos discretos
 
 - Las descripciones dentro de las fichas expandidas se muestran con **alineación justificada**, preservando los saltos de línea del autor y usando `hyphens:auto` en español para favorecer el ajuste móvil.
