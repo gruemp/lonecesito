@@ -286,7 +286,7 @@ function init(){
   const $$=selector=>[...document.querySelectorAll(selector)];
   let storage;let state=decodeState(null);
   try{storage=window.localStorage;state=decodeState(storage.getItem(STORAGE_KEY));}catch{/* The page remains usable without storage. */}
-  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let currentRequestId=null;let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
+  let currentCategory='all';let currentSubcategory='all';let currentCity='all';let searchQuery='';let wizardPicture='';let toastTimeout;let wizardStep=0;let editingRequestId=null;let draftTimer;let wizardSubmitted=false;
   const grid=$('#request-grid');
   function activateScreen(screenId){
     applyScreenNavigation(document,screenId);
@@ -310,12 +310,17 @@ function init(){
     const dialog=$(`#${id}-dialog`);if(dialog.open)return;
     dialog.showModal();
   }
-  function save(next,errorId){
-    const error=$(`#${errorId}`);
+  function save(next,errorId=null){
+    const error=errorId?$(`#${errorId}`):null;
     if(!persistState(storage,next)){
-      error.textContent='No se pudo guardar. Revisa si tu navegador permite almacenamiento local e inténtalo de nuevo.';error.hidden=false;return false;
+      const message='No se pudo guardar. Revisa si tu navegador permite almacenamiento local e inténtalo de nuevo.';
+      if(error){error.textContent=message;error.hidden=false;}
+      else showToast(message);
+      return false;
     }
-    state=next;error.hidden=true;return true;
+    state=next;
+    if(error)error.hidden=true;
+    return true;
   }
   function setError(id,error){const element=$(`#${id}`);element.textContent=error.message||'Revisa los datos e inténtalo de nuevo.';element.hidden=false;}
   function applyFilter(category=currentCategory){
@@ -484,7 +489,7 @@ function init(){
       const requests=updateLocalRequestStatus(state.requests,id,status);
       const proposals=status==='cancelada'?state.proposals.map(p=>p.requestId===id&&p.status==='activa'?{...p,status:'pendiente_confirmacion'}:p):state.proposals;
       const next={...state,requests,proposals,draft:state.draft?.editingRequestId===id?null:state.draft};
-      if(!save(next,'detail-error'))return false;
+      if(!save(next))return false;
       renderOwnRequests();return true;
     }catch(e){showToast(e.message);return false;}
   }
@@ -495,39 +500,9 @@ function init(){
       if(!persistState(storage,next))throw new Error('No se pudo guardar la aceptación en este navegador.');
       state=next;
       renderOwnRequests();
-      if($('#detail-dialog').open)showRequest(id);
       showToast('Aceptación de prueba guardada solo aquí. No se ha notificado a nadie.');
     }catch(error){showToast(error.message);}
   }
-  function showRequest(id){
-    const request=findRequest(id);if(!request)return;currentRequestId=id;
-    const mine=state.requests.some(r=>r.id===id);
-    $('#detail-title').textContent=request.title;
-    $('#detail-category').textContent=(CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría')).toLocaleUpperCase('es');
-    $('#detail-city').textContent=request.city;
-    $('#detail-description').textContent=request.description;
-    const photo=$('#detail-photo');
-    photo.hidden=!request.picture;
-    $('#detail-overview').classList.toggle('has-photo',Boolean(request.picture));
-    showPictureInline(photo,request.picture,'Fotografía de la necesidad');
-    const meta=[];
-    if(request.category==='bienes'){if(request.quantity)meta.push('Cantidad: '+request.quantity);meta.push('Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'})[request.condition]);}
-    if(request.budget!=null)meta.push('Presupuesto orientativo: '+money(request.budget));
-    if(request.desiredDate)meta.push('Fecha deseada: '+request.desiredDate);
-    if(request.createdAt)meta.push('Publicada: '+formatDate(request.createdAt));
-    if(request.status!=='abierta')meta.push('Estado: '+({resuelta:'Resuelta',cancelada:'Cancelada',en_proceso:'En proceso'})[request.status]);
-    $('#detail-meta').replaceChildren(...meta.map(t=>el('li','',t)));
-    const already=state.acceptances.some(a=>a.requestId===id);
-    $('#accept-request').hidden=mine;
-    $('#accept-request').disabled=already||request.status!=='abierta';
-    $('#accept-request').textContent=already?'Ya la aceptaste':request.status!=='abierta'?'Necesidad no disponible':'Aceptar necesidad';
-    $('#resolve-request').hidden=!mine||!['abierta','en_proceso'].includes(request.status);
-    $('#detail-note').textContent=mine?
-      'Esta necesidad solo existe en tu navegador. Otras personas no podrán verla ni aceptarla hasta implementar el servicio real.':
-      'Aceptación de demostración: no se envían datos, mensajes ni notificaciones a quien publicó la necesidad.';
-    openDialog('detail');
-  }
-
   function updateOtherCityField(){
     const other=$('#request-city').value==='__otra__';
     $('#city-other-fields').hidden=!other;
@@ -696,13 +671,6 @@ function init(){
   $('#list-city').addEventListener('change',e=>{currentCity=e.target.value;applyFilter();});
   $('#request-search').addEventListener('input',e=>{searchQuery=e.target.value.trim().toLocaleLowerCase('es').slice(0,120);applyFilter();});
   $('#request-category').addEventListener('change',populatePublishSubcategories);
-  $('#resolve-request').addEventListener('click',()=>{
-    const request=state.requests.find(r=>r.id===currentRequestId);
-    if(!request||!['abierta','en_proceso'].includes(request.status))return;
-    if(!window.confirm('¿Confirmas que ya recibiste el producto o se completó el servicio?'))return;
-    if(!changeOwnStatus(request.id,'resuelta'))return;
-    $('#detail-dialog').close();showToast('Necesidad resuelta. Se conserva en tu historial local.');
-  });
   $$('[data-explore]').forEach(link=>link.addEventListener('click',()=>{currentCategory='all';currentSubcategory='all';currentCity='all';searchQuery='';$('#request-search').value='';populateSubcategories();populateCities();applyFilter();}));
   $('#request-city').addEventListener('change',()=>{
     updateOtherCityField();
@@ -753,34 +721,43 @@ function init(){
       showToast(previous?'Necesidad de prueba actualizada.':'Necesidad de prueba guardada. La publicación real requerirá identificarte con Firebase.');
     }catch(error){setError('publish-error',error);}
   });
-  $('#my-requests-grid').addEventListener('click',event=>{
-    const button=event.target.closest('[data-action][data-id]');if(!button)return;
-    const id=button.dataset.id,request=state.requests.find(r=>r.id===id);if(!request)return;
-    const action=button.dataset.action;
-    if(action==='view'){showRequest(id);return;}
-    if(action==='edit'&&request.status==='abierta'){startPublish(request);return;}
-    if(action==='resolve'&&window.confirm('¿Confirmas que el producto fue entregado o el servicio terminó?')){
-      if(changeOwnStatus(id,'resuelta'))showToast('Necesidad resuelta.');
-    }else if(action==='cancel'&&window.confirm('¿Cancelar esta necesidad de prueba? Se conservará en tu historial.')){
-      if(changeOwnStatus(id,'cancelada'))showToast('Necesidad cancelada.');
-    }else if(action==='reopen'&&window.confirm('¿Reabrir la necesidad? Los precios anteriores necesitarán confirmación del proveedor.')){
+  function handleNeedAction(action,id){
+    const request=findRequest(id);
+    if(!request)return;
+    if(action==='accept'){acceptCurrentNeed(id);return;}
+    if(!state.requests.some(item=>item.id===id))return;
+    if(action==='edit'&&request.status==='abierta'){
+      startPublish(request);
+      return;
+    }
+    if(action==='resolve'&&['abierta','en_proceso'].includes(request.status)){
+      if(window.confirm('¿Confirmas que recibiste el producto o terminó el servicio?')&&changeOwnStatus(id,'resuelta'))
+        showToast('Necesidad resuelta. Se conserva en tu historial local.');
+      return;
+    }
+    if(action==='cancel'&&['abierta','en_proceso'].includes(request.status)){
+      if(window.confirm('¿Cancelar esta necesidad? Se conservará en tu historial local.')&&changeOwnStatus(id,'cancelada'))
+        showToast('Necesidad cancelada.');
+      return;
+    }
+    if(action==='reopen'&&['cancelada','en_proceso'].includes(request.status)){
+      if(!window.confirm('¿Reabrir la necesidad? Las ofertas anteriores necesitarán confirmación del proveedor.'))return;
       try{
         const next=reopenCanceled(state.requests,state.proposals,id);
-        if(save({...state,...next},'detail-error')){renderOwnRequests();showToast('Necesidad reactivada. Precios anteriores pendientes de confirmación.');}
+        if(save({...state,...next})){
+          renderOwnRequests();
+          showToast('Necesidad reactivada. Los precios anteriores necesitan confirmación.');
+        }
       }catch(error){showToast(error.message);}
     }
-  });
-  grid.addEventListener('click',event=>{
-    const accept=event.target.closest('[data-accept-request]');
-    if(accept){acceptCurrentNeed(accept.dataset.acceptRequest);return;}
-    const button=event.target.closest('[data-request]');
-    if(button)showRequest(button.dataset.request);
-  });
-  $('#accept-request').addEventListener('click',()=>acceptCurrentNeed(currentRequestId));
-  $('#accepted-grid').addEventListener('click',event=>{
-    const button=event.target.closest('[data-request]');
-    if(button)showRequest(button.dataset.request);
-  });
+  }
+  for(const list of [grid,$('#my-requests-grid'),$('#accepted-grid')]){
+    list.addEventListener('click',event=>{
+      const button=event.target.closest('button[data-action][data-id]');
+      if(!button||button.disabled||!list.contains(button))return;
+      handleNeedAction(button.dataset.action,button.dataset.id);
+    });
+  }
   populatePublishSubcategories();populateSubcategories();populateCities();renderOwnRequests();
   activateScreen(window.location.hash);
 
