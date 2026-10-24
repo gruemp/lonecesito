@@ -1,5 +1,5 @@
 /* Versión visible en la portada. Incrementar al publicar cada nueva modificación. */
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 export const APP_VERSION_DATE = '24/10/2026';
 
 /* Ejemplos claramente ficticios: jamás redirigir su teléfono a una persona real. */
@@ -60,11 +60,11 @@ export function whatsappUrl(number,description) {
   const digits=normalizeWhatsApp(number);
   const first=derivedTitle(description);
   const text='Hola, vi tu necesidad en LoNecesito: '+first+'. ¿Podemos hablar?';
-  return 'https://wa.me/'+digits+'?text='+encodeURIComponent(text);
+  return 'https://api.whatsapp.com/send?phone='+digits+'&text='+encodeURIComponent(text);
 }
 /* Los ejemplos abren WhatsApp sin asignar un destinatario ficticio. */
 export function exampleWhatsappUrl(description) {
-  return 'https://wa.me/?text='+encodeURIComponent('Vi esta necesidad en LoNecesito: '+derivedTitle(description));
+  return 'https://api.whatsapp.com/send?text='+encodeURIComponent('Vi esta necesidad en LoNecesito: '+derivedTitle(description));
 }
 export function canManage(publication,uid) {
   return Boolean(publication&&uid&&publication.ownerUid===uid);
