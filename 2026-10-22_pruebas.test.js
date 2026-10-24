@@ -1366,3 +1366,21 @@ test('se conserva el acceso gratuito sin métodos de pago ni aprobaciones de int
   assert.ok(live.includes('async function showApplicants'));
   assert.equal(live.includes('approveApplicant'),false);
 });
+
+
+test('existe un plan ejecutable de pruebas de reglas con Firebase Emulator',()=>{
+  const testFile=readFileSync(new URL('./tests/firestore.rules.test.mjs',import.meta.url),'utf8');
+  const firebaseJson=readFileSync(new URL('./firebase.json',import.meta.url),'utf8');
+  const packageJson=readFileSync(new URL('./package.json',import.meta.url),'utf8');
+  for(const pattern of [
+    'initializeTestEnvironment',
+    'assertFails',
+    'assertSucceeds',
+    "collection(db(A),'requests'",
+    'phone:',
+    'state'
+  ])assert.ok(testFile.includes(pattern),'Falta caso de seguridad '+pattern);
+  assert.ok(firebaseJson.includes('"firestore.rules"'));
+  assert.ok(packageJson.includes('test:rules'));
+  assert.ok(packageJson.includes('@firebase/rules-unit-testing'));
+});
