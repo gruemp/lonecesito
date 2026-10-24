@@ -7,13 +7,13 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261024-v225">
+  <link rel="stylesheet" href="simple.css?v=20261024-v226">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261024-v225"></script>
+  <script type="module" src="simple.js?v=20261024-v226"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
-<div class="release-bar" role="note"><span id="release-version">Versión 2.2.5</span></div>
+<div class="release-bar" role="note"><span id="release-version">Versión 2.2.6</span></div>
 <header class="site-header">
   <div class="shell header-layout">
     <a class="brand" href="#necesidades" aria-label="LoNecesito, ver necesidades"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
@@ -60,7 +60,7 @@
           <textarea id="need-description" name="description" rows="5" maxlength="4000" minlength="10" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
           <div class="entry-toolbar">
             <div id="photo-preview" class="photo-preview" hidden>
-              <img id="photo-preview-image" alt="Foto seleccionada">
+              <button id="preview-photo" type="button" class="preview-photo" title="Ver foto completa" aria-label="Ampliar la fotografía seleccionada"><img id="photo-preview-image" alt="Foto seleccionada"></button>
               <button id="remove-photo" type="button" class="remove-photo" title="Quitar imagen" aria-label="Quitar imagen">×</button>
             </div>
             <button id="add-photo" type="button" class="entry-tool photo-tool" title="Adjuntar fotografía" aria-label="Adjuntar fotografía">
@@ -86,6 +86,13 @@
     <input id="photo-picker" type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="Seleccionar fotografía del producto">
   </section>
 </main>
+<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-dialog-title">
+  <div class="image-dialog-content">
+    <h2 id="image-dialog-title" class="visually-hidden">Fotografía ampliada</h2>
+    <button id="close-image" class="image-dialog-close" type="button" aria-label="Cerrar fotografía" title="Cerrar fotografía">×</button>
+    <img id="image-dialog-photo" alt="" decoding="async">
+  </div>
+</dialog>
 <dialog id="auth-dialog" aria-labelledby="auth-title">
   <div class="modal-head"><h2 id="auth-title">Accede a LoNecesito</h2><button id="close-auth" class="close-button" type="button" aria-label="Cerrar">×</button></div>
   <p class="modal-description">Inicia sesión o crea una cuenta para publicar, editar y eliminar tus publicaciones.</p>
