@@ -551,3 +551,85 @@ test('la lista solo muestra títulos sin fotos inicialmente en las tres seccione
   assert.ok(js.includes('renderNeedList(list,accepted'));
   assert.ok(html.includes('Toca cualquier nombre para abrir su información'));
 });
+
+
+test('las cuatro rutas principales usan iconos, colores y explicaciones distintas',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const expected=[
+    ['action-cta-publish','write-need','Describe qué necesitas para que otros puedan ayudarte'],
+    ['action-cta-solve','help-need','Encuentra a alguien a quien puedas ayudar'],
+    ['action-cta-mine','my-needs','Consulta y administra tus publicaciones'],
+    ['action-cta-accepted','accepted-needs','Revisa los compromisos que ya aceptaste']
+  ];
+  for(const [klass,icon,tip] of expected){
+    assert.ok(html.includes(klass),'Falta la clase '+klass);
+    assert.ok(html.includes('id="'+icon+'"'),'Falta el icono '+icon);
+    assert.ok(html.includes('href="#'+icon+'"'),'Falta el uso de '+icon);
+    assert.ok(html.includes(tip),'Falta la guía '+tip);
+  }
+  for(const cssMarker of [
+    '.hero .publish-cta.action-cta{background:#174c3e',
+    '.hero .compact-next-step .solve-cta.action-cta{background:#e9f6ef',
+    '#screen-navigation a.action-cta-mine{background:#eaf2fc',
+    '#screen-navigation a.action-cta-accepted{background:#fcf2e1'
+  ])assert.ok(css.includes(cssMarker),'Falta color '+cssMarker);
+  assert.ok(html.includes('class="action-copy"'));
+});
+test('las acciones principales conservan textos y destinos acordados sin formularios extra',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(html.includes('Publicar una necesidad'));
+  assert.ok(html.includes('Soluciona una necesidad y gana dinero por ello'));
+  assert.ok(html.includes('Mis necesidades publicadas para que otros ofrezcan solucionarlas'));
+  assert.ok(html.includes('Necesidades de terceros aceptadas para solucionar'));
+  assert.ok(html.includes('href="#necesidades" data-explore'));
+  assert.ok(html.includes('href="#mis-necesidades" data-screen-link="mis-necesidades"'));
+  assert.ok(html.includes('href="#aceptadas" data-screen-link="aceptadas"'));
+  assert.equal([...html.matchAll(/data-screen-link="necesidades"/g)].length,0);
+  assert.equal([...html.matchAll(/<form\b/g)].length,1);
+});
+test('el listado compacto muestra fondos alternados y flecha distinta al expandir',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  for(const rule of [
+    '.need-list-row:nth-child(odd) > .need-list-summary',
+    '.need-list-row:nth-child(even) > .need-list-summary',
+    '.need-list-summary::after{',
+    '.need-list-row[open] > .need-list-summary::after{',
+    '.need-list-row[open] > .need-list-summary{',
+    'box-shadow:inset 3px 0 0',
+    'text-overflow:ellipsis',
+    'white-space:nowrap'
+  ])assert.ok(css.includes(rule),'Falta '+rule);
+  assert.ok(css.includes('transform:translateY(2px) rotate(225deg)'));
+  assert.ok(css.includes('border-bottom:1px solid #e2eae2'));
+  assert.ok(css.includes('gap:0'));
+});
+test('abrir una necesidad cambia el estado visual pero conserva el título como único resumen',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(js.includes("row.addEventListener('toggle',show)"));
+  assert.ok(js.includes("content.append(needCard(request,context))"));
+  assert.ok(js.includes("content.replaceChildren()"));
+  assert.ok(html.includes('Toca el nombre de una necesidad'));
+  assert.ok(html.includes('Toca el nombre para revisar, editar'));
+  assert.ok(html.includes('Toca una necesidad para revisar lo que aceptaste.'));
+});
+test('botón Cancelar aparece diferenciado sin afectar otras acciones',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(js.includes("button.classList.add('need-action-'+action)"));
+  assert.ok(js.includes("makeButton('Cancelar necesidad','cancel')"));
+  assert.ok(css.includes('.need-card-actions .need-action-cancel{'));
+  assert.ok(css.includes('color:#a33a36'));
+  assert.ok(css.includes('.need-card-actions .need-action-accepted:disabled{'));
+});
+test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las filas',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(css.includes('@media(max-width:680px){'));
+  assert.ok(css.includes('.hero .publish-cta.action-cta,.hero .compact-next-step .solve-cta.action-cta,'));
+  assert.ok(css.includes('min-height:76px'));
+  assert.ok(css.includes('.action-cta .action-copy small{font-size:11px}'));
+  assert.ok(css.includes('.need-list-summary{min-height:38px}'));
+  assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
+});
