@@ -1,4 +1,4 @@
-import {cleanPublication, whatsappUrl, canManage, normalizeWhatsApp} from './simple-model.js';
+import {APP_VERSION,APP_VERSION_DATE,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,canManage,normalizeWhatsApp} from './simple-model.js';
 
 const $ = id => document.getElementById(id);
 const pages = ['inicio', 'necesidades', 'mis-publicaciones', 'publicar'];
@@ -81,33 +81,48 @@ function whatsappLink(record,label,className){
   return a;
 }
 function renderCard(record,owner){
-  const article=el('article','publication-card');
-  const tag=el('span','publication-kind',record.category==='bienes'?'PRODUCTO':'SERVICIO');
+  const example=record.example===true;
+  const article=el('article','publication-card'+(example?' example-card':''));
+  const tag=el('span','publication-kind',(example?'EJEMPLO FICTICIO · ':'')+(record.category==='bienes'?'PRODUCTO':'SERVICIO'));
   article.append(tag,el('h3','',record.title||'Sin título'));
-  const city=el('p','publication-city','⌖  '+String(record.city||'Sin ciudad'));
-  article.append(city);
-  const detail=el('p','publication-description',record.description||'');
-  article.append(detail);
-  const extra=el('ul','publication-details');
-  if(record.quantity)extra.append(el('li','','Cantidad: '+record.quantity));
-  if(record.condition&&record.category==='bienes')extra.append(el('li','','Estado: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||'No indicado')));
-  if(record.budget!==null&&record.budget!==undefined)extra.append(el('li','','Presupuesto aproximado: '+fmt(record.budget)));
+  article.append(el('p','publication-city','⌖  '+String(record.city||'Sin ciudad')));
+  article.append(el('p','publication-description',record.description||''));
+  // Una ficha muestra todos los campos de la necesidad que se hayan diligenciado.
+  const extra=el('dl','publication-facts');
+  const field=(label,value)=>{
+    if(value===null||value===undefined||String(value).trim()==='')return;
+    extra.append(el('dt','',label),el('dd','',value));
+  };
+  field('Tipo',record.category==='bienes'?'Producto':'Servicio');
+  field('Categoría',record.subcategory);
+  field('Ciudad o municipio',record.city);
+  if(record.category==='bienes'){
+    field('Cantidad requerida',record.quantity);
+    field('Estado del producto',record.condition?({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition):null);
+  }
+  if(record.budget!==null&&record.budget!==undefined)field('Presupuesto aproximado',fmt(record.budget));
+  field('Fecha deseada',record.desiredDate);
   if(extra.children.length)article.append(extra);
-  const picture=photoNode(record);
-  if(picture)article.append(picture);
+  const photo=photoNode(record);
+  if(photo)article.append(photo);
   const contact=el('div','contact-box');
   const number=readablePhone(record.contactPhone);
-  if(number&&record.contactConsent===true){
+  if(example){
+    contact.append(el('span','contact-label','Teléfono de ejemplo · no contactar'));
+    contact.append(el('span','example-phone',record.contactPhone||'300 000 0000'));
+    contact.append(el('p','example-warning','Esta es una ficha ilustrativa. El número no corresponde a una persona que haya publicado una necesidad y no abre WhatsApp.'));
+  }else if(number&&record.contactConsent===true){
     contact.append(el('span','contact-label','WhatsApp de contacto'));
     const phoneLink=whatsappLink(record,number,'contact-phone');
     const button=whatsappLink(record,'Contactar por WhatsApp ↗','whatsapp-button');
     if(phoneLink)contact.append(phoneLink);
     if(button)contact.append(button);
   }else{
-    contact.append(el('p','field-help','Esta publicación aún no tiene un WhatsApp público válido. Su autor puede actualizarla.'));
+    // Una publicación anterior sin consentimiento no ofrece números privados.
+    contact.append(el('p','field-help','El autor debe actualizar su publicación y autorizar un número de WhatsApp visible.'));
   }
   article.append(contact);
-  if(owner&&canManage(record,currentUid())){
+  if(owner&&!example&&canManage(record,currentUid())){
     const actions=el('div','owner-actions');
     const edit=el('button','button outline-button','Editar');
     edit.type='button';
@@ -119,10 +134,19 @@ function renderCard(record,owner){
   }
   return article;
 }
+function publicItems(){
+  // No mezclar muestras ficticias con las publicaciones reales de Firebase.
+  const posted=state.items.filter(item=>{
+    if(item.status&&item.status!=='abierta')return false;
+    try{return item.contactConsent===true&&Boolean(normalizeWhatsApp(item.contactPhone));}
+    catch{return false;}
+  });
+  return state.mode==='demo'?[...posted,...EXAMPLE_PUBLICATIONS]:posted;
+}
 function fillCityFilter(){
   const select=$('city-filter');
   const selected=select.value;
-  const cities=[...new Set(state.items.map(v=>String(v.city||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+  const cities=[...new Set(publicItems().map(v=>String(v.city||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
   select.replaceChildren(new Option('Todas las ciudades','all'),...cities.map(city=>new Option(city,city)));
   select.value=cities.includes(selected)?selected:'all';
 }
@@ -131,15 +155,15 @@ function render(){
   const kind=$('type-filter').value;
   const city=$('city-filter').value;
   const search=$('search').value.toLocaleLowerCase('es').trim();
-  const visible=state.items.filter(item=>{
-    if(item.status&&item.status!=='abierta')return false; // Los estados del sistema anterior no se promueven.
+  const visible=publicItems().filter(item=>{
     if(kind!=='all'&&item.category!==kind)return false;
     if(city!=='all'&&item.city!==city)return false;
-    return !search || [item.title,item.city,item.description].join(' ').toLocaleLowerCase('es').includes(search);
+    return !search || [item.title,item.city,item.description,item.subcategory].join(' ').toLocaleLowerCase('es').includes(search);
   });
   const list=$('browse-list');
   list.replaceChildren(...visible.map(item=>renderCard(item,false)));
   $('browse-empty').hidden=visible.length!==0;
+  $('example-note').hidden=!(state.mode==='demo'&&visible.some(item=>item.example));
   const own=state.items.filter(item=>canManage(item,currentUid()));
   $('mine-list').replaceChildren(...own.map(item=>renderCard(item,true)));
   $('mine-empty').hidden=own.length!==0;
@@ -333,6 +357,7 @@ function authError(error){
   return 'No se pudo acceder: '+String(error.message||'revisa tus datos.');
 }
 async function boot(){
+  $('release-version').textContent='Versión de publicación '+APP_VERSION+' · '+APP_VERSION_DATE;
   toggleGoods();
   const config=window.LoNecesitoFirebaseConfig||{};
   const configured=['apiKey','authDomain','projectId','appId'].every(key=>Boolean(config[key]));
