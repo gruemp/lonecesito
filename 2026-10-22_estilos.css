@@ -2336,6 +2336,7 @@ dialog{
   letter-spacing:0;
   white-space:nowrap;
 }
+#my-title .my-count:empty{display:none}
 /* Títulos de las cuatro acciones principales: tratamiento uniforme. */
 .action-cta .action-copy strong{
   color:inherit;
