@@ -633,3 +633,65 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
   assert.ok(css.includes('.need-list-summary{min-height:38px}'));
   assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
 });
+
+
+test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-pulido-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  for(const marker of [
+    'id="hero-publish"','href="#necesidades" data-explore',
+    'href="#mis-necesidades" data-screen-link="mis-necesidades"',
+    'href="#aceptadas" data-screen-link="aceptadas"',
+    'id="request-grid"','id="my-requests-grid"','id="accepted-grid"',
+    'id="request-city"','id="publish-form"','id="request-photo-preview"'
+  ])assert.ok(html.includes(marker),'Falta el elemento existente '+marker);
+});
+test('la composición estática mantiene el ancho central de botones y del contenedor',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const latest=css.slice(css.lastIndexOf('Pulido visual: composición'));
+  assert.ok(latest.includes('max-width:480px'));
+  assert.ok(latest.includes('width:min(calc(100% - 20px),480px)'));
+  assert.ok(latest.includes('grid-template-columns:29px minmax(0,1fr) 20px'));
+  assert.equal(/\.shell\s*\{\s*width|min\(100% - 28px,980px\)/.test(latest),false);
+  assert.ok(latest.includes('.compact-header-inner{'));
+  assert.ok(latest.includes('.section-heading h2{'));
+  assert.ok(latest.includes('.site-footer.compact-footer{'));
+});
+test('filtros, búsqueda, diálogo y estados se alinean visualmente sin elementos añadidos',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const latest=css.slice(css.lastIndexOf('Pulido visual: composición'));
+  for(const marker of [
+    '.filters{','.filter{','.quick-search input{','.compact-filters{',
+    '.listing-controls{','.section-primary-action{',
+    '.dialog-form label{','.wizard-bars{','.wizard-actions .button',
+    '.site-footer.compact-footer{'
+  ])assert.ok(latest.includes(marker),'No se ajustó visualmente '+marker);
+  assert.ok(latest.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+});
+test('el diseño conserva la lista compacta de una línea, con separación nula',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(css.includes('gap:0'));
+  assert.ok(css.includes('.need-list-title{'));
+  assert.ok(css.includes('white-space:nowrap'));
+  assert.ok(css.includes('text-overflow:ellipsis'));
+  assert.ok(css.includes('.need-list-summary::after{'));
+  assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(js.includes("content.append(needCard(request,context))"));
+  assert.ok(!js.includes('addPictureToggle'));
+});
+test('la cascada nueva contiene ajustes para móvil, tableta y escritorio sin desbordar columnas',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const latest=css.slice(css.lastIndexOf('Pulido visual: composición'));
+  for(const marker of [
+    '@media(min-width:900px){','@media(max-width:680px){',
+    '@media(max-width:480px){','@media(max-width:350px){',
+    'grid-template-columns:25px minmax(0,1fr) 18px',
+    'grid-template-columns:minmax(0,1fr)',
+    '.form-columns{grid-template-columns:minmax(0,1fr)}',
+    'min-width:0','overflow-wrap:anywhere'
+  ])assert.ok(latest.includes(marker),'No está '+marker);
+  const braces=[...css].reduce((n,ch)=>n+(ch==='{')-(ch==='}'),0);
+  assert.equal(braces,0);
+});
