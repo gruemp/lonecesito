@@ -1,8 +1,50 @@
 export const STORAGE_KEY = 'lonecesito-demo-v1';
 export const CATEGORIES = Object.freeze({bienes:'Bienes',servicios:'Servicios'});
 export const SUBCATEGORIES = Object.freeze({
-  bienes:Object.freeze({insumos:'Insumos y materiales',vestuario:'Ropa y uniformes',repuestos:'Tecnología y repuestos',otros:'Otros bienes'}),
-  servicios:Object.freeze({mantenimiento:'Mantenimiento y reparaciones',profesionales:'Servicios profesionales',tecnologia:'Tecnología y soporte',otros:'Otros servicios'})
+  bienes:Object.freeze({
+    insumos:'Insumos y materiales',
+    vestuario:'Ropa y uniformes',
+    repuestos:'Tecnología y repuestos',
+    alimentos:'Alimentos y bebidas',
+    hogar:'Hogar y decoración',
+    muebles:'Muebles y mobiliario',
+    electrodomesticos:'Electrodomésticos',
+    electronica:'Celulares, computadores y electrónica',
+    construccion:'Materiales de construcción',
+    ferreteria:'Ferretería y herramientas',
+    automotriz:'Vehículos y autopartes',
+    salud:'Salud y cuidado personal',
+    belleza:'Belleza y cosmética',
+    papeleria:'Papelería y oficina',
+    deportivos:'Deportes y recreación',
+    mascotas:'Mascotas y suministros',
+    agro:'Agro, plantas y jardinería',
+    infantiles:'Bebés, niños y juguetes',
+    industriales:'Equipos y suministros industriales',
+    otros:'Otros bienes'
+  }),
+  servicios:Object.freeze({
+    mantenimiento:'Mantenimiento y reparaciones',
+    profesionales:'Servicios profesionales',
+    tecnologia:'Tecnología y soporte',
+    hogar_servicios:'Aseo y servicios del hogar',
+    plomeria:'Plomería y electricidad',
+    obras:'Construcción y remodelación',
+    transporte:'Transporte, mudanzas y domicilios',
+    educacion:'Educación y clases',
+    diseno:'Diseño, publicidad y mercadeo',
+    eventos:'Eventos y celebraciones',
+    belleza_servicios:'Belleza y cuidado personal',
+    salud_servicios:'Salud y bienestar',
+    mascotas_servicios:'Cuidado de mascotas',
+    automotriz_servicios:'Mecánica y servicios de vehículos',
+    agro_servicios:'Jardinería y labores agrícolas',
+    alimentacion:'Cocina y alimentación',
+    fotografia:'Fotografía y video',
+    turismo:'Turismo y guías',
+    seguridad:'Seguridad y vigilancia',
+    otros:'Otros servicios'
+  })
 });
 export const EXAMPLES = Object.freeze([
   {id:'empaques',title:'Necesito 100 empaques personalizados',city:'Bogotá',category:'bienes',subcategory:'insumos',quantity:100,condition:'cualquiera',description:'Busco 100 empaques de cartón para mi negocio. La propuesta debe incluir medidas disponibles, personalización, precio total y plazo de entrega. Solicitud ilustrativa; no corresponde a un comprador real.'},
@@ -342,13 +384,18 @@ function init(){
     if(cities.includes(currentCity))select.value=currentCity;else currentCity='all';
   }
   function populateSubcategories(){
-    const select=$('#list-subcategory');
-    const values=currentCategory==='all'?Object.entries(SUBCATEGORIES).flatMap(([,items])=>Object.entries(items)):Object.entries(SUBCATEGORIES[currentCategory]);
-    const options=[new Option('Todas las categorías','all')];
-    for(const [value,label] of values)if(!options.some(item=>item.value===value))options.push(new Option(label,value));
-    select.replaceChildren(...options);
-    if(options.some(option=>option.value===currentSubcategory))select.value=currentSubcategory;
-    else currentSubcategory='all';
+    const select=$('#list-subcategory'),before=currentSubcategory;
+    const all=[new Option('Todas las categorías','all')];
+    const kinds=currentCategory==='all'?['bienes','servicios']:[currentCategory];
+    for(const kind of kinds){
+      const group=document.createElement('optgroup');group.label=CATEGORIES[kind];
+      for(const [value,label] of Object.entries(SUBCATEGORIES[kind]))group.append(new Option(label,value));
+      all.push(group);
+    }
+    select.replaceChildren(...all);
+    const exists=kinds.some(kind=>Object.hasOwn(SUBCATEGORIES[kind],before));
+    currentSubcategory=exists?before:'all';
+    select.value=currentSubcategory;
   }
   function populatePublishSubcategories(){
     const kind=$('#request-category').value;
@@ -790,4 +837,4 @@ function init(){
 
 }
 
-if(typeof document!=='undefined')init();
+if(typeof document!=='undefined' && !(window.LoNecesitoFirebaseConfig?.apiKey && window.LoNecesitoFirebaseConfig?.authDomain && window.LoNecesitoFirebaseConfig?.projectId && window.LoNecesitoFirebaseConfig?.appId)) init();

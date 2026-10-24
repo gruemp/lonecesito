@@ -640,8 +640,8 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
-  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-firebase-categorias-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-categorias-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
     'href="#mis-necesidades" data-screen-link="mis-necesidades"',
@@ -799,8 +799,8 @@ test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
 test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
-  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-firebase-categorias-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-categorias-1'));
   assert.ok(js.includes("const row=el('details','need-list-row')"));
   assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
   assert.ok(js.includes("content.append(needCard(request,context))"));
@@ -897,8 +897,8 @@ test('las filas cerradas siguen compactas y las fichas se crean únicamente al a
 test('la nueva capa visual mantiene los tres contextos y los controles existentes',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-centrado-justificado-1'));
-  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-firebase-categorias-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-categorias-1'));
   for(const id of ['request-grid','my-requests-grid','accepted-grid','publish-form','request-city','request-photo-preview'])
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
   assert.ok(app.includes("needCard(request,'explorar')")===false);
@@ -913,8 +913,8 @@ test('el rediseño premium conserva la navegación y las pantallas originales',(
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  assert.ok(html.includes('20261023-centrado-justificado-1'));
-  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(html.includes('20261023-firebase-categorias-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-categorias-1'));
   assert.ok(css.includes('LO NECESITO / VISUAL V2'));
   for(const id of ['inicio','necesidades','mis-necesidades','aceptadas','request-grid','my-requests-grid','accepted-grid','publish-form'])
     assert.ok(html.includes('id="'+id+'"'),id);
@@ -1016,7 +1016,7 @@ test('las combinaciones nuevas conservan contraste AA',()=>{
 
 test('todas las descripciones de necesidades abiertas se justifican sin perder saltos',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Descripciones justificadas en las tres vistas'));
+  const layer=css.slice(css.lastIndexOf('Descripciones justificadas en las tres vistas'),css.lastIndexOf('Jerarquía tipográfica completa'));
   assert.ok(layer.includes(':is(#request-grid,#my-requests-grid,#accepted-grid)'));
   assert.ok(layer.includes('.need-card .need-card-description{'));
   for(const marker of ['text-align:justify','text-align-last:left','text-justify:inter-word','hyphens:auto','white-space:pre-wrap','overflow-wrap:anywhere'])
@@ -1074,7 +1074,7 @@ test('los mensajes dinámicos de éxito no incluyen comentarios sobre navegador 
 test('la jerarquía visual se aplica a los títulos de todas las pantallas',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const id of ['hero-title','requests-title','my-title','accepted-title','publish-title','wizard-title-1','wizard-title-2','wizard-title-3'])
     assert.ok(html.includes('id="'+id+'"'),'Falta título '+id);
   for(const selector of [
@@ -1092,7 +1092,7 @@ test('la jerarquía visual se aplica a los títulos de todas las pantallas',()=>
 });
 test('cada sección tiene un título con escala consistente y color identificable',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const rule of [
     '--heading-primary:#153b30',
     '--heading-blue:#244d73',
@@ -1108,7 +1108,7 @@ test('cada sección tiene un título con escala consistente y color identificabl
 test('el contador de necesidades se distingue sin alterar el título largo',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   assert.ok(html.includes('id="my-title"'));
   assert.ok(html.includes('id="my-count"'));
   assert.ok(layer.includes('#my-title .my-count{'));
@@ -1120,7 +1120,7 @@ test('el contador de necesidades se distingue sin alterar el título largo',()=>
 test('cada nombre permanece en una sola línea cerrada y completo al desplegar',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   assert.ok(layer.includes('.need-list-title{'));
   assert.ok(layer.includes('white-space:nowrap'));
   assert.ok(layer.includes('text-overflow:ellipsis'));
@@ -1133,7 +1133,7 @@ test('cada nombre permanece en una sola línea cerrada y completo al desplegar',
 test('los encabezados del formulario conservan los tres pasos y su jerarquía',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const n of [0,1,2])assert.ok(html.includes('data-wizard-step="'+n+'"'));
   assert.ok(layer.includes('.dialog-header h2{'));
   assert.ok(layer.includes('.dialog-form .wizard-heading{'));
@@ -1144,7 +1144,7 @@ test('los encabezados del formulario conservan los tres pasos y su jerarquía',(
 test('los títulos se adaptan al móvil sin cambiar las columnas ni la lógica',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const marker of [
     '@media(max-width:680px){',
     '@media(max-width:380px){',
@@ -1181,7 +1181,7 @@ test('nuevas tonalidades de títulos y fondos alcanzan contraste AA',()=>{
 
 test('los títulos de las tres secciones se centran sin cambiar su tamaño',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   assert.ok(layer.includes(':is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading{'));
   assert.ok(layer.includes('justify-content:center'));
@@ -1195,7 +1195,7 @@ test('los títulos de las tres secciones se centran sin cambiar su tamaño',()=>
 test('las explicaciones de las tres secciones quedan justificadas y con última línea natural',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   for(const piece of [
     '#necesidades > .section-heading .section-description,',
     ':is(#mis-necesidades,#aceptadas) > .section-usage{',
@@ -1212,7 +1212,7 @@ test('las explicaciones de las tres secciones quedan justificadas y con última 
 test('la cascada nueva respeta la estructura responsiva y listas compactas',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   assert.equal(/grid-template-columns|padding:|min-height:/.test(layer),false);
   assert.ok(layer.includes('#necesidades > .section-heading > div{'));
   assert.ok(layer.includes('width:100%'));
@@ -1233,4 +1233,154 @@ test('la aceptación ya registrada se presenta como Ya aplicaste a esta necesida
   assert.ok(!js.includes("makeButton('Necesidad aceptada'"));
   assert.ok(!js.includes("showToast('Necesidad aceptada.')"));
   assert.ok(js.includes("makeButton('Aceptar necesidad','accept',true)"));
+});
+
+
+test('el formulario ahora ofrece 20 categorías de bienes y 20 de servicios',()=>{
+  assert.equal(Object.keys(SUBCATEGORIES.bienes).length,20);
+  assert.equal(Object.keys(SUBCATEGORIES.servicios).length,20);
+  for(const [type,names] of Object.entries(SUBCATEGORIES)){
+    assert.equal(typeof names.otros,'string');
+    assert.equal(new Set(Object.keys(names)).size,20);
+    for(const [id,label] of Object.entries(names)){
+      assert.ok(/^[a-z_]+$/.test(id),'ID inválido '+id);
+      assert.ok(label.length>=5,'Etiqueta demasiado corta '+label);
+      const normalized=normalizeRequest({...req,category:type,subcategory:id});
+      assert.equal(normalized.category,type);
+      assert.equal(normalized.subcategory,id);
+    }
+  }
+  for(const id of ['insumos','vestuario','repuestos','otros'])assert.ok(Object.hasOwn(SUBCATEGORIES.bienes,id));
+  for(const id of ['mantenimiento','profesionales','tecnologia','otros'])assert.ok(Object.hasOwn(SUBCATEGORIES.servicios,id));
+});
+test('las nuevas categorías persisten en borradores y necesidades guardadas',()=>{
+  for(const [category,subcategory] of [['bienes','electrodomesticos'],['bienes','mascotas'],['servicios','educacion'],['servicios','transporte']]){
+    const data=normalizeRequest({...req,category,subcategory});
+    const draft=buildDraft(data);
+    assert.equal(draft.subcategory,subcategory);
+    const restored=decodeState(JSON.stringify({version:1,requests:[{...data,id:'registro-'+subcategory}]}));
+    assert.equal(restored.requests.length,1);
+    assert.equal(restored.requests[0].subcategory,subcategory);
+  }
+});
+test('las categorías se muestran en el filtro y formulario de las dos modalidades',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  assert.ok(js.includes("const group=document.createElement('optgroup')"));
+  assert.ok(js.includes("group.label=CATEGORIES[kind]"));
+  assert.ok(js.includes("Object.entries(SUBCATEGORIES[kind])"));
+  assert.ok(js.includes("Object.entries(SUBCATEGORIES[kind])"));
+  assert.ok(live.includes("Object.entries(SUBCATEGORIES[kind])"));
+  assert.ok(live.includes("Object.entries(SUBCATEGORIES[kind]||SUBCATEGORIES.bienes)"));
+  assert.ok(live.includes("$('#goods-fields').hidden=!goods"));
+});
+test('el modo multiusuario solo se activa con una configuración Firebase completa',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const config=readFileSync(new URL('./firebase-config.js',import.meta.url),'utf8');
+  assert.ok(html.includes('firebase-config.js?v=20261023-1'));
+  assert.ok(html.includes('firebase-live.js?v=20261023-1'));
+  assert.ok(html.indexOf('firebase-config.js')<html.indexOf('2026-10-22_app.js'));
+  assert.ok(js.includes("window.LoNecesitoFirebaseConfig?.apiKey"));
+  assert.ok(js.includes("window.LoNecesitoFirebaseConfig?.projectId"));
+  assert.ok(js.includes("window.LoNecesitoFirebaseConfig?.appId"));
+  assert.ok(config.includes("apiKey: ''"));
+  assert.ok(config.includes("projectId: ''"));
+});
+test('Firebase permite acceso por correo o Google y exige consentimiento antes de exponer datos',()=>{
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  new Function(live);
+  for(const expected of [
+    'createUserWithEmailAndPassword','signInWithEmailAndPassword','GoogleAuthProvider',
+    'signInWithPopup','onAuthStateChanged','account-consent','profile-consent',
+    'validProfile(name,phone,consent)','discloseConsent:true','phone:',
+    "doc(db,'profiles',state.user.uid)","state.pending"
+  ])assert.ok(live.includes(expected),'Falta autenticación/consentimiento '+expected);
+});
+test('aplicar no exige formulario adicional y no permite más de una aplicación por persona',()=>{
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  assert.ok(live.includes("async function submitApplication(id,profileOverride=null)"));
+  assert.ok(live.includes("state.applied.has(id)"));
+  assert.ok(live.includes("req.ownerUid===state.user.uid"));
+  assert.ok(live.includes("writeBatch(db)"));
+  assert.ok(live.includes("batch.commit()"));
+  assert.ok(live.includes("makeButton('Aceptar necesidad','apply',req.id,true)"));
+  assert.ok(live.includes("makeButton('Ya aplicaste a esta necesidad','accepted',req.id,true,true)"));
+  assert.ok(live.includes("name:currentProfile.name,phone:currentProfile.phone"));
+});
+test('los nombres y teléfonos de interesados solo se consultan en la ficha del propietario',()=>{
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  assert.ok(live.includes("if(own){"));
+  assert.ok(live.includes("async function showApplicants(id,container)"));
+  assert.ok(live.includes("collection(db,'requests',id,'applications')"));
+  assert.ok(live.includes("'Personas que aplicaron'"));
+  assert.ok(live.includes("applicant.phone"));
+  assert.ok(live.includes("phone.href='tel:'"));
+  assert.ok(live.includes("document.createElement(tag)"));
+  assert.equal(live.includes("innerHTML=applicant"),false);
+});
+test('las reglas aíslan perfiles y aplicaciones de usuarios no propietarios',()=>{
+  const rules=readFileSync(new URL('./firestore.rules',import.meta.url),'utf8');
+  for(const s of [
+    'match /profiles/{uid}',
+    'allow get: if isUser(uid);',
+    'allow list: if false;',
+    'match /requests/{needId}',
+    'allow get, list: if true;',
+    'match /applications/{applicantUid}',
+    'allow get: if isUser(applicantUid) || owns(needId);',
+    'allow list: if owns(needId);',
+    'match /applicationsByUser/{uid}/items/{needId}',
+    'getAfter(indexPath(applicantUid,needId))',
+    'getAfter(applicationPath(needId,uid))',
+    'get(profilePath(applicantUid)).data.phone',
+    'allow update, delete: if false;',
+    'allow read, write: if false;'
+  ])assert.ok(rules.includes(s),'Permiso ausente '+s);
+});
+test('las reglas impiden divulgar identidad o teléfono en documentos de necesidad pública',()=>{
+  const rules=readFileSync(new URL('./firestore.rules',import.meta.url),'utf8');
+  const p=rules.slice(rules.indexOf('function publicNeedFields(data) {'),rules.indexOf('function validPublicNeed(data) {'));
+  assert.ok(p.includes('ownerUid'));
+  for(const forbidden of ["'phone'","'email'","'name'","'applicants'"])assert.equal(p.includes(forbidden),false);
+  assert.ok(p.includes('hasOnly'));
+  assert.ok(rules.includes('request.resource.data.ownerUid == resource.data.ownerUid'));
+});
+test('las fichas privadas y el registro se ajustan sin alterar las cuadrículas originales',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const latest=css.slice(css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
+  for(const marker of [
+    '.account-header-button{','.account-dialog{','.account-fields{',
+    '.applicants-panel{','.applicants-title{','.applicant-entry{',
+    '.applicant-phone{','@media(max-width:680px){'
+  ])assert.ok(latest.includes(marker),'Falta estilo '+marker);
+  assert.equal(latest.includes('grid-template-columns:'),true);
+  assert.equal(latest.includes('.need-card-overview{'),false);
+});
+test('se conserva el acceso gratuito sin métodos de pago ni aprobaciones de interesados',()=>{
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('./firestore.rules',import.meta.url),'utf8');
+  assert.ok(live.includes('gratis'));
+  assert.equal(/mercadopago|stripe|checkout|suscripci[oó]n/i.test(live),false);
+  assert.equal(/match \/payments/.test(rules),false);
+  assert.ok(live.includes('async function showApplicants'));
+  assert.equal(live.includes('approveApplicant'),false);
+});
+
+
+test('existe un plan ejecutable de pruebas de reglas con Firebase Emulator',()=>{
+  const testFile=readFileSync(new URL('./tests/firestore.rules.test.mjs',import.meta.url),'utf8');
+  const firebaseJson=readFileSync(new URL('./firebase.json',import.meta.url),'utf8');
+  const packageJson=readFileSync(new URL('./package.json',import.meta.url),'utf8');
+  for(const pattern of [
+    'initializeTestEnvironment',
+    'assertFails',
+    'assertSucceeds',
+    "collection(db(A),'requests'",
+    'phone:',
+    'updateDoc'
+  ])assert.ok(testFile.includes(pattern),'Falta caso de seguridad '+pattern);
+  assert.ok(firebaseJson.includes('"firestore.rules"'));
+  assert.ok(packageJson.includes('test:rules'));
+  assert.ok(packageJson.includes('@firebase/rules-unit-testing'));
 });

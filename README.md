@@ -1,4 +1,18 @@
 # lonecesito
+
+## Categorías ampliadas y preparación del modo multiusuario
+
+- **40 categorías específicas**, distribuidas en 20 para Bienes y 20 para Servicios, incluidas construcción, electrodomésticos, educación, transporte, mascotas, hogar y muchas más. Los valores antiguos se conservan. Aparecen en el formulario y en los filtros.
+- Se incorporó el módulo **firebase-live.js**, que cuando exista una configuración Firebase válida permitirá registrar usuarios con correo o Google, guardar nombre y teléfono en un perfil no público y aplicar con un clic.
+- Solo el **propietario** de una necesidad podrá consultar la lista completa con los nombres y teléfonos de quienes aplicaron. Cada interesado podrá consultar su propia aplicación. Nadie debe aprobar la aplicación antes de ver los contactos. Sin límites preestablecidos de interesados.
+- Publicar, aplicar y contactar no cuesta dinero al usuario: no se han añadido suscripciones, pagos ni comisiones. **Firebase puede generar costes de infraestructura para quien opera el servicio según sus cuotas**.
+- Los datos de contacto se separan de la necesidad pública; las reglas de acceso están en **firestore.rules** y el despliegue configurado en **firebase.json**. El cliente requiere autorización expresa para compartir el nombre y número con cada propietario.
+- Se conserva la UI anterior, los listados, fotografía a la derecha, navegación en cuatro pantallas y el modo de demostración para cuando no hay configuración de Firebase.
+- **IMPORTANTE — PENDIENTE DE ACTIVACIÓN:** no hay proyecto ni configuración Firebase en este repositorio. Los valores de **firebase-config.js** están vacíos; GitHub Pages no despliega Firestore ni sus reglas. Se debe configurar un proyecto Firebase real, desplegar sus reglas y validar seguridad antes de ofrecer conexión entre personas. Consulta **docs/firebase-setup.md**.
+- **Verificación:** 111 pruebas de lógica, categorías y estructuras superadas; suite adicional de Firestore Emulator preparada pero aún no ejecutada. **No** se ha ejecutado el emulador de Firestore ni se han probado permisos sobre cuentas reales. No se afirma que Firebase esté operativo en producción.
+
+---
+
 ## Jerarquía visual uniforme para todos los títulos (octubre de 2026)
 
 - Los títulos de **Inicio**, **Explorar**, **Mis necesidades publicadas** y **Necesidades de terceros aceptadas** comparten escala tipográfica, márgenes y alineación coherentes. Los títulos interiores conservan un tono identificador de su sección, sin perder contraste ni cambiar sus nombres.
