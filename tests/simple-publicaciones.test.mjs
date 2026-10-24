@@ -562,3 +562,48 @@ test('las instrucciones de continuidad incluyen la papelera adicional',()=>{
 });
 
 
+
+
+test('cuatro pestañas en el orden aprobado y dos filas en PC y móvil',()=>{
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+ const nav=html.match(/<nav class="top-nav"[^>]*>([\s\S]*?)<\/nav>/);
+ assert.ok(nav);
+ const links=[...nav[1].matchAll(/data-nav="([^"]+)"/g)].map(x=>x[1]);
+ assert.deepEqual(links,['inicio','mis-publicaciones','necesidades','publicar']);
+ assert.match(css,/\.site-header \.top-nav\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.site-header \.top-nav\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+test('tercera imagen ocupa Inicio, sin fichas ni buscador',()=>{
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+ const inicio=html.split('<section id="inicio"')[1].split('</section>')[0];
+ const browse=html.split('<section id="necesidades"')[1].split('</section>')[0];
+ assert.match(inicio,/src="assets\/lonecesito-presentacion\.webp"/);
+ assert.doesNotMatch(inicio,/id="search"|id="browse-list"/);
+ assert.doesNotMatch(browse,/welcome-banner|presentacion\.webp/);
+ assert.match(browse,/id="search"/);
+ assert.match(js,/const screen=pages\.includes\(page\)\?page:'inicio'/);
+ assert.equal((html.match(/lonecesito-presentacion\.webp/g)||[]).length,1);
+});
+test('no existe versión visible ni necesidades de ejemplo',()=>{
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+ const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+ const model=readFileSync(new URL('../simple-model.js',import.meta.url),'utf8');
+ assert.doesNotMatch(html,/release-version|release-bar|Versión 2\./);
+ assert.doesNotMatch(model,/EXAMPLE_PUBLICATIONS|samplePublication|exampleWhatsappUrl/);
+ assert.doesNotMatch(js,/EXAMPLE_PUBLICATIONS|exampleWhatsappUrl|sampleCall/);
+ assert.match(js,/item\.example===true/); // Registros ficticios antiguos también se ocultan.
+ assert.match(js,/return state\.items\.filter/);
+});
+test('buscador por tramos e índice de campos públicos y teléfono',()=>{
+ const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+ const search=readFileSync(new URL('../simple-search.js',import.meta.url),'utf8');
+ assert.match(js,/publicationMatchesQuery\(item,query\)/);
+ assert.match(js,/\$\('search'\)\.addEventListener\('input',render\)/);
+ assert.match(search,/contactPhone/);
+ assert.match(search,/city','category','subcategory'/);
+ assert.match(search,/terms\.every\(term=>index\.includes\(term\)\)/);
+ assert.match(search,/normalize\('NFD'\)/);
+ assert.doesNotMatch(search,/ownerUid|ownerEmail|apiKey/);
+});
