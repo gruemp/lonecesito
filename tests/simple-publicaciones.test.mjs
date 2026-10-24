@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.15');
+  assert.equal(APP_VERSION,'2.2.16');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -576,20 +576,21 @@ test('cuatro pestañas: una fila en PC y dos en móvil, en orden lógico',()=>{
   assert.match(css,/--home-frame-width:min\(calc\(100% - 32px\),1440px/);
  assert.match(css,/\.home-visual-screen \.welcome-banner img\{[^}]*object-fit:contain/);
   assert.match(css,/\.home-visual-screen\{[^}]*width:var\(--home-frame-width\)/);
+  assert.match(css,/aspect-ratio:1819 \/ 865;object-fit:contain/);
   assert.match(css,/\.site-header \.header-layout\{[^}]*width:var\(--home-frame-width\)/);
   assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?--home-frame-width:min\(calc\(100% - 20px\)/);
 });
-test('tercera imagen ocupa Inicio, sin fichas ni buscador',()=>{
+test('imagen aprobada de dos pasos ocupa solo Inicio, sin fichas ni buscador',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
  const inicio=html.split('<section id="inicio"')[1].split('</section>')[0];
  const browse=html.split('<section id="necesidades"')[1].split('</section>')[0];
- assert.match(inicio,/src="assets\/lonecesito-presentacion\.webp"/);
+ assert.match(inicio,/src="assets\/lonecesito-presentacion-dos-pasos\.png"/);
  assert.doesNotMatch(inicio,/id="search"|id="browse-list"/);
  assert.doesNotMatch(browse,/welcome-banner|presentacion\.webp/);
  assert.match(browse,/id="search"/);
  assert.match(js,/const screen=pages\.includes\(page\)\?page:'inicio'/);
- assert.equal((html.match(/lonecesito-presentacion\.webp/g)||[]).length,1);
+ assert.equal((html.match(/lonecesito-presentacion-dos-pasos\.png/g)||[]).length,1);
 });
 test('no existe versión visible ni necesidades de ejemplo',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
