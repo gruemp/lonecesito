@@ -1,3 +1,13 @@
+# Reglas vigentes para continuar LoNecesito
+
+**Leer antes de modificar el proyecto:** [AGENTS.md](AGENTS.md) · [Preferencias actuales](docs/PREFERENCIAS-LO-NECESITO.md) · [Estado y aprendizajes de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
+
+Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en dos filas en PC y móvil, tercera ilustración solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
+
+**Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. Esta actualización es **solo documental**, sin modificaciones de interfaz ni de versión interna.
+
+---
+
 # Versión técnica 2.2.13 — Inicio independiente, cuatro pestañas y búsqueda por tramos
 
 La web empieza en **Inicio**, con la **tercera ilustración elegida** (`assets/lonecesito-presentacion.webp`) y ningún buscador ni ficha. La navegación se presenta **en dos filas de dos botones**, tanto en móviles como en computadores: **Inicio**, **Mis publicaciones**, **Ver necesidades**, **Publicar lo que necesito**. Se eliminan por completo las fichas ficticias y la barra de versión visible.

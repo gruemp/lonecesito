@@ -1,134 +1,88 @@
-# LoNecesito — entrega, aprendizajes y continuidad
+# LoNecesito — estado vigente, aprendizajes y continuidad
 
-**Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión técnica interna:** 2.2.13 (no visible en la interfaz)  
-**Web:** https://gruemp.github.io/lonecesito/  
+**Revisión de documentación:** 24 de octubre de 2026  
+**Versión interna del código de interfaz:** 2.2.13 (no visible al público; esta revisión documental no la altera)  
+**Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
-**Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
+**Rama desplegada por GitHub Pages:** **codex/diseno-original**.
 
-Este documento es el **punto de entrega** para continuar el proyecto, con otra IA o con una persona. Es una fotografía de decisiones y del estado técnico, no una promesa de que el servicio multiusuario está en producción. Leer primero [AGENTS.md](../AGENTS.md) y [PREFERENCIAS-LO-NECESITO.md](PREFERENCIAS-LO-NECESITO.md): allí están los criterios vinculantes del usuario.
+Este documento permite que una nueva IA retome el proyecto con contexto real y sin depender de esta conversación. **Obligatorio leer [AGENTS.md](../AGENTS.md) y [PREFERENCIAS-LO-NECESITO.md](PREFERENCIAS-LO-NECESITO.md)** antes de intervenir. Ambos recogen las instrucciones vigentes; este archivo añade estado técnico, aprendizajes y protocolo.
 
-## 1. Qué quedó cerrado visual y funcionalmente
+## 1. Qué problema resuelve la web
 
-- Sitio minimalista, legible en celulares y con el menor alto posible, sin ocultar texto ni quitar anchura útil.
-- Encabezado con **cuatro accesos en dos filas** en PC y móvil: Inicio, Mis publicaciones, Ver necesidades y Publicar lo que necesito. Sin botones repetidos en portada.
-- La ruta inicial abre el listado. Se eliminaron el titular grande anterior de la portada y el texto redundante del pie.
-- Publicación mediante **dos campos de texto**: una descripción libre de la necesidad y el número de WhatsApp. Ningún formulario separado de ciudad, categoría, cantidad, precio o fecha.
-- En la misma caja se encuentran el **micrófono** para dictar en español (API de reconocimiento del navegador cuando esté disponible) y el botón para adjuntar **una imagen opcional**, comprimida antes de guardarse. El teclado siempre funciona.
-- Fichas compactas: texto único y **sin título visual** y detalles redactados dentro del mismo cuerpo. Los campos históricos se incorporan al texto, no en chips o recuadros.
-- Cada ficha reserva un bloque a la **derecha** para la foto. Si no existe, la descripción ocupa todo el ancho y no se crea espacio lateral.
-- **Nuevo en 2.2.6:** al pulsar **cualquier parte de una fotografía real** de la ficha, se abre un visor en primer plano con el archivo completo, ajustado sin recortes (\`object-fit: contain\`). Se puede cerrar con la **X**, tocando fuera de la imagen o pulsando **Escape**. También se puede ampliar la miniatura del editor. Si no hay imagen, no se muestra marcador ni área interactiva.
-- Dos botones con **solo iconos** en cada ficha: llamada por enlace \`tel:\` (azul) y conversación de WhatsApp por \`https://api.whatsapp.com/send\` (verde). El teléfono no se escribe en la ficha, pero puede leerse de la URL de contacto.
-- Solo el autor puede **Editar** o **Eliminar**. No existen aceptaciones, interesados, marcados como resueltos ni intermediación.
-- Las muestras de publicación utilizan el **mismo modelo y renderizado** que las reales y conservan la zona de imagen. Una muestra sin fotografía ocupa el ancho completo con su descripción; la llamada está deshabilitada para no marcar un teléfono ficticio y WhatsApp abre sin destinatario. No mostrar avisos repetitivos de prueba.
-- Versionado visible discreto «Versión X.Y.Z» arriba de todas las pantallas, actualizado en cada entrega.
-- Buscador local sencillo, sin Gemini ni reconocimiento semántico por IA.
+**LoNecesito es un tablón de necesidades**, no un portal de ofertas ni una plataforma de intermediación. Una persona redacta lo que necesita y agrega su teléfono. Otra ve su necesidad y la contacta directamente mediante **llamada telefónica** o **WhatsApp**. El dueño puede editarla y eliminarla. No hay propuestas, interesados, aceptar, rechazar, resolver, pagos, negociación propia de la web ni Gemini.
 
-## 2. Archivos activos y responsabilidad de cada uno
+## 2. Interfaz actual, no negociable salvo instrucción nueva
 
-| Archivo | Responsabilidad |
+- **Navegación:** cuatro pestañas en orden **Inicio → Mis publicaciones → Ver necesidades → Publicar lo que necesito**, **2 × 2 tanto en PC como en móvil**, persistentes al navegar.
+- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. Mostrarla entera y muy ancha; no poner allí buscador ni fichas.
+- **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
+- **Mis publicaciones:** solo las publicaciones creadas por el dueño.
+- **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
+- **Controles del editor:** una fila con teléfono e icono a su izquierda y marcador «Ej: 300 123 4567» dentro; foto, micrófono y envío por avión de papel, **sin texto visible en el botón verde**. Enter envía; Shift+Enter salta de línea. En edición aparecen además papelera y X para cancelar, en esa fila.
+- **Fichas:** sin título visual; todo el texto justificado y visible, alto según contenido. **Con foto:** derecha, ajuste sin cortes, pulsar para ver completa y cerrar con X/Escape/toque fuera. **Sin foto:** texto a todo el ancho, sin huecos ni marcadores.
+- **Acciones de ficha:** una sola fila de **3 iconos** para visitantes (marcador telefónico azul, WhatsApp verde, compartir PNG morado de tres puntos conectados); **5 iconos** para dueño (+ lápiz y papelera). No imprimir el número sobre la ficha, no escribir «Contactar».
+- **Compartir:** generar PNG local fiel al contenido sin título visual, foto solo si existe y **teléfono real dentro del PNG**; usar compartir nativo o descargar. El número no se imprime sobre la ficha web.
+- **No mostrar ejemplos ni versión:** no hay necesidades ficticias, números de prueba ni barra «Versión X.Y.Z» en ninguna pantalla. Tampoco avisos de demo que estorben.
+- **Diseño:** máxima economía vertical **sin sacrificar ancho ni claridad**; colores diferenciados, opciones independientes, texto descriptivo justificado con última línea natural; mantener misma experiencia esencial en PC y celular.
+
+**Cambios de opinión registrados y resueltos:** se prefirió finalmente **texto a todo el ancho cuando no hay imagen**, no reserva vacía. Se terminó con **cuatro pestañas**, no tres. **La versión dejó de ser visible** aunque antes se había pedido lo contrario. **Todos los ejemplos se eliminaron** aunque antes habían sido deseados para revisar el diseño. **La tercera imagen** es la elegida actualmente y vive solo en Inicio. Estas elecciones nuevas sustituyen las viejas.
+
+## 3. Archivos activos del repositorio
+
+| Archivo | Rol actual |
 | --- | --- |
-| \`index.html\` | Pantallas, navegación, dos campos, micrófono y adjunto, modal para foto, ventana de acceso y número de versión visible |
-| \`simple.css\` | Diseño móvil, contraste, economía vertical, foto derecha, dos iconos y visor superpuesto |
-| \`simple.js\` | Publicaciones, búsqueda, DOM seguro, teléfonos, dictado, compresión, visor, almacenamiento demo/Firebase |
-| \`simple-model.js\` | Versión de publicación, validación del teléfono, texto, enlaces de WhatsApp y ejemplos |
-| \`firebase-config.js\` | Configuración pública del proyecto Firebase; **actualmente vacía** |
-| \`firestore.rules\` | Acceso a datos: lectura pública y edición/eliminación solo del dueño; reglas de foto opcional |
-| \`tests/simple-publicaciones.test.mjs\` | Pruebas del cliente, ejemplos, controles y contratos visuales |
-| \`tests/firestore.rules.test.mjs\` | Pruebas diseñadas para el emulador de seguridad de Firestore |
-| \`AGENTS.md\` | Reglas de trabajo para cualquier IA |
-| \`docs/PREFERENCIAS-LO-NECESITO.md\` | Decisiones de interfaz y comportamiento expresadas por el usuario |
-| \`README.md\` | Guía inicial y registro histórico de versiones |
+| **index.html** | Cuatro vistas, navegación, editor de dos campos, controles por icono, miniatura y visor, autenticación cuando esté configurada |
+| **simple.css** | Diseño compacto responsive, navegación 2×2, fichas, colores, imagen y editor |
+| **simple.js** | Navegación, publicación/edición/borrado, lectura, DOM seguro, contactos, audio, foto, zoom y modo local/Firebase |
+| **simple-model.js** | Versión **interna**, normalización y validación telefónica, límites de contenido y permisos |
+| **simple-search.js** | Búsqueda por tramos de datos públicos, metadatos históricos y teléfono; sin Gemini |
+| **card-png.js** | Representación PNG compartible y descarga, sin servidor |
+| **firebase-config.js** | Configuración web de Firebase; **al cierre de esta revisión sus campos están vacíos** |
+| **firestore.rules** | Reglas para futura infraestructura Firebase; **no desplegadas automáticamente por GitHub Pages** |
+| **tests/simple-publicaciones.test.mjs** | Pruebas y contratos del cliente y de la interfaz |
+| **tests/simple-search.test.mjs** | Pruebas de búsqueda de texto, tildes, fragmentos y teléfono |
+| **tests/firestore.rules.test.mjs** | Contratos de permiso para el emulador Firestore |
+| **AGENTS.md** | Normas operativas vigentes y protocolo para cualquier IA |
+| **docs/PREFERENCIAS-LO-NECESITO.md** | Guía detallada de criterios visuales, funcionalidades y aceptación |
 
-El repositorio conserva algunos archivos históricos de la aplicación original. **No reactivarlos** sin una instrucción específica.
+**No reactivar automáticamente los archivos históricos de código** o README antiguos: describen prototipos distintos, a veces con ofertas, ejemplos, estados, formularios complejos y navegación ya descartada.
 
-## 3. Lo que NO está listo todavía
+## 4. Lo que está pendiente realmente
 
-1. **Backend compartido.** \`firebase-config.js\` contiene claves vacías. Por eso, salvo nueva configuración verificada, las necesidades que una persona publica solo se almacenan en su **navegador local** mediante \`localStorage\`, y **no** aparecen en los navegadores de otras personas. No decir que LoNecesito ya opera como tablón público multiusuario.
-2. **Autenticación real y reglas desplegadas.** Firebase Authentication (correo/Google), Cloud Firestore y \`firestore.rules\` necesitan configuración y despliegue en un proyecto autorizado. GitHub Pages **no** despliega reglas Firestore.
-3. **Pruebas de privacidad y producción.** Verificar lectura pública, edición propia, protección ante edición ajena, cambios de imagen, límites del tamaño de las fotos, exposición del teléfono en enlaces y configuración de proveedores OAuth.
-4. **Pruebas móviles reales.** Ejecutar en Android/Edge/Chrome y, si es posible, Safari/iPhone: dictado, permisos, apertura de WhatsApp/marcador, selección y compresión de fotografías, ampliación en pantalla completa, orientación vertical/horizontal, botón de cierre, toque fuera, gesto atrás y lectores de pantalla. El reconocimiento de voz integrado puede no estar soportado o necesitar un servicio remoto del fabricante; no prometer disponibilidad universal.
-5. **Almacenamiento de imágenes.** Actualmente las fotos comprimidas se guardan como pequeñas cadenas base64 junto con la publicación. Esta solución es suficiente para un prototipo; reconsiderar Firebase Storage, costos y límites si crecen el tráfico y el volumen de imágenes.
+1. **Persistencia entre visitantes.** El archivo de configuración Firebase tiene campos vacíos. En ese estado las necesidades creadas se guardan en **localStorage en el navegador donde se publican**, no en una base de datos común a todos. Las pruebas y publicaciones locales no prueban que el producto ya sea un tablón público multiusuario.
+2. **Firebase real:** configurar un proyecto autorizado, Authentication si procede, Firestore, permisos de autor, reglas desplegadas, proveedores de inicio de sesión y prueba de creación/lectura pública/edición propia y bloqueo de edición ajena. **Nunca afirmar éxito sin verificar.**
+3. **Almacenamiento de fotografías:** por ahora se comprimen y se almacenan como imágenes codificadas en el propio registro. Para crecimiento real evaluar límites, Firebase Storage u otra solución, sus permisos, costos y privacidad; no implementarla sin una petición.
+4. **Prueba visual con dispositivos físicos**: ancho y navegación 2×2 en móvil/PC, micrófono del navegador, teclado Enter y Shift+Enter, fotos, ampliación, llamadas, WhatsApp, compartir archivo PNG, iconos y confirmación de borrado.
+5. **Pruebas de reglas** mediante Firebase Emulator/Java/CLI, no asumidas a partir de tests de cliente.
+6. **Accesibilidad:** revisar orden de foco, contraste, lector de pantalla, botones solo-icono, avisos puntuales y zoom del navegador.
 
-## 4. Cómo continuar sin perder decisiones
+## 5. Lecciones aprendidas de la colaboración
 
-1. Abrir la rama **\`codex/diseno-original\`**, leer \`AGENTS.md\`, la guía de preferencias y este documento. La rama predeterminada \`main\` no representa necesariamente la web activa.
-2. Verificar el estado del código y el historial de los últimos PR antes de tocar archivos.
-3. **Priorizar una sola solicitud** del usuario y no reintroducir funciones descartadas. Si cambia un requisito, actualizar \`AGENTS.md\` y la guía detallada al mismo tiempo.
-4. Crear una **rama nueva** desde \`codex/diseno-original\`. Hacer cambios pequeños, ejecutar comprobaciones, revisar los **ejemplos** junto con las fichas reales, abrir PR a \`codex/diseno-original\` y fusionar cuando esté autorizada la publicación.
-5. Incrementar versión en \`simple-model.js\` y \`index.html\`; actualizar parámetros de caché CSS y JS para que los celulares muestren cambios.
-6. Verificar el resultado del despliegue de GitHub Pages. Un build correcto **no demuestra** que el micrófono, la foto o el diseño funcionan en un dispositivo físico.
-7. Registrar lo que se hizo, lo probado y lo pendiente. No introducir advertencias técnicas molestas en la propia interfaz pública.
+- El usuario prefiere **hacer la modificación exactamente solicitada**, no mejoras genéricas o cambios innecesarios. La fidelidad es más importante que introducir complejidad.
+- **Compacto significa sobre todo reducir altura**. No equivale a aplastar el ancho ni ocultar contenidos. Los celulares deben permitir comprender el mayor número de necesidades posible de un vistazo.
+- Los **colores distintos** ayudan a percibir acciones independientes; cada botón debe comunicar inmediatamente su propósito. Los iconos deben ser reconocibles, especialmente compartir mediante **tres nodos unidos**, no una flecha genérica.
+- **La ficha es la pieza central del diseño.** Sin títulos, justificación de todo el cuerpo, foto a la derecha solo si existe y acciones en una sola fila. No crear cajas de ciudad, categoría, presupuesto ni fecha.
+- Cuando alguien habla de buscar «por tramos» quiere **fragmentos de palabras y coincidencias parciales de teléfono**, no un formulario de filtros restrictivo ni Gemini.
+- El editor usa **solo dos campos**: libertad total al describir la necesidad y un número para contactar. Micrófono y foto son opciones, no campos obligatorios.
+- Evitar los **mensajes que fastidian**, incluso si son técnicamente precisos: documentar límites del prototipo y pruebas en GitHub y en las respuestas de desarrollo, no ocupar constantemente la UI con ello. Mostrar solo información útil para una acción.
+- El usuario cambia y afina preferencias **a partir de imágenes y capturas**. Actualizar reglas cuando cambie de opinión y **retirar órdenes anteriores**. No conservar dos interpretaciones contradictorias.
+- La tercera ilustración elegida debe ser **la original aprobada** y mostrar solo el propósito real de la web; no confundir el tablón con publicar ofertas, entregar cotizaciones o negociar dentro del sitio.
+- La continuidad **debe poder viajar entre distintas IA**: no depender de memoria de chat, mantener Markdown estructurado, enlaces y estado de lo no implementado.
+- Un PR fusionado y un workflow verde **no sustituyen la revisión física** de la experiencia. Informar claramente límites de pruebas.
 
-## 5. Comprobaciones técnicas reproducibles
+## 6. Protocolo para otra IA
 
-Con un entorno que tenga Node y acceso al repositorio:
+1. Leer [AGENTS.md](../AGENTS.md) y [preferencias](PREFERENCIAS-LO-NECESITO.md) **antes de tocar código**.
+2. Inspeccionar siempre el estado actual de **codex/diseno-original**, los PR recientes y el asset de la imagen. No asumir que main se despliega.
+3. Detectar si el cambio solicitado contradice una regla; entonces modificar la **regla vigente**, no agregar al final un mandato que deje ambos activos.
+4. Crear una rama nueva, limitar el diff, añadir pruebas relevantes y PR con base **codex/diseno-original**. Fusionar si se pidió explícitamente cambiar la página.
+5. Comprobar build/despliegue GitHub Pages, pruebas del cliente, navegación, permisos, búsqueda y ausencia de ejemplos. No anunciar pruebas de navegador/dispositivos/Firestore Emulator no realizadas.
+6. Actualizar los **tres archivos de documentación** en cada cambio que altere preferencias; conservar el historial en commits/PR. Una petición **solo documental** no necesita alterar index.html ni incrementar versión interna.
+7. Informar lo implementado y lo pendiente, sin mensajes invasivos en la web.
 
-- \`npm install\` — dependencias de pruebas.
-- \`npm run check\` — sintaxis de módulos.
-- \`npm test\` — pruebas del cliente y compatibilidad.
-- \`npm run test:rules\` — **requiere** Firebase CLI, Java y emulador Firestore; confirma permisos reales en el entorno de pruebas.
-- Prueba manual sugerida del visor: cargar una publicación con foto y comprobar clic en miniatura derecha, visualización íntegra, X, Escape y clic exterior; repetir al editar, y confirmar que no existe zona de foto cuando falta.
+## 7. Cómo interpretar el historial
 
-Las verificaciones de un PR anterior **no sustituyen** ejecutar las pruebas de una nueva versión. Cuando una prueba no se ejecutó, anotarlo expresamente.
+El historial de Git y el README registran un proceso iterativo desde formularios, muestras y versiones visibles hasta esta experiencia simplificada. **Ese historial no es una segunda especificación activa.** Si una indicación histórica choca con las secciones anteriores, seguir la decisión reciente. Referencias: [commits y PR del repositorio](https://github.com/gruemp/lonecesito/pulls), incluido PR #42 para la navegación actual.
 
-## 6. Aprendizajes del diseño con el usuario
-
-- «Compacto» significa **reducir espacio vertical**, pero **no** estrechar la lectura horizontal, truncar texto ni ocultar información.
-- Las opciones separadas y los colores diferenciados hacen que cada acción se comprenda de un vistazo, especialmente en un celular.
-- Cuando el formulario cambia, los ejemplos deben cambiar **a la vez** y verse como fichas reales; no dejar campos obsoletos como ciudad o presupuesto en bloques aparte.
-- Dos campos bastan para comunicar una necesidad. El teléfono es un mecanismo de contacto, no motivo para crear una negociación dentro del sitio.
-- No llenar la pantalla de explicaciones obvias: la interfaz lleva **solo** la versión discreta arriba; documentación extensa queda en GitHub.
-- La foto debe estar a la **derecha de la ficha**, no debajo, y su ampliación debe mostrarse completa, sin recortes. Si falta, el texto ocupa todo el ancho y no existe zona de foto.
-- La página debe ofrecer **hablar o escribir**, según lo que permita el navegador, sin integrar IA externa innecesaria.
-- El usuario valora mantener sus decisiones **portables entre distintas IA**. No depender exclusivamente de memoria conversacional: conservar las reglas y decisiones en Markdown legible en el repositorio.
-
-## 7. Estado de entrega y alcance del «cierre»
-
-**Se actualiza la iteración de diseño y funcionamiento de la interfaz a la versión 2.2.8**, con visor de imágenes y exportación PNG de las fichas. No significa que Firebase, las reglas de seguridad ni las pruebas móviles reales estén completadas. Esos son pasos de infraestructura y validación independientes para convertir el prototipo en un servicio compartido.
-
-**Para dar continuidad desde otra IA:** proporcionar este enlace:
-\`https://github.com/gruemp/lonecesito/blob/codex/diseno-original/docs/CONTINUIDAD-Y-APRENDIZAJES.md\`
-y los de \`AGENTS.md\` y \`docs/PREFERENCIAS-LO-NECESITO.md\`. Una IA sin acceso a GitHub necesitará recibir el contenido de los archivos.
-
-## Actualización 2.2.7 — compartir ficha PNG
-
-La ficha mantiene el texto descriptivo justificado, sin título visible, imagen adaptada automáticamente sin deformar, y columna derecha solamente cuando hay imagen. Sin foto, **la descripción ocupa todo el ancho**. Al lado de los iconos de llamada y WhatsApp, el icono de compartir genera un PNG local con el contenido de la ficha. Usa Web Share API para enviar la imagen si el navegador lo admite; si no, descarga el PNG. El PNG real incluye el teléfono para que quien reciba una imagen estática pueda contactar, mientras que la ficha web no lo imprime. Los ejemplos nunca incluyen un número ficticio en los PNG.
-
-Esta mejora no configura Firebase, autenticación ni Firestore, que permanecen pendientes de trabajo independiente. También hay que verificar la función de compartir archivos en un teléfono real.
-
-## Estado actualizado — versión 2.2.8
-
-Esta edición reemplaza explícitamente el diseño anterior: las fichas **no muestran títulos**, su altura depende del contenido, no hay mínimo de caracteres para la necesidad más allá de requerir texto no vacío, y las imágenes siguen a la derecha **solamente cuando existen**. Si no hay foto, el texto justificado ocupa todo el ancho. Se retiraron los encabezados y descripciones superiores de las tres secciones, manteniendo los botones de navegación. El PNG compartido respeta las mismas reglas.
-
-Firebase sigue sin configuración operativa en este repositorio; las publicaciones locales no se comparten entre visitantes. Pendientes prueba visual móvil y ejecución de las reglas en el emulador de Firestore.
-
-## Actualización 2.2.9 — fila única de acciones
-
-En la ficha del propio autor hay **cinco iconos en una sola fila**: teléfono, WhatsApp, compartir mediante símbolo de tres puntos conectados, editar (lápiz) y eliminar (papelera). En las fichas que ven otras personas solo aparecen los tres primeros. Los controles de editar y eliminar no tienen palabras visibles y mantienen nombres accesibles, permisos de propietario y confirmación de borrado. La barra conserva la altura compacta en celulares, con controles táctiles de al menos 44 píxeles. El diseño y los ejemplos deben seguir esta regla en cambios futuros.
-
-El cierre de interfaz no implica backend completo: Firebase sigue sin configuración operativa; la publicación multiusuario y las pruebas de emulador y dispositivo real permanecen pendientes.
-
-## Actualización 2.2.10 — fila de publicación y teclado
-
-La caja de necesidad conserva un único texto libre. Inmediatamente debajo, y siempre en una sola fila, hay un campo telefónico con el icono de teléfono a su izquierda y el marcador `Ej: 300 123 4567` dentro; después aparecen el botón de imagen, el micrófono y el **botón verde solo con el icono de avión de papel**, sin texto. La etiqueta telefónica es accesible pero invisible. Para publicar basta tocar el icono o pulsar Enter desde el teléfono o el área de necesidad; Shift+Enter permite saltos de línea en la descripción. Si está editando, el envío se interpreta como guardar y existe un botón X para cancelar, también en la misma fila. La vista previa de imagen se aloja dentro del cuadro de necesidad y no reduce la anchura de la caja de teléfono.
-
-Verificar específicamente los anchos estrechos de celulares, teclados de composición (IME), inserción de saltos de línea, envío nativo y prevención de duplicados. El servicio Firebase sigue pendiente: no dar por finalizado el backend.
-
-## Actualización 2.2.11 — papelera en la edición
-
-Al editar una necesidad propia, además de poder eliminarla desde su ficha, aparece un **icono de papelera rojo** en la misma fila de teléfono, fotografía, micrófono, enviar/guardar y X para cancelar. Solo se ve al editar; confirma antes de borrar y únicamente el dueño puede hacerlo. Cancelar la eliminación conserva la edición; terminarla correctamente retorna a «Mis publicaciones». La fila permanece compacta en móviles. Hay que revisar visualmente la anchura de la caja de teléfono en pantallas estrechas. Firebase sigue sin configurar.
-
-## Actualización 2.2.12 — imagen de bienvenida aprobada
-
-La pantalla inicial `#necesidades` muestra, debajo de la barra de tres botones y antes del buscador, el banner panorámico seleccionado por el usuario: `assets/lonecesito-presentacion.webp` (1440×810). Presenta tres personajes y explica visualmente las tres etapas **Publica → La ven → Te contactan** por llamada o WhatsApp. No representa ofertas ni intercambios internos. Se visualiza completo, ancho 100 %, con altura automática y sin recortes, exclusivamente en la primera pestaña. Los demás flujos de publicación y fichas no cambian. El archivo original generado está asociado a esta conversación como `lonecesito_publica_y_conecta.png`; se subió una copia WebP optimizada al repositorio para que GitHub Pages la sirva sin depender de ChatGPT.
-
-Firebase sigue sin configurar; la existencia de esta imagen no implica que las publicaciones se compartan entre navegadores.
-
-## Actualización 2.2.13 — nueva portada, cero ejemplos y búsqueda avanzada
-
-La pantalla predeterminada es **Inicio**, con el banner **tercero** ya aprobado, en formato WebP alojado en el repositorio y a ancho completo sin recortes. No contiene fichas ni buscador. Las **cuatro pestañas** están ordenadas Inicio, Mis publicaciones, Ver necesidades y Publicar lo que necesito y forman un 2×2 tanto en móvil como en PC. Ningún título o número de versión aparece como barra de cabecera. El número técnico sigue dentro del código. No hay fichas ficticias ni generadores de ejemplos: Ver necesidades muestra únicamente registros reales públicos y Mis publicaciones, solo registros del autor. Los registros locales etiquetados `example:true` se ignoran sin borrar datos reales.
-
-El buscador se ha separado en `simple-search.js` y compara por tramos (subcadenas), sin tildes ni sensibilidad a mayúsculas, múltiples palabras en cualquier lugar de los campos públicos, metadatos heredados y teléfono total/parcial. No rastrea el identificador privado del dueño ni depende de IA remota.
-
-**Advertencia técnica constante:** Firebase no está configurado en `firebase-config.js`, así que en el modo actual los registros locales no son compartidos entre distintos visitantes. Verificar en navegador real la cuadrícula 2×2 de PC/móvil y la búsqueda. GitHub Pages no publica reglas de Firestore.
+**El estado de la interfaz está cerrado por ahora, no la infraestructura.** Cualquier IA que retome debe verificar de nuevo la configuración real de Firebase, el deployment y los datos antes de afirmar que existe un servicio compartido.
