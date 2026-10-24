@@ -139,3 +139,22 @@ dialog::backdrop{background:#10271e99}
   .action-words small{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Versión de publicación visible al inicio de TODAS las pantallas. */
+.release-bar{min-height:31px;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;padding:6px 14px;background:#eaf3eb;border-bottom:1px solid #d6e6d9;color:#285d40;font-size:12px;font-weight:750;line-height:1.35;text-align:center}
+.release-bar a{color:#205d42;text-decoration:underline;text-underline-offset:2px;font-weight:650}
+/* Información completa en todas las fichas. Títulos con jerarquía, texto justificado. */
+.publication-facts{display:grid;grid-template-columns:minmax(135px,35%) minmax(0,1fr);gap:0 15px;background:#f7faf7;border:1px solid #e0e9e1;border-radius:12px;margin:14px 0 18px;padding:7px 14px}
+.publication-facts dt,.publication-facts dd{padding:7px 0;margin:0;border-bottom:1px solid #e4ece4;line-height:1.5;overflow-wrap:break-word}
+.publication-facts dt{color:#315744;font-size:13px;font-weight:790;text-align:left}
+.publication-facts dd{color:#344e3e;font-size:13px;text-align:justify;text-align-last:left;hyphens:auto}
+.publication-facts dt:nth-last-child(-n+2),.publication-facts dd:last-child{border-bottom:0}
+.example-card{border-style:dashed;border-color:#b8cebb}
+.example-warning{margin:0;color:#6d6246;font-size:12px;max-width:65ch;text-align:justify;text-align-last:left;line-height:1.55}
+.example-phone{color:#596e60;font-size:17px;font-weight:800;letter-spacing:.015em;text-align:center}
+.examples-note{max-width:860px;margin:0 auto 16px;padding:12px 16px;border:1px solid #e6d8b1;border-radius:11px;background:#fff9ed;color:#62533a;font-size:13px;line-height:1.55;text-align:justify;text-align-last:left;hyphens:auto}
+@media(max-width:460px){
+ .publication-facts{grid-template-columns:minmax(105px,42%) minmax(0,1fr);gap:0 10px;padding:8px 11px}
+ .publication-facts dt,.publication-facts dd{font-size:12px}
+ .release-bar{font-size:11px}
+}
