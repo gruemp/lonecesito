@@ -1378,7 +1378,7 @@ test('existe un plan ejecutable de pruebas de reglas con Firebase Emulator',()=>
     'assertSucceeds',
     "collection(db(A),'requests'",
     'phone:',
-    'state'
+    'updateDoc'
   ])assert.ok(testFile.includes(pattern),'Falta caso de seguridad '+pattern);
   assert.ok(firebaseJson.includes('"firestore.rules"'));
   assert.ok(packageJson.includes('test:rules'));
