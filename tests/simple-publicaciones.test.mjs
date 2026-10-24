@@ -55,7 +55,7 @@ test('validar indicativo y proteger publicaciones propias',()=>{
 });
 test('las fichas tienen teléfono enlazado y sin acciones de aceptar o resolver',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(js,/phoneLink\(record,text,'contact-phone'\)/);
+  assert.match(js,/phoneLink\(record,contactNumber,'contact-phone'\)/);
   assert.match(js,/whatsappUrl\(number,record.description\|\|record.title\)/);
   assert.match(js,/exampleWhatsappUrl\(record.description\|\|record.title\)/);
   assert.match(js,/editRecord\(record\)/);
