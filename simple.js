@@ -1,8 +1,9 @@
-import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
+import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261024-v228';
 
 const $=id=>document.getElementById(id);
-const pages=['necesidades','mis-publicaciones','publicar'];
+const pages=['inicio','mis-publicaciones','necesidades','publicar'];
 const STORAGE='lonecesito-publicaciones-demo-v1';
 const state={mode:'loading',user:null,items:[],editingId:null,firebase:null,waitingForAuth:false,saving:false};
 const el=(tag,cls,value)=>{
@@ -30,9 +31,9 @@ function saveLocal(items){
 }
 function showView(){
   const page=window.location.hash.slice(1);
-  const screen=pages.includes(page)?page:'necesidades';
+  const screen=pages.includes(page)?page:'inicio';
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
-    state.waitingForAuth=true;showAuth();window.location.hash='#necesidades';return;
+    state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
   }
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
@@ -134,10 +135,10 @@ $('image-dialog').addEventListener('close',()=>{
 async function sharePublicationPng(record){
   const description=legacyDetails(record,{forCard:true})||String(record.description||'');
   try{
-    const number=record.example?null:'+'+normalizeWhatsApp(record.contactPhone);
+    const number='+'+normalizeWhatsApp(record.contactPhone);
     const blob=await makeCardPng({
       description,picture:record.picture||'',
-      contactPhone:number,example:record.example===true
+      contactPhone:number,example:false
     });
     const filename='lonecesito-necesidad.png';
     if(typeof File==='function'&&typeof navigator.share==='function'){
@@ -202,27 +203,13 @@ function renderCard(record,owner){
   const contact=el('div','contact-box');
   let contactNumber='';
   try{
-    if(record.example===true||record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
+    if(record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
   }catch{contactNumber='';}
   if(contactNumber){
-    if(record.example===true){
-      // Un ejemplo jamás debe marcar un número de muestra o de un tercero.
-      const sampleCall=el('button','contact-action call-action');
-      sampleCall.type='button';
-      sampleCall.disabled=true;
-      sampleCall.title='Llamada no disponible en esta muestra';
-      sampleCall.setAttribute('aria-label','Llamada no disponible en esta muestra');
-      sampleCall.append(contactIcon('call'));
-      contact.append(sampleCall);
-    }else{
-      contact.append(contactLink('tel:'+contactNumber,'call','Llamar por teléfono'));
-    }
-    const href=record.example===true
-      ?exampleWhatsappUrl(record.description||record.title)
-      :whatsappUrl(contactNumber,record.description||record.title);
-    contact.append(contactLink(href,'whatsapp','Escribir por WhatsApp'));
+    contact.append(contactLink('tel:'+contactNumber,'call','Llamar por teléfono'));
+    contact.append(contactLink(whatsappUrl(contactNumber,record.description||record.title),'whatsapp','Escribir por WhatsApp'));
   }else{
-    contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
+    contact.append(el('span','contact-label','Actualiza el teléfono de esta publicación.'));
   }
   // Todas las fichas pueden compartirse como una imagen PNG, sin intermediarios.
   const share=el('button','contact-action share-action');
@@ -234,8 +221,8 @@ function renderCard(record,owner){
   contact.append(share);
 
   // Una sola fila en las fichas propias: llamar, WhatsApp, compartir, editar y eliminar.
-  // Las fichas ajenas y las muestras muestran solo los tres primeros controles.
-  if(owner&&record.example!==true&&canManage(record,currentUid())){
+  // Quien no es dueño solo puede llamar, escribir y compartir.
+  if(owner&&canManage(record,currentUid())){
     contact.classList.add('has-owner-actions');
     const edit=el('button','contact-action edit-action');
     edit.type='button';
@@ -256,17 +243,17 @@ function renderCard(record,owner){
   return article;
 }
 function visibleItems(){
-  const real=state.items.filter(item=>{
-    try{return item.contactConsent===true&&Boolean(normalizeWhatsApp(item.contactPhone));}catch{return false;}
+  return state.items.filter(item=>{
+    if(!item||item.example===true||item.contactConsent!==true)return false;
+    try{return Boolean(normalizeWhatsApp(item.contactPhone));}catch{return false;}
   });
-  return state.mode==='demo'?[...real,...EXAMPLE_PUBLICATIONS]:real;
 }
 function render(){
-  const search=$('search').value.toLocaleLowerCase('es').trim();
-  const visible=visibleItems().filter(item=>!search||[item.title,item.description,item.city,item.subcategory].join(' ').toLocaleLowerCase('es').includes(search));
+  const query=$('search').value.trim();
+  const visible=visibleItems().filter(item=>publicationMatchesQuery(item,query));
   $('browse-list').replaceChildren(...visible.map(item=>renderCard(item,false)));
   $('browse-empty').hidden=visible.length!==0;
-  const own=state.items.filter(item=>canManage(item,currentUid()));
+  const own=state.items.filter(item=>item&&item.example!==true&&canManage(item,currentUid()));
   $('mine-list').replaceChildren(...own.map(item=>renderCard(item,true)));
   $('mine-empty').hidden=own.length!==0;
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
@@ -544,7 +531,7 @@ $('auth-google').addEventListener('click',async()=>{
 });
 $('auth-logout').addEventListener('click',async()=>{
   if(!state.firebase)return;
-  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#necesidades';}
+  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#inicio';}
   catch(error){feedback('auth-feedback',authError(error));}
 });
 function authError(error){
@@ -556,7 +543,6 @@ function authError(error){
   return 'No se pudo acceder: '+String(error.message||'revisa tus datos.');
 }
 async function boot(){
-  $('release-version').textContent='Versión '+APP_VERSION;
   const config=window.LoNecesitoFirebaseConfig||{};
   const configured=['apiKey','authDomain','projectId','appId'].every(key=>Boolean(config[key]));
   if(!configured){
