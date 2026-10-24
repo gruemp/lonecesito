@@ -23,13 +23,13 @@
 - Fichas de altura natural, sin altas zonas vacías ni filas repetidas. Espaciado compacto con zonas táctiles accesibles.
 - Evitar avisos obvios, párrafos instructivos bajo encabezados, eslóganes grandes, pies redundantes y banners de «esto es una prueba». Mostrar solo errores y estados que ayuden al usuario.
 - No mostrar el número de versión. Una numeración puede mantenerse en Git, documentación y código interno, nunca en una barra de la web.
-- Usar colores variados y sobrios para reconocer de inmediato acciones distintas. No sobrecargar toda la pantalla de cuadros o etiquetas.
+- Usar colores variados y sobrios para reconocer de inmediato acciones distintas. No sobrecargar toda la pantalla de cuadros o etiquetas. Las mejoras UI/UX deben ser **visibles desde la primera carga**: simetría, alineaciones, márgenes, proporciones, tipografía y contraste. No contar efectos de hover, transiciones ni cambios técnicos invisibles como mejoras visuales. Respetar la cuadrícula, los contenedores existentes y toda la lógica interna.
 
 ## C. Cuatro pestañas de navegación: una fila en PC y dos en móvil
 
 La página comienza con **cuatro botones**, en el siguiente orden de lectura y de foco: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
 
-- **PC (ancho superior a 680 px):** una sola fila horizontal con los cuatro botones.
+- **PC (ancho superior a 680 px):** una sola fila horizontal con los cuatro botones, alineada en ambos extremos con los márgenes de la imagen de Inicio. Los dos elementos comparten ancho responsivo ajustado también a la altura disponible, para mostrar completa la imagen 16:9 al 100 % de zoom.
 - **Móvil (hasta 680 px):** dos filas, con **Inicio / Publicar lo que necesito** arriba y **Mis publicaciones / Ver necesidades** abajo.
 
 - Mantener la barra arriba y el acceso visible mientras se navega.

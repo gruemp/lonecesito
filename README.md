@@ -4,7 +4,13 @@
 
 Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en una fila en PC y dos en móvil, tercera ilustración solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
 
-**Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. Esta actualización es **solo documental**, sin modificaciones de interfaz ni de versión interna.
+**Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. La actualización de diseño 2.2.15 conserva la funcionalidad técnica y Firebase sigue sin configurar.
+
+---
+
+# Versión técnica 2.2.15 — alineación y portada completa al 100 %
+
+En PC, los cuatro botones comparten los márgenes izquierdo y derecho de la imagen de Inicio. El ancho de la ilustración 16:9 se adapta a la altura útil del navegador para verse íntegra a zoom 100 %. Se mejoran superficies, proporciones, color y espacio de encabezado, buscador, fichas y editor, sin alterar su lógica. En celular se conservan dos filas de pestañas. Las modificaciones futuras deben publicarse inmediatamente al completarse.
 
 ---
 

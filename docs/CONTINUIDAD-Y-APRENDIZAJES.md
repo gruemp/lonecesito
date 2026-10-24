@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 24 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.14 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.15 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -14,8 +14,8 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 
 ## 2. Interfaz actual, no negociable salvo instrucción nueva
 
-- **Navegación:** cuatro pestañas en orden **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**, en **una fila en PC** y **cuadrícula 2 × 2 en móvil**, persistentes al navegar.
-- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. Mostrarla **entera, sin deformación ni recortes, centrada y adaptada también a la altura visible**; no poner allí buscador ni fichas.
+- **Navegación:** cuatro pestañas en orden **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**, en **una fila en PC** y **cuadrícula 2 × 2 en móvil**, persistentes al navegar. En PC están alineadas por ambos extremos con la imagen de Inicio.
+- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. El marco 16:9 adapta su ancho a la altura útil de la ventana para aparecer **completo al 100 % de zoom**, coincidiendo horizontalmente con la navegación, sin recortes ni deformaciones; no poner allí buscador ni fichas.
 - **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
 - **Mis publicaciones:** solo las publicaciones creadas por el dueño.
 - **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
@@ -76,7 +76,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 1. Leer [AGENTS.md](../AGENTS.md) y [preferencias](PREFERENCIAS-LO-NECESITO.md) **antes de tocar código**.
 2. Inspeccionar siempre el estado actual de **codex/diseno-original**, los PR recientes y el asset de la imagen. No asumir que main se despliega.
 3. Detectar si el cambio solicitado contradice una regla; entonces modificar la **regla vigente**, no agregar al final un mandato que deje ambos activos.
-4. Crear una rama nueva, limitar el diff, añadir pruebas relevantes y PR con base **codex/diseno-original**. Fusionar si se pidió explícitamente cambiar la página.
+4. Crear una rama nueva, limitar el diff, añadir pruebas relevantes y PR con base **codex/diseno-original**. Fusionar y publicar inmediatamente después de realizar los cambios solicitados, sin pedir nueva confirmación; informar las verificaciones pendientes.
 5. Comprobar build/despliegue GitHub Pages, pruebas del cliente, navegación, permisos, búsqueda y ausencia de ejemplos. No anunciar pruebas de navegador/dispositivos/Firestore Emulator no realizadas.
 6. Actualizar los **tres archivos de documentación** en cada cambio que altere preferencias; conservar el historial en commits/PR. Una petición **solo documental** no necesita alterar index.html ni incrementar versión interna.
 7. Informar lo implementado y lo pendiente, sin mensajes invasivos en la web.
