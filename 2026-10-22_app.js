@@ -401,7 +401,7 @@ function init(){
     const category=el('p','category',
       CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría'));
     head.append(category);
-    if(context==='aceptadas'||request.status!=='abierta'){
+    if(context!=='explorar'||request.status!=='abierta'){
       const label=context==='aceptadas'?'Aceptada':STATUS_LABELS[request.status]||request.status;
       head.append(el('span','my-state my-state-'+(context==='aceptadas'?'en_proceso':request.status),label));
     }
