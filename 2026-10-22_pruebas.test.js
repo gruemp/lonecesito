@@ -1016,7 +1016,7 @@ test('las combinaciones nuevas conservan contraste AA',()=>{
 
 test('todas las descripciones de necesidades abiertas se justifican sin perder saltos',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Descripciones justificadas en las tres vistas'));
+  const layer=css.slice(css.lastIndexOf('Descripciones justificadas en las tres vistas'),css.lastIndexOf('Jerarquía tipográfica completa'));
   assert.ok(layer.includes(':is(#request-grid,#my-requests-grid,#accepted-grid)'));
   assert.ok(layer.includes('.need-card .need-card-description{'));
   for(const marker of ['text-align:justify','text-align-last:left','text-justify:inter-word','hyphens:auto','white-space:pre-wrap','overflow-wrap:anywhere'])
@@ -1074,7 +1074,7 @@ test('los mensajes dinámicos de éxito no incluyen comentarios sobre navegador 
 test('la jerarquía visual se aplica a los títulos de todas las pantallas',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const id of ['hero-title','requests-title','my-title','accepted-title','publish-title','wizard-title-1','wizard-title-2','wizard-title-3'])
     assert.ok(html.includes('id="'+id+'"'),'Falta título '+id);
   for(const selector of [
@@ -1092,7 +1092,7 @@ test('la jerarquía visual se aplica a los títulos de todas las pantallas',()=>
 });
 test('cada sección tiene un título con escala consistente y color identificable',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const rule of [
     '--heading-primary:#153b30',
     '--heading-blue:#244d73',
@@ -1108,7 +1108,7 @@ test('cada sección tiene un título con escala consistente y color identificabl
 test('el contador de necesidades se distingue sin alterar el título largo',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   assert.ok(html.includes('id="my-title"'));
   assert.ok(html.includes('id="my-count"'));
   assert.ok(layer.includes('#my-title .my-count{'));
@@ -1120,7 +1120,7 @@ test('el contador de necesidades se distingue sin alterar el título largo',()=>
 test('cada nombre permanece en una sola línea cerrada y completo al desplegar',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   assert.ok(layer.includes('.need-list-title{'));
   assert.ok(layer.includes('white-space:nowrap'));
   assert.ok(layer.includes('text-overflow:ellipsis'));
@@ -1133,7 +1133,7 @@ test('cada nombre permanece en una sola línea cerrada y completo al desplegar',
 test('los encabezados del formulario conservan los tres pasos y su jerarquía',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const n of [0,1,2])assert.ok(html.includes('data-wizard-step="'+n+'"'));
   assert.ok(layer.includes('.dialog-header h2{'));
   assert.ok(layer.includes('.dialog-form .wizard-heading{'));
@@ -1144,7 +1144,7 @@ test('los encabezados del formulario conservan los tres pasos y su jerarquía',(
 test('los títulos se adaptan al móvil sin cambiar las columnas ni la lógica',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'),css.lastIndexOf('Encabezados interiores: título centrado'));
   for(const marker of [
     '@media(max-width:680px){',
     '@media(max-width:380px){',
@@ -1181,7 +1181,7 @@ test('nuevas tonalidades de títulos y fondos alcanzan contraste AA',()=>{
 
 test('los títulos de las tres secciones se centran sin cambiar su tamaño',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   assert.ok(layer.includes(':is(#necesidades,#mis-necesidades,#aceptadas) > .section-heading{'));
   assert.ok(layer.includes('justify-content:center'));
@@ -1195,7 +1195,7 @@ test('los títulos de las tres secciones se centran sin cambiar su tamaño',()=>
 test('las explicaciones de las tres secciones quedan justificadas y con última línea natural',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   for(const piece of [
     '#necesidades > .section-heading .section-description,',
     ':is(#mis-necesidades,#aceptadas) > .section-usage{',
@@ -1212,7 +1212,7 @@ test('las explicaciones de las tres secciones quedan justificadas y con última 
 test('la cascada nueva respeta la estructura responsiva y listas compactas',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'));
+  const layer=css.slice(css.lastIndexOf('Encabezados interiores: título centrado'),css.lastIndexOf('Cuentas y lista PRIVADA de interesados'));
   assert.equal(/grid-template-columns|padding:|min-height:/.test(layer),false);
   assert.ok(layer.includes('#necesidades > .section-heading > div{'));
   assert.ok(layer.includes('width:100%'));
