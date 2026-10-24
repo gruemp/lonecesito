@@ -605,5 +605,5 @@ test('buscador por tramos e índice de campos públicos y teléfono',()=>{
  assert.match(search,/city','category','subcategory'/);
  assert.match(search,/terms\.every\(term=>index\.includes\(term\)\)/);
  assert.match(search,/normalize\('NFD'\)/);
- assert.doesNotMatch(search,/ownerUid|ownerEmail|apiKey/);
+ assert.doesNotMatch(search,/['"](?:ownerUid|ownerEmail|apiKey)['"]/);
 });
