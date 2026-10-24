@@ -130,3 +130,162 @@ async function launchFirebase(){
     renderAll();
   }
   onAuthStateChanged(auth,user=>{state.user=user;changeUser().catch(e=>notify(e.message));});
+
+  function activateScreen(){
+    const id=location.hash.replace(/^#/,'');
+    const current=['inicio','necesidades','mis-necesidades','aceptadas'].includes(id)?id:'inicio';
+    $$('.app-screen').forEach(screen=>screen.hidden=screen.id!==current);
+    renderAll();
+  }
+  window.addEventListener('hashchange',activateScreen);
+  const money=v=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(v);
+  const opened=new Set();
+  function requestsFor(id){
+    if(id==='my-requests-grid')return state.user?state.requests.filter(r=>r.ownerUid===state.user.uid):[];
+    if(id==='accepted-grid')return state.user?state.requests.filter(r=>state.applied.has(r.id)):[];
+    return state.requests.filter(r=>r.status==='abierta').filter(r=>{
+      if(state.category!=='all'&&r.category!==state.category)return false;
+      if(state.subcategory!=='all'&&r.subcategory!==state.subcategory)return false;
+      if(state.city!=='all'&&r.city!==state.city)return false;
+      if(state.search&&!([r.title,r.description,r.city].join(' ').toLocaleLowerCase('es').includes(state.search)))return false;
+      return true;
+    });
+  }
+  function makeButton(label,action,id,primary=false,disabled=false){
+    const button=el('button',primary?'button need-card-primary':'my-action need-card-secondary',label);
+    button.type='button';button.disabled=disabled;
+    button.dataset.realAction=action;button.dataset.id=id;button.classList.add('need-action-'+action);
+    return button;
+  }
+  async function showApplicants(id,container){
+    try{
+      // La colección NO es legible públicamente; Firestore comprueba al propietario.
+      const snap=await getDocs(collection(db,'requests',id,'applications'));
+      container.replaceChildren();
+      if(snap.empty){container.textContent='Nadie ha aplicado todavía.';return;}
+      container.append(el('p','applicants-count',snap.size+' personas aplicaron'));
+      for(const result of snap.docs){
+        const entry=el('div','applicant-entry'),applicant=result.data();
+        entry.append(el('strong','',applicant.name));
+        const phone=el('a','applicant-phone',applicant.phone);
+        phone.href='tel:'+String(applicant.phone||'').replace(/[^0-9+]/g,'');
+        entry.append(phone);container.append(entry);
+      }
+    }catch(e){container.textContent='No fue posible consultar los interesados: '+e.message;}
+  }
+  function makeCard(req,listId){
+    const own=state.user?.uid===req.ownerUid,applied=state.applied.has(req.id);
+    const article=el('article','need-card request-card');article.dataset.id=req.id;article.dataset.kind=req.category;
+    const head=el('div','need-card-head');
+    head.append(el('p','category',(CATEGORIES[req.category]||req.category)+' · '+(SUBCATEGORIES[req.category]?.[req.subcategory]||'Otra categoría')));
+    if(listId!=='request-grid')head.append(el('span','my-state',listId==='accepted-grid'?'Aplicaste':req.status));
+    const overview=el('div','need-card-overview'),copy=el('div','need-card-copy');
+    copy.append(el('h3','need-card-title',req.title));
+    copy.append(el('p','card-city',req.city));
+    const meta=el('ul','need-card-meta');
+    if(req.category==='bienes'){
+      if(req.quantity)meta.append(el('li','','Cantidad: '+req.quantity));
+      meta.append(el('li','','Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[req.condition]||'No indicada')));
+    }
+    if(req.budget!==null&&req.budget!==undefined)meta.append(el('li','','Presupuesto: '+money(req.budget)));
+    if(req.desiredDate)meta.append(el('li','','Fecha deseada: '+req.desiredDate));
+    if(meta.children.length)copy.append(meta);
+    copy.append(el('p','need-card-description',req.description));
+    const photo=el('div','need-card-photo '+(req.picture?'has-photo':'no-photo'));
+    if(req.picture){const image=el('img');image.src=req.picture;image.alt='Fotografía de '+req.title;image.loading='lazy';photo.append(image);}
+    else photo.append(el('span','no-photo-label','Sin foto'));
+    overview.append(copy,photo);article.append(head,overview);
+    if(own){
+      const block=el('section','applicants-panel');
+      block.append(el('h4','applicants-title','Personas que aplicaron'));
+      const result=el('div','applicants-results','Cargando interesados…');
+      block.append(result);article.append(block);showApplicants(req.id,result);
+    }
+    const actions=el('div','need-card-actions');
+    if(own){
+      if(req.status==='abierta'){
+        actions.append(makeButton('Editar necesidad','edit',req.id));
+        actions.append(makeButton('Marcar como resuelta','resolve',req.id,true));
+        actions.append(makeButton('Cancelar','cancel',req.id));
+      }else if(req.status==='en_proceso'){
+        actions.append(makeButton('Marcar como resuelta','resolve',req.id,true));
+        actions.append(makeButton('Cancelar','cancel',req.id));
+      }else if(req.status==='cancelada')actions.append(makeButton('Reactivar necesidad','reopen',req.id,true));
+      else actions.append(el('p','need-card-finished','Necesidad resuelta'));
+    }else if(applied)actions.append(makeButton('Ya aplicaste a esta necesidad','accepted',req.id,true,true));
+    else if(req.status==='abierta')actions.append(makeButton('Aceptar necesidad','apply',req.id,true));
+    article.append(actions);return article;
+  }
+  function renderList(id){
+    const grid=$('#'+id);
+    grid.querySelectorAll('.need-list-row[open]').forEach(row=>opened.add(id+':'+row.dataset.id));
+    grid.replaceChildren();
+    const list=requestsFor(id);
+    for(const req of list){
+      const row=el('details','need-list-row'),summary=el('summary','need-list-summary');
+      row.dataset.id=req.id;summary.append(el('span','need-list-title',req.title));row.append(summary);
+      row.addEventListener('toggle',()=>{
+        const key=id+':'+req.id;
+        if(!row.open){opened.delete(key);row.querySelector('.need-list-content')?.remove();return;}
+        opened.add(key);
+        if(!row.querySelector('.need-list-content')){
+          const content=el('div','need-list-content');content.append(makeCard(req,id));row.append(content);
+        }
+      });
+      grid.append(row);
+      if(opened.has(id+':'+req.id)){
+        row.open=true;
+        const content=el('div','need-list-content');content.append(makeCard(req,id));row.append(content);
+      }
+    }
+    if(id==='request-grid'){
+      $('#empty-state').hidden=!!list.length;
+      $('#filter-status').textContent=list.length+' necesidades disponibles.';
+    }
+  }
+  function renderAll(){
+    renderList('request-grid');renderList('my-requests-grid');renderList('accepted-grid');
+    const own=requestsFor('my-requests-grid'),accepted=requestsFor('accepted-grid');
+    $('#my-count').textContent=own.length?'('+own.length+')':'';
+    $('#my-empty').hidden=!!own.length;
+    $('#my-empty').querySelector('p').textContent=state.user?'Aún no has creado ninguna necesidad.':'Inicia sesión para consultar tus publicaciones.';
+    $('#accepted-empty').hidden=!!accepted.length;
+    $('#accepted-empty').textContent=state.user?'Todavía no has aplicado a ninguna necesidad.':'Inicia sesión para consultar tus aplicaciones.';
+  }
+  function populateFilters(){
+    const cat=$('#list-subcategory'),previous=state.subcategory;
+    cat.replaceChildren(new Option('Todas las categorías','all'));
+    const kinds=state.category==='all'?['bienes','servicios']:[state.category];
+    for(const kind of kinds){
+      const group=document.createElement('optgroup');group.label=CATEGORIES[kind];
+      for(const [id,name] of Object.entries(SUBCATEGORIES[kind]))group.append(new Option(name,id));
+      cat.append(group);
+    }
+    state.subcategory=kinds.some(k=>Object.hasOwn(SUBCATEGORIES[k],previous))?previous:'all';
+    cat.value=state.subcategory;
+    const city=$('#list-city'),current=state.city;
+    const cities=[...new Set(state.requests.filter(r=>r.status==='abierta').map(r=>r.city))].sort((a,b)=>a.localeCompare(b,'es'));
+    city.replaceChildren(new Option('Todas las ciudades','all'),...cities.map(c=>new Option(c,c)));
+    state.city=cities.includes(current)?current:'all';city.value=state.city;
+  }
+  $$('.filter').forEach(b=>b.onclick=()=>{
+    state.category=b.dataset.category;state.subcategory='all';populateFilters();
+    $$('.filter').forEach(x=>{x.classList.toggle('is-active',x===b);x.setAttribute('aria-pressed',String(x===b));});
+    renderList('request-grid');
+  });
+  $('#list-subcategory').onchange=e=>{state.subcategory=e.target.value;renderList('request-grid');};
+  $('#list-city').onchange=e=>{state.city=e.target.value;renderList('request-grid');};
+  $('#request-search').oninput=e=>{state.search=e.target.value.trim().toLocaleLowerCase('es');renderList('request-grid');};
+  $$('[data-explore]').forEach(a=>a.onclick=()=>{
+    state.category='all';state.subcategory='all';state.city='all';state.search='';$('#request-search').value='';
+    $$('.filter').forEach(b=>{b.classList.toggle('is-active',b.dataset.category==='all');b.setAttribute('aria-pressed',String(b.dataset.category==='all'));});
+    populateFilters();
+  });
+  onSnapshot(collection(db,'requests'),snapshot=>{
+    state.requests=snapshot.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    populateFilters();renderAll();
+  },e=>{
+    notify('Error al cargar necesidades: '+e.message);
+    $('#empty-state').hidden=false;$('#empty-state').textContent='No se pudieron consultar las necesidades.';
+  });
