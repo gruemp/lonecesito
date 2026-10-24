@@ -1,3 +1,12 @@
+## Versión 2.2.10 — editor compacto y envío con Enter
+
+- Debajo de **una única caja de necesidad** hay **una sola fila horizontal**: campo telefónico con icono a su izquierda, botón de adjuntar fotografía, botón de dictado por micrófono y botón verde de envío.
+- **El campo de teléfono no lleva etiqueta visible** «Número de WhatsApp». Se mantiene su nombre accesible; el ejemplo **`Ej: 300 123 4567`** está **dentro de la caja**, y el icono de teléfono queda a la izquierda de ese campo.
+- El control verde para publicar tiene **solo el icono de envío (avión de papel)**, sin la palabra «Publicar» ni «necesidad» en el botón. Conserva `aria-label`/`title` para accesibilidad y cambia su nombre accesible a «Guardar cambios» en edición; no reemplazar el icono por texto.
+- **Enter** dentro del área de texto o el campo de teléfono envía el formulario por el mismo controlador que el icono verde, con sus validaciones y protecciones contra doble envío. **Shift+Enter** introduce salto de línea en el texto. No interceptar composición de caracteres ni pulsaciones repetidas.
+- Fotografía y micrófono siguen siendo botones independientes de la misma fila. La vista previa de la foto aparece dentro del cuadro de texto solamente cuando se selecciona una imagen, sin desplazar ni estrechar el campo telefónico.
+- En edición, «Cancelar» es un control adicional con icono X en esa misma fila y permanece oculto al crear. El resto del diseño y el mínimo de dos campos visibles se conservan.
+- Esta instrucción reemplaza el formulario de filas separadas de teléfono y «Publicar necesidad», así como la barra flotante de imagen/micrófono dentro de la caja.
 ## Actualización vigente — versión 2.2.9: cinco iconos en una sola fila
 
 - La fila de controles es **una sola fila horizontal**, compacta, sin textos visibles ni encabezado «Contactar».
