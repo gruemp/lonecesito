@@ -1,6 +1,6 @@
 /* Versión técnica interna; nunca mostrar número de versión en la interfaz. */
-export const APP_VERSION = '2.2.13';
-export const APP_VERSION_DATE = '24/10/2026';
+export const APP_VERSION = '2.2.14';
+export const APP_VERSION_DATE = '2026-10-24';
 
 /* Modelo sencillo: el autor solo escribe su necesidad y su WhatsApp. */
 export function normalizeWhatsApp(value) {
