@@ -2,9 +2,15 @@
 
 **Leer antes de modificar el proyecto:** [AGENTS.md](AGENTS.md) · [Preferencias actuales](docs/PREFERENCIAS-LO-NECESITO.md) · [Estado y aprendizajes de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
 
-Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en dos filas en PC y móvil, tercera ilustración solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
+Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en una fila en PC y dos en móvil, tercera ilustración solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
 
 **Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. Esta actualización es **solo documental**, sin modificaciones de interfaz ni de versión interna.
+
+---
+
+# Versión técnica 2.2.14 — navegación en PC e imagen íntegra de Inicio
+
+Las pestañas siguen el orden **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**. En **PC** aparecen en una sola fila; en **móvil**, en dos filas de dos. La imagen seleccionada de Inicio permanece intacta, se centra y se limita al espacio disponible del navegador sin recortarse. Las fichas, el buscador y el funcionamiento de publicación no cambian.
 
 ---
 
