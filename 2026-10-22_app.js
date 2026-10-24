@@ -372,22 +372,11 @@ function init(){
     img.src=data;img.alt=caption;img.loading='lazy';img.className='uploaded-picture';
     return img;
   }
-  function addPictureToggle(container,data,caption){
+  function showPictureInline(container,data,caption){
+    container.replaceChildren();
     if(!data)return;
-    const button=el('button','image-reveal','Ver foto');
-    button.type='button';button.setAttribute('aria-expanded','false');
-    button.setAttribute('aria-label','Ver foto: '+caption);
-    const frame=el('div','image-frame');frame.hidden=true;
-    button.addEventListener('click',()=>{
-      const show=frame.hidden;
-      frame.replaceChildren();
-      if(show){const image=pictureNode(data,caption);if(image)frame.append(image);}
-      frame.hidden=!show;
-      button.textContent=show?'Ocultar foto':'Ver foto';
-      button.setAttribute('aria-expanded',String(show));
-      button.setAttribute('aria-label',(show?'Ocultar foto: ':'Ver foto: ')+caption);
-    });
-    container.append(button,frame);
+    const image=pictureNode(data,caption);
+    if(image)container.append(image);
   }
   function addUserCard(request){
     const mine=state.requests.some(r=>r.id===request.id);
@@ -492,8 +481,10 @@ function init(){
     $('#detail-category').textContent=(CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría')).toLocaleUpperCase('es');
     $('#detail-city').textContent=request.city;
     $('#detail-description').textContent=request.description;
-    const photo=$('#detail-photo');photo.replaceChildren();
-    photo.hidden=!request.picture;addPictureToggle(photo,request.picture,'Fotografía de la necesidad');
+    const photo=$('#detail-photo');
+    photo.hidden=!request.picture;
+    $('#detail-overview').classList.toggle('has-photo',Boolean(request.picture));
+    showPictureInline(photo,request.picture,'Fotografía de la necesidad');
     const meta=[];
     if(request.category==='bienes'){if(request.quantity)meta.push('Cantidad: '+request.quantity);meta.push('Condición: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'})[request.condition]);}
     if(request.budget!=null)meta.push('Presupuesto orientativo: '+money(request.budget));
@@ -623,8 +614,7 @@ function init(){
   function refreshPhotoPreview(kind){
     const current=wizardPicture;
     const box=$('#'+kind+'-photo-preview');
-    box.replaceChildren();
-    addPictureToggle(box,current,'Fotografía seleccionada');
+    showPictureInline(box,current,'Fotografía seleccionada');
     $('#'+kind+'-photo-remove').hidden=!current;
   }
   async function compressImage(file){

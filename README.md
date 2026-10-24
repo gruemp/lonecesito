@@ -1,4 +1,19 @@
 # lonecesito
+## Diseño actual: acciones principales centradas y fotografías automáticas
+
+- **No hay botón «Ver foto»**: en Explorar, la imagen adjunta sigue apareciendo a la derecha del resumen de cada solicitud; en el detalle, la foto se muestra automáticamente en una segunda columna; y al subir una foto en el formulario se ve la vista previa de inmediato.
+- El acceso **«Soluciona una necesidad y gana dinero por ello»** se conserva únicamente debajo del botón de publicación, y se retira del antiguo menú superior redundante.
+- Dos accesos principales pasan a un área **centrada y de botones grandes** debajo de las acciones de portada: **«Mis necesidades publicadas para que otros ofrezcan solucionarlas»** y **«Necesidades de terceros aceptadas para solucionar»**. La marca LoNecesito sigue permitiendo volver a Inicio.
+- En PC y celular, los accesos se organizan en una columna con el mismo ancho máximo de «Publicar una necesidad»; el resto de las acciones principales también gana espacio para pulsarlas.
+- Se conservan el selector nativo de ciudades, la publicación con título desde una sola letra, las aceptaciones sin formularios y los datos históricos del navegador.
+
+Validación: **45 pruebas** de lógica y estructura superadas; HTML sin IDs duplicados ni referencias inexistentes. No se ejecutaron pruebas visuales en dispositivos físicos.
+
+**Limitaciones:** continúa siendo una demostración local sin Firebase ni comunicación real entre personas.
+
+Los apartados inferiores del README son registros históricos y pueden describir estados previos de la interfaz.
+
+---
 ## Portada actual: un botón de publicación y ciudad móvil compatible
 
 - La portada solo presenta **«Publicar una necesidad»** como botón de acción principal. Se eliminó el formulario previo de título/ciudad y el botón redundante de la cabecera. Al pulsar se abre directamente el asistente de tres pasos.
