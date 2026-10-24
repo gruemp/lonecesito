@@ -47,7 +47,10 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 - Botones/etiquetas/números: no justificar artificialmente textos cortos; centrar o alinear según legibilidad y zonas táctiles cómodas.
 - Acciones vinculadas a un mismo elemento: visualmente independientes pero próximas, p. ej. icono de llamada / icono de WhatsApp y Editar / Eliminar.
 - Evitar banners, avisos, mensajes y explicaciones redundantes que distraigan. Solo errores o confirmaciones funcionales pertinentes y discretos.
-- Portada sencilla: acceso claro a «Publicar lo que necesito», «Ver necesidades» y «Mis publicaciones». No volver al menú de solicitudes aceptadas.
+- **Navegación persistente**: exactamente tres botones visibles en la barra superior, en este orden: «Publicar lo que necesito» (verde), «Ver necesidades» (azul) y «Mis publicaciones» (ámbar). Mantener la cabecera fija al desplazarse y permitir navegar siempre entre las tres pantallas.
+- **Sin enlaces duplicados**: la portada contiene solamente el texto principal y su descripción, **sin tarjetas ni botones repetidos de publicar, ver necesidades o mis publicaciones**. Tampoco repetir «Crear publicación» dentro de «Mis publicaciones», porque publicar ya está disponible arriba.
+- Diseñar la barra para celulares estrechos sin cortes horizontales: botones compactos, texto legible que puede ocupar dos líneas, altura ajustada, foco y selección visibles.
+- **No añadir Gemini ni búsqueda con inteligencia artificial**. Esa idea se consideró y se descartó; mantener la búsqueda de texto existente salvo nueva autorización expresa.
 - Mantener buen contraste, lectura accesible, adaptación a distintos anchos y sin desbordamiento horizontal.
 
 ## 5. Versión de publicación visible
