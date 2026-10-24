@@ -1,3 +1,15 @@
+# Versión 2.2.3 — iconos de llamada y WhatsApp
+
+- Cada ficha presenta **dos botones compactos con iconos y sin texto visible**: teléfono (azul) y WhatsApp (verde). **El número ya no aparece escrito** en la ficha.
+- El icono de llamada usa un enlace \`tel:+<numero>\` para abrir el marcador del dispositivo. El icono de WhatsApp conserva \`https://api.whatsapp.com/send\` con el número y mensaje contextual.
+- Los botones son accesibles con \`aria-label\` y \`title\`; su diseño es igual en todas las fichas.
+- Las fichas de ejemplo mantienen ambos iconos: **llamada deshabilitada** para impedir que se marque un número ficticio; WhatsApp abre sin destinatario.
+- Que no se muestre el número como texto **no lo vuelve privado**: está disponible en las direcciones de los enlaces. El formulario informa de esa exposición.
+- Se mantienen dos campos de publicación, texto completo de necesidad, fichas compactas, separación visual, Editar/Eliminar solo del autor y versión discreta al principio.
+- Actualizadas las preferencias permanentes de \`AGENTS.md\` y \`docs/PREFERENCIAS-LO-NECESITO.md\`.
+
+---
+
 # LoNecesito — instrucciones para continuar el proyecto
 
 **Toda IA o persona que continúe el desarrollo debe leer antes de editar:**

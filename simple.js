@@ -70,17 +70,40 @@ function legacyDetails(record,{forCard=false}={}){
   add('Fecha',record.desiredDate);
   return lines.length?[original,lines.join(' · ')].filter(Boolean).join('\n'):original;
 }
-function phoneLink(record,label,cls){
-  const number=record.contactPhone;
-  let href='';
-  try{
-    href=record.example===true
-      ?exampleWhatsappUrl(record.description||record.title)
-      :whatsappUrl(number,record.description||record.title);
-  }catch{return null;}
-  const a=el('a',cls,label);
-  a.href=href;a.target='_blank';a.rel='noopener noreferrer';
-  a.setAttribute('aria-label','Abrir WhatsApp desde esta necesidad');
+function contactIcon(kind){
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 0 24 24');
+  svg.setAttribute('width','24');
+  svg.setAttribute('height','24');
+  svg.setAttribute('fill','none');
+  svg.setAttribute('stroke','currentColor');
+  svg.setAttribute('stroke-width','1.8');
+  svg.setAttribute('stroke-linecap','round');
+  svg.setAttribute('stroke-linejoin','round');
+  svg.setAttribute('aria-hidden','true');
+  svg.classList.add('contact-icon');
+  const paths=kind==='call'?
+    ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
+    ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
+     'M8.2 8.3c.3-.6.9-.8 1.4-.3l1 1.2-.7 1.1c.7 1.5 1.9 2.7 3.4 3.4l1.1-.7 1.2 1c.5.5.3 1.1-.3 1.4-.8.4-1.7.5-2.6.1a9.3 9.3 0 0 1-4.6-4.6c-.4-.9-.3-1.8.1-2.6z'];
+  for(const d of paths){
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d',d);
+    svg.append(path);
+  }
+  return svg;
+}
+function contactLink(href,kind,label){
+  const a=el('a','contact-action '+(kind==='call'?'call-action':'whatsapp-action'));
+  a.href=href;
+  a.title=label;
+  a.setAttribute('aria-label',label);
+  if(kind==='whatsapp'){
+    a.target='_blank';
+    a.rel='noopener noreferrer';
+  }
+  a.append(contactIcon(kind));
   return a;
 }
 function renderCard(record,owner){
@@ -111,11 +134,22 @@ function renderCard(record,owner){
     if(record.example===true||record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
   }catch{contactNumber='';}
   if(contactNumber){
-    // Igual presentación para publicaciones y ejemplos; sin destinatario real para ejemplos.
-    const numberLink=phoneLink(record,contactNumber,'contact-phone');
-    const chatLink=phoneLink(record,'Abrir WhatsApp ↗','whatsapp-button');
-    if(numberLink)contact.append(numberLink);
-    if(chatLink)contact.append(chatLink);
+    if(record.example===true){
+      // Un ejemplo jamás debe marcar un número de muestra o de un tercero.
+      const sampleCall=el('button','contact-action call-action');
+      sampleCall.type='button';
+      sampleCall.disabled=true;
+      sampleCall.title='Llamada no disponible en esta muestra';
+      sampleCall.setAttribute('aria-label','Llamada no disponible en esta muestra');
+      sampleCall.append(contactIcon('call'));
+      contact.append(sampleCall);
+    }else{
+      contact.append(contactLink('tel:'+contactNumber,'call','Llamar por teléfono'));
+    }
+    const href=record.example===true
+      ?exampleWhatsappUrl(record.description||record.title)
+      :whatsappUrl(contactNumber,record.description||record.title);
+    contact.append(contactLink(href,'whatsapp','Escribir por WhatsApp'));
   }else{
     contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
   }
