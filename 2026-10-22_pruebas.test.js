@@ -186,7 +186,8 @@ test('el HTML incluye formularios solo para quien publica, filtros y aceptación
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
   }
   for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
-  assert.ok(html.includes('sin SMS'));
+  assert.ok(html.includes('He revisado los datos de mi necesidad'));
+  assert.ok(html.includes('id="request-demo-consent"'));
   assert.ok(html.includes('Aceptar necesidad'));
   assert.ok(!html.includes('id="proposal-form"'));
   assert.ok(!html.includes('id="provider-form"'));
@@ -359,7 +360,7 @@ test('las tres vistas usan el mismo listado compacto que abre una ficha al pulsa
   assert.ok(js.includes("renderNeedList(list,accepted,'aceptadas')"));
   assert.ok(js.includes('function compactNeedRow(request,context,expanded=false){'));
   assert.ok(js.includes('content.append(needCard(request,context))'));
-  for(const marker of ["el('h3','need-card-title',request.title)","el('p','need-card-description',request.description)","el('ul','need-card-meta')","el('div','need-card-overview')","overview.append(copy,photo)","article.append(head,overview,contextNote,actions)"]){
+  for(const marker of ["el('h3','need-card-title',request.title)","el('p','need-card-description',request.description)","el('ul','need-card-meta')","el('div','need-card-overview')","overview.append(copy,photo)","article.append(head,overview,actions)"]){
     assert.ok(js.includes(marker),'Falta '+marker);
   }
   assert.ok(css.includes(':is(#request-grid,#my-requests-grid,#accepted-grid) .need-card{'));
@@ -639,7 +640,7 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
@@ -798,7 +799,7 @@ test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
 test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(js.includes("const row=el('details','need-list-row')"));
   assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
@@ -896,7 +897,7 @@ test('las filas cerradas siguen compactas y las fichas se crean únicamente al a
 test('la nueva capa visual mantiene los tres contextos y los controles existentes',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const id of ['request-grid','my-requests-grid','accepted-grid','publish-form','request-city','request-photo-preview'])
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
@@ -912,7 +913,7 @@ test('el rediseño premium conserva la navegación y las pantallas originales',(
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  assert.ok(html.includes('20261023-premium-2'));
+  assert.ok(html.includes('20261023-justificado-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(css.includes('LO NECESITO / VISUAL V2'));
   for(const id of ['inicio','necesidades','mis-necesidades','aceptadas','request-grid','my-requests-grid','accepted-grid','publish-form'])
@@ -1010,4 +1011,61 @@ test('las combinaciones nuevas conservan contraste AA',()=>{
     const a=lum(fg),b=lum(bg),contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
     assert.ok(contrast>=4.5,'Contraste bajo '+fg+'/'+bg+' : '+contrast);
   }
+});
+
+
+test('todas las descripciones de necesidades abiertas se justifican sin perder saltos',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Descripciones justificadas en las tres vistas'));
+  assert.ok(layer.includes(':is(#request-grid,#my-requests-grid,#accepted-grid)'));
+  assert.ok(layer.includes('.need-card .need-card-description{'));
+  for(const marker of ['text-align:justify','text-align-last:left','text-justify:inter-word','hyphens:auto','white-space:pre-wrap','overflow-wrap:anywhere'])
+    assert.ok(layer.includes(marker),'Falta '+marker);
+  assert.ok(!layer.includes('grid-template-columns'));
+});
+test('ninguna ficha añade avisos sobre guardado local o notificaciones',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const start=js.indexOf('function needCard(request,context){');
+  const end=js.indexOf('function compactNeedRow(request,context,expanded=false){',start);
+  const body=js.slice(start,end);
+  assert.ok(start>0&&end>start);
+  assert.ok(body.includes('article.append(head,overview,actions)'));
+  assert.equal(body.includes('contextNote'),false);
+  assert.equal(body.includes("el('p','need-card-note'"),false);
+  assert.equal(body.includes('este navegador'),false);
+  assert.equal(body.includes('Demostración:'),false);
+  assert.ok(body.includes("el('p','need-card-description',request.description)"));
+});
+test('desaparecen los avisos redundantes en secciones, footer y publicación',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  for(const text of [
+    'Exploración de prueba',
+    'Aceptaciones de prueba en este navegador',
+    'Demostración: solo tú podrás ver',
+    'Demostración local, sin conexión',
+    'la imagen se comprime y guarda solo en este navegador',
+    'En la versión real tendrás que identificarte',
+    'mi solicitud solo quedará guardada en este navegador'
+  ])assert.equal(html.toLowerCase().includes(text.toLowerCase()),false,'Permanece el aviso '+text);
+  assert.ok(html.includes('LoNecesito</span></footer>'));
+  assert.ok(html.includes('id="request-demo-consent" required'));
+  assert.ok(html.includes('No incluyas datos personales ni direcciones exactas.'));
+  assert.ok(html.includes('id="request-city"'));
+  assert.ok(html.includes('id="publish-form"'));
+});
+test('los mensajes dinámicos de éxito no incluyen comentarios sobre navegador o modo de prueba',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  for(const marker of [
+    "showToast('Necesidad aceptada.')",
+    "previous?'Necesidad actualizada.':'Necesidad guardada.'",
+    "'Borrador guardado.'",
+    "editingRequestId?'Guardar cambios':'Guardar necesidad'",
+    "showToast('Necesidad resuelta.')"
+  ])assert.ok(js.includes(marker),'Falta '+marker);
+  for(const phrase of [
+    'Aceptación de prueba guardada solo aquí',
+    'Borrador guardado en este navegador',
+    'Necesidad de prueba guardada',
+    'Publicada solo en este navegador'
+  ])assert.equal(js.includes(phrase),false,'Mensaje anterior todavía presente '+phrase);
 });
