@@ -1,3 +1,11 @@
+# Versión 2.2.9 — acciones compactas en una fila
+
+La ficha de «Mis publicaciones» muestra **cinco botones con solo iconos en una fila**: llamar, WhatsApp, compartir PNG (símbolo de tres puntos conectados), editar y eliminar. Los visitantes ven únicamente los tres primeros iconos. No se repiten acciones en otra fila. Permisos y confirmación de eliminación siguen intactos. Diseño adaptado a pantallas pequeñas con botones táctiles y colores diferenciados.
+
+Esta decisión se añadió a [AGENTS.md](AGENTS.md), [preferencias](docs/PREFERENCIAS-LO-NECESITO.md) y [continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md). Firebase sigue pendiente de configuración; las publicaciones aún no se comparten entre visitantes.
+
+---
+
 # Versión 2.2.8 — fichas sin título y sin espacios vacíos
 
 Se retiraron los textos explicativos y encabezados grandes de **Publicar**, **Ver necesidades** y **Mis publicaciones**. Las fichas no muestran títulos: presentan todo el texto de la necesidad justificado, con una altura que depende del contenido. Las descripciones pueden contener desde un solo carácter (no se aceptan vacías).
