@@ -383,7 +383,8 @@ test('los accesos de mis necesidades y aceptadas están centrados bajo Publicar'
   assert.equal(/data-screen-link="necesidades"/.test(html),false);
   const heroEnd=html.indexOf('</section>',html.indexOf('id="inicio"'));
   const navPos=html.indexOf('id="screen-navigation"');
-  assert.ok(navPos>heroEnd,'Los accesos deben quedar después de la portada, nunca encima');
+  assert.ok(navPos>html.indexOf('id="inicio"')&&navPos<heroEnd,
+    'Los accesos deben existir solo dentro de Inicio para ocultarse al cambiar de sección');
   assert.equal([...html.matchAll(/data-screen-link=/g)].length,2);
 });
 test('un título largo sobrevive al ciclo de almacenamiento y recarga',()=>{
@@ -459,7 +460,8 @@ test('botones de acceso y acciones primarias poseen tamaño cómodo para celular
   assert.ok(css.includes('min-height:65px;'));
   assert.ok(css.includes('.section-primary-action{display:flex;justify-content:center'));
   assert.ok(css.includes('.filter,.my-action,.card-link{min-height:43px}'));
-  assert.ok(html.includes('class="section-primary-action"'));
+  assert.equal(html.includes('class="section-primary-action"'),false,
+    'No debe aparecer otro botón de navegación dentro de las secciones');
 });
 test('la ficha expandida conserva información y foto, sin modal adicional',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
@@ -695,4 +697,49 @@ test('la cascada nueva contiene ajustes para móvil, tableta y escritorio sin de
   ])assert.ok(latest.includes(marker),'No está '+marker);
   const braces=[...css].reduce((n,ch)=>n+(ch==='{')-(ch==='}'),0);
   assert.equal(braces,0);
+});
+
+test('los cuatro accesos principales pertenecen exclusivamente a Inicio',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const first=html.indexOf('<section class="hero shell app-screen"');
+  const end=html.indexOf('</section>',first);
+  const home=html.slice(first,end);
+  assert.ok(first>=0&&end>first);
+  assert.ok(home.includes('id="hero-publish"'));
+  assert.ok(home.includes('class="button solve-cta action-cta action-cta-solve"'));
+  assert.ok(home.includes('id="screen-navigation"'));
+  assert.ok(home.includes('href="#mis-necesidades"'));
+  assert.ok(home.includes('href="#aceptadas"'));
+  assert.equal((html.match(/id="screen-navigation"/g)||[]).length,1);
+  assert.ok(html.includes('.app-screen')===false || html.includes('app-screen'));
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(css.includes('.app-screen[hidden]{display:none!important}'),
+    'La navegación incluida en Inicio debe desaparecer al cambiar a otra sección');
+});
+test('al entrar a cada sección únicamente queda su información, no las otras acciones principales',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const homeStart=html.indexOf('<section class="hero shell app-screen"');
+  const homeEnd=html.indexOf('</section>',homeStart);
+  const otherSections=html.slice(homeEnd);
+  assert.equal(otherSections.includes('id="screen-navigation"'),false);
+  assert.equal(otherSections.includes('action-cta-publish'),false);
+  assert.equal(otherSections.includes('action-cta-solve'),false);
+  assert.equal(otherSections.includes('action-cta-mine'),false);
+  assert.equal(otherSections.includes('action-cta-accepted'),false);
+  assert.equal(otherSections.includes('Publicar otra necesidad'),false);
+  assert.equal(otherSections.includes('Soluciona otra necesidad'),false);
+  for(const id of ['necesidades','mis-necesidades','aceptadas'])
+    assert.ok(otherSections.includes('id="'+id+'" data-screen="'+id+'"'));
+  assert.ok(html.includes('href="#inicio" aria-label="LoNecesito, inicio"'),
+    'La marca permite regresar a Inicio desde cualquier sección');
+  assert.ok(otherSections.includes('id="my-empty"'),
+    'El estado vacío de publicaciones aún permite crear una necesidad');
+});
+test('navegar no borra funcionalidades ni modifica el JavaScript existente',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(js.includes('export function applyScreenNavigation(root,screenId)'));
+  assert.ok(js.includes('window.addEventListener('+"'hashchange'"+',()=>activateScreen(window.location.hash))'));
+  for(const marker of ['id="request-grid"','id="my-requests-grid"','id="accepted-grid"','id="publish-dialog"','id="publish-form"','id="list-city"','id="request-city"'])
+    assert.ok(html.includes(marker),'Falta el componente '+marker);
 });

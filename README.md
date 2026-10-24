@@ -1,4 +1,15 @@
 # lonecesito
+## Navegación actual: botones principales solo en Inicio
+
+- Los **cuatro accesos principales** (Publicar, Solucionar, Mis necesidades publicadas y Necesidades aceptadas) aparecen **únicamente en Inicio**.
+- Los dos botones de navegación «Mis necesidades...» y «Necesidades aceptadas...» ahora están dentro de la sección HTML `#inicio.app-screen`. Cuando el usuario cambia de vista, la navegación existente oculta toda la portada, incluidos esos accesos, sin modificar JavaScript.
+- Dentro de **Explorar**, **Mis necesidades** y **Aceptadas** se muestra exclusivamente su título, información, filtros o listado y las acciones específicas de la vista. Se retiran los accesos secundarios duplicados «Publicar otra necesidad» y «Soluciona otra necesidad». Los controles de cada necesidad y el estado vacío siguen disponibles.
+- El logotipo **LoNecesito** permanece visible para volver al Inicio en cualquier momento. Se conservan las rutas existentes y toda la lógica.
+- Verificación: **65 pruebas** de lógica y estructura aprobadas; CSS y JavaScript sin cambios. Sin backend Firebase, la plataforma sigue siendo demostración local.
+
+Los apartados inferiores registran etapas anteriores del proyecto.
+
+---
 ## Interfaz didáctica: opciones diferenciadas (diseño vigente)
 
 - Las **cuatro acciones principales** conservan sus destinos y etiquetas, con colores, símbolos y ayudas breves: publicar (verde oscuro), solucionar una necesidad (verde claro), administrar publicaciones propias (azul) y revisar necesidades aceptadas (ámbar). Se mantienen en la misma columna central en PC y celular.
