@@ -743,3 +743,67 @@ test('navegar no borra funcionalidades ni modifica el JavaScript existente',()=>
   for(const marker of ['id="request-grid"','id="my-requests-grid"','id="accepted-grid"','id="publish-dialog"','id="publish-form"','id="list-city"','id="request-city"'])
     assert.ok(html.includes(marker),'Falta el componente '+marker);
 });
+
+
+test('las tres listas muestran cuatro tonos pastel cíclicos con acentos y flechas coordinados',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const theme=css.slice(css.lastIndexOf('Listas de necesidades: cuatro tonos pastel'));
+  for(const pair of [
+    ['4n + 1','#e5f1fc','#3983c6','#173f61'],
+    ['4n + 2','#fff1d9','#d99a36','#704a16'],
+    ['4n + 3','#f0e9fa','#9874c5','#503777'],
+    ['4n)','#e6f5ed','#34896e','#205644']
+  ]){
+    for(const marker of pair)assert.ok(theme.includes(marker),'Falta color/ciclo '+marker);
+  }
+  assert.ok(theme.includes(':is(#request-grid,#my-requests-grid,#accepted-grid)'));
+  assert.ok(theme.includes('color:var(--row-ink)'));
+  assert.ok(theme.includes('box-shadow:inset 5px 0 0 var(--row-accent)'));
+  assert.ok(css.includes('.need-list-summary::after{'));
+  assert.ok(css.includes('border-right:2px solid currentColor'));
+});
+test('la ficha abierta mantiene el color de su línea y el listado sigue compacto',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const theme=css.slice(css.lastIndexOf('Listas de necesidades: cuatro tonos pastel'));
+  assert.ok(theme.includes('nth-child(n)[open] > .need-list-summary'));
+  assert.ok(theme.includes('background:var(--row-open)'));
+  assert.equal(theme.includes('grid-template-columns'),false);
+  assert.equal(theme.includes('padding:'),false);
+  assert.equal(theme.includes('min-height:'),false);
+  assert.equal(theme.includes('gap:'),false);
+  assert.ok(css.includes('white-space:nowrap'));
+  assert.ok(css.includes('text-overflow:ellipsis'));
+  assert.ok(css.includes('gap:0'));
+});
+test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
+  function luminance(hex){
+    const numbers=[0,2,4].map(i=>parseInt(hex.slice(i,i+2),16)/255);
+    const linear=numbers.map(n=>n<=0.04045?n/12.92:Math.pow((n+0.055)/1.055,2.4));
+    return linear[0]*.2126+linear[1]*.7152+linear[2]*.0722;
+  }
+  function ratio(a,b){
+    const x=luminance(a),y=luminance(b);
+    return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+  }
+  for(const [name,ink,background,open] of [
+    ['azul','173f61','e5f1fc','d3e7f8'],
+    ['amarillo','704a16','fff1d9','ffe6bf'],
+    ['lavanda','503777','f0e9fa','e5d8f5'],
+    ['menta','205644','e6f5ed','d4ebdc']
+  ]){
+    assert.ok(ratio(ink,background)>=4.5,'Contraste cerrado insuficiente: '+name);
+    assert.ok(ratio(ink,open)>=4.5,'Contraste abierto insuficiente: '+name);
+  }
+});
+test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-colores-1'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(js.includes("const row=el('details','need-list-row')"));
+  assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(js.includes("content.append(needCard(request,context))"));
+  assert.ok(html.includes('id="request-grid"'));
+  assert.ok(html.includes('id="my-requests-grid"'));
+  assert.ok(html.includes('id="accepted-grid"'));
+});
