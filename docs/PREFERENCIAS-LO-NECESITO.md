@@ -1,3 +1,13 @@
+## Actualización vigente — versión 2.2.9: cinco iconos en una sola fila
+
+- La fila de controles es **una sola fila horizontal**, compacta, sin textos visibles ni encabezado «Contactar».
+- **Ficha del autor (Mis publicaciones):** cinco botones independientes y del mismo tamaño en este orden: teléfono azul, WhatsApp verde, compartir PNG morado con el icono universal de **tres puntos conectados**, editar con lápiz azul claro y eliminar con papelera rojo claro.
+- **Ficha de otros usuarios y ejemplos:** tres botones de iconos (llamada, WhatsApp y compartir) en **una sola fila**. Los ejemplos no pueden llamar a un número ficticio.
+- Los botones son táctiles (44 px de alto como mínimo), usan `aria-label` y `title`, y están diferenciados por color. No crear un bloque adicional con «Editar» y «Eliminar» ni poner etiquetas visibles en los botones.
+- Solo el autor puede editar o eliminar. Mantener la confirmación previa a eliminar y la autorización de Firestore cuando esté habilitado.
+- Se conserva la ficha **sin títulos**, descripción justificada, fotografía opcional a la derecha cuando existe, texto a ancho completo sin foto y altura según el contenido.
+- Esta regla reemplaza instrucciones anteriores donde los iconos de compartir, editar y eliminar estaban en filas separadas o el icono de compartir era una flecha hacia arriba.
+
 ## Actualización vigente — versión 2.2.8
 
 - Eliminar de las tres pantallas los encabezados y párrafos mostrados por el usuario: «Necesidades publicadas» / «Encuentra necesidades y contacta directamente por WhatsApp.»; «Mis publicaciones» / «Edita o elimina tus publicaciones cuando lo necesites.»; «Publica lo que necesitas» / «Describe tu necesidad y deja tu WhatsApp.». Los botones superiores **siguen existiendo** con sus nombres.
