@@ -11,7 +11,7 @@ El modo multiusuario está preparado, pero todavía no está conectado: el repos
    - firebase login
    - firebase deploy --only firestore:rules --project TU_PROJECT_ID
    No usar reglas de lectura/escritura públicas.
-4. Probar las reglas con Firebase Emulator y varias cuentas independientes. Revisar los casos de privacidad indicados abajo, App Check, tratamiento de datos y cuotas antes del lanzamiento.
+4. Instalar dependencias de desarrollo con npm install, luego ejecutar npm run test:rules. Ese comando inicia Firestore Emulator y ejecuta tests/firestore.rules.test.mjs con cuentas simuladas para privacidad y lotes atómicos. Revisar además App Check, tratamiento de datos y cuotas antes del lanzamiento.
 5. Completar firebase-config.js con los valores exactos de la aplicación Web, y publicar la rama codex/diseno-original en GitHub Pages. La página activará firebase-live.js en lugar del modo local cuando la configuración sea completa.
 6. Probar publicación y aplicación en dos navegadores o sesiones independientes.
 
@@ -41,4 +41,4 @@ El modo multiusuario está preparado, pero todavía no está conectado: el repos
 - Hasta que se configure un proyecto Firebase y se publiquen estas reglas, NO hay almacenamiento multiusuario en producción.
 - No se ha verificado la titularidad de los números; no hay chat ni pagos.
 - Los registros antiguos del modo local no migran automáticamente a Firebase.
-- No se han ejecutado pruebas reales de reglas con Firebase Emulator aquí. Las pruebas estáticas del código no sustituyen esas comprobaciones.
+- Se incluyen pruebas automáticas para Firebase Emulator, pero no se han ejecutado con el emulador en este entorno. Las pruebas estáticas del código no sustituyen esa ejecución.
