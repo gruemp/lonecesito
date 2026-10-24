@@ -6,7 +6,7 @@
   "description": "Portal LoNecesito basado en el diseño original aprobado",
   "scripts": {
     "test": "node --test 2026-10-22_pruebas.test.js",
-    "check": "node --check 2026-10-22_app.js",
+    "check": "node --check 2026-10-22_app.js && node --check firebase-live.js && node --check tests/firestore.rules.test.mjs",
     "test:rules": "npx firebase-tools emulators:exec --only firestore --project demo-lonecesito-privacidad \"node --test tests/firestore.rules.test.mjs\""
   },
   "devDependencies": {
