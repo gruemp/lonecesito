@@ -384,13 +384,18 @@ function init(){
     if(cities.includes(currentCity))select.value=currentCity;else currentCity='all';
   }
   function populateSubcategories(){
-    const select=$('#list-subcategory');
-    const values=currentCategory==='all'?Object.entries(SUBCATEGORIES).flatMap(([,items])=>Object.entries(items)):Object.entries(SUBCATEGORIES[currentCategory]);
-    const options=[new Option('Todas las categorías','all')];
-    for(const [value,label] of values)if(!options.some(item=>item.value===value))options.push(new Option(label,value));
-    select.replaceChildren(...options);
-    if(options.some(option=>option.value===currentSubcategory))select.value=currentSubcategory;
-    else currentSubcategory='all';
+    const select=$('#list-subcategory'),before=currentSubcategory;
+    const all=[new Option('Todas las categorías','all')];
+    const kinds=currentCategory==='all'?['bienes','servicios']:[currentCategory];
+    for(const kind of kinds){
+      const group=document.createElement('optgroup');group.label=CATEGORIES[kind];
+      for(const [value,label] of Object.entries(SUBCATEGORIES[kind]))group.append(new Option(label,value));
+      all.push(group);
+    }
+    select.replaceChildren(...all);
+    const exists=kinds.some(kind=>Object.hasOwn(SUBCATEGORIES[kind],before));
+    currentSubcategory=exists?before:'all';
+    select.value=currentSubcategory;
   }
   function populatePublishSubcategories(){
     const kind=$('#request-category').value;
@@ -832,4 +837,4 @@ function init(){
 
 }
 
-if(typeof document!=='undefined' && !window.LoNecesitoFirebaseConfig?.apiKey) init();
+if(typeof document!=='undefined' && !(window.LoNecesitoFirebaseConfig?.apiKey && window.LoNecesitoFirebaseConfig?.projectId && window.LoNecesitoFirebaseConfig?.appId)) init();
