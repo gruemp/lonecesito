@@ -1,3 +1,12 @@
+### Presentación de fichas y PNG compartido (versión 2.2.7)
+
+- La descripción se muestra **justificada** siempre que sea un párrafo, incluso a la izquierda de una foto. Mantener última línea normal para evitar espacios exagerados.
+- Cada ficha reserva la columna derecha para una fotografía opcional. La imagen de cualquier tamaño se ajusta automáticamente con `object-fit: contain` sin cortar información. **Sin imagen: la columna está vacía por completo**. No mostrar fondo de color, borde, tarjeta vacía, icono de fotografía ni texto. **No** expandir el texto hacia ese hueco, aunque permanezca vacío.
+- No mostrar la palabra **«Contactar»** ni encabezados redundantes en la fila de acciones.
+- Mantener tres **botones solo con iconos**, visualmente separados: teléfono azul, WhatsApp verde y **compartir PNG** en un tercer color. Los controles del dueño Editar y Eliminar siguen apareciendo únicamente al propio autor.
+- Compartir/exportar PNG con el título, el texto completo justificado y la foto si existe; si no existe, dejar reservado el espacio blanco. Priorizar la hoja nativa de compartir del dispositivo (`navigator.share` con archivo PNG) y, cuando no esté disponible, ofrecer descarga del PNG sin servidor. Para que una imagen compartida por otra aplicación permita contactar al autor, **el número real se imprime solo dentro del PNG**; no se muestra escrito en la ficha web. En los ejemplos no imprimir teléfonos falsos.
+- No agregar chips separados para ciudad, presupuesto, cantidad ni otros datos; permanecen en el único texto del requerimiento.
+
 # LoNecesito — preferencias, decisiones y protocolo para continuar el proyecto
 
 **Propósito:** documento transportable y explícito para cualquier desarrollador o IA que reciba el repositorio. Refleja las decisiones indicadas durante las iteraciones de octubre de 2026. Leer junto a [AGENTS.md](../AGENTS.md).
@@ -57,7 +66,7 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 
 - La portada **no** debe mostrar el titular grande «Publica lo que necesitas. Encuentra quién puede ofrecerlo.» ni el pie «LoNecesito · Publica lo que necesitas. Contacta directamente por WhatsApp.». Esos textos ocupaban altura innecesaria. Al entrar en la dirección principal, mostrar directamente el listado de necesidades debajo de los tres botones persistentes.
 - La caja de texto «¿Qué necesitas?» debe incluir **un icono de micrófono** que permita hablar para completar el mismo texto. Emplear reconocimiento integrado del navegador en español (`SpeechRecognition` / `webkitSpeechRecognition`), sin Gemini ni registro/almacenamiento de audio en LoNecesito. Mostrar cuándo escucha y permitir detener. El teclado permanece disponible y puede haber navegadores sin soporte. En algunos navegadores un proveedor externo puede procesar el audio: no prometer dictado exclusivamente local. Solo informar problemas cuando ocurran, no con banners.
-- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (marcador gráfico discreto). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
+- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (sin ningún marcador si está vacía). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. Si no hay foto, dejar el área **completamente vacía**, sin marcador, recuadro, texto ni fondo. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
 - Quien publica puede adjuntar una fotografía opcional mediante **icono integrado en la caja de necesidad**. No añadir un campo visible más a los dos existentes. Reducir resolución y tamaño antes de almacenar; conservar o quitar la foto durante la edición y adaptar las reglas de actualización en Firestore.
 - Los ejemplos siguen mostrando el mismo espacio a la derecha y los mismos controles que las fichas reales, sin textos de prueba intrusivos.
 

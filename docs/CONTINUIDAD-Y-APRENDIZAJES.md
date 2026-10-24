@@ -1,7 +1,7 @@
 # LoNecesito — entrega, aprendizajes y continuidad
 
 **Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión:** 2.2.6  
+**Versión:** 2.2.7  
 **Web:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
@@ -16,11 +16,11 @@ Este documento es el **punto de entrega** para continuar el proyecto, con otra I
 - Publicación mediante **dos campos de texto**: una descripción libre de la necesidad y el número de WhatsApp. Ningún formulario separado de ciudad, categoría, cantidad, precio o fecha.
 - En la misma caja se encuentran el **micrófono** para dictar en español (API de reconocimiento del navegador cuando esté disponible) y el botón para adjuntar **una imagen opcional**, comprimida antes de guardarse. El teclado siempre funciona.
 - Fichas compactas: texto único, título derivado de la primera línea y detalles redactados dentro del mismo cuerpo. Los campos históricos se incorporan al texto, no en chips o recuadros.
-- Cada ficha reserva un bloque a la **derecha** para la foto. Si no existe, muestra un marcador gráfico discreto.
-- **Nuevo en 2.2.6:** al pulsar **cualquier parte de una fotografía real** de la ficha, se abre un visor en primer plano con el archivo completo, ajustado sin recortes (\`object-fit: contain\`). Se puede cerrar con la **X**, tocando fuera de la imagen o pulsando **Escape**. También se puede ampliar la miniatura del editor. Si la ficha no tiene imagen, el marcador no abre un visor vacío.
+- Cada ficha reserva un bloque a la **derecha** para la foto. Si no existe, queda en blanco, sin ningún marcador, borde ni recuadro.
+- **Nuevo en 2.2.6:** al pulsar **cualquier parte de una fotografía real** de la ficha, se abre un visor en primer plano con el archivo completo, ajustado sin recortes (\`object-fit: contain\`). Se puede cerrar con la **X**, tocando fuera de la imagen o pulsando **Escape**. También se puede ampliar la miniatura del editor. Si no hay imagen, no se muestra marcador ni área interactiva.
 - Dos botones con **solo iconos** en cada ficha: llamada por enlace \`tel:\` (azul) y conversación de WhatsApp por \`https://api.whatsapp.com/send\` (verde). El teléfono no se escribe en la ficha, pero puede leerse de la URL de contacto.
 - Solo el autor puede **Editar** o **Eliminar**. No existen aceptaciones, interesados, marcados como resueltos ni intermediación.
-- Las muestras de publicación utilizan el **mismo modelo y renderizado** que las reales y conservan la zona de imagen. Una muestra sin fotografía muestra el marcador; la llamada está deshabilitada para no marcar un teléfono ficticio y WhatsApp abre sin destinatario. No mostrar avisos repetitivos de prueba.
+- Las muestras de publicación utilizan el **mismo modelo y renderizado** que las reales y conservan la zona de imagen. Una muestra sin fotografía deja el espacio vacío; la llamada está deshabilitada para no marcar un teléfono ficticio y WhatsApp abre sin destinatario. No mostrar avisos repetitivos de prueba.
 - Versionado visible discreto «Versión X.Y.Z» arriba de todas las pantallas, actualizado en cada entrega.
 - Buscador local sencillo, sin Gemini ni reconocimiento semántico por IA.
 
@@ -79,14 +79,20 @@ Las verificaciones de un PR anterior **no sustituyen** ejecutar las pruebas de u
 - Cuando el formulario cambia, los ejemplos deben cambiar **a la vez** y verse como fichas reales; no dejar campos obsoletos como ciudad o presupuesto en bloques aparte.
 - Dos campos bastan para comunicar una necesidad. El teléfono es un mecanismo de contacto, no motivo para crear una negociación dentro del sitio.
 - No llenar la pantalla de explicaciones obvias: la interfaz lleva **solo** la versión discreta arriba; documentación extensa queda en GitHub.
-- La foto debe estar a la **derecha de la ficha**, no debajo, y su ampliación debe mostrarse completa, sin recortes.
+- La foto debe estar a la **derecha de la ficha**, no debajo, y su ampliación debe mostrarse completa, sin recortes. Si falta, reservar el espacio derecho vacío, sin marcador ni recuadro.
 - La página debe ofrecer **hablar o escribir**, según lo que permita el navegador, sin integrar IA externa innecesaria.
 - El usuario valora mantener sus decisiones **portables entre distintas IA**. No depender exclusivamente de memoria conversacional: conservar las reglas y decisiones en Markdown legible en el repositorio.
 
 ## 7. Estado de entrega y alcance del «cierre»
 
-**Se cierra la iteración de diseño y funcionamiento de la interfaz en la versión 2.2.6**, con visor de imágenes. No significa que Firebase, las reglas de seguridad ni las pruebas móviles reales estén completadas. Esos son pasos de infraestructura y validación independientes para convertir el prototipo en un servicio compartido.
+**Se actualiza la iteración de diseño y funcionamiento de la interfaz a la versión 2.2.7**, con visor de imágenes y exportación PNG de las fichas. No significa que Firebase, las reglas de seguridad ni las pruebas móviles reales estén completadas. Esos son pasos de infraestructura y validación independientes para convertir el prototipo en un servicio compartido.
 
 **Para dar continuidad desde otra IA:** proporcionar este enlace:
 \`https://github.com/gruemp/lonecesito/blob/codex/diseno-original/docs/CONTINUIDAD-Y-APRENDIZAJES.md\`
 y los de \`AGENTS.md\` y \`docs/PREFERENCIAS-LO-NECESITO.md\`. Una IA sin acceso a GitHub necesitará recibir el contenido de los archivos.
+
+## Actualización 2.2.7 — compartir ficha PNG
+
+La ficha mantiene título y texto descriptivo justificado, imagen adaptada automáticamente sin deformar, y una columna derecha reservada incluso cuando no hay imagen. Sin foto, esa columna queda **vacía, sin marco, fondo, icono ni aviso**. Al lado de los iconos de llamada y WhatsApp, el icono de compartir genera un PNG local con el contenido de la ficha. Usa Web Share API para enviar la imagen si el navegador lo admite; si no, descarga el PNG. El PNG real incluye el teléfono para que quien reciba una imagen estática pueda contactar, mientras que la ficha web no lo imprime. Los ejemplos nunca incluyen un número ficticio en los PNG.
+
+Esta mejora no configura Firebase, autenticación ni Firestore, que permanecen pendientes de trabajo independiente. También hay que verificar la función de compartir archivos en un teléfono real.

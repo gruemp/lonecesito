@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.6');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.6<\/span>/);
+  assert.equal(APP_VERSION,'2.2.7');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.7<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -82,7 +82,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.6/);
+  assert.match(html,/Versión 2\.2\.7/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -127,7 +127,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.6/);
+  assert.match(html,/Versión 2\.2\.7/);
 });
 
 
@@ -222,7 +222,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.6/);
+  assert.match(html,/Versión 2\.2\.7/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -313,14 +313,14 @@ test('dictado del navegador en español con permiso, detener y teclado convencio
   assert.match(js,/textarea\.value=\(textarea\.value\+join\+transcript\)\.slice\(0,4000\)/);
   assert.match(js,/micrófono del teclado/);
 });
-test('las fichas tienen una imagen derecha y marcador cuando no hay fotografía',()=>{
+test('las fichas reservan imagen derecha y dejan vacío el espacio si falta fotografía',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   assert.match(js,/const main=el\('div','publication-main'\)/);
   assert.match(js,/const copy=el\('div','publication-copy'\)/);
   assert.match(js,/const media=el\('div','publication-media'\)/);
   assert.match(js,/main\.append\(copy,media\)/);
-  assert.match(js,/placeholder\.append\(contactIcon\('photo'\)\)/);
+  assert.doesNotMatch(js,/placeholder\.append\(contactIcon\('photo'\)\)/);
   assert.match(js,/img\.loading='lazy'/);
   assert.match(css,/\.publication-main\{display:grid;grid-template-columns:minmax\(0,1fr\) clamp\(90px,25vw,180px\)/);
   assert.match(css,/\.publication-media\{[^}]*aspect-ratio:4\/3/);
@@ -356,7 +356,7 @@ test('al tocar cualquier punto de una fotografía de la ficha se abre el visor c
   assert.match(card,/enlarge\.append\(img\)/);
   assert.match(card,/enlarge\.addEventListener\('click',\(\)=>openImageViewer\(photo,title\)\)/);
   assert.match(card,/media\.append\(enlarge\)/);
-  assert.match(card,/const placeholder=el\('span','photo-placeholder'\)/);
+  assert.doesNotMatch(card,/photo-placeholder|placeholder\.append/);
   assert.doesNotMatch(card,/placeholder\.addEventListener\('click'/);
   assert.match(css,/\.publication-photo-button\{[^}]*width:100%;height:100%/);
 });
@@ -394,9 +394,58 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.6/);
+  assert.match(handoff,/2\.2\.7/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
   assert.match(handoff,/Escape/);
+});
+
+
+test('la descripción está justificada y la columna vacía no tiene marco ni marcador',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/main\.append\(copy,media\)/);
+  assert.match(card,/const media=el\('div','publication-media'\)/);
+  assert.doesNotMatch(card,/placeholder|photo-placeholder|contactIcon\('photo'\)/);
+  assert.match(css,/\.publication-media:empty\{border:0;background:transparent;box-shadow:none\}/);
+  assert.match(css,/\.publication-main \.publication-description\{white-space:pre-wrap;text-align:justify;text-align-last:left;hyphens:auto/);
+  assert.match(css,/\.publication-media \.publication-photo,\.publication-photo-button \.publication-photo\{object-fit:contain/);
+});
+test('todas las fichas tienen tercer botón para compartir PNG sin palabra Contactar',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/const share=el\('button','contact-action share-action'\)/);
+  assert.match(card,/share\.append\(contactIcon\('share'\)\)/);
+  assert.match(card,/share\.addEventListener\('click',\(\)=>sharePublicationPng\(record\)\)/);
+  assert.match(card,/contact\.append\(share\)/);
+  assert.match(css,/\.contact-box\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.share-action\{background:#565c93/);
+  assert.doesNotMatch(card,/Contactar/);
+});
+test('la exportación PNG usa canvas, hoja nativa de compartir o descarga',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  assert.match(js,/import \{makeCardPng\} from '.\/card-png\.js\?v=20261024-v227'/);
+  assert.match(js,/async function sharePublicationPng\(record\)/);
+  assert.match(js,/navigator\.share\(\{files:\[file\],title:/);
+  assert.match(js,/new File\(\[blob\],filename,\{type:'image\/png'\}\)/);
+  assert.match(js,/download\.download=filename/);
+  assert.match(png,/drawing\.toBlob\(blob=>blob\?resolve\(blob\)/);
+  assert.match(png,/drawWrapped\(ctx,bodyLines,left,bodyY\+32,bodyWidth,46,true\)/);
+  assert.match(png,/const bodyHeight=Math\.max\(paragraphHeight,photoHeight\)/);
+  assert.match(png,/if\(hasPhone\)/);
+  assert.match(png,/const hasPhone=!example&&Boolean\(contactPhone\)/);
+  assert.match(png,/const image=await photoImage\(picture\)/);
+});
+test('las preferencias portables reflejan compartir PNG y espacio en blanco sin imagen',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
+  for(const file of [agents,guide,handoff]){
+    assert.match(file,/PNG/);
+    assert.match(file,/vacío|vacía/);
+  }
 });

@@ -1,4 +1,5 @@
 import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
+import {makeCardPng} from './card-png.js?v=20261024-v227';
 
 const $=id=>document.getElementById(id);
 const pages=['necesidades','mis-publicaciones','publicar'];
@@ -85,6 +86,8 @@ function contactIcon(kind){
   svg.classList.add('contact-icon');
   const paths=kind==='call'?
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
+    kind==='share'?
+    ['M12 16V3','m7 8 5-5 5 5','M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5']:
     kind==='photo'?
     ['M3 4h18v16H3z','M8 8.5h.01','m3 18 5-6 4 4 3-3 4 5']:
     ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
@@ -124,6 +127,43 @@ $('image-dialog').addEventListener('click',event=>{
 $('image-dialog').addEventListener('close',()=>{
   $('image-dialog-photo').removeAttribute('src');
 });
+async function sharePublicationPng(record){
+  const title=String(record.title||derivedTitle(record.description)||'Necesidad');
+  try{
+    const number=record.example?null:'+'+normalizeWhatsApp(record.contactPhone);
+    const full=legacyDetails(record,{forCard:true});
+    const remainder=full.startsWith(title)?full.slice(title.length).trimStart():full;
+    const blob=await makeCardPng({
+      title,description:remainder,picture:record.picture||'',
+      contactPhone:number,example:record.example===true
+    });
+    const filename='lonecesito-necesidad.png';
+    if(typeof File==='function'&&typeof navigator.share==='function'){
+      const file=new File([blob],filename,{type:'image/png'});
+      const canUseFiles=typeof navigator.canShare==='function'&&navigator.canShare({files:[file]});
+      if(canUseFiles){
+        try{
+          await navigator.share({files:[file],title:'LoNecesito · '+title});
+          return;
+        }catch(error){
+          if(error.name==='AbortError')return;
+          // Si el sistema no permite compartir, ofrecer la descarga del mismo PNG.
+        }
+      }
+    }
+    const url=URL.createObjectURL(blob);
+    const download=el('a');
+    download.href=url;
+    download.download=filename;
+    document.body.append(download);
+    download.click();
+    download.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    toast('Ficha preparada en formato PNG.');
+  }catch(error){
+    toast('No se pudo compartir la ficha como imagen.');
+  }
+}
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
@@ -155,11 +195,6 @@ function renderCard(record,owner){
     enlarge.append(img);
     enlarge.addEventListener('click',()=>openImageViewer(photo,title));
     media.append(enlarge);
-  }else{
-    const placeholder=el('span','photo-placeholder');
-    placeholder.setAttribute('aria-hidden','true');
-    placeholder.append(contactIcon('photo'));
-    media.append(placeholder);
   }
   main.append(copy,media);
   article.append(main);
@@ -189,6 +224,14 @@ function renderCard(record,owner){
   }else{
     contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
   }
+  // Todas las fichas pueden compartirse como una imagen PNG, sin intermediarios.
+  const share=el('button','contact-action share-action');
+  share.type='button';
+  share.title='Compartir ficha como imagen PNG';
+  share.setAttribute('aria-label','Compartir ficha en formato PNG');
+  share.append(contactIcon('share'));
+  share.addEventListener('click',()=>sharePublicationPng(record));
+  contact.append(share);
   article.append(contact);
 
   if(owner&&record.example!==true&&canManage(record,currentUid())){

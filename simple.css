@@ -310,3 +310,17 @@ dialog{padding:17px;border-radius:13px}
 .visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 body:has(.image-dialog[open]){overflow:hidden}
 @media(max-width:600px){.image-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0}.image-dialog-content{padding:8px}.image-dialog-close{top:max(9px,env(safe-area-inset-top));right:max(9px,env(safe-area-inset-right))}}
+
+
+/* v2.2.7: lectura justificada, foto opcional realmente invisible si falta.
+   La columna derecha queda reservada, pero sin borde, fondo, aviso ni icono. */
+.publication-main .publication-description{white-space:pre-wrap;text-align:justify;text-align-last:left;hyphens:auto;line-height:1.48}
+.publication-media{border:0;background:transparent;border-radius:10px;min-width:0}
+.publication-media:empty{border:0;background:transparent;box-shadow:none}
+.publication-photo-button{border-radius:10px}
+.publication-media .publication-photo,.publication-photo-button .publication-photo{object-fit:contain;background:transparent}
+.contact-box{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:6px}
+.share-action{background:#565c93;color:#fff;border-color:#464b7a}
+.share-action:hover{background:#414778}
+.contact-action{border-radius:9px}
+@media(max-width:350px){.contact-box{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.contact-action{padding:6px}}

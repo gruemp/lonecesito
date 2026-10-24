@@ -1,3 +1,13 @@
+# Versión 2.2.7 — foto opcional y compartir fichas como PNG
+
+Cada ficha reserva una zona a la derecha: si hay foto, se ajusta sin recortes; si no hay, queda completamente vacía, sin borde, fondo ni icono. El texto de la necesidad permanece justificado y no invade esa columna. No aparece el título «Contactar».
+
+Además de llamar y WhatsApp, ahora existe un tercer icono para **compartir la ficha como PNG**. En dispositivos compatibles abre la hoja nativa de compartir; de lo contrario descarga el PNG. La imagen exportada contiene título, descripción, foto opcional y el número de contacto real cuando corresponde. Los ejemplos no exportan números ficticios.
+
+Se han actualizado las preferencias permanentes y los tests. **Firebase sigue sin configurar:** las publicaciones solo se guardan localmente en este entorno.
+
+---
+
 # LoNecesito — versión 2.2.6 · cierre de la interfaz
 
 La edición de la **interfaz** queda consolidada con fotografías ampliables: al tocar una fotografía en cualquier punto de la ficha o su miniatura en el editor, se abre un visor en primer plano que permite verla **completa sin recortes** y cerrarla con X, Escape o toque fuera.
