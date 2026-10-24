@@ -1,3 +1,7 @@
+## Actualización 2.2.11 — eliminar también desde el editor
+
+Al editar una publicación propia, la fila compacta bajo «¿Qué necesitas?» tiene **teléfono, foto, micrófono, enviar/guardar, papelera roja y X para cancelar**, en ese orden; todos los controles de acción son iconos, sin textos visibles. En la creación no aparecen ni papelera ni X. Al pulsar la papelera se solicita confirmación antes del borrado; si se rechaza no se pierde la edición, y si se confirma y se completa se vuelve a «Mis publicaciones». No duplicar la acción en otra fila. Esta indicación se suma a la posibilidad de eliminar una ficha propia desde su propia barra de iconos.
+
 ## Versión 2.2.10 — editor compacto y envío con Enter
 
 - Debajo de **una única caja de necesidad** hay **una sola fila horizontal**: campo telefónico con icono a su izquierda, botón de adjuntar fotografía, botón de dictado por micrófono y botón verde de envío.

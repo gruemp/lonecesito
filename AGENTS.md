@@ -37,6 +37,9 @@ Este archivo es la **entrada obligatoria** para agentes e IAs que abran este rep
 
 25. **Versión 2.2.10 — fila de publicación con iconos**: bajo el texto de necesidad, una sola fila horizontal con campo de **teléfono** (icono telefónico a su izquierda y marcador `Ej: 300 123 4567` dentro), botón de foto, botón de micrófono y botón verde con **solo el icono de enviar** (avión de papel, sin texto). La etiqueta «Número de WhatsApp» **no** aparece visible, pero conservar etiqueta accesible. La imagen elegida se previsualiza dentro del editor sin quitar espacio al campo del teléfono. **Enter** desde descripción o teléfono debe activar exactamente el envío validado del formulario; **Shift+Enter** agrega una nueva línea en la descripción. Respetar composición IME, repetición de tecla, edición y prevención de duplicados. Editar conserva el mismo icono verde con nombre accesible «Guardar cambios» y un icono X para cancelar, oculto al crear. Nunca poner la palabra «Publicar» como texto del botón verde.
 
+
+26. **Versión 2.2.11 — papelera también en el editor**: cuando el autor edita una publicación, mostrar en **la misma fila** del teléfono, foto, micrófono y envío un botón adicional de **papelera roja** antes de la X para cancelar. En creación, ocultar tanto papelera como X. El icono de papelera debe ser `type="button"`, tener `title`/`aria-label` «Eliminar publicación», comprobar que es el dueño, solicitar confirmación y reutilizar la operación de borrado segura de las fichas. Si el usuario cancela la confirmación, conservar el texto y la foto sin salir. Si se elimina correctamente, limpiar el formulario y volver a «Mis publicaciones». No crear segunda fila ni borrar el icono X de cancelar. Adaptar la fila en celulares pequeños sin desplazamiento horizontal.
+
 ## Puntos de entrada
 
 - Sitio: https://gruemp.github.io/lonecesito/
