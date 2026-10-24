@@ -1384,3 +1384,14 @@ test('existe un plan ejecutable de pruebas de reglas con Firebase Emulator',()=>
   assert.ok(packageJson.includes('test:rules'));
   assert.ok(packageJson.includes('@firebase/rules-unit-testing'));
 });
+
+
+test('tras autenticarse se completa la aplicación iniciada con un clic',()=>{
+  const live=readFileSync(new URL('./firebase-live.js',import.meta.url),'utf8');
+  assert.ok(live.includes('if(state.user&&state.profile?.discloseConsent&&state.pending){'));
+  assert.ok(live.includes('const pending=state.pending;state.pending=null;'));
+  assert.ok(live.includes('await submitApplication(pending)'));
+  assert.ok(live.includes('if(state.user&&state.profile&&accountDialog.open)accountDialog.close()'));
+  assert.ok(live.includes("if(!state.user||!state.profile?.discloseConsent){"));
+  assert.ok(live.includes('state.pending=id;openAccount();return;'));
+});
