@@ -6,12 +6,8 @@ El modo multiusuario está preparado, pero todavía no está conectado: el repos
 
 1. Crear un proyecto en https://console.firebase.google.com/ y registrar una aplicación Web. Copiar los valores públicos apiKey, authDomain, projectId y appId. Nunca incluir claves de servicio administrativas.
 2. En Authentication, habilitar Correo electrónico/contraseña y Google. Añadir gruemp.github.io en dominios autorizados. No es necesario usar SMS.
-3. Crear Cloud Firestore. Instalar y probar primero las reglas de firestore.rules con Firebase CLI:
-   - npm install -g firebase-tools
-   - firebase login
-   - firebase deploy --only firestore:rules --project TU_PROJECT_ID
-   No usar reglas de lectura/escritura públicas.
-4. Instalar dependencias de desarrollo con npm install, luego ejecutar npm run test:rules. Ese comando inicia Firestore Emulator y ejecuta tests/firestore.rules.test.mjs con cuentas simuladas para privacidad y lotes atómicos. Revisar además App Check, tratamiento de datos y cuotas antes del lanzamiento.
+3. Crear Cloud Firestore e instalar las herramientas de desarrollo: `npm install` y `npm install -g firebase-tools`. Ejecutar **primero** `npm run test:rules` para probar `firestore.rules` en Firestore Emulator con usuarios simulados, incluidos propietarios, interesados y terceros. No usar reglas públicas.
+4. Solo **después de aprobar las pruebas de privacidad**, iniciar sesión con `firebase login` y publicar las reglas mediante `firebase deploy --only firestore:rules --project TU_PROJECT_ID`. Revisar además App Check, tratamiento de datos y cuotas antes del lanzamiento.
 5. Completar firebase-config.js con los valores exactos de la aplicación Web, y publicar la rama codex/diseno-original en GitHub Pages. La página activará firebase-live.js en lugar del modo local cuando la configuración sea completa.
 6. Probar publicación y aplicación en dos navegadores o sesiones independientes.
 
