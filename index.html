@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#103f37">
-  <meta name="description" content="Publica una necesidad o explora las que puedes resolver. Quien ayuda solo pulsa Aceptar necesidad.">
-  <title>LoNecesito — Publica o acepta necesidades</title>
+  <meta name="description" content="LoNecesito conecta personas y empresas que buscan productos o servicios con quienes pueden ofrecerlos. Publica solicitudes y explora oportunidades.">
+  <title>LoNecesito — Conectamos necesidades con soluciones</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-firebase-categorias-1">
   <script src="firebase-config.js?v=20261023-1"></script>
@@ -38,33 +38,29 @@
   <main id="contenido" class="compact-main">
     <section class="hero shell app-screen" id="inicio" data-screen="inicio" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow">NECESITO ALGO</p>
-        <h1 id="hero-title">¿Qué necesitas?</h1>
-        <p class="hero-description">Publica tu necesidad. O explora lo que otras personas necesitan resolver.</p>
+        <p class="eyebrow">CONECTAMOS NECESIDADES Y SOLUCIONES</p>
+        <h1 id="hero-title">Lo que necesitas, más cerca de encontrarlo.</h1>
+        <p class="hero-description">Publica lo que buscas o descubre oportunidades para ofrecer tus productos y servicios.</p>
         <button class="button publish-cta action-cta action-cta-publish" id="hero-publish" type="button" data-open="publish" aria-label="Publicar una necesidad">
           <svg class="icon action-leading-icon" aria-hidden="true"><use href="#write-need"/></svg>
-          <span class="action-copy"><strong>Publicar una necesidad</strong><small>Describe qué necesitas para que otros puedan ayudarte</small></span>
+          <span class="action-copy"><strong>Publicar una necesidad</strong><small>Cuéntanos qué necesitas y permite que otros conozcan tu solicitud.</small></span>
           <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
         </button>
         <div class="compact-next-step"><a class="button solve-cta action-cta action-cta-solve" href="#necesidades" data-explore>
           <svg class="icon action-leading-icon" aria-hidden="true"><use href="#help-need"/></svg>
-          <span class="action-copy"><strong>Soluciona una necesidad y gana dinero por ello</strong><small>Encuentra a alguien a quien puedas ayudar</small></span>
+          <span class="action-copy"><strong>Explorar oportunidades</strong><small>Encuentra personas que buscan lo que puedes ofrecer.</small></span>
           <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
         </a></div>
-        <details class="compact-help">
-          <summary>¿Cómo funciona?</summary>
-          <ol><li>Quien necesita ayuda publica su solicitud.</li><li>Quien puede ayudar consulta las necesidades.</li><li>Si puede resolver una, pulsa «Aceptar necesidad» sin diligenciar formularios.</li></ol>
-        </details>
       </div>
       <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
         <a class="action-cta action-cta-mine" href="#mis-necesidades" data-screen-link="mis-necesidades">
           <svg class="icon action-leading-icon" aria-hidden="true"><use href="#my-needs"/></svg>
-          <span class="action-copy"><strong>Mis necesidades publicadas para que otros ofrezcan solucionarlas</strong><small>Consulta y administra tus publicaciones</small></span>
+          <span class="action-copy"><strong>Mis publicaciones</strong><small>Consulta, actualiza y administra las necesidades que has publicado.</small></span>
           <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
         </a>
         <a class="action-cta action-cta-accepted" href="#aceptadas" data-screen-link="aceptadas">
           <svg class="icon action-leading-icon" aria-hidden="true"><use href="#accepted-needs"/></svg>
-          <span class="action-copy"><strong>Necesidades de terceros aceptadas para solucionar</strong><small>Revisa los compromisos que ya aceptaste</small></span>
+          <span class="action-copy"><strong>Solicitudes de mi interés</strong><small>Revisa las necesidades que has seleccionado para ofrecer una solución.</small></span>
           <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
         </a>
       </nav>
@@ -74,14 +70,14 @@
 
 
     <section class="requests-section shell app-screen" id="necesidades" data-screen="necesidades" aria-labelledby="requests-title" hidden>
-      <div class="section-heading"><div><h2 id="requests-title">Soluciona una necesidad y gana dinero por ello</h2><p class="section-description">Toca el nombre de una necesidad para ver su descripción, fotografía y opción de aceptar.</p></div></div>
+      <div class="section-heading"><div><h2 id="requests-title">Descubre oportunidades para ofrecer tus productos y servicios.</h2><p class="section-description">Explora las solicitudes disponibles, consulta sus características y encuentra necesidades que puedes atender.</p></div></div>
       <div class="filters" role="group" aria-label="Filtrar necesidades por tipo">
-        <button class="filter is-active" data-category="all" aria-pressed="true">Todas</button>
-        <button class="filter" data-category="bienes" aria-pressed="false">Bienes</button>
+        <button class="filter is-active" data-category="all" aria-pressed="true">Todas las solicitudes</button>
+        <button class="filter" data-category="bienes" aria-pressed="false">Productos</button>
         <button class="filter" data-category="servicios" aria-pressed="false">Servicios</button>
       </div>
-      <div class="quick-search"><label class="sr-only" for="request-search">Buscar necesidades</label><input id="request-search" type="search" maxlength="120" placeholder="Buscar por producto, servicio o ciudad…"></div>
-      <details class="compact-filters" id="more-filters"><summary>Más filtros: categoría y ciudad</summary>
+      <div class="quick-search"><label class="sr-only" for="request-search">Buscar necesidades</label><input id="request-search" type="search" maxlength="120" placeholder="Buscar productos, servicios o ubicaciones…"></div>
+      <details class="compact-filters" id="more-filters"><summary>Filtrar por categoría y ubicación</summary>
         <div class="listing-controls">
           <div><label for="list-subcategory">Categoría</label><select id="list-subcategory" aria-label="Categoría de la necesidad"></select></div>
           <div><label for="list-city">Ciudad o municipio</label><select id="list-city" aria-label="Filtrar necesidades por ciudad"></select></div>
@@ -89,45 +85,46 @@
       </details>
       <div class="request-grid" id="request-grid" aria-label="Lista de necesidades individualizadas"></div>
       <p id="filter-status" class="sr-only" aria-live="polite"></p>
-      <p class="empty-state" id="empty-state" hidden>No hay necesidades con esos filtros.</p>
+      <p class="empty-state" id="empty-state" hidden>No encontramos solicitudes que coincidan con tu búsqueda. Prueba con otros filtros.</p>
     </section>
 
     <section class="my-section shell app-screen" id="mis-necesidades" data-screen="mis-necesidades" aria-labelledby="my-title" hidden>
-      <div class="section-heading"><h2 id="my-title">Mis necesidades publicadas para que otros ofrezcan solucionarlas <span id="my-count" class="my-count"></span></h2></div>
-      <p class="section-usage">Toca el nombre para revisar, editar o marcar tu necesidad como resuelta.</p>
+      <div class="section-heading"><h2 id="my-title">Mis solicitudes <span id="my-count" class="my-count"></span></h2></div>
+      <p class="section-usage">Administra tus publicaciones, consulta su estado y mantén actualizada la información de cada necesidad.</p>
       <div class="my-grid" id="my-requests-grid"></div>
-      <div class="my-empty" id="my-empty"><p>Aún no has creado ninguna necesidad.</p><button class="button button-small" type="button" data-open="publish">Crear necesidad</button></div>
+      <div class="my-empty" id="my-empty"><p>Aún no has publicado ninguna necesidad. Crea tu primera solicitud para dar a conocer lo que buscas.</p><button class="button button-small" type="button" data-open="publish">Publicar mi primera solicitud</button></div>
     </section>
 
     <section class="my-section shell app-screen" id="aceptadas" data-screen="aceptadas" aria-labelledby="accepted-title" hidden>
-      <div class="section-heading"><h2 id="accepted-title">Necesidades de terceros aceptadas para solucionar</h2></div>
-      <p class="section-usage">Toca una necesidad para revisar lo que aceptaste.</p>
+      <div class="section-heading"><h2 id="accepted-title">Solicitudes que quiero atender</h2></div>
+      <p class="section-usage">Consulta las necesidades que has seleccionado y revisa la información disponible para preparar tu solución.</p>
       <div class="my-grid" id="accepted-grid"></div>
-      <p class="my-note" id="accepted-empty">Todavía no has aceptado ninguna necesidad.</p>
+      <p class="my-note" id="accepted-empty">Todavía no has seleccionado ninguna solicitud. Explora las oportunidades disponibles.</p>
     </section>
   </main>
 
-  <footer class="site-footer shell compact-footer"><span>LoNecesito</span></footer>
+  <footer class="site-footer shell compact-footer"><span>LoNecesito · Conectamos necesidades con oportunidades.</span></footer>
   <div class="toast" id="toast" role="status" hidden></div>
 
   <dialog id="publish-dialog" aria-labelledby="publish-title">
     <div class="dialog-header"><h2 id="publish-title">Publica lo que necesitas</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
+    <p class="dialog-description">Describe el producto o servicio que buscas para que otras personas puedan conocer tu necesidad.</p>
     <div class="wizard-progress" role="group" aria-label="Progreso de publicación">
       <span class="wizard-label" id="wizard-status" aria-live="polite">Paso 1 de 3: ¿Qué necesitas?</span><button type="button" class="wizard-clear" id="wizard-clear" hidden>Empezar una nueva</button><div class="wizard-bars" aria-hidden="true"><span class="is-complete"></span><span></span><span></span></div>
     </div>
     <form id="publish-form" class="dialog-form">
       <div class="wizard-step" data-wizard-step="0" aria-labelledby="wizard-title-1">
-        <h3 class="wizard-heading" id="wizard-title-1">1. Cuéntanos qué necesitas</h3>
-        <label for="request-category">¿Qué necesitas?</label>
+        <h3 class="wizard-heading" id="wizard-title-1">1. Define tu necesidad</h3>
+        <label for="request-category">¿Buscas un producto o un servicio?</label>
         <select id="request-category" name="category" required><option value="bienes">Un bien o producto</option><option value="servicios">Un servicio</option></select>
-        <label for="request-title">Descríbelo en pocas palabras</label>
+        <label for="request-title">¿Qué necesitas?</label>
         <input id="request-title" name="title" required placeholder="Ej. Necesito reparar mi nevera">
-        <label for="request-subcategory">Categoría</label>
+        <label for="request-subcategory">Selecciona la categoría correspondiente</label>
         <select id="request-subcategory" name="subcategory" required></select>
       </div>
       <div class="wizard-step" data-wizard-step="1" aria-labelledby="wizard-title-2" hidden>
-        <h3 class="wizard-heading" id="wizard-title-2">2. Completa los detalles</h3>
-        <label for="request-city">¿Dónde necesitas el bien o servicio?</label>
+        <h3 class="wizard-heading" id="wizard-title-2">2. Añade los detalles</h3>
+        <label for="request-city">¿En qué ciudad o municipio lo necesitas?</label>
         <select id="request-city" name="city" required aria-describedby="city-select-note">
           <option value="">Selecciona tu ciudad o municipio</option>
           <option value="Santa Marta">Santa Marta</option>
@@ -163,25 +160,25 @@
           <label for="request-city-other">Escribe tu ciudad o municipio</label>
           <input id="request-city-other" type="text" minlength="2" maxlength="80" autocomplete="address-level2" placeholder="Nombre de la ciudad o municipio" disabled>
         </div>
-        <fieldset id="goods-fields" class="goods-fields"><legend>Características del bien</legend><div class="form-columns">
-          <div><label for="request-quantity">Cantidad</label><input id="request-quantity" name="quantity" type="number" min="1" max="1000000" step="1" required value="1"></div>
-          <div><label for="request-condition">Condición</label><select id="request-condition" name="condition" required><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
+        <fieldset id="goods-fields" class="goods-fields"><legend>Características del producto</legend><div class="form-columns">
+          <div><label for="request-quantity">Cantidad requerida</label><input id="request-quantity" name="quantity" type="number" min="1" max="1000000" step="1" required value="1"></div>
+          <div><label for="request-condition">Estado del producto</label><select id="request-condition" name="condition" required><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
         </div></fieldset>
-        <label for="request-description">Describe lo que necesitas</label><textarea id="request-description" name="description" rows="4" minlength="15" maxlength="1500" required placeholder="Para bienes: referencia y entrega. Para servicios: alcance, visita o diagnóstico y condiciones."></textarea>
+        <label for="request-description">Describe las características y condiciones de tu solicitud</label><textarea id="request-description" name="description" rows="4" minlength="15" maxlength="1500" required placeholder="Para bienes: referencia y entrega. Para servicios: alcance, visita o diagnóstico y condiciones."></textarea>
         <div class="form-columns">
-          <div><label for="request-budget">Presupuesto aproximado, COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
-          <div><label for="request-date">Fecha deseada (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
+          <div><label for="request-budget">Presupuesto aproximado en COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
+          <div><label for="request-date">Fecha en la que lo necesitas (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
         </div>
-        <label for="request-photo">Fotografía de la necesidad (opcional, máximo una)</label>
+        <label for="request-photo">Adjuntar imagen (opcional, máximo una)</label>
         <input id="request-photo" type="file" accept="image/jpeg,image/png,image/webp">
         <div id="request-photo-preview" class="photo-preview" aria-live="polite"></div>
         <button id="request-photo-remove" type="button" class="my-action" hidden>Quitar fotografía</button>
         <p class="field-help">Puedes adjuntar una imagen JPG, PNG o WebP. No incluyas datos personales ni direcciones exactas.</p>
       </div>
       <div class="wizard-step" data-wizard-step="2" aria-labelledby="wizard-title-3" hidden>
-        <h3 class="wizard-heading" id="wizard-title-3">3. Revisa y confirma</h3>
+        <h3 class="wizard-heading" id="wizard-title-3">3. Confirma los detalles de tu solicitud</h3>
         <div class="review-box" id="wizard-review" aria-live="polite"></div>
-        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> He revisado los datos de mi necesidad y confirmo que deseo guardarla.</label>
+        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> He revisado la información y confirmo que deseo guardar esta solicitud.</label>
       </div>
       <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
       <p class="form-error" id="publish-error" role="alert" hidden></p>
@@ -189,7 +186,7 @@
         <button class="button button-secondary" type="button" id="wizard-back" hidden>Anterior</button>
         <button class="button button-secondary" type="button" id="wizard-draft">Guardar borrador</button>
         <button class="button" type="button" id="wizard-next">Continuar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
-        <button class="button" type="submit" id="wizard-submit" hidden>Guardar necesidad</button>
+        <button class="button" type="submit" id="wizard-submit" hidden>Guardar solicitud</button>
       </div>
     </form>
   </dialog>

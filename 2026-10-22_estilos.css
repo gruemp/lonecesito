@@ -1,4 +1,7 @@
 /* LoNecesito: diseño compacto, contenido progresivo e imágenes bajo demanda. */
+/* Texto introductorio del asistente de publicación en la prueba de redacción. */
+#publish-dialog>.dialog-description{color:#53695d;font-size:13px;line-height:1.5;margin:-7px 0 17px;max-width:56ch}
+#hero-title{text-wrap:balance}
 :root{--ink:#123632;--green:#17493e;--green-dark:#0f332d;--lime:#d7f486;--paper:#f7f9f6;--surface:#fff;--border:#dbe5dd;--muted:#63736c;--radius:12px;color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:var(--paper)}
 *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:112px}body{margin:0;font-size:14px;line-height:1.4;background:var(--paper)}
 button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}a{color:inherit;text-decoration:none}svg.icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}

@@ -449,7 +449,7 @@ function init(){
       CATEGORIES[request.category]+' · '+(SUBCATEGORIES[request.category]?.[request.subcategory]||'Otra categoría'));
     head.append(category);
     if(context!=='explorar'||request.status!=='abierta'){
-      const label=context==='aceptadas'?'Aceptada':STATUS_LABELS[request.status]||request.status;
+      const label=context==='aceptadas'?'Seleccionada':STATUS_LABELS[request.status]||request.status;
       head.append(el('span','my-state my-state-'+(context==='aceptadas'?'en_proceso':request.status),label));
     }
 
@@ -475,7 +475,7 @@ function init(){
       const image=pictureNode(request.picture,'Fotografía de la necesidad: '+request.title);
       if(image)photo.append(image);
     }else{
-      photo.append(el('span','no-photo-label','Sin foto'));
+      photo.append(el('span','no-photo-label','Sin imagen'));
       photo.setAttribute('aria-label','Esta necesidad no tiene fotografía');
     }
     overview.append(copy,photo);
@@ -493,18 +493,18 @@ function init(){
     if(own){
       if(request.status==='abierta'||request.status==='en_proceso'){
         actions.append(makeButton('Marcar como resuelta','resolve',true));
-        if(request.status==='abierta')actions.append(makeButton('Editar necesidad','edit'));
+        if(request.status==='abierta')actions.append(makeButton('Editar solicitud','edit'));
         if(request.status==='en_proceso')actions.append(makeButton('Reabrir necesidad','reopen'));
-        actions.append(makeButton('Cancelar necesidad','cancel'));
+        actions.append(makeButton('Cancelar solicitud','cancel'));
       }else if(request.status==='cancelada'){
-        actions.append(makeButton('Reactivar necesidad','reopen',true));
+        actions.append(makeButton('Reactivar solicitud','reopen',true));
       }else{
-        actions.append(el('span','need-card-finished','Necesidad resuelta'));
+        actions.append(el('span','need-card-finished','Solicitud resuelta'));
       }
     }else if(accepted||context==='aceptadas'){
-      actions.append(makeButton('Ya aplicaste a esta necesidad','accepted',true,true));
+      actions.append(makeButton('Solicitud seleccionada','accepted',true,true));
     }else if(request.status==='abierta'){
-      actions.append(makeButton('Aceptar necesidad','accept',true));
+      actions.append(makeButton('Me interesa atender esta solicitud','accept',true));
     }else{
       actions.append(makeButton('No disponible','unavailable',true,true));
     }
@@ -574,7 +574,7 @@ function init(){
       if(!persistState(storage,next))throw new Error('No se pudo registrar la aceptación.');
       state=next;
       renderOwnRequests();
-      showToast('Ya aplicaste a esta necesidad.');
+      showToast('Ya registraste tu interés en esta solicitud.');
     }catch(error){showToast(error.message);}
   }
   function updateOtherCityField(){
@@ -592,7 +592,7 @@ function init(){
     input.value=choice.custom;
     updateOtherCityField();
   }
-  const wizardTitles=['¿Qué necesitas?','Detalles de la necesidad','Revisar y confirmar'];
+  const wizardTitles=['Define tu necesidad','Añade los detalles','Revisa y confirma'];
   const draftFields=['title','city','category','subcategory','description','budget','quantity','condition','desiredDate'];
   function wizardData(){
     const input={};
@@ -661,7 +661,7 @@ function init(){
     if(overrides?.title)$('#request-title').value=overrides.title;
     setCityChoice(overrides?.city||values.city||'');
     $('#publish-title').textContent=editingRequestId?'Edita tu necesidad':'Publica lo que necesitas';
-    $('#wizard-submit').textContent=editingRequestId?'Guardar cambios':'Guardar necesidad';
+    $('#wizard-submit').textContent=editingRequestId?'Guardar cambios':'Guardar solicitud';
     $('#publish-error').hidden=true;$('#publish-error').textContent='';
     $('#draft-status').textContent=activeDraft&&!request?'Borrador recuperado. Puedes continuarlo o editarlo.':'';
     $('#wizard-clear').hidden=!activeDraft||!!request;
@@ -792,7 +792,7 @@ function init(){
       currentCategory='all';currentSubcategory='all';currentCity='all';populateSubcategories();renderOwnRequests();
       window.location.hash='#mis-necesidades';
       activateScreen('mis-necesidades');
-      showToast(previous?'Necesidad actualizada.':'Necesidad guardada.');
+      showToast(previous?'Solicitud actualizada correctamente.':'Tu solicitud se ha guardado correctamente.');
     }catch(error){setError('publish-error',error);}
   });
   function handleNeedAction(action,id){
