@@ -1,4 +1,15 @@
 # lonecesito
+## Paleta pastel de las listas de necesidades
+
+- Las tres vistas (**Soluciona una necesidad**, **Mis necesidades publicadas** y **Necesidades de terceros aceptadas**) utilizan un ciclo visual de cuatro tonos pastel: azul suave, amarillo cálido, lavanda y verde menta.
+- Cada fila mantiene **solo el nombre de la necesidad** y un chevrón, con el texto y la flecha del tono correspondiente. Una franja interior de 5 px aporta separación visual sin modificar alturas ni ancho.
+- Al abrir una fila, su encabezado adopta una versión ligeramente más intensa del mismo tono; la ficha con fotografía y acciones aparece debajo como antes.
+- Los colores se repiten cada cuatro necesidades, independientemente de la categoría y el estado. No se añaden imágenes o controles al listado cerrado.
+- Solo cambia el CSS, el identificador de caché de la hoja en HTML, las pruebas y este texto. JavaScript y flujos se conservan.
+
+**Verificación:** 69 pruebas de lógica y estructura aprobadas. Contrastes de texto de los cuatro tonos superiores a 4,5:1 tanto en filas abiertas como cerradas. Sin pruebas visuales en dispositivos físicos.
+
+---
 ## Navegación actual: botones principales solo en Inicio
 
 - Los **cuatro accesos principales** (Publicar, Solucionar, Mis necesidades publicadas y Necesidades aceptadas) aparecen **únicamente en Inicio**.
