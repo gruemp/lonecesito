@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 24 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.13 (no visible al público; esta revisión documental no la altera)  
+**Versión interna del código de interfaz:** 2.2.14 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -14,8 +14,8 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 
 ## 2. Interfaz actual, no negociable salvo instrucción nueva
 
-- **Navegación:** cuatro pestañas en orden **Inicio → Mis publicaciones → Ver necesidades → Publicar lo que necesito**, **2 × 2 tanto en PC como en móvil**, persistentes al navegar.
-- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. Mostrarla entera y muy ancha; no poner allí buscador ni fichas.
+- **Navegación:** cuatro pestañas en orden **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**, en **una fila en PC** y **cuadrícula 2 × 2 en móvil**, persistentes al navegar.
+- **Inicio:** solo la **tercera imagen aprobada**, tres personajes, flujo «Publica → La ven → Te contactan»; archivo **assets/lonecesito-presentacion.webp**. Mostrarla **entera, sin deformación ni recortes, centrada y adaptada también a la altura visible**; no poner allí buscador ni fichas.
 - **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
 - **Mis publicaciones:** solo las publicaciones creadas por el dueño.
 - **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
@@ -33,7 +33,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 | Archivo | Rol actual |
 | --- | --- |
 | **index.html** | Cuatro vistas, navegación, editor de dos campos, controles por icono, miniatura y visor, autenticación cuando esté configurada |
-| **simple.css** | Diseño compacto responsive, navegación 2×2, fichas, colores, imagen y editor |
+| **simple.css** | Diseño compacto responsive, navegación horizontal en PC y 2×2 en móvil, fichas, colores, imagen y editor |
 | **simple.js** | Navegación, publicación/edición/borrado, lectura, DOM seguro, contactos, audio, foto, zoom y modo local/Firebase |
 | **simple-model.js** | Versión **interna**, normalización y validación telefónica, límites de contenido y permisos |
 | **simple-search.js** | Búsqueda por tramos de datos públicos, metadatos históricos y teléfono; sin Gemini |

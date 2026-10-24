@@ -13,9 +13,9 @@
 
 ## 2. Navegación e Inicio
 
-- Barra superior permanente con **exactamente cuatro pestañas** en orden de lectura: **Inicio → Mis publicaciones → Ver necesidades → Publicar lo que necesito**.
-- Diseño **2 × 2, dos botones por fila y dos filas**, idéntico en **PC y celular**. La primera fila es Inicio / Mis publicaciones; la segunda, Ver necesidades / Publicar lo que necesito. No colapsar a una fila en PC. Colores diferenciados y pestaña activa identificable.
-- Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la tercera imagen seleccionada** (tres personajes y secuencia «Publica → La ven → Te contactan»), conservada como **assets/lonecesito-presentacion.webp**. Mostrarla **completa sin recortes, con el máximo ancho disponible**. No modificar ni sustituirla por una propuesta anterior ni agregar texto, buscador, fichas o botones redundantes bajo ella.
+- Barra superior permanente con **exactamente cuatro pestañas** en orden de lectura: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
+- En **PC** (más de 680 px), disponer las cuatro pestañas en **una única fila horizontal**. En **celular** (hasta 680 px), conservar dos filas de dos botones. Colores diferenciados y pestaña activa identificable.
+- Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la tercera imagen seleccionada** (tres personajes y secuencia «Publica → La ven → Te contactan»), conservada como **assets/lonecesito-presentacion.webp**. Mostrarla **completa sin recortes, centrada y sin deformaciones**, ajustada al ancho disponible y a la altura visible del navegador cuando sea necesario. No modificar ni sustituirla por una propuesta anterior ni agregar texto, buscador, fichas o botones redundantes bajo ella.
 - **Ver necesidades** contiene **buscador y fichas reales**; **Mis publicaciones**, solo publicaciones del autor; **Publicar**, editor. El banner no aparece en estas pestañas.
 
 ## 3. Editor: exclusivamente dos campos y una fila
