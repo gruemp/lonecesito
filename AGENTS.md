@@ -15,6 +15,9 @@ Este archivo es la **entrada obligatoria** para agentes e IAs que abran este rep
 9. **Calidad y reversibilidad**: leer el código vigente antes de cambiar; restringir alcance; cambiar en rama nueva; probar sintaxis, regresión móvil, render de ejemplos y flujo de WhatsApp; usar PR, revisar y fusionar en la rama **codex/diseno-original** de GitHub Pages cuando el usuario autorice implementar/publicar. **No modificar main ni cambios ajenos**. Registrar PR, versión y límite de verificaciones.
 10. **Hechos operativos**: GitHub Pages es hosting estático. A octubre de 2026, firebase-config.js no tiene configuración operativa; las publicaciones en modo local no son compartidas entre visitantes. **No anunciar un backend público funcional** sin verificar Firebase y reglas. Estas limitaciones técnicas se documentan aquí y en informes, **no en avisos intrusivos de la web**. Mantener tratamiento cuidadoso de teléfonos expuestos, autorización de publicación y enlaces.
 
+11. **Navegación permanente y sin duplicados**: mostrar **exactamente tres botones** en la barra superior: «Publicar lo que necesito», «Ver necesidades» y «Mis publicaciones». La barra debe permanecer visible al desplazarse por las pantallas (sticky). **No** repetir esas acciones mediante botones, tarjetas, enlaces o accesos adicionales en la portada o en «Mis publicaciones». Conservar tres colores sobrios diferenciados, botones legibles en celulares y resaltado de la pantalla actual.
+12. **Buscador sin IA**: mantener la búsqueda sencilla de necesidades. El usuario descartó expresamente la integración con Gemini o cualquier buscador basado en IA; no incorporarlo salvo una nueva petición explícita.
+
 ## Puntos de entrada
 
 - Sitio: https://gruemp.github.io/lonecesito/
