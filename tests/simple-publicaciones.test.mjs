@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.2');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.2<\/span>/);
+  assert.equal(APP_VERSION,'2.2.3');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.3<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -55,8 +55,8 @@ test('validar indicativo y proteger publicaciones propias',()=>{
 });
 test('las fichas tienen teléfono enlazado y sin acciones de aceptar o resolver',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(js,/phoneLink\(record,contactNumber,'contact-phone'\)/);
-  assert.match(js,/whatsappUrl\(number,record.description\|\|record.title\)/);
+  assert.match(js,/contactLink\('tel:'\+contactNumber,'call','Llamar por teléfono'\)/);
+  assert.match(js,/whatsappUrl\(contactNumber,record.description\|\|record.title\)/);
   assert.match(js,/exampleWhatsappUrl\(record.description\|\|record.title\)/);
   assert.match(js,/editRecord\(record\)/);
   assert.match(js,/deleteRecord\(record\)/);
@@ -82,13 +82,13 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.2/);
+  assert.match(html,/Versión 2\.2\.3/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
-test('número y acción de WhatsApp están separados y apuntan al endpoint API',()=>{
+test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(js,/phoneLink\(record,contactNumber,'contact-phone'\)/);
-  assert.match(js,/phoneLink\(record,'Abrir WhatsApp ↗','whatsapp-button'\)/);
+  assert.match(js,/contactLink\('tel:'\+contactNumber,'call','Llamar por teléfono'\)/);
+  assert.match(js,/contactLink\(href,'whatsapp','Escribir por WhatsApp'\)/);
   const url=whatsappUrl('3001234567','Reparación de nevera');
   const parsed=new URL(url);
   assert.equal(parsed.hostname,'api.whatsapp.com');
@@ -127,7 +127,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.2/);
+  assert.match(html,/Versión 2\.2\.3/);
 });
 
 
@@ -146,7 +146,7 @@ test('ninguna ficha contiene bloques separados de ciudad, categoría, presupuest
 test('datos heredados pasan al texto único y ejemplos no crean campos separados',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const start=js.indexOf('function legacyDetails(record,');
-  const end=js.indexOf('\nfunction phoneLink(',start);
+  const end=js.indexOf('\nfunction contactIcon(',start);
   assert.ok(start>=0&&end>start);
   const legacyDetails=new Function('derivedTitle',js.slice(start,end)+';return legacyDetails;')(derivedTitle);
   const previous={
@@ -174,7 +174,7 @@ test('datos heredados pasan al texto único y ejemplos no crean campos separados
 test('un dato escrito en el texto no se vuelve a agregar al final',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const start=js.indexOf('function legacyDetails(record,');
-  const end=js.indexOf('\nfunction phoneLink(',start);
+  const end=js.indexOf('\nfunction contactIcon(',start);
   const legacyDetails=new Function('derivedTitle',js.slice(start,end)+';return legacyDetails;')(derivedTitle);
   const description='Necesito una nevera en Santa Marta. Busco reparador para esta semana.';
   const result=legacyDetails({description,city:'Santa Marta'},{forCard:true});
@@ -189,4 +189,47 @@ test('la guía portátil está enlazada desde README y AGENTS',()=>{
   assert.match(agents,/docs\/PREFERENCIAS-LO-NECESITO\.md/);
   assert.match(guide,/No.*crear recuadros separados/i);
   assert.match(guide,/(?:caja grande de texto|una sola caja de texto)/i);
+});
+
+
+test('los contactos en fichas son botones únicamente con iconos',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(js,/function contactIcon\(kind\)/);
+  assert.match(js,/document\.createElementNS\(ns,'svg'\)/);
+  assert.match(js,/a\.append\(contactIcon\(kind\)\)/);
+  assert.match(js,/contactLink\('tel:'\+contactNumber,'call','Llamar por teléfono'\)/);
+  assert.match(js,/contactLink\(href,'whatsapp','Escribir por WhatsApp'\)/);
+  assert.match(js,/a\.setAttribute\('aria-label',label\)/);
+  assert.match(js,/a\.title=label/);
+  assert.doesNotMatch(js,/phoneLink\(|contact\.append\(el\('span','contact-phone/);
+  assert.doesNotMatch(css,/\.contact-phone\b|\.whatsapp-button\b/);
+  assert.match(css,/\.contact-action\{display:flex;/);
+  assert.match(css,/\.call-action\{background:#236b96/);
+  assert.match(css,/\.whatsapp-action\{background:#16844e/);
+  assert.match(css,/\.contact-action\{[^}]*min-height:46px/);
+});
+test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono ficticio',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/if\(record\.example===true\)\{\s*\/\/ Un ejemplo jamás debe marcar/);
+  assert.match(js,/sampleCall\.disabled=true/);
+  assert.match(js,/sampleCall\.append\(contactIcon\('call'\)\)/);
+  assert.match(js,/contact\.append\(contactLink\(href,'whatsapp','Escribir por WhatsApp'\)\)/);
+  const example=EXAMPLE_PUBLICATIONS[0];
+  const url=exampleWhatsappUrl(example.description);
+  assert.equal(new URL(url).searchParams.has('phone'),false);
+});
+test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
+  assert.match(html,/Versión 2\.2\.3/);
+});
+test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  for(const content of [agents,guide]){
+    assert.match(content,/tel:\+/);
+    assert.match(content,/no mostrar el número|no aparece como texto|sin números escritos/i);
+    assert.match(content,/icono.*WhatsApp/i);
+  }
 });
