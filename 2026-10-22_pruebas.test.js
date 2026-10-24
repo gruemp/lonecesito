@@ -653,7 +653,8 @@ test('la composición estática mantiene el ancho central de botones y del conte
   assert.ok(latest.includes('max-width:480px'));
   assert.ok(latest.includes('width:min(calc(100% - 20px),480px)'));
   assert.ok(latest.includes('grid-template-columns:29px minmax(0,1fr) 20px'));
-  assert.equal(/\.shell\s*\{\s*width|min\(100% - 28px,980px\)/.test(latest),false);
+  assert.ok(latest.includes('.shell{width:calc(100% - 20px)}'));
+  assert.equal(/\.shell\s*\{\s*width:\s*min\(/.test(latest),false);
   assert.ok(latest.includes('.compact-header-inner{'));
   assert.ok(latest.includes('.section-heading h2{'));
   assert.ok(latest.includes('.site-footer.compact-footer{'));
