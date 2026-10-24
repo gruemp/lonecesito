@@ -640,7 +640,7 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
@@ -799,7 +799,7 @@ test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
 test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(js.includes("const row=el('details','need-list-row')"));
   assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
@@ -897,7 +897,7 @@ test('las filas cerradas siguen compactas y las fichas se crean únicamente al a
 test('la nueva capa visual mantiene los tres contextos y los controles existentes',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-justificado-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-titulos-todas-vistas-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const id of ['request-grid','my-requests-grid','accepted-grid','publish-form','request-city','request-photo-preview'])
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
@@ -913,7 +913,7 @@ test('el rediseño premium conserva la navegación y las pantallas originales',(
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  assert.ok(html.includes('20261023-justificado-1'));
+  assert.ok(html.includes('20261023-titulos-todas-vistas-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(css.includes('LO NECESITO / VISUAL V2'));
   for(const id of ['inicio','necesidades','mis-necesidades','aceptadas','request-grid','my-requests-grid','accepted-grid','publish-form'])
@@ -1068,4 +1068,111 @@ test('los mensajes dinámicos de éxito no incluyen comentarios sobre navegador 
     'Necesidad de prueba guardada',
     'Publicada solo en este navegador'
   ])assert.equal(js.includes(phrase),false,'Mensaje anterior todavía presente '+phrase);
+});
+
+
+test('la jerarquía visual se aplica a los títulos de todas las pantallas',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  for(const id of ['hero-title','requests-title','my-title','accepted-title','publish-title','wizard-title-1','wizard-title-2','wizard-title-3'])
+    assert.ok(html.includes('id="'+id+'"'),'Falta título '+id);
+  for(const selector of [
+    '.hero h1{',
+    '#necesidades>.section-heading h2,',
+    '#mis-necesidades>.section-heading h2,',
+    '#aceptadas>.section-heading h2{',
+    '.dialog-header h2{',
+    '.dialog-form .wizard-heading{',
+    '.action-cta .action-copy strong{',
+    '.compact-brand{',
+    '.need-list-title{',
+    '.need-card .need-card-title{'
+  ])assert.ok(layer.includes(selector),'Falta estilo de título '+selector);
+});
+test('cada sección tiene un título con escala consistente y color identificable',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  for(const rule of [
+    '--heading-primary:#153b30',
+    '--heading-blue:#244d73',
+    '--heading-amber:#765120',
+    'font-size:clamp(23px,3vw,31px)',
+    'text-align:left',
+    'text-wrap:balance',
+    'hyphens:auto',
+    '#mis-necesidades>.section-heading h2{color:var(--heading-blue)}',
+    '#aceptadas>.section-heading h2{color:var(--heading-amber)}'
+  ])assert.ok(layer.includes(rule),'Falta propiedad de jerarquía '+rule);
+});
+test('el contador de necesidades se distingue sin alterar el título largo',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  assert.ok(html.includes('id="my-title"'));
+  assert.ok(html.includes('id="my-count"'));
+  assert.ok(layer.includes('#my-title .my-count{'));
+  assert.ok(layer.includes('vertical-align:middle'));
+  assert.ok(layer.includes('background:#e7f0fa'));
+  assert.ok(layer.includes('white-space:nowrap'));
+});
+test('cada nombre permanece en una sola línea cerrada y completo al desplegar',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  assert.ok(layer.includes('.need-list-title{'));
+  assert.ok(layer.includes('white-space:nowrap'));
+  assert.ok(layer.includes('text-overflow:ellipsis'));
+  assert.ok(layer.includes('.need-card .need-card-title{'));
+  assert.ok(layer.includes('white-space:normal'));
+  assert.ok(layer.includes('overflow-wrap:anywhere'));
+  assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(js.includes("copy.append(el('h3','need-card-title',request.title))"));
+});
+test('los encabezados del formulario conservan los tres pasos y su jerarquía',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  for(const n of [0,1,2])assert.ok(html.includes('data-wizard-step="'+n+'"'));
+  assert.ok(layer.includes('.dialog-header h2{'));
+  assert.ok(layer.includes('.dialog-form .wizard-heading{'));
+  assert.ok(layer.includes('border-left:3px solid #46876a'));
+  assert.ok(layer.includes('.wizard-progress .wizard-label{'));
+  assert.ok(layer.includes('.goods-fields legend{'));
+});
+test('los títulos se adaptan al móvil sin cambiar las columnas ni la lógica',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('Jerarquía tipográfica completa'));
+  for(const marker of [
+    '@media(max-width:680px){',
+    '@media(max-width:380px){',
+    'font-size:clamp(21px,5.55vw,26px)',
+    'font-size:clamp(18px,4.8vw,22px)',
+    'font-size:clamp(20px,5.5vw,22px)',
+    'font-size:17px',
+    'min-width:0',
+    'overflow-wrap:anywhere'
+  ])assert.ok(layer.includes(marker),'Falta adaptación '+marker);
+  assert.equal(/grid-template-columns:/.test(layer),false);
+  assert.ok(js.includes("renderNeedList(grid,records(),'explorar')"));
+  assert.ok(js.includes("renderNeedList(container,state.requests,'propias')"));
+  assert.ok(js.includes("renderNeedList(list,accepted,'aceptadas')"));
+});
+test('nuevas tonalidades de títulos y fondos alcanzan contraste AA',()=>{
+  function lum(hex){
+    const channels=[0,2,4].map(i=>parseInt(hex.slice(i,i+2),16)/255);
+    const v=channels.map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);
+    return .2126*v[0]+.7152*v[1]+.0722*v[2];
+  }
+  for(const [fg,bg] of [
+    ['153b30','ffffff'],
+    ['244d73','ffffff'],
+    ['765120','ffffff'],
+    ['284f78','e7f0fa'],
+    ['23533e','ffffff']
+  ]){
+    const a=lum(fg),b=lum(bg);
+    assert.ok((Math.max(a,b)+.05)/(Math.min(a,b)+.05)>=4.5,'Contraste insuficiente '+fg+'/'+bg);
+  }
 });
