@@ -182,7 +182,7 @@ test('el HTML incluye formularios solo para quien publica, filtros y aceptación
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]);
   assert.equal(new Set(ids).size,ids.length);
-  for(const id of ['hero-publish','request-city','request-city-other','city-other-fields','list-city','request-photo','request-photo-preview','accepted-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back','accept-request']){
+  for(const id of ['hero-publish','request-city','request-city-other','city-other-fields','list-city','request-photo','request-photo-preview','accepted-grid','my-requests-grid','wizard-submit','wizard-next','wizard-back']){
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
   }
   for(const step of [0,1,2])assert.ok(html.includes('data-wizard-step="'+step+'"'));
@@ -229,21 +229,21 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(screens,[...SCREEN_IDS]);
 });
-test('las fotos aparecen directamente en detalle y formulario, sin botón Ver foto',()=>{
+test('las imágenes se muestran en cada ficha y en el asistente, sin depender de Detalles',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   assert.ok(js.includes('function showPictureInline(container,data,caption)'));
-  assert.ok(js.includes("showPictureInline(photo,request.picture"));
   assert.ok(js.includes("showPictureInline(box,current,'Fotografía seleccionada')"));
+  assert.ok(js.includes("const image=pictureNode(request.picture"));
+  assert.ok(js.includes("photo.append(image)"));
+  assert.ok(js.includes("overview.append(copy,photo)"));
+  assert.ok(html.includes('id="request-photo-preview"'));
+  assert.ok(css.includes('.need-card-overview{'));
+  assert.equal(html.includes('id="detail-dialog"'),false);
+  assert.equal(js.includes('function showRequest('),false);
   assert.equal(js.includes('addPictureToggle'),false);
   assert.equal(js.includes("'Ver foto'"),false);
-  assert.equal(js.includes("'Ocultar foto'"),false);
-  assert.ok(js.includes("const image=pictureNode(request.picture"));
-  assert.ok(js.includes("'request-card-media'+(request.picture?' has-photo':' no-photo')"));
-  assert.ok(html.includes('id="detail-overview"')&&html.includes('id="detail-photo"'));
-  assert.ok(html.includes('id="request-photo-preview"'));
-  assert.ok(css.includes('.detail-overview.has-photo{grid-template-columns:'));
 });
 test('las secciones adicionales aparecen solo a petición del usuario',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
@@ -317,21 +317,22 @@ test('las aceptaciones locales sobreviven recarga sin duplicados ni entradas inv
   const owned=decodeState(JSON.stringify({version:1,requests:[original],acceptances:[{requestId:'mia',acceptedAt}]}));
   assert.deepEqual(owned.acceptances,[]);
 });
-test('la interfaz del proveedor no contiene acciones para crear propuestas ni formularios',()=>{
+test('aceptar desde la ficha no exige formulario ni ventana de consulta',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   assert.equal(/id="(?:proposal|provider|access)-(?:form|dialog)"/.test(html),false);
-  assert.ok(js.includes('accept.dataset.acceptRequest=request.id'));
-  assert.ok(js.includes('grid.replaceChildren(...records().map(addUserCard))'));
   assert.ok(html.includes('id="accepted-grid"'));
-  assert.ok(js.includes("acceptNeedLocally(state,request)"));
-  assert.ok(js.includes("grid.addEventListener('click'"));
+  assert.ok(js.includes("makeButton('Aceptar necesidad','accept',true)"));
+  assert.ok(js.includes('acceptNeedLocally(state,request)'));
+  assert.ok(js.includes("handleNeedAction(button.dataset.action,button.dataset.id)"));
   assert.ok(!js.includes("$('#proposal-form')"));
   assert.ok(!js.includes("$('#provider-form')"));
   assert.ok(!js.includes("function openProposalFor("));
   assert.ok(!js.includes("function proposalAction("));
+  assert.ok(!js.includes("showRequest("));
+  assert.ok(!js.includes("data-request"));
+  assert.equal(/Ver detalles/i.test(html+js),false);
 });
-
 test('una sola letra sirve como título de necesidad y no hay límite fijo de longitud',()=>{
   assert.equal(normalizeRequest({...req,title:'A'}).title,'A');
   assert.equal(normalizeRequest({...req,title:' ñ '}).title,'ñ');
@@ -349,18 +350,20 @@ test('el título del asistente sigue sin imponer longitud mínima ni máxima',()
     assert.ok(tag[0].includes('required'),'Debe impedirse solo el valor vacío');
   }
 });
-test('cada tarjeta de Explorar separa texto, resumen y foto lateral automática',()=>{
+test('las tres vistas reutilizan la misma estructura de ficha completa',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  assert.ok(js.includes("el('p','card-summary',request.description)"));
-  assert.ok(js.includes("article.append(content,media)"));
-  assert.ok(js.includes("const image=pictureNode(request.picture"));
-  assert.ok(js.includes("media.append(image)"));
-  assert.ok(js.includes("'Sin foto'"));
-  assert.ok(css.includes('#request-grid .request-card{'));
-  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 156px'));
-  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 106px'));
+  assert.ok(js.includes('function needCard(request,context){'));
+  assert.ok(js.includes("needCard(request,'explorar')"));
+  assert.ok(js.includes("needCard(request,'propias')"));
+  assert.ok(js.includes("needCard(request,'aceptadas')"));
+  for(const marker of ["el('h3','need-card-title',request.title)","el('p','need-card-description',request.description)","el('ul','need-card-meta')","el('div','need-card-overview')","overview.append(copy,photo)","article.append(head,overview,contextNote,actions)"]){
+    assert.ok(js.includes(marker),'Falta '+marker);
+  }
+  assert.ok(css.includes(':is(#request-grid,#my-requests-grid,#accepted-grid) .need-card{'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) minmax(116px,29%)'));
   assert.ok(css.includes('border-left:5px solid'));
+  assert.ok(js.includes("'Sin foto'"));
 });
 test('los accesos de mis necesidades y aceptadas están centrados bajo Publicar',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
@@ -456,14 +459,41 @@ test('botones de acceso y acciones primarias poseen tamaño cómodo para celular
   assert.ok(css.includes('.filter,.my-action,.card-link{min-height:43px}'));
   assert.ok(html.includes('class="section-primary-action"'));
 });
-test('foto de detalle aparece automáticamente a la derecha del resumen',()=>{
+test('la foto y toda la información se ven en cada ficha, sin modal adicional',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(js.includes("classList.toggle('has-photo',Boolean(request.picture))"));
-  assert.ok(js.includes("showPictureInline(photo,request.picture"));
-  assert.ok(js.includes("photo.hidden=!request.picture;"));
-  assert.ok(html.includes('class="detail-overview" id="detail-overview"'));
-  const detail=html.slice(html.indexOf('id="detail-overview"'),html.indexOf('id="detail-note"'));
-  assert.ok(detail.indexOf('id="detail-description"')<detail.indexOf('id="detail-photo"'));
-  assert.equal(js.includes("'Ver foto'"),false);
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  for(const label of ['Cantidad: ','Condición: ','Presupuesto aproximado: ','Fecha deseada: ','Publicada: '])
+    assert.ok(js.includes(label),'Falta el dato '+label);
+  assert.ok(js.includes("photo.append(image)"));
+  assert.ok(js.includes('copy.append(metadata)'));
+  assert.ok(js.includes("el('p','need-card-description',request.description)"));
+  assert.ok(css.includes('.need-card-photo img{'));
+  assert.ok(!html.includes('id="detail-dialog"'));
+  assert.ok(!html.includes('id="detail-title"'));
+  assert.equal(/Ver detalles|Mostrar detalles/i.test(js+html),false);
+});
+test('cada contexto conserva una acción directa y no muestra Detalles',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  for(const instruction of [
+    "makeButton('Aceptar necesidad','accept',true)",
+    "makeButton('Necesidad aceptada','accepted',true,true)",
+    "makeButton('Marcar como resuelta','resolve',true)",
+    "makeButton('Editar necesidad','edit')",
+    "makeButton('Cancelar necesidad','cancel')",
+    "makeButton('Reactivar necesidad','reopen',true)"
+  ])assert.ok(js.includes(instruction),'No existe '+instruction);
+  assert.ok(js.includes("for(const list of [grid,$('#my-requests-grid'),$('#accepted-grid')])"));
+  assert.ok(js.includes('handleNeedAction(button.dataset.action,button.dataset.id)'));
+});
+test('la descripción completa no se corta y la foto permanece a la derecha también en celular',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(css.includes('.need-card-overview{'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) minmax(116px,29%)'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) minmax(90px,36%)'));
+  assert.ok(css.includes('.need-card-description{'));
+  assert.ok(css.includes('white-space:pre-wrap'));
+  assert.ok(css.includes('-webkit-line-clamp:unset'));
+  assert.ok(css.includes('object-fit:contain'));
+  assert.ok(css.includes('overflow-wrap:anywhere'));
 });
