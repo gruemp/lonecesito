@@ -9,7 +9,7 @@
 - Los datos de contacto se separan de la necesidad pública; las reglas de acceso están en **firestore.rules** y el despliegue configurado en **firebase.json**. El cliente requiere autorización expresa para compartir el nombre y número con cada propietario.
 - Se conserva la UI anterior, los listados, fotografía a la derecha, navegación en cuatro pantallas y el modo de demostración para cuando no hay configuración de Firebase.
 - **IMPORTANTE — PENDIENTE DE ACTIVACIÓN:** no hay proyecto ni configuración Firebase en este repositorio. Los valores de **firebase-config.js** están vacíos; GitHub Pages no despliega Firestore ni sus reglas. Se debe configurar un proyecto Firebase real, desplegar sus reglas y validar seguridad antes de ofrecer conexión entre personas. Consulta **docs/firebase-setup.md**.
-- **Verificación:** 110 pruebas de lógica, categorías y estructuras superadas. **No** se ha ejecutado el emulador de Firestore ni se han probado permisos sobre cuentas reales. No se afirma que Firebase esté operativo en producción.
+- **Verificación:** 111 pruebas de lógica, categorías y estructuras superadas; suite adicional de Firestore Emulator preparada pero aún no ejecutada. **No** se ha ejecutado el emulador de Firestore ni se han probado permisos sobre cuentas reales. No se afirma que Firebase esté operativo en producción.
 
 ---
 
