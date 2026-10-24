@@ -34,7 +34,7 @@ async function launchFirebase(){
   const accountDialog=el('dialog','account-dialog');
   accountDialog.id='account-dialog';
   accountDialog.innerHTML='<div class="dialog-header"><h2>Tu cuenta</h2><button type="button" class="close-dialog" id="account-close" aria-label="Cerrar">×</button></div>'+
-    '<p class="account-info">Publicar, aplicar y contactar es gratis.</p>'+
+    '<p class="account-info">Accede a tu cuenta para publicar solicitudes y expresar interés en las oportunidades disponibles.</p>'+
     '<form id="account-form" class="dialog-form"><label for="account-mode">Acceso</label>'+
     '<select id="account-mode"><option value="login">Iniciar sesión</option><option value="register">Crear cuenta gratis</option></select>'+
     '<label for="account-email">Correo</label><input id="account-email" type="email" required autocomplete="email">'+
@@ -215,16 +215,16 @@ async function launchFirebase(){
     const actions=el('div','need-card-actions');
     if(own){
       if(req.status==='abierta'){
-        actions.append(makeButton('Editar necesidad','edit',req.id));
+        actions.append(makeButton('Editar solicitud','edit',req.id));
         actions.append(makeButton('Marcar como resuelta','resolve',req.id,true));
         actions.append(makeButton('Cancelar','cancel',req.id));
       }else if(req.status==='en_proceso'){
         actions.append(makeButton('Marcar como resuelta','resolve',req.id,true));
         actions.append(makeButton('Cancelar','cancel',req.id));
-      }else if(req.status==='cancelada')actions.append(makeButton('Reactivar necesidad','reopen',req.id,true));
+      }else if(req.status==='cancelada')actions.append(makeButton('Reactivar solicitud','reopen',req.id,true));
       else actions.append(el('p','need-card-finished','Necesidad resuelta'));
-    }else if(applied)actions.append(makeButton('Ya aplicaste a esta necesidad','accepted',req.id,true,true));
-    else if(req.status==='abierta')actions.append(makeButton('Aceptar necesidad','apply',req.id,true));
+    }else if(applied)actions.append(makeButton('Solicitud seleccionada','accepted',req.id,true,true));
+    else if(req.status==='abierta')actions.append(makeButton('Me interesa atender esta solicitud','apply',req.id,true));
     article.append(actions);return article;
   }
   function renderList(id){
@@ -259,9 +259,9 @@ async function launchFirebase(){
     const own=requestsFor('my-requests-grid'),accepted=requestsFor('accepted-grid');
     $('#my-count').textContent=own.length?'('+own.length+')':'';
     $('#my-empty').hidden=!!own.length;
-    $('#my-empty').querySelector('p').textContent=state.user?'Aún no has creado ninguna necesidad.':'Inicia sesión para consultar tus publicaciones.';
+    $('#my-empty').querySelector('p').textContent=state.user?'Aún no has publicado ninguna necesidad. Crea tu primera solicitud para dar a conocer lo que buscas.':'Inicia sesión para consultar tus publicaciones.';
     $('#accepted-empty').hidden=!!accepted.length;
-    $('#accepted-empty').textContent=state.user?'Todavía no has aplicado a ninguna necesidad.':'Inicia sesión para consultar tus aplicaciones.';
+    $('#accepted-empty').textContent=state.user?'Todavía no has seleccionado ninguna solicitud. Explora las oportunidades disponibles.':'Inicia sesión para consultar tus solicitudes de interés.';
   }
   function populateFilters(){
     const cat=$('#list-subcategory'),previous=state.subcategory;
@@ -298,7 +298,7 @@ async function launchFirebase(){
     populateFilters();renderAll();
   },e=>{
     notify('Error al cargar necesidades: '+e.message);
-    $('#empty-state').hidden=false;$('#empty-state').textContent='No se pudieron consultar las necesidades.';
+    $('#empty-state').hidden=false;$('#empty-state').textContent='No se pudieron consultar las solicitudes disponibles.';
   });
 
   async function submitApplication(id,profileOverride=null){
@@ -307,7 +307,7 @@ async function launchFirebase(){
     const currentProfile=profileOverride||state.profile;
     if(!state.user||!currentProfile?.discloseConsent)throw Error('Completa tu perfil antes de aplicar.');
     if(req.ownerUid===state.user.uid)throw Error('No puedes aplicar a tu propia necesidad.');
-    if(state.applied.has(id)){notify('Ya aplicaste a esta necesidad.');return;}
+    if(state.applied.has(id)){notify('Ya registraste tu interés en esta solicitud.');return;}
     const uid=state.user.uid,batch=writeBatch(db);
     batch.set(doc(db,'requests',id,'applications',uid),{
       uid,name:currentProfile.name,phone:currentProfile.phone,appliedAt:serverTimestamp()
@@ -316,7 +316,7 @@ async function launchFirebase(){
       requestId:id,appliedAt:serverTimestamp()
     });
     await batch.commit();
-    state.applied.add(id);renderAll();notify('Ya aplicaste a esta necesidad.');
+    state.applied.add(id);renderAll();notify('Ya registraste tu interés en esta solicitud.');
   }
   async function clickAction(button){
     if(button.disabled)return;
@@ -486,7 +486,7 @@ async function launchFirebase(){
       }
       try{await deleteDoc(doc(db,'drafts',state.user.uid));}catch{}
       $('#publish-dialog').close();state.edit=null;setPicture('');
-      location.hash='#mis-necesidades';notify('Necesidad guardada.');
+      location.hash='#mis-necesidades';notify('Tu solicitud se ha guardado correctamente.');
     }catch(ex){error.textContent=ex.message;error.hidden=false;}
   };
   // Solo se muestran los cuatro accesos originales de Inicio.
