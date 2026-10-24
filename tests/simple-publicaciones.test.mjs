@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.1');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.1<\/span>/);
+  assert.equal(APP_VERSION,'2.2.2');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.2<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -64,7 +64,7 @@ test('las fichas tienen teléfono enlazado y sin acciones de aceptar o resolver'
 });
 test('los registros antiguos conservan sus detalles al editarse',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(js,/function legacyDetails\(record\)/);
+  assert.match(js,/function legacyDetails\(record,\{forCard=false\}=\{\}\)/);
   for(const field of ['city','subcategory','quantity','condition','budget','desiredDate'])assert.ok(js.includes('record.'+field));
   assert.match(js,/deleteField\(\)/);
 });
@@ -73,7 +73,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.match(css,/\.publication-facts\{display:flex;flex-wrap:wrap;/);
+  assert.doesNotMatch(css,/\.publication-facts|\.publication-fact\b|\.publication-kind/);
   assert.match(css,/\.contact-box\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/);
   assert.match(css,/\.owner-actions\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css,/\.publication-description\{font-size:13\.5px;line-height:1\.46;/);
@@ -81,8 +81,8 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\+3\)/);
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
-  assert.match(js,/description\.startsWith\(title\)\?description\.slice\(title\.length\)\.trimStart\(\):description/);
-  assert.match(html,/Versión 2\.2\.1/);
+  assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
+  assert.match(html,/Versión 2\.2\.2/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('número y acción de WhatsApp están separados y apuntan al endpoint API',()=>{
@@ -127,5 +127,66 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.1/);
+  assert.match(html,/Versión 2\.2\.2/);
+});
+
+
+test('ninguna ficha contiene bloques separados de ciudad, categoría, presupuesto o fecha',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const start=js.indexOf('function renderCard(record,owner){');
+  const end=js.indexOf('\nfunction visibleItems(){',start);
+  assert.ok(start>=0&&end>start);
+  const card=js.slice(start,end);
+  assert.doesNotMatch(card,/publication-facts|publication-fact|publication-kind|el\('dl'/);
+  assert.match(card,/legacyDetails\(record,\{forCard:true\}\)/);
+  assert.match(card,/const rest=fullText\.startsWith\(title\)/);
+  assert.doesNotMatch(css,/\.publication-facts|\.publication-fact\b|\.publication-kind/);
+});
+test('datos heredados pasan al texto único y ejemplos no crean campos separados',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const start=js.indexOf('function legacyDetails(record,');
+  const end=js.indexOf('\nfunction phoneLink(',start);
+  assert.ok(start>=0&&end>start);
+  const legacyDetails=new Function('derivedTitle',js.slice(start,end)+';return legacyDetails;')(derivedTitle);
+  const previous={
+    title:'Busco repuesto de una máquina',
+    description:'Busco un repuesto compatible que se pueda enviar.',
+    city:'Santa Marta',
+    category:'bienes',
+    subcategory:'Maquinaria',
+    quantity:2,
+    budget:150000,
+    desiredDate:'2026-11-01'
+  };
+  const display=legacyDetails(previous,{forCard:true});
+  assert.match(display,/Santa Marta/);
+  assert.match(display,/Maquinaria/);
+  assert.match(display,/Cantidad: 2/);
+  assert.match(display,/Presupuesto: /);
+  assert.match(display,/Fecha: 2026-11-01/);
+  assert.doesNotMatch(display,/Necesidad: Busco repuesto/);
+  for(const sample of EXAMPLE_PUBLICATIONS){
+    assert.equal(legacyDetails(sample,{forCard:true}),sample.description);
+    assert.equal(Object.hasOwn(sample,'city'),false);
+  }
+});
+test('un dato escrito en el texto no se vuelve a agregar al final',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const start=js.indexOf('function legacyDetails(record,');
+  const end=js.indexOf('\nfunction phoneLink(',start);
+  const legacyDetails=new Function('derivedTitle',js.slice(start,end)+';return legacyDetails;')(derivedTitle);
+  const description='Necesito una nevera en Santa Marta. Busco reparador para esta semana.';
+  const result=legacyDetails({description,city:'Santa Marta'},{forCard:true});
+  assert.equal(result,description);
+});
+test('la guía portátil está enlazada desde README y AGENTS',()=>{
+  const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  assert.match(readme,/\[AGENTS\.md\]\(AGENTS\.md\)/);
+  assert.match(readme,/docs\/PREFERENCIAS-LO-NECESITO\.md/);
+  assert.match(agents,/docs\/PREFERENCIAS-LO-NECESITO\.md/);
+  assert.match(guide,/No.*crear recuadros separados/i);
+  assert.match(guide,/una.*caja de texto/i);
 });
