@@ -49,6 +49,7 @@ function showView(){
     window.location.hash='#inicio';
     return;
   }
+  if(screen!=='publicar' && state.editingId) resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
   for(const link of document.querySelectorAll('[data-nav]')){
     const active=link.dataset.nav===screen;
