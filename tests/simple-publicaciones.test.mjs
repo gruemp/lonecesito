@@ -188,5 +188,5 @@ test('la guía portátil está enlazada desde README y AGENTS',()=>{
   assert.match(readme,/docs\/PREFERENCIAS-LO-NECESITO\.md/);
   assert.match(agents,/docs\/PREFERENCIAS-LO-NECESITO\.md/);
   assert.match(guide,/No.*crear recuadros separados/i);
-  assert.match(guide,/una.*caja de texto/i);
+  assert.match(guide,/(?:caja grande de texto|una sola caja de texto)/i);
 });
