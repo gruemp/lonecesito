@@ -1,7 +1,7 @@
 # LoNecesito — entrega, aprendizajes y continuidad
 
 **Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión:** 2.2.8  
+**Versión:** 2.2.9  
 **Web:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
@@ -102,3 +102,9 @@ Esta mejora no configura Firebase, autenticación ni Firestore, que permanecen p
 Esta edición reemplaza explícitamente el diseño anterior: las fichas **no muestran títulos**, su altura depende del contenido, no hay mínimo de caracteres para la necesidad más allá de requerir texto no vacío, y las imágenes siguen a la derecha **solamente cuando existen**. Si no hay foto, el texto justificado ocupa todo el ancho. Se retiraron los encabezados y descripciones superiores de las tres secciones, manteniendo los botones de navegación. El PNG compartido respeta las mismas reglas.
 
 Firebase sigue sin configuración operativa en este repositorio; las publicaciones locales no se comparten entre visitantes. Pendientes prueba visual móvil y ejecución de las reglas en el emulador de Firestore.
+
+## Actualización 2.2.9 — fila única de acciones
+
+En la ficha del propio autor hay **cinco iconos en una sola fila**: teléfono, WhatsApp, compartir mediante símbolo de tres puntos conectados, editar (lápiz) y eliminar (papelera). En las fichas que ven otras personas solo aparecen los tres primeros. Los controles de editar y eliminar no tienen palabras visibles y mantienen nombres accesibles, permisos de propietario y confirmación de borrado. La barra conserva la altura compacta en celulares, con controles táctiles de al menos 44 píxeles. El diseño y los ejemplos deben seguir esta regla en cambios futuros.
+
+El cierre de interfaz no implica backend completo: Firebase sigue sin configuración operativa; la publicación multiusuario y las pruebas de emulador y dispositivo real permanecen pendientes.

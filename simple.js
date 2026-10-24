@@ -87,7 +87,11 @@ function contactIcon(kind){
   const paths=kind==='call'?
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
     kind==='share'?
-    ['M12 16V3','m7 8 5-5 5 5','M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5']:
+    ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','m8.7 13.3 6.6 4.4','m15.3 6.3-6.6 4.4']:
+    kind==='edit'?
+    ['M12 20h9','M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z']:
+    kind==='delete'?
+    ['M3 6h18','M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2','m19 6-1 14H6L5 6','M10 11v6','M14 11v6']:
     kind==='photo'?
     ['M3 4h18v16H3z','M8 8.5h.01','m3 18 5-6 4 4 3-3 4 5']:
     ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
@@ -228,16 +232,27 @@ function renderCard(record,owner){
   share.append(contactIcon('share'));
   share.addEventListener('click',()=>sharePublicationPng(record));
   contact.append(share);
-  article.append(contact);
 
+  // Una sola fila en las fichas propias: llamar, WhatsApp, compartir, editar y eliminar.
+  // Las fichas ajenas y las muestras muestran solo los tres primeros controles.
   if(owner&&record.example!==true&&canManage(record,currentUid())){
-    const actions=el('div','owner-actions');
-    const edit=el('button','button outline-button','Editar');edit.type='button';
+    contact.classList.add('has-owner-actions');
+    const edit=el('button','contact-action edit-action');
+    edit.type='button';
+    edit.title='Editar publicación';
+    edit.setAttribute('aria-label','Editar publicación');
+    edit.append(contactIcon('edit'));
     edit.addEventListener('click',()=>editRecord(record));
-    const remove=el('button','button danger-button','Eliminar');remove.type='button';
+
+    const remove=el('button','contact-action delete-action');
+    remove.type='button';
+    remove.title='Eliminar publicación';
+    remove.setAttribute('aria-label','Eliminar publicación');
+    remove.append(contactIcon('delete'));
     remove.addEventListener('click',()=>deleteRecord(record));
-    actions.append(edit,remove);article.append(actions);
+    contact.append(edit,remove);
   }
+  article.append(contact);
   return article;
 }
 function visibleItems(){

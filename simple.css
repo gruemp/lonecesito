@@ -342,3 +342,48 @@ body:has(.image-dialog[open]){overflow:hidden}
  .publication-main.has-photo{grid-template-columns:minmax(0,1fr) clamp(86px,29%,112px);gap:8px}
  .publication-main .publication-description{font-size:13px;line-height:1.45}
 }
+
+
+/* v2.2.9 — única fila de controles, tanto en fichas propias como ajenas.
+   Las propias muestran cinco iconos; las ajenas solo llamar, WhatsApp y compartir. */
+.publication-card .contact-box{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+  margin-top:9px;
+  padding:5px;
+  background:#f1f6f3;
+  border:1px solid #cfdfd5;
+  border-radius:11px;
+}
+.publication-card .contact-box.has-owner-actions{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+.publication-card .contact-action{
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:46px;
+  align-items:center;
+  justify-content:center;
+  padding:7px 4px;
+  border-radius:9px;
+  font-size:0;
+}
+.publication-card .contact-action .contact-icon{width:25px;height:25px;flex:0 0 25px}
+.publication-card .share-action{background:#6357b3;border-color:#54479f;color:#fff}
+.publication-card .share-action:hover{background:#50449b}
+.publication-card .edit-action{background:#dcedfb;border-color:#c1dcf2;color:#1c5c82}
+.publication-card .edit-action:hover{background:#cce3f6}
+.publication-card .delete-action{background:#fde6e5;border-color:#f1cfcc;color:#a12e2a}
+.publication-card .delete-action:hover{background:#fbd2d0}
+@media(max-width:420px){
+  .publication-card .contact-box{gap:5px;padding:4px;margin-top:7px}
+  .publication-card .contact-action{min-height:44px;padding:6px 3px}
+  .publication-card .contact-action .contact-icon{width:22px;height:22px;flex-basis:22px}
+}
+@media(max-width:340px){
+  .publication-card .contact-box{gap:3px;padding:3px}
+  .publication-card .contact-action{min-height:44px;padding:4px 2px}
+  .publication-card .contact-action .contact-icon{width:20px;height:20px;flex-basis:20px}
+}

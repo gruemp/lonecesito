@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.8');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.8<\/span>/);
+  assert.equal(APP_VERSION,'2.2.9');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.9<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -84,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.8/);
+  assert.match(html,/Versión 2\.2\.9/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -129,7 +129,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.8/);
+  assert.match(html,/Versión 2\.2\.9/);
 });
 
 
@@ -224,7 +224,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.8/);
+  assert.match(html,/Versión 2\.2\.9/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -396,7 +396,7 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.8/);
+  assert.match(handoff,/2\.2\.9/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
@@ -511,4 +511,55 @@ test('el PNG no genera título y adapta el ancho y el alto si falta imagen',()=>
   assert.match(png,/const bodyHeight=Math\.max\(paragraphHeight,photoHeight\)/);
   assert.match(js,/const description=legacyDetails\(record,\{forCard:true\}\)/);
   assert.doesNotMatch(png,/const titleLines=|titleHeight=/);
+});
+
+
+test('la ficha propia integra las cinco acciones en una sola fila sin palabras visibles',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/contact\.classList\.add\('has-owner-actions'\)/);
+  assert.match(card,/const edit=el\('button','contact-action edit-action'\)/);
+  assert.match(card,/const remove=el\('button','contact-action delete-action'\)/);
+  assert.match(card,/edit\.append\(contactIcon\('edit'\)\)/);
+  assert.match(card,/remove\.append\(contactIcon\('delete'\)\)/);
+  assert.match(card,/edit\.addEventListener\('click',\(\)=>editRecord\(record\)\)/);
+  assert.match(card,/remove\.addEventListener\('click',\(\)=>deleteRecord\(record\)\)/);
+  assert.match(card,/contact\.append\(edit,remove\)/);
+  assert.doesNotMatch(card,/el\('div','owner-actions'\)|outline-button','Editar'|danger-button','Eliminar'/);
+  assert.equal((card.match(/article\.append\(contact\)/g)||[]).length,1);
+  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{\s*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.publication-card \.contact-box\{\s*display:grid;\s*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+});
+test('los cinco botones con icono son accesibles y conservan sus colores',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/edit\.setAttribute\('aria-label','Editar publicación'\)/);
+  assert.match(card,/remove\.setAttribute\('aria-label','Eliminar publicación'\)/);
+  assert.match(card,/edit\.title='Editar publicación'/);
+  assert.match(card,/remove\.title='Eliminar publicación'/);
+  assert.match(css,/\.publication-card \.edit-action\{background:#dcedfb/);
+  assert.match(css,/\.publication-card \.delete-action\{background:#fde6e5/);
+  assert.match(css,/\.publication-card \.contact-action\{[^}]*min-height:46px/);
+  assert.match(css,/@media\(max-width:420px\)[\s\S]*?\.publication-card \.contact-action\{min-height:44px/);
+});
+test('compartir usa icono de tres puntos conectados y no flecha hacia arriba',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const icon=js.slice(js.indexOf("kind==='share'?"),js.indexOf("kind==='edit'?"));
+  assert.match(icon,/M18 8a3 3/);
+  assert.match(icon,/M6 15a3 3/);
+  assert.match(icon,/M18 22a3 3/);
+  assert.match(icon,/m8\.7 13\.3 6\.6 4\.4/);
+  assert.doesNotMatch(icon,/M12 16V3/);
+});
+test('la preferencia de fila única está guardada para próximas IA',()=>{
+  const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
+  const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
+  const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
+  for(const content of [agents,guide,handoff]){
+    assert.match(content,/2\.2\.9/);
+    assert.match(content,/una sola fila/i);
+    assert.match(content,/cinco iconos|cinco botones/i);
+  }
 });
