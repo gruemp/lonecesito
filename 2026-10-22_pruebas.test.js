@@ -1115,6 +1115,7 @@ test('el contador de necesidades se distingue sin alterar el título largo',()=>
   assert.ok(layer.includes('vertical-align:middle'));
   assert.ok(layer.includes('background:#e7f0fa'));
   assert.ok(layer.includes('white-space:nowrap'));
+  assert.ok(layer.includes('#my-title .my-count:empty{display:none}'));
 });
 test('cada nombre permanece en una sola línea cerrada y completo al desplegar',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
