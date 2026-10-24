@@ -55,19 +55,20 @@
           <p>Demostración: las aceptaciones solo quedan en este navegador y no se envían a nadie.</p>
         </details>
       </div>
+      <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
+        <a class="action-cta action-cta-mine" href="#mis-necesidades" data-screen-link="mis-necesidades">
+          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#my-needs"/></svg>
+          <span class="action-copy"><strong>Mis necesidades publicadas para que otros ofrezcan solucionarlas</strong><small>Consulta y administra tus publicaciones</small></span>
+          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+        </a>
+        <a class="action-cta action-cta-accepted" href="#aceptadas" data-screen-link="aceptadas">
+          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#accepted-needs"/></svg>
+          <span class="action-copy"><strong>Necesidades de terceros aceptadas para solucionar</strong><small>Revisa los compromisos que ya aceptaste</small></span>
+          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+        </a>
+      </nav>
     </section>
-    <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
-      <a class="action-cta action-cta-mine" href="#mis-necesidades" data-screen-link="mis-necesidades">
-        <svg class="icon action-leading-icon" aria-hidden="true"><use href="#my-needs"/></svg>
-        <span class="action-copy"><strong>Mis necesidades publicadas para que otros ofrezcan solucionarlas</strong><small>Consulta y administra tus publicaciones</small></span>
-        <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
-      </a>
-      <a class="action-cta action-cta-accepted" href="#aceptadas" data-screen-link="aceptadas">
-        <svg class="icon action-leading-icon" aria-hidden="true"><use href="#accepted-needs"/></svg>
-        <span class="action-copy"><strong>Necesidades de terceros aceptadas para solucionar</strong><small>Revisa los compromisos que ya aceptaste</small></span>
-        <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
-      </a>
-    </nav>
+
 
 
 
@@ -93,14 +94,14 @@
     <section class="my-section shell app-screen" id="mis-necesidades" data-screen="mis-necesidades" aria-labelledby="my-title" hidden>
       <div class="section-heading"><h2 id="my-title">Mis necesidades publicadas para que otros ofrezcan solucionarlas <span id="my-count" class="my-count"></span></h2></div>
       <p class="section-usage">Toca el nombre para revisar, editar o marcar tu necesidad como resuelta.</p>
-      <div class="section-primary-action"><button class="button" type="button" data-open="publish">Publicar otra necesidad</button></div><div class="my-grid" id="my-requests-grid"></div>
+      <div class="my-grid" id="my-requests-grid"></div>
       <div class="my-empty" id="my-empty"><p>Aún no has creado ninguna necesidad.</p><button class="button button-small" type="button" data-open="publish">Crear necesidad</button></div>
     </section>
 
     <section class="my-section shell app-screen" id="aceptadas" data-screen="aceptadas" aria-labelledby="accepted-title" hidden>
       <div class="section-heading"><h2 id="accepted-title">Necesidades de terceros aceptadas para solucionar</h2></div>
       <p class="section-usage">Toca una necesidad para revisar lo que aceptaste.</p>
-      <div class="section-primary-action"><a class="button button-secondary" href="#necesidades" data-explore>Soluciona otra necesidad <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a></div><p class="my-note">Aceptaciones de prueba en este navegador. Nadie recibe una notificación ni queda contratado.</p>
+      <p class="my-note">Aceptaciones de prueba en este navegador. Nadie recibe una notificación ni queda contratado.</p>
       <div class="my-grid" id="accepted-grid"></div>
       <p class="my-note" id="accepted-empty">Todavía no has aceptado ninguna necesidad.</p>
     </section>
