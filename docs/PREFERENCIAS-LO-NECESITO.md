@@ -1,175 +1,153 @@
-## Actualización vigente 2.2.13 — portada, navegación y buscador
+# Preferencias de LoNecesito — diseño y funcionamiento vigentes
 
-- **La tercera imagen es la elegida**, con tres personajes y el mensaje «Publica lo que necesitas y recibe contacto directo», secuencia «Publica → La ven → Te contactan». Es el archivo propio `assets/lonecesito-presentacion.webp`, derivado de `lonecesito_publica_y_conecta.png`. Debe verse **solo en la pestaña nueva «Inicio»**, completa, a todo el ancho posible, sin tarjetas, sin buscador y sin explicaciones añadidas.
-- **Cuatro botones superiores, siempre dos filas de dos**, en PC y celulares por igual, en este orden de lectura: **Inicio**, **Mis publicaciones**, **Ver necesidades**, **Publicar lo que necesito**. No sustituir las cuatro pestañas por una fila horizontal en PC ni apretarlas en celular.
-- **No existen fichas de ejemplo en ninguna parte**: ni en Ver necesidades ni en Mis publicaciones ni en Inicio. Quitar datos de prueba y generadores ficticios. No borrar publicaciones reales de los visitantes; impedir que los posibles registros etiquetados `example:true` aparezcan.
-- **No mostrar la versión** al usuario. Mantener cambios internos documentados y números de versión en archivos de GitHub únicamente; **nunca** mostrar barra, etiqueta o número de versión en la interfaz.
-- **Buscador por tramos:** buscar fragmentos de palabras, varios términos en cualquier orden, sin depender de tildes o mayúsculas. Incluir descripción íntegra, teléfono visible mediante enlaces y todos los metadatos públicos del registro (incluidos campos históricos). Aceptar teléfono con indicativo, números parciales y separadores. No implementar Gemini ni IA externa.
-- Esta actualización prevalece sobre las instrucciones históricas anteriores sobre tres botones, fichas de ejemplo, versión visible o banner en «Ver necesidades».
+**Actualizado: 24 de octubre de 2026.** Este documento reemplaza como guía vigente la acumulación de versiones anteriores. Las decisiones descartadas siguen en el historial Git, pero **no son requisitos actuales**. Consultar también [AGENTS.md](../AGENTS.md) (normas operativas) y [CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md) (estado técnico).
 
-## Actualización vigente 2.2.12 — banner en la primera pestaña
+## A. Concepto exacto del producto
 
-- El usuario eligió la **segunda imagen de las dos últimas propuestas**, con tres personajes y la secuencia **«Publica → La ven → Te contactan»**. Usarla sin rediseñarla, en su representación web optimizada `assets/lonecesito-presentacion.webp` (WebP de 1440 × 810, derivado del PNG seleccionado).
-- Colocarla en la vista **Ver necesidades**, que es la pantalla inicial, **inmediatamente debajo de los tres botones superiores y encima del buscador**. No es una cuarta opción ni una pantalla separada.
-- La ilustración debe **ocupar todo el ancho disponible de la pestaña** en PC y móviles, pero mostrarse entera sin cortar (`width:100%; height:auto; object-fit:contain`). Evitar márgenes y textos adicionales que ocupen espacio vertical alrededor.
-- Mostrarla solo en esa primera vista, no en «Mis publicaciones» ni en el editor. No alterar las fichas ni los botones existentes.
-- El sentido de la web sigue siendo exclusivamente publicar lo que uno necesita, verlo y contactar **directamente por llamada o WhatsApp**, sin ofertas publicadas, intercambios o negociación interna.
+**LoNecesito sirve para publicar necesidades y facilitar que quien pueda atenderlas contacte directamente a su autor.** Puede tratarse de productos, bienes o servicios.
 
-## Actualización 2.2.11 — eliminar también desde el editor
+**Recorrido esperado:**
+1. Una persona escribe en texto libre qué necesita, deja un teléfono y publica.
+2. Otra persona encuentra la necesidad en la lista o el buscador.
+3. Usa un icono de llamada o WhatsApp y se comunica **directamente** con quien publicó, fuera de LoNecesito.
+4. Quien publicó puede editar o eliminar su registro en cualquier momento.
 
-Al editar una publicación propia, la fila compacta bajo «¿Qué necesitas?» tiene **teléfono, foto, micrófono, enviar/guardar, papelera roja y X para cancelar**, en ese orden; todos los controles de acción son iconos, sin textos visibles. En la creación no aparecen ni papelera ni X. Al pulsar la papelera se solicita confirmación antes del borrado; si se rechaza no se pierde la edición, y si se confirma y se completa se vuelve a «Mis publicaciones». No duplicar la acción en otra fila. Esta indicación se suma a la posibilidad de eliminar una ficha propia desde su propia barra de iconos.
+**No es un mercado de ofertas:** no se publican ofertas del proveedor, no hay aceptar/rechazar, resolver, ofertar, postularse, avisos de interesado, mensajería interna, mediación, tareas de negociación ni estados de seguimiento. El usuario insistió repetidamente en quitar toda interfaz que sugiera ese flujo.
 
-## Versión 2.2.10 — editor compacto y envío con Enter
+## B. Regla máxima de presentación
 
-- Debajo de **una única caja de necesidad** hay **una sola fila horizontal**: campo telefónico con icono a su izquierda, botón de adjuntar fotografía, botón de dictado por micrófono y botón verde de envío.
-- **El campo de teléfono no lleva etiqueta visible** «Número de WhatsApp». Se mantiene su nombre accesible; el ejemplo **`Ej: 300 123 4567`** está **dentro de la caja**, y el icono de teléfono queda a la izquierda de ese campo.
-- El control verde para publicar tiene **solo el icono de envío (avión de papel)**, sin la palabra «Publicar» ni «necesidad» en el botón. Conserva `aria-label`/`title` para accesibilidad y cambia su nombre accesible a «Guardar cambios» en edición; no reemplazar el icono por texto.
-- **Enter** dentro del área de texto o el campo de teléfono envía el formulario por el mismo controlador que el icono verde, con sus validaciones y protecciones contra doble envío. **Shift+Enter** introduce salto de línea en el texto. No interceptar composición de caracteres ni pulsaciones repetidas.
-- Fotografía y micrófono siguen siendo botones independientes de la misma fila. La vista previa de la foto aparece dentro del cuadro de texto solamente cuando se selecciona una imagen, sin desplazar ni estrechar el campo telefónico.
-- En edición, «Cancelar» es un control adicional con icono X en esa misma fila y permanece oculto al crear. El resto del diseño y el mínimo de dos campos visibles se conservan.
-- Esta instrucción reemplaza el formulario de filas separadas de teléfono y «Publicar necesidad», así como la barra flotante de imagen/micrófono dentro de la caja.
-## Actualización vigente — versión 2.2.9: cinco iconos en una sola fila
+**Ahorrar espacio vertical, no horizontal.** En celular, procurar ver tanta información como sea razonable de un vistazo, sin esconder, truncar o estrechar el texto. La claridad se obtiene mediante **opciones separadas y colores contrastados**, no mediante largos mensajes.
 
-- La fila de controles es **una sola fila horizontal**, compacta, sin textos visibles ni encabezado «Contactar».
-- **Ficha del autor (Mis publicaciones):** cinco botones independientes y del mismo tamaño en este orden: teléfono azul, WhatsApp verde, compartir PNG morado con el icono universal de **tres puntos conectados**, editar con lápiz azul claro y eliminar con papelera rojo claro.
-- **Ficha de otros usuarios y ejemplos:** tres botones de iconos (llamada, WhatsApp y compartir) en **una sola fila**. Los ejemplos no pueden llamar a un número ficticio.
-- Los botones son táctiles (44 px de alto como mínimo), usan `aria-label` y `title`, y están diferenciados por color. No crear un bloque adicional con «Editar» y «Eliminar» ni poner etiquetas visibles en los botones.
-- Solo el autor puede editar o eliminar. Mantener la confirmación previa a eliminar y la autorización de Firestore cuando esté habilitado.
-- Se conserva la ficha **sin títulos**, descripción justificada, fotografía opcional a la derecha cuando existe, texto a ancho completo sin foto y altura según el contenido.
-- Esta regla reemplaza instrucciones anteriores donde los iconos de compartir, editar y eliminar estaban en filas separadas o el icono de compartir era una flecha hacia arriba.
+- Textos **descriptivos justificados**. La última línea de un párrafo mantiene alineación natural para no crear espacios grotescos.
+- En elementos que realmente precisen un título, centrarlo cuando mejore el aspecto. **Dentro de las fichas no debe haber ningún título**.
+- Fichas de altura natural, sin altas zonas vacías ni filas repetidas. Espaciado compacto con zonas táctiles accesibles.
+- Evitar avisos obvios, párrafos instructivos bajo encabezados, eslóganes grandes, pies redundantes y banners de «esto es una prueba». Mostrar solo errores y estados que ayuden al usuario.
+- No mostrar el número de versión. Una numeración puede mantenerse en Git, documentación y código interno, nunca en una barra de la web.
+- Usar colores variados y sobrios para reconocer de inmediato acciones distintas. No sobrecargar toda la pantalla de cuadros o etiquetas.
 
-## Actualización vigente — versión 2.2.8
+## C. Cuatro pestañas de navegación: mismas en PC y en móvil
 
-- Eliminar de las tres pantallas los encabezados y párrafos mostrados por el usuario: «Necesidades publicadas» / «Encuentra necesidades y contacta directamente por WhatsApp.»; «Mis publicaciones» / «Edita o elimina tus publicaciones cuando lo necesites.»; «Publica lo que necesitas» / «Describe tu necesidad y deja tu WhatsApp.». Los botones superiores **siguen existiendo** con sus nombres.
-- **Fichas sin títulos.** Todo el texto libre se muestra íntegro y justificado como un solo cuerpo, desde la primera línea. Los detalles antiguos se incorporan al mismo cuerpo cuando corresponda; sin etiquetas o bloques aparte.
-- **Altura natural** según el texto, la imagen opcional y los botones; sin espacios sobrantes.
-- **Sin mínimo de caracteres**: aceptar cualquier texto no vacío (1–4.000 caracteres), no imponer 10 ni otro mínimo artificial. El campo de WhatsApp sigue siendo requerido.
-- **Con fotografía**: imagen a la derecha, encajada sin recortes. **Sin fotografía**: el texto abarca todo el ancho; ninguna columna de imagen queda reservada.
-- El **PNG de compartir debe reflejar exactamente estas reglas**: sin título adicional, cuerpo a ancho completo si no hay imagen, y altura adaptada al contenido.
-- Esta actualización reemplaza cualquier indicación anterior en este archivo de dejar vacío el hueco de la imagen cuando no se adjunta foto.
+La página comienza con **cuatro botones**, con esta distribución **obligatoria de dos filas**:
 
-### Presentación de fichas y PNG compartido (versión 2.2.7)
+| Primera columna | Segunda columna |
+| --- | --- |
+| **Inicio** | **Mis publicaciones** |
+| **Ver necesidades** | **Publicar lo que necesito** |
 
-- La descripción se muestra **justificada** siempre que sea un párrafo, incluso a la izquierda de una foto. Mantener última línea normal para evitar espacios exagerados.
-- Cada ficha reserva la columna derecha para una fotografía opcional. La imagen de cualquier tamaño se ajusta automáticamente con `object-fit: contain` sin cortar información. **Sin imagen: no crear columna de fotografía y expandir el texto a todo el ancho**. No mostrar fondo, borde, tarjeta vacía, icono ni aviso.
-- No mostrar la palabra **«Contactar»** ni encabezados redundantes en la fila de acciones.
-- Mantener tres **botones solo con iconos**, visualmente separados: teléfono azul, WhatsApp verde y **compartir PNG** en un tercer color. Los controles del dueño Editar y Eliminar siguen apareciendo únicamente al propio autor.
-- Compartir/exportar PNG **sin título independiente**, con todo el texto justificado y la foto si existe; si no existe, el texto debe ocupar todo el ancho y el alto depende del contenido. Priorizar la hoja nativa de compartir del dispositivo (`navigator.share` con archivo PNG) y, cuando no esté disponible, ofrecer descarga del PNG sin servidor. Para que una imagen compartida por otra aplicación permita contactar al autor, **el número real se imprime solo dentro del PNG**; no se muestra escrito en la ficha web. En los ejemplos no imprimir teléfonos falsos.
-- No agregar chips separados para ciudad, presupuesto, cantidad ni otros datos; permanecen en el único texto del requerimiento.
+- Mantener la barra arriba y el acceso visible mientras se navega.
+- En **PC también deben ser dos filas**: no reorganizar en cuatro columnas ni una sola fila.
+- Primera pestaña: **Inicio**. Solo muestra la **tercera ilustración aprobada** que enseña el flujo «Publica → La ven → Te contactan», en el archivo **assets/lonecesito-presentacion.webp**; no cambiar por la primera o segunda ilustración. Debe usar **todo el ancho posible**, altura automática, sin recortes ni otros contenidos añadidos.
+- Segunda pestaña: **Mis publicaciones**. Solo registros propios y sus acciones de edición/eliminación.
+- Tercera: **Ver necesidades**. Buscador y lista de necesidades publicadas **reales**, sin imagen introductoria dentro de esta pestaña.
+- Cuarta: **Publicar lo que necesito**. Editor compacto.
+- No repetir debajo de un botón las otras tres opciones de navegación: el usuario las quitó expresamente para reducir altura.
 
-# LoNecesito — preferencias, decisiones y protocolo para continuar el proyecto
+## D. Entrada de datos: libertad de texto y fila compacta
 
-**Propósito:** documento transportable y explícito para cualquier desarrollador o IA que reciba el repositorio. Refleja las decisiones indicadas durante las iteraciones de octubre de 2026. Leer junto a [AGENTS.md](../AGENTS.md).
+**No existe formulario de muchos campos.** Son exactamente:
+1. **Una caja grande de texto** donde se escribe TODO el requerimiento, incluida la ciudad, cantidad, presupuesto, fecha o condición cuando el autor lo considere relevante.
+2. **Una sola caja de teléfono**, con el ejemplo **«Ej: 300 123 4567» dentro**, y un icono de teléfono a la **izquierda** de esa entrada. Nunca escribir la etiqueta visible «Número de WhatsApp».
 
-## 1. Qué es LoNecesito
+No pedir un mínimo de caracteres: **un único carácter no vacío es válido**; permanece el límite técnico máximo de 4.000 caracteres de la implementación vigente. Teléfono obligatorio y validado. Foto **no obligatoria**.
 
-Es un tablón sencillo de necesidades de bienes y servicios. Una persona publica lo que está buscando; otra lo lee y, si puede venderle el producto o prestarle el servicio, se comunica **directamente por WhatsApp**. La página **no** media ni administra la negociación, la contratación o el resultado.
+La fila directamente debajo del editor se presenta, en orden:
 
-Flujos aprobados:
-- Publicar una necesidad, indicando su descripción completa y WhatsApp.
-- Ver/buscar publicaciones, llamar al autor con el icono del teléfono o escribirle usando el icono de WhatsApp.
-- Consultar **Mis publicaciones** y editar o eliminar **únicamente las propias**.
+**[icono teléfono + caja Ej: 300 123 4567] [foto] [micrófono] [icono verde de avión de papel]**
 
-Funciones descartadas, no reintroducir:
-- «Aceptar necesidad», «Mostrar interés», «Aplicar», «Solicitudes de interés».
-- «Personas interesadas», «Marcar como resuelta», «Reactivar» o estados de tramitación.
-- Formularios de propuestas, notificaciones de aceptación, asignación de proveedores o perfiles de interesados.
+- El icono verde **no lleva la palabra «Publicar»** en su superficie; accesiblemente sí se denomina «Publicar» o «Guardar cambios».
+- Enter desde descripción o teléfono activa publicar/guardar por la misma ruta que el icono. **Shift+Enter inserta un salto de línea** en la descripción. Evitar publicar involuntariamente mientras se compone texto con un teclado IME o al repetir una tecla.
+- El micrófono ofrece dictado de voz en español, sin bloquear el teclado. Usa reconocimiento del navegador solo si está disponible, con inicio y detención; si falta, un aviso puntual al tocarlo es suficiente.
+- El botón de foto permite adjuntar una imagen. Comprimirla y mostrar una miniatura dentro del área de texto, con opción de ampliarla o quitarla.
+- **Al editar**, aparecen también, en **la misma fila**, una **papelera roja** para eliminar y una **X** para cancelar. Al crear, ambas desaparecen. Eliminar pide confirmación, verifica que el registro pertenezca al autor y solo tras completar el borrado retorna a Mis publicaciones. Rechazar el borrado deja el texto en su lugar.
+- El teléfono conserva semántica y accesibilidad aunque no tenga etiqueta de texto visible.
 
-## 2. Captura de datos — exactamente dos entradas
+## E. La ficha ideal (centro de todo el producto)
 
-La pantalla Publicar debe tener:
-1. **Una caja grande de texto**: «¿Qué necesitas?». Allí el autor redacta todo: nombre o tipo de producto/servicio, lugar, características, cantidad, presupuesto, condición, fecha, observaciones. **No se deben extraer esos datos a campos separados**.
-2. **Una entrada para «Número de WhatsApp»**. El teléfono no aparece como texto en las fichas, pero estará expuesto en los enlaces públicos para llamadas y WhatsApp. El usuario debe conocerlo antes de publicar.
+La ficha presenta **el contenido íntegro que escribió la persona**, sin forzarlo a campos inventados ni crear un título diferente. Esta es la decisión de mayor prioridad visual.
 
-El guardado puede derivar datos internos imprescindibles (identificador, autor, fecha técnica de creación y un título técnico no visible), pero **no debe solicitar más campos** al usuario. Mantener las reglas de validación y acceso, y la protección de datos personales.
+**Texto**
+- Un único cuerpo, completamente visible, **justificado**, desde su primera palabra.
+- Sin título visual, sin mínimo de longitud, sin chips de ciudad, precio, fecha, tipo, cantidad ni condición.
+- Registros del formato viejo: incorporar sus detalles en el cuerpo sin perderlos ni duplicarlos gratuitamente.
+- El alto depende de texto, imagen y fila de acciones, nunca de una altura fija innecesaria.
 
-## 3. Composición exacta de una ficha
+**Fotografía**
+- Opcional. Si está, se ve en la **columna derecha** de la ficha, respetando su proporción con ajuste automático sin recorte.
+- Al tocar **cualquier parte** de la miniatura debe abrirse la fotografía **completa en primer plano**, con X, Escape y toque fuera para cerrar.
+- Si no hay foto, **NO DEBE QUEDAR HUECO**: el párrafo ocupa todo el ancho. No dibujar ninguna caja, borde, icono, aviso, foto de relleno ni marcador.
 
-- **Sin títulos en las fichas**: mostrar toda la necesidad, desde su primera palabra, en un único texto justificado. El título calculado puede existir internamente para compatibilidad, pero no se presenta por separado.
-- **Cuerpo único y completo**: todo el resto del texto del requerimiento. **No** crear recuadros separados, chips, filas, badges ni columnas para ciudad, ubicación, presupuesto, cantidad, condición, categoría o fecha. Si existen campos históricos, incorporarlos a este mismo cuerpo de texto, legibles y sin perder información.
-- **Contacto**: la ficha muestra **solo dos botones con iconos, sin números escritos ni textos visibles**. Icono de teléfono: enlace `tel:+<numero_normalizado>`, abre la aplicación de marcado del celular. Icono de WhatsApp: enlace `https://api.whatsapp.com/send?phone=<numero_normalizado>&text=<mensaje_codificado>`, abre la conversación. Cada icono necesita `aria-label` y `title` explicativos para accesibilidad. Mantener ambos botones compactos, próximos y diferenciados por color.
-- **Administración**: botones «Editar» y «Eliminar» únicamente cuando el visitante es autor. No mostrar acciones de aceptación, resolución, aplicación o seguimiento.
-- **Ejemplos**: mismos datos de entrada, transformación, render y CSS que una ficha real. Deben verse idénticos y mostrar los dos iconos. El de llamada se ve **deshabilitado**, porque no debe marcar un número ficticio ni de terceros; el de WhatsApp abre la aplicación sin destinatario preseleccionado. No contener campos antiguos.
-- Evitar ruido visual, textos repetidos y carteles que expliquen que los ejemplos son pruebas.
+**Controles en la ficha**
+- Una sola fila, de iconos sin palabras visibles; acciones independientes, con **colores distintos** y al menos 44 px de alto en el móvil.
+- Todos ven tres: **llamar** (azul, abre marcador), **WhatsApp** (verde, abre conversación por API de WhatsApp), **compartir** (morado).
+- El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Cinco en una fila, no en dos.
+- Compartir es el **símbolo familiar de tres puntos conectados**; se rechazó el anterior icono de flecha hacia arriba.
+- Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
+- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje contextual. No hacer que ambos iconos abran WhatsApp.
+- Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
 
-Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la aplicación de marcado; **no garantiza ni ejecuta una llamada automática**. El formato `api.whatsapp.com/send` es un enlace de apertura de WhatsApp, **no** la Cloud API de mensajería empresarial. Que el número no aparezca escrito **no significa que sea secreto**: un visitante puede inspeccionar la URL `tel:` o el enlace de WhatsApp. El formulario debe informar esa exposición. Los ejemplos no deben usar números de terceros.
+## F. Imagen PNG al compartir
 
-## 4. Preferencias de presentación
+- El icono de compartir genera **una imagen PNG de la ficha**, no solo una URL de la web.
+- PNG **sin título añadido**, con toda la descripción justificada y **sin espacio reservado** cuando no hay foto; si hay foto, va a la derecha y completa.
+- **El número real del autor sí aparece dentro del PNG**: la imagen enviada es estática y sin ese dato el destinatario no podría llamarlo. La ficha web sigue sin imprimirlo.
+- Usar las opciones nativas de compartir archivo cuando el navegador las soporte; como respaldo, descargar el PNG. Generarlo en el propio navegador.
+- No utilizar teléfonos ficticios en imágenes exportadas ni imprimir mensajes sobre pruebas.
 
-**Máxima prioridad: que se comprenda de un vistazo en la pantalla de un celular.**
+## G. Buscador con coincidencia por tramos
 
-- Ahorrar **espacio vertical**, no ancho útil: reducir márgenes, huecos, filas innecesarias, paddings y bloques repetitivos; nunca hacer párrafos demasiado estrechos para ganar altura.
-- Mostrar toda la información: sin truncamiento arbitrario, «ver más» obligatorio ni pérdida de campos existentes.
-- Diferenciar claramente unas opciones de otras: cada ficha y cada acción con fondo, borde, separación y/o color propio. Mantener una identidad verde, con variaciones discretas de azul, ámbar y otros colores cuando mejoren la distinción. No saturar.
-- Todos los **párrafos y textos explicativos/descriptivos deben verse justificados**; ajustar interlineado, guiones y el último renglón para evitar espacios antiestéticos.
-- **Títulos preferiblemente centrados**, salvo cuando la lectura de fichas o listados resulte más clara a la izquierda. Jerarquía uniforme, separación equilibrada y tamaño moderado.
-- Botones/etiquetas/números: no justificar artificialmente textos cortos; centrar o alinear según legibilidad y zonas táctiles cómodas.
-- Acciones vinculadas a un mismo elemento: visualmente independientes pero próximas, p. ej. icono de llamada / icono de WhatsApp y Editar / Eliminar.
-- Evitar banners, avisos, mensajes y explicaciones redundantes que distraigan. Solo errores o confirmaciones funcionales pertinentes y discretos.
-- **Navegación persistente**: exactamente tres botones visibles en la barra superior, en este orden: «Publicar lo que necesito» (verde), «Ver necesidades» (azul) y «Mis publicaciones» (ámbar). Mantener la cabecera fija al desplazarse y permitir navegar siempre entre las tres pantallas.
-- **Sin enlaces duplicados**: la portada contiene solamente el texto principal y su descripción, **sin tarjetas ni botones repetidos de publicar, ver necesidades o mis publicaciones**. Tampoco repetir «Crear publicación» dentro de «Mis publicaciones», porque publicar ya está disponible arriba.
-- Diseñar la barra para celulares estrechos sin cortes horizontales: botones compactos, texto legible que puede ocupar dos líneas, altura ajustada, foco y selección visibles.
-- **No añadir Gemini ni búsqueda con inteligencia artificial**. Esa idea se consideró y se descartó; mantener la búsqueda de texto existente salvo nueva autorización expresa.
-- Mantener buen contraste, lectura accesible, adaptación a distintos anchos y sin desbordamiento horizontal.
+- En **Ver necesidades** debe localizar publicaciones reales por **fragmentos** escritos en cualquier punto de las palabras y por varios términos colocados en distinto orden.
+- Tolerar diferencias de mayúsculas, minúsculas y tildes.
+- Revisar toda información pública disponible de la ficha, no solamente el principio del texto: descripción, metadatos heredados, ciudad, categoría, cantidad, precio y también **número de teléfono completo o parcial**, sin requerir que se escriba el código de país.
+- Permitir encontrar un mismo registro si la consulta mezcla fragmentos del texto y parte del teléfono; todos los fragmentos deben aparecer en algún campo público.
+- Sin Gemini, buscadores remotos, costos de IA ni procesamiento de información privada.
+- Vacío: mostrar estado breve, **nunca inyectar fichas de ejemplo**.
 
-### Portada, micrófono e imagen del producto (actualización 2.2.5)
+## H. No mostrar ejemplos ni pruebas
 
-- La portada **no** debe mostrar el titular grande «Publica lo que necesitas. Encuentra quién puede ofrecerlo.» ni el pie «LoNecesito · Publica lo que necesitas. Contacta directamente por WhatsApp.». Esos textos ocupaban altura innecesaria. Al entrar en la dirección principal, mostrar directamente el listado de necesidades debajo de los tres botones persistentes.
-- La caja de texto «¿Qué necesitas?» debe incluir **un icono de micrófono** que permita hablar para completar el mismo texto. Emplear reconocimiento integrado del navegador en español (`SpeechRecognition` / `webkitSpeechRecognition`), sin Gemini ni registro/almacenamiento de audio en LoNecesito. Mostrar cuándo escucha y permitir detener. El teclado permanece disponible y puede haber navegadores sin soporte. En algunos navegadores un proveedor externo puede procesar el audio: no prometer dictado exclusivamente local. Solo informar problemas cuando ocurran, no con banners.
-- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (sin ningún marcador si está vacía). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. Si no hay foto, **el texto ocupará todo el ancho de la ficha** y no existirá un área vacía reservada. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
-- Quien publica puede adjuntar una fotografía opcional mediante **icono integrado en la caja de necesidad**. No añadir un campo visible más a los dos existentes. Reducir resolución y tamaño antes de almacenar; conservar o quitar la foto durante la edición y adaptar las reglas de actualización en Firestore.
-- Los ejemplos siguen mostrando el mismo espacio a la derecha y los mismos controles que las fichas reales, sin textos de prueba intrusivos.
+Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de muestra.
 
-### Imagen ampliada y continuidad del proyecto (actualización 2.2.6)
+- En **ninguna pestaña** deben aparecer necesidades de ejemplo ni números ficticios.
+- Tampoco en la página inicial o al comenzar con base de datos vacía.
+- Conservar únicamente registros auténticos; ignorar cualquier legado identificado como ejemplo sin eliminar datos reales.
+- Los datos de muestra quedan reservados a **pruebas automatizadas internas**, no al público.
+- No poner en la propia página avisos de demo, textos de «estos números son ficticios» ni número de versión.
 
-- **Al tocar cualquier parte de una fotografía real** en una ficha, abrir un visor modal en primer plano. Mostrar el archivo **completo y sin recortes** con ajuste `object-fit: contain` sobre fondo oscuro; no abrir otra página ni navegar lejos de la necesidad.
-- El visor debe tener una **X** fácil de alcanzar, cerrarse con **Escape** y con toque sobre el fondo fuera de la imagen; mantener accesibilidad (botón con nombre, foco y retorno a la publicación).
-- Permitir la misma ampliación al tocar la miniatura de la fotografía dentro del editor. Sin fotografía no existe marcador ni control de ampliación.
-- La presentación lateral compacta de las fotos en las fichas sigue intacta y los ejemplos usan exactamente el mismo componente.
-- **Cierre de diseño:** esta iteración se da por completada en versión 2.2.6. La descripción de aprendizajes, del estado técnico y de las tareas restantes para publicar un servicio multiusuario se encuentra en **[CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md)**. La configuración y el despliegue de Firebase siguen siendo tareas independientes.
+## I. Restricciones y seguridad que no deben olvidarse
 
-## 5. Versión de publicación visible
+- El almacenamiento Firebase **todavía no está configurado** en el proyecto conocido. En modo local, las publicaciones del navegador no se comparten con otros visitantes; no prometer lo contrario ni ocultar esa limitación en respuestas técnicas.
+- Al activar Firebase, la identidad de quien publicó y el control de creación/edición/eliminación deben verificarse en reglas de seguridad, **no únicamente en botones ocultos**.
+- El número se publica como mecanismo de contacto en enlaces y PNG: solicitar consentimiento explícito y evitar usos secundarios no autorizados.
+- La web sirve como tablón informativo, no como sustituto de WhatsApp, marcador de teléfono, sistema de pagos ni registro de contratos.
+- Las imágenes comprimidas y datos guardados localmente pueden tener límites de tamaño; para escala real evaluar almacenamiento externo y privacidad antes de implementarlo, sin introducirlo espontáneamente.
 
-Al inicio de **todas** las pantallas hay una barra discreta que muestra **solo «Versión X.Y.Z»**, sin fecha, enlaces, avisos ni notas adicionales. Aumentar en **cada modificación que se publique**, incluso si es solo visual o textual. Sincronizar:
-- \`APP_VERSION\` en \`simple-model.js\`.
-- \`#release-version\` inicial en \`index.html\`.
-- Versión en parámetros de caché de CSS y JS en \`index.html\`.
-- Registro de cambios en el repositorio, nunca como un banner en la página.
+## J. Preferencias sobre cómo debe trabajar cualquier IA
 
-## 6. Ejemplos y cambios futuros
+- **La fidelidad al producto importa más que inventar mejoras**. El usuario pide cambios concretos; no añadir por iniciativa propia campos, flujos, rótulos o avisos.
+- No confundir «propuesta de imagen» con «editar la web». Para cambios visuales, mostrar una maqueta cuando lo solicite; publicar únicamente cuando lo autorice.
+- Si el usuario cambia de opinión (p. ej., espacio vacío sin foto → ahora texto a ancho completo; tres pestañas → ahora cuatro), registrar **solo la decisión nueva como vigente**. No acumular ambas reglas en la misma sección.
+- Respetar la selección final entre imágenes distintas; conservar el archivo aprobado, a ancho grande, no sustituirlo por uno nuevo sin orden.
+- Crear **rama nueva + PR** hacia **codex/diseno-original**, la rama que alimenta GitHub Pages. No usar main por inercia. Si solicita cambiar la página directamente, fusionar y verificar el despliegue.
+- Validar con pruebas y ser claro sobre lo que no se ejecutó (móvil real, emulador Firestore). Un despliegue correcto no confirma una prueba física.
+- Mantener siempre actualizados los tres documentos de reglas, preferencias y continuidad para permitir que **cualquier otra IA** continúe el proyecto sin depender de recuerdos del chat.
+- Al hacer únicamente **cambios documentales**, no alterar interfaz, assets ni versión interna de la aplicación.
+- No reutilizar antiguas especificaciones o textos de README como si superaran esta guía. El historial de experimentos anteriores sigue disponible en commits y PR.
 
-**Toda modificación visual o del modelo requiere revisar inmediatamente las publicaciones de ejemplo.** Deben reflejar cómo se vería una ficha real escrita en la versión actual, incluida la información redactada en una sola entrada y los dos iconos de contacto. Probar muestras que incluyan lugar, cantidad y presupuesto dentro del texto, para detectar si aparecen por error recuadros de datos estructurados.
+## K. Comprobación rápida antes de aprobar otra modificación
 
-No hacer cambios solo en la ficha real dejando los ejemplos atrás ni usar fixtures con estructuras abandonadas.
+- [ ] ¿La página sigue ofreciendo exactamente cuatro pestañas en una cuadrícula 2 × 2 en PC y celular?
+- [ ] ¿Inicio contiene exclusivamente la ilustración tercera aprobada, grande y sin recortes?
+- [ ] ¿La lista muestra solo fichas reales y el buscador incluye teléfono y tramos?
+- [ ] ¿La ficha contiene toda la descripción justificada, sin título ni chips?
+- [ ] ¿Con foto va a la derecha y amplía completa; sin foto, texto usa todo el ancho?
+- [ ] ¿En la ficha ajena hay 3 iconos y en la propia 5, todos en una sola fila?
+- [ ] ¿El PNG representa fielmente texto/foto y contiene teléfono real?
+- [ ] ¿En el editor solo hay dos campos y una fila de controles con ejemplo telefónico interior?
+- [ ] ¿Enter envía, Shift+Enter hace salto, micro y foto siguen funcionando?
+- [ ] ¿Solo el dueño puede editar/eliminar y el editor muestra papelera más X al editar?
+- [ ] ¿Desaparecieron ejemplos, versiones visibles, avisos molestos y controles descartados?
+- [ ] ¿Las reglas y la documentación coinciden con la UI real y con el alcance probado?
 
-## 7. Flujo responsable de trabajo en GitHub
+**Si algún punto falla, corregir o señalarlo expresamente antes de afirmar que se completó.**
 
-- Leer el código vigente, este documento y \`AGENTS.md\` antes de actuar.
-- Proponer planes sin editar si esa es la autorización. Cuando haya autorización de ejecutar, crear **rama de prueba** basada en \`codex/diseno-original\` y mantener \`main\` intacta.
-- Cambiar lo mínimo; no reactivar \`2026-10-22_app.js\` ni \`firebase-live.js\` sin necesidad explícita, pues el cliente activo es \`simple.js\`.
-- Probar sintaxis JS, validación de teléfonos, permisos de autor, enlaces WhatsApp, cantidad exacta de campos, fidelidad de ejemplos, lectura completa y diseño móvil. Cuando se pueda, probar visualmente en navegador y con datos reales de demostración.
-- Antes de fusionar, comparar rama con la publicada y revisar que los cambios estén limitados al objetivo. Usar PR; fusionar solo cuando esté autorizado publicar. Verificar el resultado de GitHub Pages; no confundir compilación exitosa con revisión visual real.
-- Documentar con transparencia las pruebas que no se ejecutaron y conservar un camino reversible.
-- Los fallos y limitaciones técnicas pertenecen a la documentación y al informe del trabajo, no a advertencias intrusivas en la portada.
-
-## 8. Estado técnico conocido y aspectos por resolver
-
-- Repositorio: https://github.com/gruemp/lonecesito
-- Sitio: https://gruemp.github.io/lonecesito/
-- Rama que activa GitHub Pages: \`codex/diseno-original\`.
-- Archivos de interfaz: \`index.html\`, \`simple.css\`, \`simple.js\`, \`simple-model.js\`.
-- \`firebase-config.js\` estaba vacío a octubre de 2026; con esa configuración, las publicaciones se guardan localmente en ese navegador, **no se comparten** entre todos los visitantes. Comprobar el estado nuevamente antes de declarar que existe un servicio público multiusuario.
-- Las reglas de \`firestore.rules\` requieren despliegue y pruebas en Firestore aparte de GitHub Pages. Revisar seguridad, autorización del autor y privacidad de teléfonos antes de usar personas reales.
-- Los módulos viejos y el historial técnico pueden contener textos/funciones descartados; no son fuente de verdad del diseño actual.
-
-## 9. Prioridad y resolución de conflictos
-
-1. La instrucción nueva y expresa del usuario prevalece sobre este documento.
-2. Este documento refleja la intención vigente y prevalece sobre archivos históricos, pruebas viejas o decisiones no solicitadas de otra IA.
-3. La implementación y los ejemplos deben actualizarse juntos.
-4. Ante una limitación de seguridad o técnica, comunicarla con claridad, sin inventar funcionalidades.
-5. Actualizar esta guía y \`AGENTS.md\` cuando el usuario cambie una preferencia; **no confiar únicamente en recordar el chat**.
-
-## 10. Portabilidad a otras herramientas de IA
-
-El documento es Markdown estándar, legible en cualquier plataforma con acceso a archivos. Otra IA **no** lo leerá automáticamente si no tiene acceso al repositorio: compartirle el enlace al archivo o copiarle su contenido. No guardar aquí datos privados del propietario ni información sensible de usuarios.
+---
+**Fuentes vigentes:** [AGENTS.md](../AGENTS.md) · [Continuidad técnica](CONTINUIDAD-Y-APRENDIZAJES.md) · [Código GitHub](https://github.com/gruemp/lonecesito/tree/codex/diseno-original).
