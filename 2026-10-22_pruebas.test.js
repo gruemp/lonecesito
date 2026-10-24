@@ -229,7 +229,7 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(screens,[...SCREEN_IDS]);
 });
-test('las imágenes se muestran en cada ficha y en el asistente, sin depender de Detalles',()=>{
+test('las imágenes se muestran solamente al abrir la ficha y dentro del asistente',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
@@ -350,13 +350,15 @@ test('el título del asistente sigue sin imponer longitud mínima ni máxima',()
     assert.ok(tag[0].includes('required'),'Debe impedirse solo el valor vacío');
   }
 });
-test('las tres vistas reutilizan la misma estructura de ficha completa',()=>{
+test('las tres vistas usan el mismo listado compacto que abre una ficha al pulsar el nombre',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   assert.ok(js.includes('function needCard(request,context){'));
-  assert.ok(js.includes("needCard(request,'explorar')"));
-  assert.ok(js.includes("needCard(request,'propias')"));
-  assert.ok(js.includes("needCard(request,'aceptadas')"));
+  assert.ok(js.includes("renderNeedList(grid,records(),'explorar')"));
+  assert.ok(js.includes("renderNeedList(container,state.requests,'propias')"));
+  assert.ok(js.includes("renderNeedList(list,accepted,'aceptadas')"));
+  assert.ok(js.includes('function compactNeedRow(request,context,expanded=false){'));
+  assert.ok(js.includes('content.append(needCard(request,context))'));
   for(const marker of ["el('h3','need-card-title',request.title)","el('p','need-card-description',request.description)","el('ul','need-card-meta')","el('div','need-card-overview')","overview.append(copy,photo)","article.append(head,overview,contextNote,actions)"]){
     assert.ok(js.includes(marker),'Falta '+marker);
   }
@@ -459,7 +461,7 @@ test('botones de acceso y acciones primarias poseen tamaño cómodo para celular
   assert.ok(css.includes('.filter,.my-action,.card-link{min-height:43px}'));
   assert.ok(html.includes('class="section-primary-action"'));
 });
-test('la foto y toda la información se ven en cada ficha, sin modal adicional',()=>{
+test('la ficha expandida conserva información y foto, sin modal adicional',()=>{
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
@@ -496,4 +498,56 @@ test('la descripción completa no se corta y la foto permanece a la derecha tamb
   assert.ok(css.includes('-webkit-line-clamp:unset'));
   assert.ok(css.includes('object-fit:contain'));
   assert.ok(css.includes('overflow-wrap:anywhere'));
+});
+
+test('cada línea contraída presenta únicamente el título y no carga la fotografía',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const start=js.indexOf('function compactNeedRow(request,context,expanded=false){');
+  const end=js.indexOf('function renderNeedList(container,requests,context){',start);
+  assert.ok(start>=0&&end>start);
+  const body=js.slice(start,end);
+  assert.ok(body.includes("const row=el('details','need-list-row')"));
+  assert.ok(body.includes("const heading=el('summary','need-list-summary')"));
+  assert.ok(body.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(body.includes("row.append(heading,content)"));
+  assert.ok(body.includes("row.addEventListener('toggle',show)"));
+  assert.ok(body.includes('if(row.open){'));
+  assert.ok(body.includes('content.append(needCard(request,context))'));
+  assert.ok(body.includes('content.replaceChildren()'));
+  assert.ok(body.includes('if(expanded){'));
+  assert.equal(body.includes('pictureNode('),false,'Una línea cerrada no crea imágenes');
+});
+test('las tres listas comparten estilo sin margen, sin huecos entre renglones',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  for(const piece of [
+    ':is(#request-grid,#my-requests-grid,#accepted-grid){',
+    'grid-template-columns:none',
+    'gap:0',
+    'border-bottom:1px solid #e2eae2',
+    '.need-list-summary{',
+    'min-height:37px',
+    'text-overflow:ellipsis',
+    'white-space:nowrap',
+    '.need-list-summary::-webkit-details-marker{display:none}',
+    '.need-list-title{'
+  ])assert.ok(css.includes(piece),'No está '+piece);
+});
+test('el nombre abre ficha con teclado y se conservan filas abiertas al actualizar',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  assert.ok(js.includes("el('summary','need-list-summary')"));
+  assert.ok(js.includes("row.addEventListener('toggle',show)"));
+  assert.ok(js.includes("new Set([...container.querySelectorAll('.need-list-row[open]')]"));
+  assert.ok(js.includes('expanded.has(request.id)'));
+  assert.ok(js.includes('row.open=true;'));
+  assert.equal(js.includes("addEventListener('mouseover'"),false);
+});
+test('la lista solo muestra títulos sin fotos inicialmente en las tres secciones',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  for(const id of ['request-grid','my-requests-grid','accepted-grid'])
+    assert.ok(html.includes('id="'+id+'"'));
+  assert.ok(js.includes('renderNeedList(grid,records()'));
+  assert.ok(js.includes('renderNeedList(container,state.requests'));
+  assert.ok(js.includes('renderNeedList(list,accepted'));
+  assert.ok(html.includes('Toca cualquier nombre para abrir su información'));
 });
