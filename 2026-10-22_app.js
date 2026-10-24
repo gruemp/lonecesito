@@ -264,7 +264,7 @@ export function acceptNeedLocally(state,request){
   const isOwn=state.requests?.some(item=>item.id===request.id);
   if(isOwn)throw new Error('No puedes aceptar tu propia necesidad.');
   if(!EXAMPLES.some(item=>item.id===request.id))throw new Error('No se encontró la necesidad.');
-  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aceptaste esta necesidad.');
+  if(state.acceptances?.some(item=>item.requestId===request.id))throw new Error('Ya aplicaste a esta necesidad.');
   const entry={requestId:request.id,acceptedAt:new Date().toISOString()};
   return {...state,acceptances:[...(state.acceptances||[]),entry]};
 }
@@ -455,7 +455,7 @@ function init(){
         actions.append(el('span','need-card-finished','Necesidad resuelta'));
       }
     }else if(accepted||context==='aceptadas'){
-      actions.append(makeButton('Necesidad aceptada','accepted',true,true));
+      actions.append(makeButton('Ya aplicaste a esta necesidad','accepted',true,true));
     }else if(request.status==='abierta'){
       actions.append(makeButton('Aceptar necesidad','accept',true));
     }else{
@@ -527,7 +527,7 @@ function init(){
       if(!persistState(storage,next))throw new Error('No se pudo registrar la aceptación.');
       state=next;
       renderOwnRequests();
-      showToast('Necesidad aceptada.');
+      showToast('Ya aplicaste a esta necesidad.');
     }catch(error){showToast(error.message);}
   }
   function updateOtherCityField(){
