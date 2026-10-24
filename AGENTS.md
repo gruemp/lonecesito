@@ -33,6 +33,8 @@ Este archivo es la **entrada obligatoria** para agentes e IAs que abran este rep
 22. **Sin encabezados redundantes de secciones**: quitar de las vistas «Publicar lo que necesitas», «Mis publicaciones» y «Necesidades publicadas» los títulos grandes y los párrafos explicativos indicados por el usuario. Mantener las etiquetas de entrada y los tres botones superiores, que sí son navegación. Asignar `aria-label` a secciones sin encabezados visibles.
 23. **PNG fiel al nuevo formato**: la imagen compartida no lleva título independiente y se adapta al alto real del contenido; si no hay fotografía, el texto abarca todo el ancho de la ficha PNG y no se reserva una columna vacía. Mantener teléfono real en PNG y excluir ficticios.
 
+24. **Versión 2.2.9 — una sola fila de cinco iconos como máximo**: todas las fichas deben contener **una sola fila horizontal de botones** bajo el texto/foto. En las fichas propias exactamente **cinco botones de icono, sin palabras visibles**: llamar (azul), WhatsApp (verde), **compartir PNG (morado, icono universal de tres círculos unidos)**, editar (azul claro, lápiz) y eliminar (rojo claro, papelera). En fichas ajenas y muestras, solo los tres primeros. **No** crear una segunda fila `owner-actions`, ni botones con texto «Editar»/«Eliminar». Conservar `aria-label`, `title`, tamaño táctil mínimo de 44 px en móvil, permisos de edición/borrado y confirmación de eliminación. Las fichas de ejemplos se renderizan con la misma fila de tres iconos.
+
 ## Puntos de entrada
 
 - Sitio: https://gruemp.github.io/lonecesito/
