@@ -67,57 +67,52 @@ function paintImage(ctx,img,x,y,width,height){
   ctx.drawImage(img,x+(width-w)/2,y+(height-h)/2,w,h);
   ctx.restore();
 }
-/* Retorna un archivo PNG que puede enviarse por cualquier aplicación.
-   En el PNG se incluye el teléfono REAL para que la copia gráfica sea útil.
-   En la ficha de la web el teléfono continúa oculto tras sus dos iconos. */
-export async function makeCardPng({title,description,picture,contactPhone,example}){
-  const width=1080,margin=35,padding=54;
+/* PNG fiel a la ficha: sin título, altura según contenido y ancho total si no hay foto.
+   El teléfono de una publicación real se incluye únicamente en la copia compartida. */
+export async function makeCardPng({description,picture,contactPhone,example}){
+  const width=1080,margin=35,padding=46;
   const left=margin+padding;
   const available=width-2*left;
-  const imageWidth=270,imageGap=28;
-  const bodyWidth=available-imageWidth-imageGap;
+  const imageWidth=260,imageGap=24;
+  const img=await photoImage(picture);
+  const hasPhoto=Boolean(img);
+  const bodyWidth=hasPhoto?available-imageWidth-imageGap:available;
   const drawing=document.createElement('canvas');
   const ctx=drawing.getContext('2d');
-  if(!ctx)throw new Error('El navegador no puede crear la imagen.');
-  ctx.font='bold 58px system-ui, sans-serif';
-  const titleLines=wrapLines(ctx,title,available);
-  const titleHeight=titleLines.length*68;
+  if(!ctx)throw new Error('El navegador no puede generar el PNG.');
   ctx.font='33px system-ui, sans-serif';
   const bodyLines=wrapLines(ctx,description,bodyWidth);
-  const paragraphHeight=bodyLines.length*46;
-  const photoHeight=345;
+  const lineHeight=46;
+  const paragraphHeight=Math.max(lineHeight,bodyLines.length*lineHeight);
+  const aspect=hasPhoto?(img.naturalHeight||img.height)/(img.naturalWidth||img.width):0;
+  const photoHeight=hasPhoto?Math.min(340,Math.max(175,Math.round(imageWidth*aspect))):0;
   const bodyHeight=Math.max(paragraphHeight,photoHeight);
-  const bodyY=margin+padding+titleHeight+28;
-  const footerY=bodyY+bodyHeight+35;
+  const bodyY=margin+padding;
+  const footerY=bodyY+bodyHeight+25;
   const hasPhone=!example&&Boolean(contactPhone);
-  const footerHeight=hasPhone?115:80;
-  const height=Math.ceil(footerY+footerHeight+margin+36);
-  drawing.width=width;drawing.height=height;
+  const footerHeight=hasPhone?102:66;
+  const height=Math.ceil(footerY+footerHeight+margin);
 
+  drawing.width=width;drawing.height=height;
   ctx.fillStyle='#f3f7f5';ctx.fillRect(0,0,width,height);
-  ctx.fillStyle='#ffffff';
-  ctx.shadowColor='rgba(27,65,49,0.16)';
-  ctx.shadowBlur=30;ctx.shadowOffsetY=8;
-  roundedRect(ctx,margin,margin,width-2*margin,height-2*margin,38);
+  ctx.fillStyle='#fff';
+  ctx.shadowColor='rgba(27,65,49,0.12)';
+  ctx.shadowBlur=23;ctx.shadowOffsetY=6;
+  roundedRect(ctx,margin,margin,width-2*margin,height-2*margin,30);
   ctx.fill();
   ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
 
-  ctx.fillStyle='#0f2420';ctx.font='bold 58px system-ui, sans-serif';
-  drawWrapped(ctx,titleLines,left,margin+padding+55,available,68);
-  ctx.fillStyle='#334843';ctx.font='33px system-ui, sans-serif';
-  drawWrapped(ctx,bodyLines,left,bodyY+32,bodyWidth,46,true);
-
-  // La columna derecha existe incluso sin foto; en ese caso no se pinta nada.
-  const image=await photoImage(picture);
-  paintImage(ctx,image,left+bodyWidth+imageGap,bodyY,imageWidth,photoHeight);
+  ctx.font='33px system-ui, sans-serif';ctx.fillStyle='#334843';
+  drawWrapped(ctx,bodyLines,left,bodyY+32,bodyWidth,lineHeight,true);
+  if(hasPhoto)paintImage(ctx,img,left+bodyWidth+imageGap,bodyY,imageWidth,photoHeight);
 
   ctx.beginPath();ctx.moveTo(left,footerY);ctx.lineTo(width-left,footerY);
   ctx.strokeStyle='#dfeae4';ctx.lineWidth=2;ctx.stroke();
-  ctx.fillStyle='#175b45';ctx.font='bold 30px system-ui, sans-serif';
-  ctx.fillText('LoNecesito',left,footerY+49);
+  ctx.font='bold 26px system-ui, sans-serif';ctx.fillStyle='#175b45';
+  ctx.fillText('LoNecesito',left,footerY+40);
   if(hasPhone){
-    ctx.fillStyle='#2c4c40';ctx.font='30px system-ui, sans-serif';
-    ctx.fillText('Teléfono y WhatsApp: '+String(contactPhone),left,footerY+93);
+    ctx.font='28px system-ui, sans-serif';ctx.fillStyle='#2c4c40';
+    ctx.fillText('Teléfono y WhatsApp: '+String(contactPhone),left,footerY+79);
   }
 
   return new Promise((resolve,reject)=>{
