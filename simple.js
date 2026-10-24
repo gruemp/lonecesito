@@ -196,7 +196,123 @@ function render(){
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
 }
 $('search').addEventListener('input',render);
+/* Dictado opcional mediante el navegador; el teclado sigue disponible siempre. */
+let recognition=null;
+let pictureDraft='';
+let pictureLoading=false;
+function setMicState(active){
+  const button=$('voice-button');
+  button.classList.toggle('listening',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',active?'Detener dictado':'Dictar necesidad por voz');
+  button.title=active?'Detener dictado':'Dictar necesidad';
+}
+function stopDictation(){
+  const current=recognition;
+  recognition=null;
+  if(current)try{current.abort();}catch{}
+  setMicState(false);
+}
+$('voice-button').addEventListener('click',()=>{
+  if(recognition){stopDictation();return;}
+  const Constructor=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!Constructor){
+    toast('Este navegador no admite dictado en la página. Puedes usar el micrófono del teclado.');
+    return;
+  }
+  try{
+    const instance=new Constructor();
+    recognition=instance;
+    instance.lang='es-CO';
+    instance.continuous=false;
+    instance.interimResults=false;
+    instance.maxAlternatives=1;
+    instance.onresult=event=>{
+      let transcript='';
+      for(let i=0;i<event.results.length;i++){
+        if(event.results[i].isFinal)transcript+=event.results[i][0].transcript+' ';
+      }
+      transcript=transcript.trim();
+      if(!transcript)return;
+      const textarea=$('need-description');
+      const join=textarea.value&&!/\s$/.test(textarea.value)?' ':'';
+      textarea.value=(textarea.value+join+transcript).slice(0,4000);
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
+    };
+    instance.onerror=event=>{
+      if(event.error==='not-allowed'||event.error==='service-not-allowed')toast('Permite el uso del micrófono para dictar.');
+      else if(event.error==='network')toast('El dictado necesita conexión en este navegador.');
+      else if(event.error!=='aborted'&&event.error!=='no-speech')toast('No se pudo reconocer la voz.');
+    };
+    instance.onend=()=>{
+      if(recognition===instance){recognition=null;setMicState(false);}
+    };
+    instance.start();
+    setMicState(true);
+  }catch{
+    recognition=null;setMicState(false);
+    toast('No se pudo iniciar el micrófono.');
+  }
+});
+function updatePhotoPreview(){
+  const preview=$('photo-preview');
+  preview.hidden=!pictureDraft;
+  $('photo-preview-image').src=pictureDraft||'';
+  $('photo-picker').value='';
+}
+$('add-photo').addEventListener('click',()=>$('photo-picker').click());
+$('remove-photo').addEventListener('click',()=>{
+  pictureDraft='';updatePhotoPreview();
+});
+function loadPhotoBitmap(file){
+  if(typeof createImageBitmap==='function')return createImageBitmap(file);
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se pudo leer la imagen.'));};
+    img.src=url;
+  });
+}
+async function encodePhoto(file){
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Selecciona una foto JPG, PNG o WebP.');
+  if(file.size>12000000)throw Error('La foto es demasiado grande. Selecciona una de menos de 12 MB.');
+  const img=await loadPhotoBitmap(file);
+  try{
+    const width=img.width||img.naturalWidth,height=img.height||img.naturalHeight;
+    if(!width||!height)throw Error('No se pudo leer la foto.');
+    const canvas=document.createElement('canvas');
+    const context=canvas.getContext('2d');
+    if(!context)throw Error('Este navegador no puede procesar fotos.');
+    for(const maxSide of [960,800,640,480,320]){
+      const ratio=Math.min(1,maxSide/Math.max(width,height));
+      canvas.width=Math.max(1,Math.round(width*ratio));
+      canvas.height=Math.max(1,Math.round(height*ratio));
+      context.fillStyle='#ffffff';context.fillRect(0,0,canvas.width,canvas.height);
+      context.drawImage(img,0,0,canvas.width,canvas.height);
+      for(const quality of [.78,.66,.52]){
+        const encoded=canvas.toDataURL('image/jpeg',quality);
+        if(encoded.length<380000)return encoded;
+      }
+    }
+    throw Error('La imagen no se pudo comprimir. Elige una foto más pequeña.');
+  }finally{
+    if(typeof img.close==='function')img.close();
+  }
+}
+$('photo-picker').addEventListener('change',async()=>{
+  const file=$('photo-picker').files?.[0];
+  if(!file)return;
+  pictureLoading=true;$('add-photo').disabled=true;
+  try{
+    pictureDraft=await encodePhoto(file);
+    updatePhotoPreview();
+  }catch(error){toast(error.message||'No se pudo adjuntar la foto.');}
+  finally{pictureLoading=false;$('add-photo').disabled=false;$('photo-picker').value='';}
+});
 function resetForm(){
+  stopDictation();
+  pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
   $('publish-title').textContent='Publica lo que necesitas';
   $('save-button').textContent='Publicar necesidad';
@@ -209,6 +325,7 @@ function editRecord(record){
   state.editingId=record.id;
   $('need-description').value=legacyDetails(record);
   $('need-phone').value=record.contactPhone||'';
+  pictureDraft=record.picture||'';updatePhotoPreview();
   $('publish-title').textContent='Edita tu publicación';
   $('save-button').textContent='Guardar cambios';
   $('cancel-edit').hidden=false;
@@ -230,6 +347,7 @@ async function deleteRecord(record){
 $('publish-form').addEventListener('submit',async event=>{
   event.preventDefault();
   if(state.saving)return;
+  if(pictureLoading){toast('La imagen aún se está preparando.');return;}
   if(state.mode==='cloud'&&!state.user){state.waitingForAuth=true;showAuth();return;}
   let current=null;
   try{
@@ -237,12 +355,13 @@ $('publish-form').addEventListener('submit',async event=>{
       description:$('need-description').value,
       contactPhone:$('need-phone').value
     });
+    if(pictureDraft)data.picture=pictureDraft;
     current=state.items.find(item=>item.id===state.editingId);
     if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
     state.saving=true;$('save-button').disabled=true;
     if(state.mode==='demo'){
-      const base=current?{id:current.id,ownerUid:current.ownerUid,createdAt:current.createdAt,...(current.picture?{picture:current.picture}:{})}
+      const base=current?{id:current.id,ownerUid:current.ownerUid,createdAt:current.createdAt}
         :{id:'local-'+Date.now()+'-'+Math.random().toString(36).slice(2),ownerUid:currentUid(),createdAt:Date.now()};
       const item={...base,...data};
       saveLocal(current?state.items.map(x=>x.id===current.id?item:x):[item,...state.items]);
@@ -250,6 +369,7 @@ $('publish-form').addEventListener('submit',async event=>{
       const api=state.firebase;
       if(current){
         const updated={...data};
+        if(current.picture&&!pictureDraft)updated.picture=api.deleteField();
         // Retirar campos de formularios anteriores; sus datos ya están en la descripción.
         for(const key of ['category','city','subcategory','quantity','condition','budget','desiredDate','status']){
           if(Object.prototype.hasOwnProperty.call(current,key))updated[key]=api.deleteField();
