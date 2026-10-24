@@ -1,4 +1,20 @@
 # lonecesito
+## Interfaz didáctica: opciones diferenciadas (diseño vigente)
+
+- Las **cuatro acciones principales** conservan sus destinos y etiquetas, con colores, símbolos y ayudas breves: publicar (verde oscuro), solucionar una necesidad (verde claro), administrar publicaciones propias (azul) y revisar necesidades aceptadas (ámbar). Se mantienen en la misma columna central en PC y celular.
+- La diferencia no depende únicamente del color: cada opción tiene **icono específico, título y explicación**, con estados de foco visibles.
+- En las tres listas, las necesidades siguen mostrando **solo su nombre en una línea**. Las filas alternan blanco/gris muy claro, una flecha indica si están abiertas, y el renglón abierto recibe un fondo resaltado; la ficha completa con fotografía sigue apareciendo solamente al pulsar el título.
+- Textos breves en cada sección explican qué acción realizar, sin instrucciones extensas ni nuevos formularios.
+- El rojo se reserva para acciones como «Cancelar necesidad»; las necesidades ya aceptadas mantienen un tratamiento ámbar, con texto de estado.
+- Se respetan la navegación, filtros, publicación guiada, aceptación local y las restricciones actuales de Firebase pendiente.
+
+**Validación:** 57 pruebas de lógica y estructura aprobadas en ejecución JavaScript aislada; HTML con IDs únicos, selectores existentes y CSS equilibrado. No equivale a pruebas visuales con dispositivos físicos.
+
+La aplicación continúa en **demostración local**: no hay publicaciones ni aceptaciones compartidas entre personas hasta que se integre Firebase.
+
+Las secciones inferiores del README documentan versiones históricas de la interfaz.
+
+---
 ## Interfaz vigente: listas compactas de títulos expandibles
 
 - En **Soluciona una necesidad y gana dinero por ello**, **Mis necesidades publicadas para que otros ofrezcan solucionarlas** y **Necesidades de terceros aceptadas para solucionar**, cada necesidad aparece inicialmente como **una sola línea clicable con su nombre**, sin imagen, fecha, descripción, botones ni espacios entre renglones.
