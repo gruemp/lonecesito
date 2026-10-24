@@ -387,3 +387,53 @@ body:has(.image-dialog[open]){overflow:hidden}
   .publication-card .contact-action{min-height:44px;padding:4px 2px}
   .publication-card .contact-action .contact-icon{width:20px;height:20px;flex-basis:20px}
 }
+
+
+/* v2.2.10: una fila debajo de la descripción, tal como la maqueta.
+   Teléfono con icono a la izquierda y ejemplo DENTRO, foto, micro y envío sin texto. */
+#publish-form{gap:8px}
+#publish-form .need-entry{position:relative;min-width:0}
+#publish-form .need-entry #need-description{display:block;width:100%;min-height:145px;padding:12px 13px;box-sizing:border-box}
+#publish-form .need-entry.has-photo-preview #need-description{padding-bottom:60px}
+#publish-form .need-entry .photo-preview{position:absolute;right:9px;bottom:9px;z-index:2;display:flex;align-items:center;gap:3px;padding:3px;border:1px solid #d9e5de;border-radius:8px;background:#ffffffee}
+#publish-form .need-entry .photo-preview[hidden]{display:none!important}
+#publish-form .publish-controls{
+  display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 52px;
+  align-items:stretch;gap:7px;min-width:0;width:100%;
+}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(4,44px)}
+#publish-form .publish-controls [hidden]{display:none!important}
+#publish-form .phone-field{display:flex;align-items:center;gap:7px;min-width:0;min-height:46px;box-sizing:border-box;padding:0 8px;
+  background:#f8fffa;border:1px solid #afcdbb;border-radius:10px;color:#246a53}
+#publish-form .phone-field:focus-within{border-color:#22845d;box-shadow:0 0 0 2px #b9e5d0}
+#publish-form .phone-field-icon{display:block;flex:0 0 20px;width:20px;height:20px}
+#publish-form .phone-field #need-phone{min-height:0;height:100%;width:100%;min-width:0;margin:0;padding:0;
+  font:inherit;font-size:14px;font-weight:600;border:0;outline:none;box-shadow:none;background:transparent;color:#173b30}
+#publish-form .phone-field #need-phone:focus{outline:none;border:0;box-shadow:none}
+#publish-form .phone-field #need-phone::placeholder{color:#648073;opacity:1;font-weight:500}
+#publish-form .publish-controls .entry-tool{width:100%;height:auto;min-height:46px;min-width:0;flex:none;border-radius:10px;padding:7px}
+#publish-form .publish-controls .entry-tool svg{width:22px;height:22px}
+#publish-form .publish-controls .publish-icon-button{min-width:0;width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;
+  padding:7px;border-radius:10px;background:var(--green);color:#fff;border:1px solid var(--green);cursor:pointer}
+#publish-form .publish-icon-button svg{display:block;width:23px;height:23px;flex:none}
+#publish-form .publish-icon-button:hover{background:var(--green-dark)}
+#publish-form .publish-icon-button:disabled{opacity:.6;cursor:progress}
+#publish-form .cancel-icon-button{min-width:0;width:100%;min-height:46px;padding:4px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;font-size:26px;line-height:1;color:#a34d37}
+#publish-form .publish-controls button:focus-visible{outline:3px solid #d8a944;outline-offset:2px}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 42px 42px 45px;gap:5px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(4,39px)}
+  #publish-form .phone-field{gap:5px;padding:0 6px;min-height:44px}
+  #publish-form .phone-field-icon{width:18px;height:18px;flex-basis:18px}
+  #publish-form .phone-field #need-phone{font-size:12px;letter-spacing:-.1px}
+  #publish-form .publish-controls .entry-tool,#publish-form .publish-controls .publish-icon-button{min-height:44px;padding:5px}
+  #publish-form .publish-icon-button svg{width:21px;height:21px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,38px);gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(4,36px);gap:3px}
+  #publish-form .phone-field{gap:3px;padding:0 5px}
+  #publish-form .phone-field-icon{width:16px;height:16px;flex-basis:16px}
+  #publish-form .phone-field #need-phone{font-size:11px}
+}
