@@ -1163,3 +1163,49 @@ dialog{
   .need-card-overview{grid-template-columns:minmax(0,1fr) 82px;gap:8px}
   .wizard-actions .button{font-size:12px}
 }
+
+
+/* Listas de necesidades: cuatro tonos pastel cíclicos sin cambiar tamaño,
+   contenido ni comportamiento. Las variables se aplican a las tres vistas. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(4n + 1){
+  --row-bg:#e5f1fc;
+  --row-ink:#173f61;
+  --row-accent:#3983c6;
+  --row-open:#d3e7f8;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(4n + 2){
+  --row-bg:#fff1d9;
+  --row-ink:#704a16;
+  --row-accent:#d99a36;
+  --row-open:#ffe6bf;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(4n + 3){
+  --row-bg:#f0e9fa;
+  --row-ink:#503777;
+  --row-accent:#9874c5;
+  --row-open:#e5d8f5;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(4n){
+  --row-bg:#e6f5ed;
+  --row-ink:#205644;
+  --row-accent:#34896e;
+  --row-open:#d4ebdc;
+}
+/* El fondo, el texto, la flecha y la banda comparten el tono de cada línea.
+   La franja interior no altera el ancho ni la altura del listado compacto. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n) > .need-list-summary{
+  background:var(--row-bg);
+  color:var(--row-ink);
+  box-shadow:inset 5px 0 0 var(--row-accent);
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n)[open] > .need-list-summary{
+  background:var(--row-open);
+  color:var(--row-ink);
+  box-shadow:inset 5px 0 0 var(--row-accent);
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n) > .need-list-summary:hover{
+  background:var(--row-bg);
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n)[open] > .need-list-summary:hover{
+  background:var(--row-open);
+}
