@@ -1,7 +1,7 @@
 /* Modo multiusuario: solo activo al conectar Firebase.
    Las reglas de privacidad viven en firestore.rules, no en esta interfaz. */
 const firebaseSettings=window.LoNecesitoFirebaseConfig;
-if(firebaseSettings?.apiKey&&firebaseSettings?.projectId&&firebaseSettings?.appId){
+if(firebaseSettings?.apiKey&&firebaseSettings?.authDomain&&firebaseSettings?.projectId&&firebaseSettings?.appId){
   launchFirebase().catch(e=>{
     const alert=document.createElement('p');alert.className='live-error shell';
     alert.textContent='Servicio no disponible. No se pueden publicar ni enviar aplicaciones: '+e.message;
