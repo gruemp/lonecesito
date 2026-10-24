@@ -7,8 +7,8 @@
   <meta name="description" content="Publica una necesidad o explora las que puedes resolver. Quien ayuda solo pulsa Aceptar necesidad.">
   <title>LoNecesito — Publica o acepta necesidades</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-listado-1">
-  <script type="module" src="2026-10-22_app.js?v=20261023-listado-1"></script>
+  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-didactica-1">
+  <script type="module" src="2026-10-22_app.js?v=20261023-didactica-1"></script>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -21,6 +21,10 @@
     <symbol id="approved" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="m13 24 8 8 15-17"/></symbol>
     <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
     <symbol id="box" viewBox="0 0 48 48"><path d="m24 5 18 10v20L24 45 6 35V15Zm0 20 18-10M24 25 6 15m18 10v20M15 10l18 10v10"/></symbol>
+    <symbol id="write-need" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4L16.5 3.5Z"/></symbol>
+    <symbol id="help-need" viewBox="0 0 24 24"><path d="m2 12 5-5 4 3 3-3 8 5-8 7-6-3-4 2Z"/><path d="m8 7 3-3 5 1 2 2M8 16l-2-2"/></symbol>
+    <symbol id="my-needs" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5v-2h6v2M9 10h6M9 14h6M9 18h4"/></symbol>
+    <symbol id="accepted-needs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
   </defs></svg>
 
   <header class="compact-header">
@@ -35,10 +39,16 @@
         <p class="eyebrow">NECESITO ALGO</p>
         <h1 id="hero-title">¿Qué necesitas?</h1>
         <p class="hero-description">Publica tu necesidad. O explora lo que otras personas necesitan resolver.</p>
-        <button class="button publish-cta" id="hero-publish" type="button" data-open="publish" aria-label="Publicar una necesidad">
-          <span>Publicar una necesidad</span><svg class="icon" aria-hidden="true"><use href="#arrow"/></svg>
+        <button class="button publish-cta action-cta action-cta-publish" id="hero-publish" type="button" data-open="publish" aria-label="Publicar una necesidad">
+          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#write-need"/></svg>
+          <span class="action-copy"><strong>Publicar una necesidad</strong><small>Describe qué necesitas para que otros puedan ayudarte</small></span>
+          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
         </button>
-        <div class="compact-next-step"><a class="button solve-cta" href="#necesidades" data-explore>Soluciona una necesidad y gana dinero por ello <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a></div>
+        <div class="compact-next-step"><a class="button solve-cta action-cta action-cta-solve" href="#necesidades" data-explore>
+          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#help-need"/></svg>
+          <span class="action-copy"><strong>Soluciona una necesidad y gana dinero por ello</strong><small>Encuentra a alguien a quien puedas ayudar</small></span>
+          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+        </a></div>
         <details class="compact-help">
           <summary>¿Cómo funciona?</summary>
           <ol><li>Quien necesita ayuda publica su solicitud.</li><li>Quien puede ayudar consulta las necesidades.</li><li>Si puede resolver una, pulsa «Aceptar necesidad» sin diligenciar formularios.</li></ol>
@@ -47,14 +57,22 @@
       </div>
     </section>
     <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
-      <a href="#mis-necesidades" data-screen-link="mis-necesidades">Mis necesidades publicadas para que otros ofrezcan solucionarlas <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a>
-      <a href="#aceptadas" data-screen-link="aceptadas">Necesidades de terceros aceptadas para solucionar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a>
+      <a class="action-cta action-cta-mine" href="#mis-necesidades" data-screen-link="mis-necesidades">
+        <svg class="icon action-leading-icon" aria-hidden="true"><use href="#my-needs"/></svg>
+        <span class="action-copy"><strong>Mis necesidades publicadas para que otros ofrezcan solucionarlas</strong><small>Consulta y administra tus publicaciones</small></span>
+        <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+      </a>
+      <a class="action-cta action-cta-accepted" href="#aceptadas" data-screen-link="aceptadas">
+        <svg class="icon action-leading-icon" aria-hidden="true"><use href="#accepted-needs"/></svg>
+        <span class="action-copy"><strong>Necesidades de terceros aceptadas para solucionar</strong><small>Revisa los compromisos que ya aceptaste</small></span>
+        <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+      </a>
     </nav>
 
 
 
     <section class="requests-section shell app-screen" id="necesidades" data-screen="necesidades" aria-labelledby="requests-title" hidden>
-      <div class="section-heading"><div><p class="section-note">Exploración de prueba · Aceptaciones locales, sin contacto real</p><h2 id="requests-title">Soluciona una necesidad y gana dinero por ello</h2><p class="section-description">Consulta rápidamente los nombres de las necesidades. Toca cualquier nombre para abrir su información, fotografía y acciones.</p></div></div>
+      <div class="section-heading"><div><p class="section-note">Exploración de prueba · Aceptaciones locales, sin contacto real</p><h2 id="requests-title">Soluciona una necesidad y gana dinero por ello</h2><p class="section-description">Toca el nombre de una necesidad para ver su descripción, fotografía y opción de aceptar.</p></div></div>
       <div class="filters" role="group" aria-label="Filtrar necesidades por tipo">
         <button class="filter is-active" data-category="all" aria-pressed="true">Todas</button>
         <button class="filter" data-category="bienes" aria-pressed="false">Bienes</button>
@@ -74,12 +92,14 @@
 
     <section class="my-section shell app-screen" id="mis-necesidades" data-screen="mis-necesidades" aria-labelledby="my-title" hidden>
       <div class="section-heading"><h2 id="my-title">Mis necesidades publicadas para que otros ofrezcan solucionarlas <span id="my-count" class="my-count"></span></h2></div>
+      <p class="section-usage">Toca el nombre para revisar, editar o marcar tu necesidad como resuelta.</p>
       <div class="section-primary-action"><button class="button" type="button" data-open="publish">Publicar otra necesidad</button></div><div class="my-grid" id="my-requests-grid"></div>
       <div class="my-empty" id="my-empty"><p>Aún no has creado ninguna necesidad.</p><button class="button button-small" type="button" data-open="publish">Crear necesidad</button></div>
     </section>
 
     <section class="my-section shell app-screen" id="aceptadas" data-screen="aceptadas" aria-labelledby="accepted-title" hidden>
       <div class="section-heading"><h2 id="accepted-title">Necesidades de terceros aceptadas para solucionar</h2></div>
+      <p class="section-usage">Toca una necesidad para revisar lo que aceptaste.</p>
       <div class="section-primary-action"><a class="button button-secondary" href="#necesidades" data-explore>Soluciona otra necesidad <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></a></div><p class="my-note">Aceptaciones de prueba en este navegador. Nadie recibe una notificación ni queda contratado.</p>
       <div class="my-grid" id="accepted-grid"></div>
       <p class="my-note" id="accepted-empty">Todavía no has aceptado ninguna necesidad.</p>

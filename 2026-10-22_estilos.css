@@ -571,3 +571,121 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
   .need-list-summary{min-height:38px;padding:8px 10px;font-size:14px}
   .need-list-content{padding:0 6px 8px}
 }
+
+
+/* Lenguaje visual de LoNecesito: misma posición, distinto propósito.
+   Los iconos y los textos acompañan siempre a los colores. */
+.hero .publish-cta.action-cta,
+.hero .compact-next-step .solve-cta.action-cta,
+#screen-navigation a.action-cta{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:14px;
+  width:100%;
+  max-width:480px;
+  min-height:79px;
+  padding:14px 18px;
+  margin-inline:auto;
+  border-radius:15px;
+  font-size:inherit;
+  font-weight:normal;
+  line-height:1.25;
+  text-align:left;
+  white-space:normal;
+  text-decoration:none;
+  letter-spacing:normal;
+  box-shadow:0 4px 13px rgba(17,44,34,.075);
+  transition:background-color .16s ease,box-shadow .16s ease;
+}
+.hero .publish-cta.action-cta{background:#174c3e;color:#fff;border:2px solid #174c3e}
+.hero .publish-cta.action-cta:hover{background:#0d3b30}
+.hero .compact-next-step .solve-cta.action-cta{background:#e9f6ef;color:#145846;border:2px solid #62ab8a}
+.hero .compact-next-step .solve-cta.action-cta:hover{background:#d9f0e1}
+#screen-navigation a.action-cta-mine{background:#eaf2fc;color:#244e7a;border:2px solid #9bbde5}
+#screen-navigation a.action-cta-mine:hover{background:#dae9fa}
+#screen-navigation a.action-cta-accepted{background:#fcf2e1;color:#765015;border:2px solid #e7c18a}
+#screen-navigation a.action-cta-accepted:hover{background:#f9e8c9}
+#screen-navigation a.action-cta-mine[aria-current=page]{background:#244e7a;color:#fff;border-color:#244e7a}
+#screen-navigation a.action-cta-accepted[aria-current=page]{background:#80551b;color:#fff;border-color:#80551b}
+.hero .action-cta .action-leading-icon,
+.hero .action-cta .action-trailing-icon,
+#screen-navigation .action-cta .action-leading-icon,
+#screen-navigation .action-cta .action-trailing-icon{
+  display:block;
+  width:25px;
+  height:25px;
+  flex:0 0 25px;
+  margin:0;
+  stroke-width:1.8;
+}
+.hero .action-cta .action-leading-icon,
+#screen-navigation .action-cta .action-leading-icon{align-self:center}
+.hero .action-cta .action-trailing-icon,
+#screen-navigation .action-cta .action-trailing-icon{margin-left:auto;width:19px;height:19px;flex-basis:19px}
+.hero .action-cta-publish .action-leading-icon{color:#d9f2a4}
+.action-cta .action-copy{display:flex;flex-direction:column;align-items:flex-start;gap:4px;flex:1;min-width:0}
+.action-cta .action-copy strong{display:block;font-size:clamp(15px,2.1vw,18px);line-height:1.27;font-weight:800;overflow-wrap:anywhere}
+.action-cta .action-copy small{display:block;font-size:12px;line-height:1.32;font-weight:500;opacity:.87;overflow-wrap:anywhere}
+.hero .publish-cta.action-cta:hover,.hero .compact-next-step .solve-cta.action-cta:hover,
+#screen-navigation a.action-cta:hover{box-shadow:0 5px 17px rgba(17,44,34,.12)}
+.action-cta:focus-visible{outline:3px solid #527cc5;outline-offset:3px}
+.section-usage{margin:0 0 12px;color:#566b60;font-size:13px;line-height:1.4}
+/* Se conserva el listado: solo títulos, sin huecos.
+   Filas alternadas, selección perceptible y flecha de apertura. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(odd) > .need-list-summary{background:#fff}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(even) > .need-list-summary{background:#f2f6f3}
+.need-list-summary{gap:12px;transition:background-color .12s ease}
+.need-list-summary::after{
+  content:"";
+  display:block;
+  width:8px;
+  height:8px;
+  flex:0 0 8px;
+  margin-left:auto;
+  margin-right:4px;
+  border-right:2px solid currentColor;
+  border-bottom:2px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);
+  transition:transform .15s ease;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row > .need-list-summary:hover{
+  background:#e6efe7;
+}
+:is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row[open] > .need-list-summary{
+  background:#daecdf;
+  box-shadow:inset 3px 0 0 #217455;
+  color:#114b3b;
+  font-weight:800;
+}
+.need-list-row[open] > .need-list-summary::after{transform:translateY(2px) rotate(225deg)}
+#my-requests-grid > .need-list-row[open] > .need-list-summary{
+  background:#e1edfa;color:#244e7a;box-shadow:inset 3px 0 0 #426a9e
+}
+#accepted-grid > .need-list-row[open] > .need-list-summary{
+  background:#f9eccf;color:#765015;box-shadow:inset 3px 0 0 #b77e2c
+}
+.need-list-summary:focus-visible{outline:3px solid #517cc5;outline-offset:-3px}
+/* Solo las acciones destructivas usan el rojo y requieren confirmación. */
+.need-card-actions .need-action-cancel{
+  color:#a33a36;
+  border-color:#dfaaa8;
+  background:#fff7f6;
+}
+.need-card-actions .need-action-cancel:hover{background:#fbe8e6}
+.need-card-actions .need-action-accepted:disabled{
+  background:#f9efd9;color:#79561e;border-color:#d9b977
+}
+@media(max-width:680px){
+  .hero .publish-cta.action-cta,.hero .compact-next-step .solve-cta.action-cta,
+  #screen-navigation a.action-cta{min-height:76px;padding:13px 15px;gap:11px}
+  .action-cta .action-copy strong{font-size:15px}
+  .action-cta .action-copy small{font-size:11px}
+  .hero .action-cta .action-leading-icon,#screen-navigation .action-cta .action-leading-icon{
+    width:23px;height:23px;flex-basis:23px
+  }
+  .need-list-summary{min-height:38px}
+}
+@media(prefers-reduced-motion:reduce){
+  .action-cta,.need-list-summary,.need-list-summary::after{transition:none!important}
+}
