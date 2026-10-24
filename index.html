@@ -7,13 +7,13 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261024-v210">
+  <link rel="stylesheet" href="simple.css?v=20261024-v220">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261024-v210"></script>
+  <script type="module" src="simple.js?v=20261024-v220"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
-<div class="release-bar" role="note"><span id="release-version">Versión 2.1.0</span></div>
+<div class="release-bar" role="note"><span id="release-version">Versión 2.2.0</span></div>
 <header class="site-header">
   <div class="shell header-layout">
     <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
@@ -29,16 +29,16 @@
     <div class="hero">
       <p class="eyebrow">PRODUCTOS Y SERVICIOS</p>
       <h1 id="home-title">Publica lo que necesitas. Encuentra quién puede ofrecerlo.</h1>
-      <p class="hero-description">Escribe lo que necesitas y tu número de WhatsApp. Quien pueda ayudarte podrá contactarte directamente.</p>
+      <p class="hero-description">Describe tu necesidad. Quien pueda ayudarte te contacta por WhatsApp.</p>
       <div class="hero-actions">
         <a class="action-card primary" href="#publicar">
           <span class="action-symbol" aria-hidden="true">✎</span>
-          <span class="action-words"><strong>Publicar lo que necesito</strong><small>Escribe tu necesidad y tu WhatsApp.</small></span>
+          <span class="action-words"><strong>Publicar lo que necesito</strong><small>Tu necesidad y WhatsApp.</small></span>
           <span aria-hidden="true">→</span>
         </a>
         <a class="action-card secondary" href="#necesidades">
           <span class="action-symbol" aria-hidden="true">⌕</span>
-          <span class="action-words"><strong>Ver necesidades</strong><small>Consulta publicaciones y contacta por WhatsApp.</small></span>
+          <span class="action-words"><strong>Ver necesidades</strong><small>Contacto directo.</small></span>
           <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -49,7 +49,7 @@
   <section id="necesidades" class="screen shell content-screen" aria-labelledby="browse-title" hidden>
     <div class="page-heading">
       <h2 id="browse-title">Necesidades publicadas</h2>
-      <p>Lee cada necesidad y pulsa el número para hablar directamente por WhatsApp.</p>
+      <p>Encuentra necesidades y contacta directamente por WhatsApp.</p>
     </div>
     <div class="search-panel">
       <label for="search">Buscar necesidades</label>
@@ -62,7 +62,7 @@
   <section id="mis-publicaciones" class="screen shell content-screen" aria-labelledby="mine-title" hidden>
     <div class="page-heading">
       <h2 id="mine-title">Mis publicaciones</h2>
-      <p>Consulta tus necesidades. Si algo cambia, puedes editar o eliminar la publicación.</p>
+      <p>Edita o elimina tus publicaciones cuando lo necesites.</p>
     </div>
     <div class="section-actions"><a class="button primary-button" href="#publicar">Crear publicación</a></div>
     <div id="mine-list" class="publication-list" aria-live="polite"></div>
@@ -72,17 +72,17 @@
   <section id="publicar" class="screen shell content-screen" aria-labelledby="publish-title" hidden>
     <div class="page-heading">
       <h2 id="publish-title">Publica lo que necesitas</h2>
-      <p>Solo escribe tu necesidad y un teléfono de WhatsApp para recibir contactos.</p>
+      <p>Describe tu necesidad y deja tu WhatsApp.</p>
     </div>
     <form id="publish-form" class="publish-form">
       <div class="form-field">
         <label for="need-description">¿Qué necesitas?</label>
-        <textarea id="need-description" name="description" rows="8" maxlength="4000" minlength="10" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
+        <textarea id="need-description" name="description" rows="5" maxlength="4000" minlength="10" placeholder="Describe aquí todo lo que necesitas: producto o servicio, características, cantidad, ciudad, fecha o cualquier otro detalle que consideres importante." required></textarea>
       </div>
       <div class="form-field">
         <label for="need-phone">Número de WhatsApp</label>
         <input id="need-phone" name="contactPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="Ej. 300 123 4567" required>
-        <p class="field-help">Al publicar, este número será visible y se podrá pulsar para iniciar una conversación por WhatsApp.</p>
+        <p class="field-help">Tu número aparecerá públicamente como enlace a WhatsApp.</p>
       </div>
       <p id="form-feedback" class="feedback" role="alert" hidden></p>
       <div class="form-actions">

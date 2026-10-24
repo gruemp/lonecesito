@@ -72,50 +72,64 @@ function phoneLink(record,label,cls){
   return a;
 }
 function renderCard(record,owner){
-  const article=el('article','publication-card');
+  const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
   const title=String(record.title||derivedTitle(description)).trim()||'Necesidad publicada';
-  article.append(el('h3','',title));
-  article.append(el('p','publication-description',description));
-  // Se respetan los datos de las fichas antiguas y de los ejemplos.
+  const heading=el('div','publication-heading');
+  const h=el('h3','',title);
+  heading.append(h);
+  if(record.category){
+    const kind=record.category==='bienes'?'Producto':'Servicio';
+    heading.append(el('span','publication-kind',kind));
+  }
+  article.append(heading);
+
+  // Evitar repetir la primera línea cuando el título proviene del mismo texto.
+  // Toda la descripción sigue visible, repartida entre título y cuerpo.
+  const rest=description.startsWith(title)?description.slice(title.length).trimStart():description;
+  if(rest)article.append(el('p','publication-description',rest));
+
+  // Campos legados y ejemplos: pequeñas opciones autónomas, sin filas altas.
   const facts=el('dl','publication-facts');
   function fact(name,value){
     if(value===undefined||value===null||String(value).trim()==='')return;
-    facts.append(el('dt','',name),el('dd','',value));
+    const pair=el('div','publication-fact');
+    pair.append(el('dt','',name),el('dd','',value));
+    facts.append(pair);
   }
-  if(record.category)fact('Tipo',record.category==='bienes'?'Producto':'Servicio');
   fact('Categoría',record.subcategory);
-  fact('Ciudad o municipio',record.city);
+  fact('Ciudad',record.city);
   fact('Cantidad',record.quantity);
-  if(record.condition)fact('Estado del producto',({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition));
+  if(record.condition)fact('Estado',({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition));
   if(record.budget!==undefined&&record.budget!==null){
-    fact('Presupuesto aproximado',new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(record.budget));
+    fact('Presupuesto',new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(record.budget));
   }
-  fact('Fecha deseada',record.desiredDate);
+  fact('Fecha',record.desiredDate);
   if(facts.children.length)article.append(facts);
+
   const photo=String(record.picture||'');
   if(/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(photo)){
     const img=el('img','publication-photo');
     img.src=photo;img.alt='Fotografía de '+title;img.loading='lazy';article.append(img);
   }
+
   const contact=el('div','contact-box');
-  // El número visible se enlaza a WhatsApp; las muestras abren WhatsApp sin destinatario.
   let contactNumber='';
   try{
     if(record.example===true)contactNumber=String(record.contactPhone||'');
     else if(record.contactConsent===true)contactNumber='+'+normalizeWhatsApp(record.contactPhone);
   }catch{contactNumber='';}
   if(contactNumber){
-    contact.append(el('span','contact-label','WhatsApp de contacto'));
-    const linked=phoneLink(record,contactNumber,'contact-phone');
-    const action=phoneLink(record,'Contactar por WhatsApp ↗','whatsapp-button');
-    if(linked)contact.append(linked);
-    if(action)contact.append(action);
+    // Número y acción son enlaces independientes, ambos al endpoint api.whatsapp.com/send.
+    const numberLink=phoneLink(record,contactNumber,'contact-phone');
+    const chatLink=phoneLink(record,'Abrir WhatsApp ↗','whatsapp-button');
+    if(numberLink)contact.append(numberLink);
+    if(chatLink)contact.append(chatLink);
   }else{
-    // Un dato antiguo inválido solo se muestra al dueño para corregirlo.
     contact.append(el('span','contact-label','Actualiza el WhatsApp de esta publicación.'));
   }
   article.append(contact);
+
   if(owner&&record.example!==true&&canManage(record,currentUid())){
     const actions=el('div','owner-actions');
     const edit=el('button','button outline-button','Editar');edit.type='button';
