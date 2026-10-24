@@ -1,7 +1,7 @@
 # LoNecesito — entrega, aprendizajes y continuidad
 
 **Fecha del cierre de interfaz:** 24 de octubre de 2026  
-**Versión:** 2.2.12  
+**Versión técnica interna:** 2.2.13 (no visible en la interfaz)  
 **Web:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama que alimenta GitHub Pages:** \`codex/diseno-original\` (la rama \`main\` no es la interfaz publicada).
@@ -11,7 +11,7 @@ Este documento es el **punto de entrega** para continuar el proyecto, con otra I
 ## 1. Qué quedó cerrado visual y funcionalmente
 
 - Sitio minimalista, legible en celulares y con el menor alto posible, sin ocultar texto ni quitar anchura útil.
-- Encabezado siempre visible con **solo tres accesos**: **Publicar lo que necesito** (verde), **Ver necesidades** (azul) y **Mis publicaciones** (ámbar). Sin botones repetidos en portada.
+- Encabezado con **cuatro accesos en dos filas** en PC y móvil: Inicio, Mis publicaciones, Ver necesidades y Publicar lo que necesito. Sin botones repetidos en portada.
 - La ruta inicial abre el listado. Se eliminaron el titular grande anterior de la portada y el texto redundante del pie.
 - Publicación mediante **dos campos de texto**: una descripción libre de la necesidad y el número de WhatsApp. Ningún formulario separado de ciudad, categoría, cantidad, precio o fecha.
 - En la misma caja se encuentran el **micrófono** para dictar en español (API de reconocimiento del navegador cuando esté disponible) y el botón para adjuntar **una imagen opcional**, comprimida antes de guardarse. El teclado siempre funciona.
@@ -124,3 +124,11 @@ Al editar una necesidad propia, además de poder eliminarla desde su ficha, apar
 La pantalla inicial `#necesidades` muestra, debajo de la barra de tres botones y antes del buscador, el banner panorámico seleccionado por el usuario: `assets/lonecesito-presentacion.webp` (1440×810). Presenta tres personajes y explica visualmente las tres etapas **Publica → La ven → Te contactan** por llamada o WhatsApp. No representa ofertas ni intercambios internos. Se visualiza completo, ancho 100 %, con altura automática y sin recortes, exclusivamente en la primera pestaña. Los demás flujos de publicación y fichas no cambian. El archivo original generado está asociado a esta conversación como `lonecesito_publica_y_conecta.png`; se subió una copia WebP optimizada al repositorio para que GitHub Pages la sirva sin depender de ChatGPT.
 
 Firebase sigue sin configurar; la existencia de esta imagen no implica que las publicaciones se compartan entre navegadores.
+
+## Actualización 2.2.13 — nueva portada, cero ejemplos y búsqueda avanzada
+
+La pantalla predeterminada es **Inicio**, con el banner **tercero** ya aprobado, en formato WebP alojado en el repositorio y a ancho completo sin recortes. No contiene fichas ni buscador. Las **cuatro pestañas** están ordenadas Inicio, Mis publicaciones, Ver necesidades y Publicar lo que necesito y forman un 2×2 tanto en móvil como en PC. Ningún título o número de versión aparece como barra de cabecera. El número técnico sigue dentro del código. No hay fichas ficticias ni generadores de ejemplos: Ver necesidades muestra únicamente registros reales públicos y Mis publicaciones, solo registros del autor. Los registros locales etiquetados `example:true` se ignoran sin borrar datos reales.
+
+El buscador se ha separado en `simple-search.js` y compara por tramos (subcadenas), sin tildes ni sensibilidad a mayúsculas, múltiples palabras en cualquier lugar de los campos públicos, metadatos heredados y teléfono total/parcial. No rastrea el identificador privado del dueño ni depende de IA remota.
+
+**Advertencia técnica constante:** Firebase no está configurado en `firebase-config.js`, así que en el modo actual los registros locales no son compartidos entre distintos visitantes. Verificar en navegador real la cuadrícula 2×2 de PC/móvil y la búsqueda. GitHub Pages no publica reglas de Firestore.

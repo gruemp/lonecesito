@@ -1,3 +1,12 @@
+## Actualización vigente 2.2.13 — portada, navegación y buscador
+
+- **La tercera imagen es la elegida**, con tres personajes y el mensaje «Publica lo que necesitas y recibe contacto directo», secuencia «Publica → La ven → Te contactan». Es el archivo propio `assets/lonecesito-presentacion.webp`, derivado de `lonecesito_publica_y_conecta.png`. Debe verse **solo en la pestaña nueva «Inicio»**, completa, a todo el ancho posible, sin tarjetas, sin buscador y sin explicaciones añadidas.
+- **Cuatro botones superiores, siempre dos filas de dos**, en PC y celulares por igual, en este orden de lectura: **Inicio**, **Mis publicaciones**, **Ver necesidades**, **Publicar lo que necesito**. No sustituir las cuatro pestañas por una fila horizontal en PC ni apretarlas en celular.
+- **No existen fichas de ejemplo en ninguna parte**: ni en Ver necesidades ni en Mis publicaciones ni en Inicio. Quitar datos de prueba y generadores ficticios. No borrar publicaciones reales de los visitantes; impedir que los posibles registros etiquetados `example:true` aparezcan.
+- **No mostrar la versión** al usuario. Mantener cambios internos documentados y números de versión en archivos de GitHub únicamente; **nunca** mostrar barra, etiqueta o número de versión en la interfaz.
+- **Buscador por tramos:** buscar fragmentos de palabras, varios términos en cualquier orden, sin depender de tildes o mayúsculas. Incluir descripción íntegra, teléfono visible mediante enlaces y todos los metadatos públicos del registro (incluidos campos históricos). Aceptar teléfono con indicativo, números parciales y separadores. No implementar Gemini ni IA externa.
+- Esta actualización prevalece sobre las instrucciones históricas anteriores sobre tres botones, fichas de ejemplo, versión visible o banner en «Ver necesidades».
+
 ## Actualización vigente 2.2.12 — banner en la primera pestaña
 
 - El usuario eligió la **segunda imagen de las dos últimas propuestas**, con tres personajes y la secuencia **«Publica → La ven → Te contactan»**. Usarla sin rediseñarla, en su representación web optimizada `assets/lonecesito-presentacion.webp` (WebP de 1440 × 810, derivado del PNG seleccionado).

@@ -1,3 +1,13 @@
+# Versión técnica 2.2.13 — Inicio independiente, cuatro pestañas y búsqueda por tramos
+
+La web empieza en **Inicio**, con la **tercera ilustración elegida** (`assets/lonecesito-presentacion.webp`) y ningún buscador ni ficha. La navegación se presenta **en dos filas de dos botones**, tanto en móviles como en computadores: **Inicio**, **Mis publicaciones**, **Ver necesidades**, **Publicar lo que necesito**. Se eliminan por completo las fichas ficticias y la barra de versión visible.
+
+El buscador de **Ver necesidades** compara fragmentos de palabras sin tildes, varios términos en cualquier orden, teléfono total o parcial y metadatos públicos históricos. Las fichas de los usuarios y sus acciones se mantienen iguales. **Firebase sigue sin configurar**, por lo que las necesidades locales todavía no son públicas entre distintos navegadores.
+
+Las decisiones nuevas prevalecen sobre las instrucciones históricas siguientes. Ver [AGENTS.md](AGENTS.md), [Preferencias](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
+
+---
+
 # Versión 2.2.12 — imagen elegida en la primera pestaña
 
 Se incorporó **la imagen panorámica escogida por el usuario** en la vista inicial «Ver necesidades», debajo de los tres accesos superiores y antes del buscador. El archivo se guarda de manera independiente en el repositorio, en `assets/lonecesito-presentacion.webp`, para que funcione como recurso propio de GitHub Pages. Ocupa todo el ancho disponible, se adapta a móviles y se muestra sin recortes. La secuencia es «Publica → La ven → Te contactan» mediante llamada o WhatsApp.

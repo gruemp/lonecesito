@@ -1,30 +1,6 @@
-/* Versión visible en la portada. Incrementar al publicar cada nueva modificación. */
-export const APP_VERSION = '2.2.12';
+/* Versión técnica interna; nunca mostrar número de versión en la interfaz. */
+export const APP_VERSION = '2.2.13';
 export const APP_VERSION_DATE = '24/10/2026';
-
-/* Los ejemplos utilizan el mismo formulario y validación que una publicación nueva.
-   No se asigna un teléfono real a estas muestras. */
-function samplePublication(id,description){
-  return Object.freeze({
-    id,
-    example:true,
-    ...cleanPublication({description,contactPhone:'3000000000'})
-  });
-}
-export const EXAMPLE_PUBLICATIONS=Object.freeze([
-  samplePublication(
-    'ejemplo-reparacion',
-    'Necesito reparar una nevera\nBusco un técnico que revise una nevera que dejó de enfriar. Estoy en Santa Marta y quisiera conocer el costo de la revisión y la disponibilidad para esta semana.'
-  ),
-  samplePublication(
-    'ejemplo-uniformes',
-    'Necesito 15 uniformes para mi equipo\nBusco quien venda o confeccione 15 uniformes de trabajo, en varias tallas y con el logo de mi negocio. La entrega sería en Barranquilla. Agradezco información sobre telas, precio total y tiempo de fabricación.'
-  ),
-  samplePublication(
-    'ejemplo-repuesto',
-    'Busco repuesto para una impresora\nNecesito un repuesto compatible con una impresora láser de oficina. Estoy en Medellín. Me interesa conocer disponibilidad, precio, garantía y opciones de entrega.'
-  )
-]);
 
 /* Modelo sencillo: el autor solo escribe su necesidad y su WhatsApp. */
 export function normalizeWhatsApp(value) {
@@ -56,10 +32,6 @@ export function whatsappUrl(number,description) {
   const first=derivedTitle(description);
   const text='Hola, vi tu necesidad en LoNecesito: '+first+'. ¿Podemos hablar?';
   return 'https://api.whatsapp.com/send?phone='+digits+'&text='+encodeURIComponent(text);
-}
-/* Los ejemplos abren WhatsApp sin asignar un destinatario ficticio. */
-export function exampleWhatsappUrl(description) {
-  return 'https://api.whatsapp.com/send?text='+encodeURIComponent('Vi esta necesidad en LoNecesito: '+derivedTitle(description));
 }
 export function canManage(publication,uid) {
   return Boolean(publication&&uid&&publication.ownerUid===uid);

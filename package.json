@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Portal sencillo de necesidades y contacto directo por WhatsApp",
   "scripts": {
-    "test": "node --test 2026-10-22_pruebas.test.js tests/simple-publicaciones.test.mjs",
-    "check": "node --check 2026-10-22_app.js && node --check simple-model.js && node --check simple.js && node --check firebase-live.js && node --check tests/simple-publicaciones.test.mjs && node --check tests/firestore.rules.test.mjs",
+    "test": "node --test 2026-10-22_pruebas.test.js tests/simple-publicaciones.test.mjs tests/simple-search.test.mjs",
+    "check": "node --check 2026-10-22_app.js && node --check simple-model.js && node --check simple-search.js && node --check simple.js && node --check firebase-live.js && node --check tests/simple-publicaciones.test.mjs && node --check tests/simple-search.test.mjs && node --check tests/firestore.rules.test.mjs",
     "test:rules": "npx firebase-tools emulators:exec --only firestore --project demo-lonecesito-privacidad \"node --test tests/firestore.rules.test.mjs\""
   },
   "devDependencies": {
