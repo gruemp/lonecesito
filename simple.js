@@ -44,19 +44,31 @@ function showView(){
 }
 window.addEventListener('hashchange',showView);
 
-function legacyDetails(record){
-  // Antiguas publicaciones conservan sus datos al editarse mediante la caja única.
+function legacyDetails(record,{forCard=false}={}){
+  // Los campos de versiones anteriores se mantienen en un solo texto;
+  // no volver a mostrar etiquetas de ciudad, presupuesto, etc. fuera del párrafo.
   const original=String(record.description||'').trim();
   const lines=[];
-  if(record.title&&record.title!==derivedTitle(original))lines.push('Necesidad: '+record.title);
-  if(record.category)lines.push('Tipo: '+(record.category==='bienes'?'Producto':'Servicio'));
-  if(record.subcategory)lines.push('Categoría: '+record.subcategory);
-  if(record.city)lines.push('Ciudad o municipio: '+record.city);
-  if(record.quantity)lines.push('Cantidad: '+record.quantity);
-  if(record.condition)lines.push('Estado del producto: '+({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition));
-  if(record.budget!==null&&record.budget!==undefined)lines.push('Presupuesto aproximado (COP): '+record.budget);
-  if(record.desiredDate)lines.push('Fecha deseada: '+record.desiredDate);
-  return lines.length?[original,...lines].filter(Boolean).join('\n\n'):original;
+  const normalized=original.toLocaleLowerCase('es');
+  const add=(label,value)=>{
+    if(value===null||value===undefined||String(value).trim()==='')return;
+    const str=String(value).trim();
+    // Evita repetir un dato que el autor ya escribió en su descripción.
+    if(normalized.includes(str.toLocaleLowerCase('es')))return;
+    lines.push(label+': '+str);
+  };
+  if(!forCard&&record.title&&record.title!==derivedTitle(original))add('Necesidad',record.title);
+  if(record.category)add('Tipo',record.category==='bienes'?'Producto':'Servicio');
+  add('Categoría',record.subcategory);
+  add('Ciudad',record.city);
+  add('Cantidad',record.quantity);
+  if(record.condition)add('Estado',({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition));
+  if(record.budget!==null&&record.budget!==undefined){
+    const formatted=new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(record.budget);
+    add('Presupuesto',formatted);
+  }
+  add('Fecha',record.desiredDate);
+  return lines.length?[original,lines.join(' · ')].filter(Boolean).join('\n'):original;
 }
 function phoneLink(record,label,cls){
   const number=record.contactPhone;
@@ -78,34 +90,14 @@ function renderCard(record,owner){
   const heading=el('div','publication-heading');
   const h=el('h3','',title);
   heading.append(h);
-  if(record.category){
-    const kind=record.category==='bienes'?'Producto':'Servicio';
-    heading.append(el('span','publication-kind',kind));
-  }
   article.append(heading);
 
   // Evitar repetir la primera línea cuando el título proviene del mismo texto.
   // Toda la descripción sigue visible, repartida entre título y cuerpo.
-  const rest=description.startsWith(title)?description.slice(title.length).trimStart():description;
+  const fullText=legacyDetails(record,{forCard:true});
+  const rest=fullText.startsWith(title)?fullText.slice(title.length).trimStart():fullText;
   if(rest)article.append(el('p','publication-description',rest));
 
-  // Campos legados y ejemplos: pequeñas opciones autónomas, sin filas altas.
-  const facts=el('dl','publication-facts');
-  function fact(name,value){
-    if(value===undefined||value===null||String(value).trim()==='')return;
-    const pair=el('div','publication-fact');
-    pair.append(el('dt','',name),el('dd','',value));
-    facts.append(pair);
-  }
-  fact('Categoría',record.subcategory);
-  fact('Ciudad',record.city);
-  fact('Cantidad',record.quantity);
-  if(record.condition)fact('Estado',({nuevo:'Nuevo',usado:'Segunda mano',cualquiera:'Cualquiera'}[record.condition]||record.condition));
-  if(record.budget!==undefined&&record.budget!==null){
-    fact('Presupuesto',new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(record.budget));
-  }
-  fact('Fecha',record.desiredDate);
-  if(facts.children.length)article.append(facts);
 
   const photo=String(record.picture||'');
   if(/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(photo)){
