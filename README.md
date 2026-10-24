@@ -1,3 +1,15 @@
+# LoNecesito — instrucciones para continuar el proyecto
+
+**Toda IA o persona que continúe el desarrollo debe leer antes de editar:**
+- [AGENTS.md](AGENTS.md) — reglas obligatorias resumidas.
+- [Preferencias y decisiones de LoNecesito](docs/PREFERENCIAS-LO-NECESITO.md) — guía completa de funcionalidad, diseño, ejemplos, versión y publicación.
+
+**Versión 2.2.2:** todas las necesidades (incluidos registros de formatos anteriores) se presentan en **un solo texto**. Ciudad, presupuesto, categoría y detalles no aparecen en casillas separadas; se conserva el contacto por WhatsApp y el diseño compacto. La versión visible se actualiza en la parte superior.
+
+La documentación histórica debajo de esta sección describe decisiones anteriores y **no sustituye las reglas vigentes** de los documentos enlazados. La documentación persiste en GitHub y puede ser compartida con otras IA; no es memoria automática de plataformas ajenas.
+
+---
+
 # Versión 2.1.0 · 24/10/2026
 
 - Para publicar se utilizan **solo dos campos**: descripción completa de la necesidad y número de WhatsApp.
