@@ -55,7 +55,7 @@ function showView(){
     if(active)link.setAttribute('aria-current','page');
     else link.removeAttribute('aria-current');
   }
-  window.scrollTo({top:0,behavior:'instant'});
+  window.scrollTo({top:0,behavior:'auto'});
   if(screen==='publicar'&&!state.editingId)resetForm();
 }
 window.addEventListener('hashchange',showView);
