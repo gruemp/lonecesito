@@ -480,3 +480,65 @@ body:has(.image-dialog[open]){overflow:hidden}
   #necesidades .welcome-banner{margin-bottom:9px}
   #necesidades .welcome-banner img{border-radius:8px}
 }
+
+
+/* v2.2.13 — la misma navegación en PC y móvil: cuatro pestañas, dos filas. */
+.site-header .header-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;
+  align-items:center;
+  gap:6px 10px;
+  min-height:0;
+  padding-block:7px;
+}
+.site-header .brand{grid-column:1;grid-row:1;min-width:0;font-size:clamp(17px,3.5vw,21px)}
+.site-header .account-button{grid-column:2;grid-row:1;justify-self:end;max-width:min(46vw,200px)}
+.site-header .top-nav{
+  grid-column:1 / -1;grid-row:2;
+  width:100%;min-width:0;margin:0;
+  padding-top:6px;border-top:1px solid #e9f0ec;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(44px,auto));
+  gap:6px;
+  flex:none;
+}
+.site-header .top-nav a{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:44px;
+  padding:7px 9px;border:1px solid transparent;border-radius:10px;
+  font-size:clamp(12px,1.55vw,14px);font-weight:750;
+  line-height:1.2;white-space:normal;text-align:center;
+  text-wrap:balance;
+}
+.site-header .top-nav .nav-home{background:#e9f6f1;color:#185945;border-color:#bcdcca}
+.site-header .top-nav .nav-home:hover{background:#d8eee4}
+.site-header .top-nav .nav-mine{background:#fff1d9;color:#805322;border-color:#eed7a7}
+.site-header .top-nav .nav-mine:hover{background:#ffe7bb}
+.site-header .top-nav .nav-browse{background:#e5f2fa;color:#245f82;border-color:#bed9e9}
+.site-header .top-nav .nav-browse:hover{background:#d8ebf8}
+.site-header .top-nav .nav-publish{background:#17493e;color:#fff;border-color:#17493e}
+.site-header .top-nav .nav-publish:hover{background:#0e352c}
+.site-header .top-nav a[aria-current=page]{outline:2px solid currentColor;outline-offset:-3px}
+.site-header .top-nav .nav-publish[aria-current=page]{outline-color:#bde3cf}
+/* El banner vive SOLO en Inicio, a todo el ancho disponible y sin recortes. */
+.home-visual-screen{
+  width:min(calc(100% - 16px),1440px);
+  max-width:none;
+  margin-inline:auto;
+  padding-block:9px 14px;
+  min-height:0;
+}
+.home-visual-screen .welcome-banner{display:block;margin:0 auto;padding:0;width:100%;max-width:none;border:0;background:transparent}
+.home-visual-screen .welcome-banner img{
+  display:block;width:100%;height:auto;max-width:none;
+  aspect-ratio:auto;object-fit:contain;
+  border:0;border-radius:10px;
+}
+@media(max-width:680px){
+  .site-header .header-layout{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;padding-block:6px}
+  .site-header .top-nav{grid-column:1 / -1;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));padding-top:4px;gap:5px}
+  .site-header .top-nav a{min-height:44px;font-size:12px;padding:6px}
+  .home-visual-screen{width:calc(100% - 10px);padding-block:6px 10px}
+  .home-visual-screen .welcome-banner img{border-radius:6px}
+}
