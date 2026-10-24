@@ -837,4 +837,4 @@ function init(){
 
 }
 
-if(typeof document!=='undefined' && !(window.LoNecesitoFirebaseConfig?.apiKey && window.LoNecesitoFirebaseConfig?.projectId && window.LoNecesitoFirebaseConfig?.appId)) init();
+if(typeof document!=='undefined' && !(window.LoNecesitoFirebaseConfig?.apiKey && window.LoNecesitoFirebaseConfig?.authDomain && window.LoNecesitoFirebaseConfig?.projectId && window.LoNecesitoFirebaseConfig?.appId)) init();
