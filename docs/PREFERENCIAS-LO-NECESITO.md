@@ -25,21 +25,19 @@
 - No mostrar el número de versión. Una numeración puede mantenerse en Git, documentación y código interno, nunca en una barra de la web.
 - Usar colores variados y sobrios para reconocer de inmediato acciones distintas. No sobrecargar toda la pantalla de cuadros o etiquetas.
 
-## C. Cuatro pestañas de navegación: mismas en PC y en móvil
+## C. Cuatro pestañas de navegación: una fila en PC y dos en móvil
 
-La página comienza con **cuatro botones**, con esta distribución **obligatoria de dos filas**:
+La página comienza con **cuatro botones**, en el siguiente orden de lectura y de foco: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
 
-| Primera columna | Segunda columna |
-| --- | --- |
-| **Inicio** | **Mis publicaciones** |
-| **Ver necesidades** | **Publicar lo que necesito** |
+- **PC (ancho superior a 680 px):** una sola fila horizontal con los cuatro botones.
+- **Móvil (hasta 680 px):** dos filas, con **Inicio / Publicar lo que necesito** arriba y **Mis publicaciones / Ver necesidades** abajo.
 
 - Mantener la barra arriba y el acceso visible mientras se navega.
-- En **PC también deben ser dos filas**: no reorganizar en cuatro columnas ni una sola fila.
-- Primera pestaña: **Inicio**. Solo muestra la **tercera ilustración aprobada** que enseña el flujo «Publica → La ven → Te contactan», en el archivo **assets/lonecesito-presentacion.webp**; no cambiar por la primera o segunda ilustración. Debe usar **todo el ancho posible**, altura automática, sin recortes ni otros contenidos añadidos.
-- Segunda pestaña: **Mis publicaciones**. Solo registros propios y sus acciones de edición/eliminación.
-- Tercera: **Ver necesidades**. Buscador y lista de necesidades publicadas **reales**, sin imagen introductoria dentro de esta pestaña.
-- Cuarta: **Publicar lo que necesito**. Editor compacto.
+- No duplicar pestañas ni ocultarlas; conservar sus cuatro colores e indicación de selección.
+- Primera pestaña: **Inicio**. Solo muestra la **tercera ilustración aprobada** que enseña el flujo «Publica → La ven → Te contactan», en el archivo **assets/lonecesito-presentacion.webp**; no cambiar por la primera o segunda ilustración. Debe quedar **plenamente visible**, centrada, conservando su relación de aspecto y encajada tanto en el ancho como en la altura disponible, sin recortes ni otros contenidos añadidos.
+- Segunda pestaña: **Publicar lo que necesito**. Editor compacto.
+- Tercera pestaña: **Mis publicaciones**. Solo registros propios y sus acciones de edición/eliminación.
+- Cuarta pestaña: **Ver necesidades**. Buscador y lista de necesidades publicadas **reales**, sin imagen introductoria dentro de esta pestaña.
 - No repetir debajo de un botón las otras tres opciones de navegación: el usuario las quitó expresamente para reducir altura.
 
 ## D. Entrada de datos: libertad de texto y fila compacta
@@ -134,7 +132,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ## K. Comprobación rápida antes de aprobar otra modificación
 
-- [ ] ¿La página sigue ofreciendo exactamente cuatro pestañas en una cuadrícula 2 × 2 en PC y celular?
+- [ ] ¿La página ofrece las cuatro pestañas en una fila en PC y en cuadrícula 2 × 2 en celular, en el orden establecido?
 - [ ] ¿Inicio contiene exclusivamente la ilustración tercera aprobada, grande y sin recortes?
 - [ ] ¿La lista muestra solo fichas reales y el buscador incluye teléfono y tramos?
 - [ ] ¿La ficha contiene toda la descripción justificada, sin título ni chips?
