@@ -397,6 +397,7 @@ function resetForm(){
   $('save-button').setAttribute('aria-label','Publicar');
   $('save-button').title='Publicar';
   $('cancel-edit').hidden=true;
+  $('delete-edit').hidden=true;
   document.querySelector('.publish-controls').classList.remove('editing');
   feedback('form-feedback','');
 }
@@ -410,11 +411,35 @@ function editRecord(record){
   $('save-button').setAttribute('aria-label','Guardar cambios');
   $('save-button').title='Guardar cambios';
   $('cancel-edit').hidden=false;
+  $('delete-edit').hidden=false;
   document.querySelector('.publish-controls').classList.add('editing');
   window.location.hash='#publicar';
   showView();
 }
-$('cancel-edit').addEventListener('click',()=>{resetForm();window.location.hash='#mis-publicaciones';});
+$('cancel-edit').addEventListener('click',()=>{if(state.saving)return;resetForm();window.location.hash='#mis-publicaciones';});
+$('delete-edit').addEventListener('click',async()=>{
+  if(state.saving||!state.editingId)return;
+  const record=state.items.find(item=>item.id===state.editingId);
+  if(!record||!canManage(record,currentUid())){
+    feedback('form-feedback','Solo puedes eliminar tus propias publicaciones.');
+    return;
+  }
+  state.saving=true;
+  $('save-button').disabled=true;
+  $('delete-edit').disabled=true;
+  try{
+    const deleted=await deleteRecord(record);
+    if(deleted){
+      resetForm();
+      window.location.hash='#mis-publicaciones';
+      showView();
+    }
+  }finally{
+    state.saving=false;
+    $('save-button').disabled=false;
+    $('delete-edit').disabled=false;
+  }
+});
 
 // Enter publica con la misma validación que el botón de envío; Shift+Enter crea una nueva línea.
 // No se envía durante la composición del teclado (acentos, IME) ni por teclas mantenidas.
@@ -430,15 +455,19 @@ function publishOnEnter(event){
 $('need-description').addEventListener('keydown',publishOnEnter);
 $('need-phone').addEventListener('keydown',publishOnEnter);
 async function deleteRecord(record){
-  if(!canManage(record,currentUid()))return;
-  if(!window.confirm('¿Eliminar definitivamente esta publicación?'))return;
+  if(!canManage(record,currentUid()))return false;
+  if(!window.confirm('¿Eliminar definitivamente esta publicación?'))return false;
   try{
     if(state.mode==='demo')saveLocal(state.items.filter(item=>item.id!==record.id));
     else if(state.mode==='cloud'){
       const api=state.firebase;await api.deleteDoc(api.doc(api.db,'requests',record.id));
     }else throw Error('No fue posible eliminar.');
     toast('Publicación eliminada.');
-  }catch(error){toast('No fue posible eliminar la publicación.');}
+    return true;
+  }catch(error){
+    toast('No fue posible eliminar la publicación.');
+    return false;
+  }
 }
 $('publish-form').addEventListener('submit',async event=>{
   event.preventDefault();
