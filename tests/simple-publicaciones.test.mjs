@@ -84,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   assert.match(js,/contactLink\('tel:'\+contactNumber,'call','Llamar por teléfono'\)/);
-  assert.match(js,/contactLink\(href,'whatsapp','Escribir por WhatsApp'\)/);
+  assert.match(js,/contactLink\(whatsappUrl\(contactNumber,record.description\|\|record.title\),'whatsapp','Escribir por WhatsApp'\)/);
   const url=whatsappUrl('3001234567','Reparación de nevera');
   const parsed=new URL(url);
   assert.equal(parsed.hostname,'api.whatsapp.com');
@@ -159,7 +159,7 @@ test('los contactos en fichas son botones únicamente con iconos',()=>{
   assert.match(js,/document\.createElementNS\(ns,'svg'\)/);
   assert.match(js,/a\.append\(contactIcon\(kind\)\)/);
   assert.match(js,/contactLink\('tel:'\+contactNumber,'call','Llamar por teléfono'\)/);
-  assert.match(js,/contactLink\(href,'whatsapp','Escribir por WhatsApp'\)/);
+  assert.match(js,/contactLink\(whatsappUrl\(contactNumber,record.description\|\|record.title\),'whatsapp','Escribir por WhatsApp'\)/);
   assert.match(js,/a\.setAttribute\('aria-label',label\)/);
   assert.match(js,/a\.title=label/);
   assert.doesNotMatch(js,/phoneLink\(|contact\.append\(el\('span','contact-phone/);
