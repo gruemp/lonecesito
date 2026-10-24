@@ -526,7 +526,7 @@ test('la ficha propia integra las cinco acciones en una sola fila sin palabras v
   assert.match(card,/edit\.addEventListener\('click',\(\)=>editRecord\(record\)\)/);
   assert.match(card,/remove\.addEventListener\('click',\(\)=>deleteRecord\(record\)\)/);
   assert.match(card,/contact\.append\(edit,remove\)/);
-  assert.doesNotMatch(card,/owner-actions|outline-button','Editar'|danger-button','Eliminar'/);
+  assert.doesNotMatch(card,/el\('div','owner-actions'\)|outline-button','Editar'|danger-button','Eliminar'/);
   assert.equal((card.match(/article\.append\(contact\)/g)||[]).length,1);
   assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{\s*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css,/\.publication-card \.contact-box\{\s*display:grid;\s*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
