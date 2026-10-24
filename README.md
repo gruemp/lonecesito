@@ -2,9 +2,15 @@
 
 **Leer antes de modificar el proyecto:** [AGENTS.md](AGENTS.md) · [Preferencias actuales](docs/PREFERENCIAS-LO-NECESITO.md) · [Estado y aprendizajes de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
 
-Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en una fila en PC y dos en móvil, tercera ilustración solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
+Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en una fila en PC y dos en móvil, ilustración vigente de dos pasos solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
 
 **Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. La actualización de diseño 2.2.15 conserva la funcionalidad técnica y Firebase sigue sin configurar.
+
+---
+
+# Versión técnica 2.2.16 — imagen de dos pasos elegida para Inicio
+
+Se instala la **primera ilustración de dos pasos aprobada por el usuario**, «Publica lo que necesitas» (licuadora) → «Lo ven y te contactan» (llamada o WhatsApp). Archivo vigente **assets/lonecesito-presentacion-dos-pasos.png**, 1819 × 865. La ilustración anterior queda preservada como respaldo; **la variante posterior con mayonesa no se utiliza**. El banner usa su proporción exacta, manteniendo los márgenes compartidos con la navegación. No se cambia la lógica de publicación, búsqueda ni Firebase.
 
 ---
 

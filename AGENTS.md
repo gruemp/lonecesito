@@ -15,8 +15,8 @@
 
 - Barra superior permanente con **exactamente cuatro pestañas** en orden de lectura: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
 - En **PC** (más de 680 px), disponer las cuatro pestañas en **una única fila horizontal**. En **celular** (hasta 680 px), conservar dos filas de dos botones. Colores diferenciados y pestaña activa identificable.
-- En PC, los cuatro botones y la imagen de Inicio comparten **los mismos márgenes laterales**. Ajustar el ancho de la imagen 16:9 a la altura útil de la ventana para mostrarla completa a zoom 100 %, sin recortes ni desplazamiento en escritorios habituales.
-- Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la tercera imagen seleccionada** (tres personajes y secuencia «Publica → La ven → Te contactan»), conservada como **assets/lonecesito-presentacion.webp**. Mostrarla **completa sin recortes, centrada y sin deformaciones**, ajustada al ancho disponible y a la altura visible del navegador cuando sea necesario. No modificar ni sustituirla por una propuesta anterior ni agregar texto, buscador, fichas o botones redundantes bajo ella.
+- En PC, los cuatro botones y la imagen de Inicio comparten **los mismos márgenes laterales**. Ajustar el ancho de la imagen 1819:865 a la altura útil de la ventana para mostrarla completa a zoom 100 %, sin recortes ni desplazamiento en escritorios habituales.
+- Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la imagen nueva de dos pasos aprobada por el usuario**: «1. Publica lo que necesitas» (ejemplo de licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp). Su recurso vigente es **assets/lonecesito-presentacion-dos-pasos.png** (1819 × 865). La imagen anterior de tres pasos queda como respaldo histórico, fuera de la web; **no usar la variante con mayonesa**. Mostrarla completa, centrada y sin recortes o deformaciones. No añadir buscador, fichas ni controles redundantes en Inicio.
 - **Ver necesidades** contiene **buscador y fichas reales**; **Mis publicaciones**, solo publicaciones del autor; **Publicar**, editor. El banner no aparece en estas pestañas.
 
 ## 3. Editor: exclusivamente dos campos y una fila

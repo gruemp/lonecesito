@@ -482,9 +482,9 @@ body:has(.image-dialog[open]){overflow:hidden}
 }
 
 
-/* v2.2.15: navegación y banner comparten marco responsivo y proporción 16:9.
+/* v2.2.16: navegación y banner comparten marco; nueva imagen de dos pasos 1819:865.
    El ancho máximo se adapta también a la altura disponible del navegador. */
-:root{--home-frame-width:min(calc(100% - 32px),1440px,max(240px,calc(177.7778dvh - 302px)))}
+:root{--home-frame-width:min(calc(100% - 32px),1440px,max(240px,calc(210.289dvh - 357.5px)))}
 .site-header{background:#fcfdfb;border-bottom:1px solid #dce7df;box-shadow:0 3px 16px #173b300b}
 .site-header .header-layout{
   display:grid;width:var(--home-frame-width);grid-template-columns:minmax(0,1fr) auto;
@@ -512,7 +512,7 @@ body:has(.image-dialog[open]){overflow:hidden}
 .home-visual-screen .welcome-banner{display:block;width:100%;max-width:none;margin:0;padding:0;border:0;background:transparent}
 .home-visual-screen .welcome-banner img{
   display:block;width:100%;height:auto;max-width:100%;max-height:calc(100dvh - 170px);
-  margin-inline:auto;aspect-ratio:16 / 9;object-fit:contain;border:0;border-radius:14px;
+  margin-inline:auto;aspect-ratio:1819 / 865;object-fit:contain;border:0;border-radius:14px;
   box-shadow:0 7px 24px #17493e15
 }
 /* Mejora visible de las áreas existentes, sin tocar cuadrículas ni lógica. */
@@ -527,7 +527,7 @@ body:has(.image-dialog[open]){overflow:hidden}
 .publication-card .contact-box{background:#f4f8f5;border-color:#d6e4db}
 #publish-form{border-color:#d3e2d9;border-radius:18px;box-shadow:0 9px 26px #173b300b}
 @media(max-width:680px){
-  :root{--home-frame-width:min(calc(100% - 20px),1440px,max(190px,calc(177.7778dvh - 364px)))}
+  :root{--home-frame-width:min(calc(100% - 20px),1440px,max(190px,calc(210.289dvh - 431px)))}
   .site-header .header-layout{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;padding-block:6px 8px}
   .site-header .top-nav{
     grid-column:1 / -1;grid-row:2;
