@@ -1,4 +1,16 @@
 # lonecesito
+## Fichas desplegables: composición visual mejorada (octubre de 2026)
+
+- Las fichas completas que se abren al pulsar una necesidad ahora muestran una jerarquía más clara: encabezado de categoría y estado, título, ubicación, características, descripción, fotografía lateral, aviso y botones de acción.
+- La clasificación se diferencia con una etiqueta legible y las características se agrupan en una superficie discreta; las notas y las acciones tienen separaciones uniformes.
+- Se conserva íntegra la estructura de **dos columnas** de las fichas (texto a la izquierda, foto a la derecha), con los anchos base de escritorio y móvil existentes. No se modifica el número de columnas ni se añaden componentes al HTML.
+- La imagen utiliza `object-fit: contain` para mostrarla completa. Las solicitudes sin foto conservan su indicador «Sin foto». Los botones para aceptar, resolver, reactivar, editar o cancelar mantienen sus funciones.
+- La misma mejora se aplica a **Explorar**, **Mis necesidades publicadas** y **Necesidades aceptadas** sin modificar el listado cerrado de nombres compactos y colores pastel.
+- El ajuste fue exclusivamente CSS y la actualización de versión de CSS en `index.html`; el archivo JavaScript y las reglas de negocio permanecen sin cambios.
+
+**Verificación:** 76 pruebas de lógica y estructura aprobadas, contraste calculado superior a 4,5:1 en los textos clave y botones de las fichas. Las pruebas manuales de disposición en distintos navegadores y teléfonos siguen pendientes.
+
+---
 ## Paleta pastel de las listas de necesidades
 
 - Las tres vistas (**Soluciona una necesidad**, **Mis necesidades publicadas** y **Necesidades de terceros aceptadas**) utilizan un ciclo visual de cuatro tonos pastel: azul suave, amarillo cálido, lavanda y verde menta.
