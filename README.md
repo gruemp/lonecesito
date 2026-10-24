@@ -1,4 +1,16 @@
-# lonecesito
+# LoNecesito — propuesta de interfaz simplificada con WhatsApp
+
+**Versión preparada: 2.0.0 · 24/10/2026.** La página de esta rama contiene exclusivamente: publicar necesidades, consultar publicaciones, contactar directamente al autor por WhatsApp, y editar o eliminar las publicaciones propias. No incluye aceptaciones ni registro de interesados.
+
+**Advertencia:** Firebase todavía no está configurado en este repositorio. Sin él, el sitio muestra **modo de prueba**, con datos almacenados únicamente en el navegador; no sirve todavía como portal público compartido. También queda por desplegar y verificar la versión nueva de las reglas de Firestore y revisar la privacidad antes de publicar.
+
+La versión aparece encima del encabezado en la página. En cada nueva publicación deberá incrementarse el número de versión y registrarse el cambio.
+
+Consulta [la documentación de esta versión](docs/VERSION-SIMPLE-WHATSAPP.md) para sus requisitos, pruebas y límites.
+
+---
+
+# Historial técnico de implementaciones anteriores (no activo en esta interfaz)
 
 ## Categorías ampliadas y preparación del modo multiusuario
 

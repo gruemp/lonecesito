@@ -3,193 +3,147 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#103f37">
-  <meta name="description" content="LoNecesito conecta personas y empresas que buscan productos o servicios con quienes pueden ofrecerlos. Publica solicitudes y explora oportunidades.">
-  <title>LoNecesito — Conectamos necesidades con soluciones</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-firebase-categorias-1">
-  <script src="firebase-config.js?v=20261023-1"></script>
-  <script type="module" src="2026-10-22_app.js?v=20261023-categorias-1"></script>
-  <script type="module" src="firebase-live.js?v=20261023-1"></script>
+  <meta name="theme-color" content="#17493e">
+  <meta name="description" content="LoNecesito: publica productos o servicios que buscas y contacta directamente por WhatsApp a quienes publican necesidades.">
+  <title>LoNecesito — Publica lo que necesitas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="simple.css?v=20261024-v2">
+  <script src="firebase-config.js"></script>
+  <script type="module" src="simple.js?v=20261024-v2"></script>
 </head>
 <body>
-  <a class="skip-link" href="#contenido">Saltar al contenido</a>
-  <svg class="svg-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
-    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
-    <symbol id="pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
-    <symbol id="check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
-    <symbol id="document" viewBox="0 0 48 48"><rect x="10" y="6" width="27" height="35" rx="4"/><path d="M16 15h15m-15 7h15m-15 7h10M7 13v28a4 4 0 0 0 4 4h21"/></symbol>
-    <symbol id="conversation" viewBox="0 0 48 48"><path d="M30 27a16 16 0 0 1-12 5l-10 5 2-10A14 14 0 1 1 36 14"/><path d="M41 34a10 10 0 1 0-8 5l9 3Z"/></symbol>
-    <symbol id="approved" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20"/><path d="m13 24 8 8 15-17"/></symbol>
-    <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
-    <symbol id="box" viewBox="0 0 48 48"><path d="m24 5 18 10v20L24 45 6 35V15Zm0 20 18-10M24 25 6 15m18 10v20M15 10l18 10v10"/></symbol>
-    <symbol id="write-need" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L9 17l-4 1 1-4L16.5 3.5Z"/></symbol>
-    <symbol id="help-need" viewBox="0 0 24 24"><path d="m2 12 5-5 4 3 3-3 8 5-8 7-6-3-4 2Z"/><path d="m8 7 3-3 5 1 2 2M8 16l-2-2"/></symbol>
-    <symbol id="my-needs" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5v-2h6v2M9 10h6M9 14h6M9 18h4"/></symbol>
-    <symbol id="accepted-needs" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
-  </defs></svg>
-
-  <header class="compact-header">
-    <div class="shell compact-header-inner">
-      <a class="brand compact-brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="compact-brand-mark" aria-hidden="true">L</span>LoNecesito</a>
-      
-    </div>
-  </header>
-  <main id="contenido" class="compact-main">
-    <section class="hero shell app-screen" id="inicio" data-screen="inicio" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <p class="eyebrow">CONECTAMOS NECESIDADES Y SOLUCIONES</p>
-        <h1 id="hero-title">Lo que necesitas, más cerca de encontrarlo.</h1>
-        <p class="hero-description">Publica lo que buscas o descubre oportunidades para ofrecer tus productos y servicios.</p>
-        <button class="button publish-cta action-cta action-cta-publish" id="hero-publish" type="button" data-open="publish" aria-label="Publicar una necesidad">
-          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#write-need"/></svg>
-          <span class="action-copy"><strong>Publicar una necesidad</strong><small>Cuéntanos qué necesitas y permite que otros conozcan tu solicitud.</small></span>
-          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
-        </button>
-        <div class="compact-next-step"><a class="button solve-cta action-cta action-cta-solve" href="#necesidades" data-explore>
-          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#help-need"/></svg>
-          <span class="action-copy"><strong>Explorar oportunidades</strong><small>Encuentra personas que buscan lo que puedes ofrecer.</small></span>
-          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
-        </a></div>
-      </div>
-      <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
-        <a class="action-cta action-cta-mine" href="#mis-necesidades" data-screen-link="mis-necesidades">
-          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#my-needs"/></svg>
-          <span class="action-copy"><strong>Mis publicaciones</strong><small>Consulta, actualiza y administra las necesidades que has publicado.</small></span>
-          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<div class="release-bar" role="note"><span id="release-version">Versión de publicación 2.0.0 · 24/10/2026</span> <a href="https://github.com/gruemp/lonecesito/pull/26" target="_blank" rel="noopener noreferrer">Ver cambios</a></div>
+<header class="site-header">
+  <div class="shell header-layout">
+    <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
+    <nav class="top-nav" aria-label="Navegación principal">
+      <a href="#necesidades" data-nav="necesidades">Ver necesidades</a>
+      <a href="#mis-publicaciones" data-nav="mis-publicaciones">Mis publicaciones</a>
+    </nav>
+    <button id="account-button" class="account-button" type="button" hidden>Iniciar sesión</button>
+  </div>
+</header>
+<div id="mode-notice" class="mode-notice" role="status" hidden></div>
+<main id="contenido">
+  <section id="inicio" class="screen shell home-screen" aria-labelledby="home-title">
+    <div class="hero">
+      <p class="eyebrow">PRODUCTOS Y SERVICIOS</p>
+      <h1 id="home-title">Publica lo que necesitas. Encuentra quién puede ofrecerlo.</h1>
+      <p class="hero-description">Publica una necesidad o descubre lo que otras personas están buscando. Si puedes venderles un producto o prestarles un servicio, contáctalas directamente por WhatsApp.</p>
+      <div class="hero-actions">
+        <a class="action-card primary" href="#publicar">
+          <span class="action-symbol" aria-hidden="true">✎</span>
+          <span class="action-words"><strong>Publicar lo que necesito</strong><small>Describe el producto o servicio que buscas.</small></span>
+          <span aria-hidden="true">→</span>
         </a>
-        <a class="action-cta action-cta-accepted" href="#aceptadas" data-screen-link="aceptadas">
-          <svg class="icon action-leading-icon" aria-hidden="true"><use href="#accepted-needs"/></svg>
-          <span class="action-copy"><strong>Solicitudes de mi interés</strong><small>Revisa las necesidades que has seleccionado para ofrecer una solución.</small></span>
-          <svg class="icon action-trailing-icon" aria-hidden="true"><use href="#arrow"/></svg>
+        <a class="action-card secondary" href="#necesidades">
+          <span class="action-symbol" aria-hidden="true">⌕</span>
+          <span class="action-words"><strong>Ver necesidades</strong><small>Encuentra publicaciones y comunícate por WhatsApp.</small></span>
+          <span aria-hidden="true">→</span>
         </a>
-      </nav>
-    </section>
-
-
-
-
-    <section class="requests-section shell app-screen" id="necesidades" data-screen="necesidades" aria-labelledby="requests-title" hidden>
-      <div class="section-heading"><div><h2 id="requests-title">Descubre oportunidades para ofrecer tus productos y servicios.</h2><p class="section-description">Explora las solicitudes disponibles, consulta sus características y encuentra necesidades que puedes atender.</p></div></div>
-      <div class="filters" role="group" aria-label="Filtrar necesidades por tipo">
-        <button class="filter is-active" data-category="all" aria-pressed="true">Todas las solicitudes</button>
-        <button class="filter" data-category="bienes" aria-pressed="false">Productos</button>
-        <button class="filter" data-category="servicios" aria-pressed="false">Servicios</button>
       </div>
-      <div class="quick-search"><label class="sr-only" for="request-search">Buscar necesidades</label><input id="request-search" type="search" maxlength="120" placeholder="Buscar productos, servicios o ubicaciones…"></div>
-      <details class="compact-filters" id="more-filters"><summary>Filtrar por categoría y ubicación</summary>
-        <div class="listing-controls">
-          <div><label for="list-subcategory">Categoría</label><select id="list-subcategory" aria-label="Categoría de la necesidad"></select></div>
-          <div><label for="list-city">Ciudad o municipio</label><select id="list-city" aria-label="Filtrar necesidades por ciudad"></select></div>
-        </div>
-      </details>
-      <div class="request-grid" id="request-grid" aria-label="Lista de necesidades individualizadas"></div>
-      <p id="filter-status" class="sr-only" aria-live="polite"></p>
-      <p class="empty-state" id="empty-state" hidden>No encontramos solicitudes que coincidan con tu búsqueda. Prueba con otros filtros.</p>
-    </section>
-
-    <section class="my-section shell app-screen" id="mis-necesidades" data-screen="mis-necesidades" aria-labelledby="my-title" hidden>
-      <div class="section-heading"><h2 id="my-title">Mis solicitudes <span id="my-count" class="my-count"></span></h2></div>
-      <p class="section-usage">Administra tus publicaciones, consulta su estado y mantén actualizada la información de cada necesidad.</p>
-      <div class="my-grid" id="my-requests-grid"></div>
-      <div class="my-empty" id="my-empty"><p>Aún no has publicado ninguna necesidad. Crea tu primera solicitud para dar a conocer lo que buscas.</p><button class="button button-small" type="button" data-open="publish">Publicar mi primera solicitud</button></div>
-    </section>
-
-    <section class="my-section shell app-screen" id="aceptadas" data-screen="aceptadas" aria-labelledby="accepted-title" hidden>
-      <div class="section-heading"><h2 id="accepted-title">Solicitudes que quiero atender</h2></div>
-      <p class="section-usage">Consulta las necesidades que has seleccionado y revisa la información disponible para preparar tu solución.</p>
-      <div class="my-grid" id="accepted-grid"></div>
-      <p class="my-note" id="accepted-empty">Todavía no has seleccionado ninguna solicitud. Explora las oportunidades disponibles.</p>
-    </section>
-  </main>
-
-  <footer class="site-footer shell compact-footer"><span>LoNecesito · Conectamos necesidades con oportunidades.</span></footer>
-  <div class="toast" id="toast" role="status" hidden></div>
-
-  <dialog id="publish-dialog" aria-labelledby="publish-title">
-    <div class="dialog-header"><h2 id="publish-title">Publica lo que necesitas</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
-    <p class="dialog-description">Describe el producto o servicio que buscas para que otras personas puedan conocer tu necesidad.</p>
-    <div class="wizard-progress" role="group" aria-label="Progreso de publicación">
-      <span class="wizard-label" id="wizard-status" aria-live="polite">Paso 1 de 3: ¿Qué necesitas?</span><button type="button" class="wizard-clear" id="wizard-clear" hidden>Empezar una nueva</button><div class="wizard-bars" aria-hidden="true"><span class="is-complete"></span><span></span><span></span></div>
+      <div class="personal-link"><a href="#mis-publicaciones">Mis publicaciones <span aria-hidden="true">→</span></a></div>
     </div>
-    <form id="publish-form" class="dialog-form">
-      <div class="wizard-step" data-wizard-step="0" aria-labelledby="wizard-title-1">
-        <h3 class="wizard-heading" id="wizard-title-1">1. Define tu necesidad</h3>
-        <label for="request-category">¿Buscas un producto o un servicio?</label>
-        <select id="request-category" name="category" required><option value="bienes">Un bien o producto</option><option value="servicios">Un servicio</option></select>
-        <label for="request-title">¿Qué necesitas?</label>
-        <input id="request-title" name="title" required placeholder="Ej. Necesito reparar mi nevera">
-        <label for="request-subcategory">Selecciona la categoría correspondiente</label>
-        <select id="request-subcategory" name="subcategory" required></select>
+  </section>
+
+  <section id="necesidades" class="screen shell content-screen" aria-labelledby="browse-title" hidden>
+    <div class="page-heading">
+      <h2 id="browse-title">Necesidades publicadas</h2>
+      <p>Consulta lo que otras personas necesitan. Si puedes ofrecer el producto o prestar el servicio, usa el número de WhatsApp que aparece en la publicación.</p>
+    </div>
+    <div class="search-panel">
+      <label for="search">Buscar necesidades</label>
+      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="Producto, servicio o ciudad…">
+      <div class="filter-fields">
+        <div><label for="type-filter">Tipo</label><select id="type-filter"><option value="all">Productos y servicios</option><option value="bienes">Productos</option><option value="servicios">Servicios</option></select></div>
+        <div><label for="city-filter">Ciudad o municipio</label><select id="city-filter"><option value="all">Todas las ciudades</option></select></div>
       </div>
-      <div class="wizard-step" data-wizard-step="1" aria-labelledby="wizard-title-2" hidden>
-        <h3 class="wizard-heading" id="wizard-title-2">2. Añade los detalles</h3>
-        <label for="request-city">¿En qué ciudad o municipio lo necesitas?</label>
-        <select id="request-city" name="city" required aria-describedby="city-select-note">
-          <option value="">Selecciona tu ciudad o municipio</option>
-          <option value="Santa Marta">Santa Marta</option>
-          <option value="Bogotá">Bogotá</option>
-          <option value="Medellín">Medellín</option>
-          <option value="Cali">Cali</option>
-          <option value="Barranquilla">Barranquilla</option>
-          <option value="Cartagena">Cartagena</option>
-          <option value="Bucaramanga">Bucaramanga</option>
-          <option value="Pereira">Pereira</option>
-          <option value="Manizales">Manizales</option>
-          <option value="Cúcuta">Cúcuta</option>
-          <option value="Ibagué">Ibagué</option>
-          <option value="Villavicencio">Villavicencio</option>
-          <option value="Pasto">Pasto</option>
-          <option value="Neiva">Neiva</option>
-          <option value="Montería">Montería</option>
-          <option value="Valledupar">Valledupar</option>
-          <option value="Sincelejo">Sincelejo</option>
-          <option value="Armenia">Armenia</option>
-          <option value="Popayán">Popayán</option>
-          <option value="Tunja">Tunja</option>
-          <option value="Riohacha">Riohacha</option>
-          <option value="Florencia">Florencia</option>
-          <option value="Quibdó">Quibdó</option>
-          <option value="Yopal">Yopal</option>
-          <option value="Soledad">Soledad</option>
-          <option value="Soacha">Soacha</option>
-          <option value="__otra__">Otra ciudad o municipio…</option>
-        </select>
-        <p class="field-help" id="city-select-note">En celular, toca esta casilla para abrir el listado. Si tu municipio no aparece, selecciona «Otra ciudad o municipio».</p>
-        <div id="city-other-fields" hidden>
-          <label for="request-city-other">Escribe tu ciudad o municipio</label>
-          <input id="request-city-other" type="text" minlength="2" maxlength="80" autocomplete="address-level2" placeholder="Nombre de la ciudad o municipio" disabled>
+    </div>
+    <p id="example-note" class="examples-note" hidden>Los ejemplos son ficticios. Sus números son ilustrativos y no corresponden a contactos reales; las publicaciones auténticas permiten abrir WhatsApp.</p>
+    <div id="browse-list" class="publication-list" aria-live="polite"></div>
+    <p id="browse-empty" class="empty-message" hidden>No hay publicaciones que coincidan con la búsqueda.</p>
+  </section>
+
+  <section id="mis-publicaciones" class="screen shell content-screen" aria-labelledby="mine-title" hidden>
+    <div class="page-heading">
+      <h2 id="mine-title">Mis publicaciones</h2>
+      <p>Aquí puedes consultar las necesidades que has publicado, editarlas o eliminarlas.</p>
+    </div>
+    <div class="section-actions"><a class="button primary-button" href="#publicar">Crear publicación</a></div>
+    <div id="mine-list" class="publication-list" aria-live="polite"></div>
+    <p id="mine-empty" class="empty-message" hidden>Aún no tienes publicaciones. Crea la primera cuando lo necesites.</p>
+  </section>
+
+  <section id="publicar" class="screen shell content-screen" aria-labelledby="publish-title" hidden>
+    <div class="page-heading">
+      <h2 id="publish-title">Publica lo que necesitas</h2>
+      <p>Describe lo que buscas e indica un número de WhatsApp para que puedan contactarte directamente.</p>
+    </div>
+    <form id="publish-form" class="publish-form">
+      <p id="edit-info" class="inline-notice" hidden>Estás editando tu publicación.</p>
+      <div class="form-field">
+        <label for="need-category">¿Buscas un producto o un servicio?</label>
+        <select id="need-category" name="category" required><option value="bienes">Producto</option><option value="servicios">Servicio</option></select>
+      </div>
+      <div class="form-field">
+        <label for="need-title">Título de la publicación</label>
+        <input id="need-title" name="title" maxlength="120" minlength="5" placeholder="Ej. Necesito reparar una nevera" required>
+      </div>
+      <div class="form-field">
+        <label for="need-city">Ciudad o municipio</label>
+        <input id="need-city" name="city" maxlength="80" minlength="2" placeholder="Ej. Santa Marta" required>
+      </div>
+      <div class="form-field">
+        <label for="need-description">Descripción</label>
+        <textarea id="need-description" name="description" rows="5" maxlength="1500" minlength="15" placeholder="Explica las características, condiciones y demás detalles importantes." required></textarea>
+      </div>
+      <fieldset id="goods-fields" class="goods-fields">
+        <legend>Detalles del producto (opcional)</legend>
+        <div class="filter-fields">
+          <div class="form-field"><label for="need-quantity">Cantidad</label><input id="need-quantity" name="quantity" type="number" min="1" max="1000000" step="1" placeholder="Ej. 2"></div>
+          <div class="form-field"><label for="need-condition">Estado</label><select id="need-condition" name="condition"><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
         </div>
-        <fieldset id="goods-fields" class="goods-fields"><legend>Características del producto</legend><div class="form-columns">
-          <div><label for="request-quantity">Cantidad requerida</label><input id="request-quantity" name="quantity" type="number" min="1" max="1000000" step="1" required value="1"></div>
-          <div><label for="request-condition">Estado del producto</label><select id="request-condition" name="condition" required><option value="cualquiera">Cualquiera</option><option value="nuevo">Nuevo</option><option value="usado">Segunda mano</option></select></div>
-        </div></fieldset>
-        <label for="request-description">Describe las características y condiciones de tu solicitud</label><textarea id="request-description" name="description" rows="4" minlength="15" maxlength="1500" required placeholder="Para bienes: referencia y entrega. Para servicios: alcance, visita o diagnóstico y condiciones."></textarea>
-        <div class="form-columns">
-          <div><label for="request-budget">Presupuesto aproximado en COP (opcional)</label><input id="request-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Prefiero recibir cotizaciones"></div>
-          <div><label for="request-date">Fecha en la que lo necesitas (opcional)</label><input id="request-date" name="desiredDate" type="date"></div>
-        </div>
-        <label for="request-photo">Adjuntar imagen (opcional, máximo una)</label>
-        <input id="request-photo" type="file" accept="image/jpeg,image/png,image/webp">
-        <div id="request-photo-preview" class="photo-preview" aria-live="polite"></div>
-        <button id="request-photo-remove" type="button" class="my-action" hidden>Quitar fotografía</button>
-        <p class="field-help">Puedes adjuntar una imagen JPG, PNG o WebP. No incluyas datos personales ni direcciones exactas.</p>
+      </fieldset>
+      <div class="form-field">
+        <label for="need-budget">Presupuesto aproximado en COP (opcional)</label>
+        <input id="need-budget" name="budget" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Puedes dejarlo vacío">
       </div>
-      <div class="wizard-step" data-wizard-step="2" aria-labelledby="wizard-title-3" hidden>
-        <h3 class="wizard-heading" id="wizard-title-3">3. Confirma los detalles de tu solicitud</h3>
-        <div class="review-box" id="wizard-review" aria-live="polite"></div>
-        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> He revisado la información y confirmo que deseo guardar esta solicitud.</label>
+      <div class="form-field">
+        <label for="need-picture">Fotografía (opcional)</label>
+        <input id="need-picture" type="file" accept="image/jpeg,image/png,image/webp">
+        <p class="field-help">No incluyas documentos de identidad ni direcciones exactas en las fotografías.</p>
+        <div id="picture-preview" class="picture-preview"></div>
+        <button id="remove-picture" class="text-button" type="button" hidden>Quitar fotografía</button>
       </div>
-      <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
-      <p class="form-error" id="publish-error" role="alert" hidden></p>
-      <div class="wizard-actions">
-        <button class="button button-secondary" type="button" id="wizard-back" hidden>Anterior</button>
-        <button class="button button-secondary" type="button" id="wizard-draft">Guardar borrador</button>
-        <button class="button" type="button" id="wizard-next">Continuar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
-        <button class="button" type="submit" id="wizard-submit" hidden>Guardar solicitud</button>
+      <div class="form-field">
+        <label for="need-phone">Número de WhatsApp para recibir contactos</label>
+        <input id="need-phone" name="contactPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="24" placeholder="Ej. 300 123 4567 o +57 300 123 4567" required>
+        <p class="field-help">Si escribes un celular colombiano de 10 dígitos, se agregará el indicativo +57.</p>
+      </div>
+      <label class="consent"><input id="need-consent" type="checkbox" required><span>Autorizo que mi número de WhatsApp aparezca públicamente en esta publicación, para que las personas puedan contactarme directamente.</span></label>
+      <p id="form-feedback" class="feedback" role="alert" hidden></p>
+      <div class="form-actions">
+        <button id="save-button" type="submit" class="button primary-button">Publicar necesidad</button>
+        <button id="cancel-edit" type="button" class="button outline-button" hidden>Cancelar edición</button>
       </div>
     </form>
-  </dialog>
-
+  </section>
+</main>
+<footer class="footer shell"><p>LoNecesito · Publica lo que necesitas. Contacta directamente por WhatsApp.</p></footer>
+<dialog id="auth-dialog" aria-labelledby="auth-title">
+  <div class="modal-head"><h2 id="auth-title">Accede a LoNecesito</h2><button id="close-auth" class="close-button" type="button" aria-label="Cerrar">×</button></div>
+  <p class="modal-description">Inicia sesión o crea una cuenta para publicar, editar y eliminar tus publicaciones.</p>
+  <form id="auth-form">
+    <div class="form-field"><label for="auth-mode">¿Qué deseas hacer?</label><select id="auth-mode"><option value="login">Iniciar sesión</option><option value="register">Crear cuenta</option></select></div>
+    <div class="form-field"><label for="auth-email">Correo electrónico</label><input id="auth-email" type="email" autocomplete="email" required></div>
+    <div class="form-field"><label for="auth-password">Contraseña</label><input id="auth-password" type="password" minlength="6" autocomplete="current-password" required></div>
+    <p id="auth-feedback" class="feedback" role="alert" hidden></p>
+    <button id="auth-submit" class="button primary-button" type="submit">Iniciar sesión</button>
+    <button id="auth-google" class="button outline-button" type="button">Continuar con Google</button>
+  </form>
+  <button id="auth-logout" class="button outline-button" type="button" hidden>Cerrar sesión</button>
+</dialog>
+<div id="toast" role="status" class="toast" hidden></div>
 </body>
 </html>
