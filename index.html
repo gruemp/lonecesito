@@ -7,7 +7,7 @@
   <meta name="description" content="Publica una necesidad o explora las que puedes resolver. Quien ayuda solo pulsa Aceptar necesidad.">
   <title>LoNecesito — Publica o acepta necesidades</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23103f37'/%3E%3Cpath d='M10 7v18h13' fill='none' stroke='%23dfff8a' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-premium-2">
+  <link rel="stylesheet" href="2026-10-22_estilos.css?v=20261023-justificado-1">
   <script type="module" src="2026-10-22_app.js?v=20261023-didactica-1"></script>
 </head>
 <body>
@@ -52,7 +52,6 @@
         <details class="compact-help">
           <summary>¿Cómo funciona?</summary>
           <ol><li>Quien necesita ayuda publica su solicitud.</li><li>Quien puede ayudar consulta las necesidades.</li><li>Si puede resolver una, pulsa «Aceptar necesidad» sin diligenciar formularios.</li></ol>
-          <p>Demostración: las aceptaciones solo quedan en este navegador y no se envían a nadie.</p>
         </details>
       </div>
       <nav class="screen-navigation shell" id="screen-navigation" aria-label="Tus necesidades">
@@ -73,7 +72,7 @@
 
 
     <section class="requests-section shell app-screen" id="necesidades" data-screen="necesidades" aria-labelledby="requests-title" hidden>
-      <div class="section-heading"><div><p class="section-note">Exploración de prueba · Aceptaciones locales, sin contacto real</p><h2 id="requests-title">Soluciona una necesidad y gana dinero por ello</h2><p class="section-description">Toca el nombre de una necesidad para ver su descripción, fotografía y opción de aceptar.</p></div></div>
+      <div class="section-heading"><div><h2 id="requests-title">Soluciona una necesidad y gana dinero por ello</h2><p class="section-description">Toca el nombre de una necesidad para ver su descripción, fotografía y opción de aceptar.</p></div></div>
       <div class="filters" role="group" aria-label="Filtrar necesidades por tipo">
         <button class="filter is-active" data-category="all" aria-pressed="true">Todas</button>
         <button class="filter" data-category="bienes" aria-pressed="false">Bienes</button>
@@ -101,18 +100,16 @@
     <section class="my-section shell app-screen" id="aceptadas" data-screen="aceptadas" aria-labelledby="accepted-title" hidden>
       <div class="section-heading"><h2 id="accepted-title">Necesidades de terceros aceptadas para solucionar</h2></div>
       <p class="section-usage">Toca una necesidad para revisar lo que aceptaste.</p>
-      <p class="my-note">Aceptaciones de prueba en este navegador. Nadie recibe una notificación ni queda contratado.</p>
       <div class="my-grid" id="accepted-grid"></div>
       <p class="my-note" id="accepted-empty">Todavía no has aceptado ninguna necesidad.</p>
     </section>
   </main>
 
-  <footer class="site-footer shell compact-footer"><span>LoNecesito · Demostración local, sin conexión entre usuarios</span></footer>
+  <footer class="site-footer shell compact-footer"><span>LoNecesito</span></footer>
   <div class="toast" id="toast" role="status" hidden></div>
 
   <dialog id="publish-dialog" aria-labelledby="publish-title">
     <div class="dialog-header"><h2 id="publish-title">Publica lo que necesitas</h2><button class="close-dialog" aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#close"/></svg></button></div>
-    <p class="demo-note">Demostración: solo tú podrás ver estas solicitudes en este navegador. No se envían a otras personas ni proveedores.</p>
     <div class="wizard-progress" role="group" aria-label="Progreso de publicación">
       <span class="wizard-label" id="wizard-status" aria-live="polite">Paso 1 de 3: ¿Qué necesitas?</span><button type="button" class="wizard-clear" id="wizard-clear" hidden>Empezar una nueva</button><div class="wizard-bars" aria-hidden="true"><span class="is-complete"></span><span></span><span></span></div>
     </div>
@@ -177,13 +174,12 @@
         <input id="request-photo" type="file" accept="image/jpeg,image/png,image/webp">
         <div id="request-photo-preview" class="photo-preview" aria-live="polite"></div>
         <button id="request-photo-remove" type="button" class="my-action" hidden>Quitar fotografía</button>
-        <p class="field-help">La imagen se comprime y guarda solo en este navegador. No incluyas datos personales ni direcciones.</p>
+        <p class="field-help">Puedes adjuntar una imagen JPG, PNG o WebP. No incluyas datos personales ni direcciones exactas.</p>
       </div>
       <div class="wizard-step" data-wizard-step="2" aria-labelledby="wizard-title-3" hidden>
         <h3 class="wizard-heading" id="wizard-title-3">3. Revisa y confirma</h3>
         <div class="review-box" id="wizard-review" aria-live="polite"></div>
-        <p class="privacy-note">En la versión real tendrás que identificarte al final mediante Google o correo electrónico, sin SMS. La identificación con Firebase aún no está implementada en esta prueba.</p>
-        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> Entiendo que mi solicitud solo quedará guardada en este navegador.</label>
+        <label class="consent-line" for="request-demo-consent"><input type="checkbox" id="request-demo-consent" required> He revisado los datos de mi necesidad y confirmo que deseo guardarla.</label>
       </div>
       <p id="draft-status" class="draft-status" role="status" aria-live="polite"></p>
       <p class="form-error" id="publish-error" role="alert" hidden></p>
@@ -191,7 +187,7 @@
         <button class="button button-secondary" type="button" id="wizard-back" hidden>Anterior</button>
         <button class="button button-secondary" type="button" id="wizard-draft">Guardar borrador</button>
         <button class="button" type="button" id="wizard-next">Continuar <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
-        <button class="button" type="submit" id="wizard-submit" hidden>Guardar solicitud de prueba</button>
+        <button class="button" type="submit" id="wizard-submit" hidden>Guardar necesidad</button>
       </div>
     </form>
   </dialog>
