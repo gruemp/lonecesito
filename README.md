@@ -1,3 +1,15 @@
+# Versión 2.2.5 — dictado, fotografía lateral y portada sin textos redundantes
+
+- Eliminados exactamente los textos grandes de portada y del pie señalados en las capturas; la URL principal abre directamente el listado «Ver necesidades», manteniendo los tres botones permanentes.
+- Dentro del campo único de descripción hay un botón de micrófono para dictar en español mediante el navegador, sin Gemini. Se conserva el teclado, un estado de escucha y una notificación breve solo si falla o no está disponible. El dictado depende del navegador y puede usar servicios externos.
+- Se añade un icono para **adjuntar una foto opcional** dentro del mismo campo; no hay un tercer campo visible. La imagen se comprime en el dispositivo antes de guardarse; puede cambiarse o eliminarse.
+- Toda ficha, incluidos los ejemplos, reserva un espacio a la **derecha para la imagen**. Las publicaciones sin foto muestran un marcador visual; las que incluyen foto muestran la imagen a la derecha, sin ocultar información.
+- Las reglas Firestore permiten actualizar o quitar `picture` exclusivamente al autor. Deben desplegarse en el proyecto Firebase una vez configurado; GitHub Pages no despliega reglas.
+- Se siguen mostrando solamente los iconos de llamar y WhatsApp, y en la parte superior solamente «Versión 2.2.5».
+- Las preferencias se conservaron en `AGENTS.md` y `docs/PREFERENCIAS-LO-NECESITO.md`.
+
+---
+
 # Versión 2.2.4 — tres botones permanentes de navegación
 
 La barra superior concentra los únicos tres accesos principales, siempre visibles al desplazarse: **Publicar lo que necesito** (verde), **Ver necesidades** (azul) y **Mis publicaciones** (ámbar).

@@ -69,3 +69,23 @@ test('no se permite registrar interesados ni datos de terceros',async()=>{
   await assertFails(setDoc(doc(db(B),'requests','nueva','applications',B),{uid:B}));
   await assertFails(setDoc(doc(db(A),'profiles',A),{phone:'573001234567'}));
 });
+
+
+test('foto opcional: solo el autor puede añadir, cambiar o quitar una imagen',async()=>{
+  const image='data:image/jpeg;base64,AAAA';
+  await assertSucceeds(setDoc(doc(db(A),'requests','con-foto'),{
+    ...publication(A),picture:image
+  }));
+  await assertSucceeds(updateDoc(doc(db(A),'requests','con-foto'),{
+    picture:'data:image/jpeg;base64,BBBB'
+  }));
+  await assertFails(updateDoc(doc(db(B),'requests','con-foto'),{
+    picture:image
+  }));
+  await assertSucceeds(updateDoc(doc(db(A),'requests','con-foto'),{
+    picture:deleteField()
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','foto-excesiva'),{
+    ...publication(A),picture:'x'.repeat(400001)
+  }));
+});

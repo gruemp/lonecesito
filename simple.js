@@ -1,7 +1,7 @@
 import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
 
 const $=id=>document.getElementById(id);
-const pages=['inicio','necesidades','mis-publicaciones','publicar'];
+const pages=['necesidades','mis-publicaciones','publicar'];
 const STORAGE='lonecesito-publicaciones-demo-v1';
 const state={mode:'loading',user:null,items:[],editingId:null,firebase:null,waitingForAuth:false,saving:false};
 const el=(tag,cls,value)=>{
@@ -29,9 +29,9 @@ function saveLocal(items){
 }
 function showView(){
   const page=window.location.hash.slice(1);
-  const screen=pages.includes(page)?page:'inicio';
+  const screen=pages.includes(page)?page:'necesidades';
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
-    state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
+    state.waitingForAuth=true;showAuth();window.location.hash='#necesidades';return;
   }
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
@@ -85,6 +85,8 @@ function contactIcon(kind){
   svg.classList.add('contact-icon');
   const paths=kind==='call'?
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
+    kind==='photo'?
+    ['M3 4h18v16H3z','M8 8.5h.01','m3 18 5-6 4 4 3-3 4 5']:
     ['M20.5 11.8a8.5 8.5 0 0 1-12.2 7.6L3 21l1.6-5.2a8.5 8.5 0 1 1 15.9-4z',
      'M8.2 8.3c.3-.6.9-.8 1.4-.3l1 1.2-.7 1.1c.7 1.5 1.9 2.7 3.4 3.4l1.1-.7 1.2 1c.5.5.3 1.1-.3 1.4-.8.4-1.7.5-2.6.1a9.3 9.3 0 0 1-4.6-4.6c-.4-.9-.3-1.8.1-2.6z'];
   for(const d of paths){
@@ -110,23 +112,35 @@ function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
   const title=String(record.title||derivedTitle(description)).trim()||'Necesidad publicada';
+  const main=el('div','publication-main');
+  const copy=el('div','publication-copy');
   const heading=el('div','publication-heading');
-  const h=el('h3','',title);
-  heading.append(h);
-  article.append(heading);
+  heading.append(el('h3','',title));
+  copy.append(heading);
 
-  // Evitar repetir la primera línea cuando el título proviene del mismo texto.
-  // Toda la descripción sigue visible, repartida entre título y cuerpo.
+  // Cuerpo completo en un solo texto, también para registros antiguos.
   const fullText=legacyDetails(record,{forCard:true});
   const rest=fullText.startsWith(title)?fullText.slice(title.length).trimStart():fullText;
-  if(rest)article.append(el('p','publication-description',rest));
+  if(rest)copy.append(el('p','publication-description',rest));
 
-
+  // Zona de fotografía SIEMPRE a la derecha, incluso sin imagen cargada.
+  const media=el('div','publication-media');
+  media.setAttribute('aria-label','Imagen del producto o servicio');
   const photo=String(record.picture||'');
   if(/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(photo)){
     const img=el('img','publication-photo');
-    img.src=photo;img.alt='Fotografía de '+title;img.loading='lazy';article.append(img);
+    img.src=photo;
+    img.alt='Fotografía de '+title;
+    img.loading='lazy';
+    media.append(img);
+  }else{
+    const placeholder=el('span','photo-placeholder');
+    placeholder.setAttribute('aria-hidden','true');
+    placeholder.append(contactIcon('photo'));
+    media.append(placeholder);
   }
+  main.append(copy,media);
+  article.append(main);
 
   const contact=el('div','contact-box');
   let contactNumber='';
@@ -182,7 +196,123 @@ function render(){
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
 }
 $('search').addEventListener('input',render);
+/* Dictado opcional mediante el navegador; el teclado sigue disponible siempre. */
+let recognition=null;
+let pictureDraft='';
+let pictureLoading=false;
+function setMicState(active){
+  const button=$('voice-button');
+  button.classList.toggle('listening',active);
+  button.setAttribute('aria-pressed',String(active));
+  button.setAttribute('aria-label',active?'Detener dictado':'Dictar necesidad por voz');
+  button.title=active?'Detener dictado':'Dictar necesidad';
+}
+function stopDictation(){
+  const current=recognition;
+  recognition=null;
+  if(current)try{current.abort();}catch{}
+  setMicState(false);
+}
+$('voice-button').addEventListener('click',()=>{
+  if(recognition){stopDictation();return;}
+  const Constructor=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!Constructor){
+    toast('Este navegador no admite dictado en la página. Puedes usar el micrófono del teclado.');
+    return;
+  }
+  try{
+    const instance=new Constructor();
+    recognition=instance;
+    instance.lang='es-CO';
+    instance.continuous=false;
+    instance.interimResults=false;
+    instance.maxAlternatives=1;
+    instance.onresult=event=>{
+      let transcript='';
+      for(let i=0;i<event.results.length;i++){
+        if(event.results[i].isFinal)transcript+=event.results[i][0].transcript+' ';
+      }
+      transcript=transcript.trim();
+      if(!transcript)return;
+      const textarea=$('need-description');
+      const join=textarea.value&&!/\s$/.test(textarea.value)?' ':'';
+      textarea.value=(textarea.value+join+transcript).slice(0,4000);
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
+    };
+    instance.onerror=event=>{
+      if(event.error==='not-allowed'||event.error==='service-not-allowed')toast('Permite el uso del micrófono para dictar.');
+      else if(event.error==='network')toast('El dictado necesita conexión en este navegador.');
+      else if(event.error!=='aborted'&&event.error!=='no-speech')toast('No se pudo reconocer la voz.');
+    };
+    instance.onend=()=>{
+      if(recognition===instance){recognition=null;setMicState(false);}
+    };
+    instance.start();
+    setMicState(true);
+  }catch{
+    recognition=null;setMicState(false);
+    toast('No se pudo iniciar el micrófono.');
+  }
+});
+function updatePhotoPreview(){
+  const preview=$('photo-preview');
+  preview.hidden=!pictureDraft;
+  $('photo-preview-image').src=pictureDraft||'';
+  $('photo-picker').value='';
+}
+$('add-photo').addEventListener('click',()=>$('photo-picker').click());
+$('remove-photo').addEventListener('click',()=>{
+  pictureDraft='';updatePhotoPreview();
+});
+function loadPhotoBitmap(file){
+  if(typeof createImageBitmap==='function')return createImageBitmap(file);
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);resolve(img);};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se pudo leer la imagen.'));};
+    img.src=url;
+  });
+}
+async function encodePhoto(file){
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Selecciona una foto JPG, PNG o WebP.');
+  if(file.size>12000000)throw Error('La foto es demasiado grande. Selecciona una de menos de 12 MB.');
+  const img=await loadPhotoBitmap(file);
+  try{
+    const width=img.width||img.naturalWidth,height=img.height||img.naturalHeight;
+    if(!width||!height)throw Error('No se pudo leer la foto.');
+    const canvas=document.createElement('canvas');
+    const context=canvas.getContext('2d');
+    if(!context)throw Error('Este navegador no puede procesar fotos.');
+    for(const maxSide of [960,800,640,480,320]){
+      const ratio=Math.min(1,maxSide/Math.max(width,height));
+      canvas.width=Math.max(1,Math.round(width*ratio));
+      canvas.height=Math.max(1,Math.round(height*ratio));
+      context.fillStyle='#ffffff';context.fillRect(0,0,canvas.width,canvas.height);
+      context.drawImage(img,0,0,canvas.width,canvas.height);
+      for(const quality of [.78,.66,.52]){
+        const encoded=canvas.toDataURL('image/jpeg',quality);
+        if(encoded.length<380000)return encoded;
+      }
+    }
+    throw Error('La imagen no se pudo comprimir. Elige una foto más pequeña.');
+  }finally{
+    if(typeof img.close==='function')img.close();
+  }
+}
+$('photo-picker').addEventListener('change',async()=>{
+  const file=$('photo-picker').files?.[0];
+  if(!file)return;
+  pictureLoading=true;$('add-photo').disabled=true;
+  try{
+    pictureDraft=await encodePhoto(file);
+    updatePhotoPreview();
+  }catch(error){toast(error.message||'No se pudo adjuntar la foto.');}
+  finally{pictureLoading=false;$('add-photo').disabled=false;$('photo-picker').value='';}
+});
 function resetForm(){
+  stopDictation();
+  pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
   $('publish-title').textContent='Publica lo que necesitas';
   $('save-button').textContent='Publicar necesidad';
@@ -195,6 +325,7 @@ function editRecord(record){
   state.editingId=record.id;
   $('need-description').value=legacyDetails(record);
   $('need-phone').value=record.contactPhone||'';
+  pictureDraft=record.picture||'';updatePhotoPreview();
   $('publish-title').textContent='Edita tu publicación';
   $('save-button').textContent='Guardar cambios';
   $('cancel-edit').hidden=false;
@@ -216,6 +347,7 @@ async function deleteRecord(record){
 $('publish-form').addEventListener('submit',async event=>{
   event.preventDefault();
   if(state.saving)return;
+  if(pictureLoading){toast('La imagen aún se está preparando.');return;}
   if(state.mode==='cloud'&&!state.user){state.waitingForAuth=true;showAuth();return;}
   let current=null;
   try{
@@ -223,12 +355,13 @@ $('publish-form').addEventListener('submit',async event=>{
       description:$('need-description').value,
       contactPhone:$('need-phone').value
     });
+    if(pictureDraft)data.picture=pictureDraft;
     current=state.items.find(item=>item.id===state.editingId);
     if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
     state.saving=true;$('save-button').disabled=true;
     if(state.mode==='demo'){
-      const base=current?{id:current.id,ownerUid:current.ownerUid,createdAt:current.createdAt,...(current.picture?{picture:current.picture}:{})}
+      const base=current?{id:current.id,ownerUid:current.ownerUid,createdAt:current.createdAt}
         :{id:'local-'+Date.now()+'-'+Math.random().toString(36).slice(2),ownerUid:currentUid(),createdAt:Date.now()};
       const item={...base,...data};
       saveLocal(current?state.items.map(x=>x.id===current.id?item:x):[item,...state.items]);
@@ -236,6 +369,7 @@ $('publish-form').addEventListener('submit',async event=>{
       const api=state.firebase;
       if(current){
         const updated={...data};
+        if(current.picture&&!pictureDraft)updated.picture=api.deleteField();
         // Retirar campos de formularios anteriores; sus datos ya están en la descripción.
         for(const key of ['category','city','subcategory','quantity','condition','budget','desiredDate','status']){
           if(Object.prototype.hasOwnProperty.call(current,key))updated[key]=api.deleteField();
@@ -285,7 +419,7 @@ $('auth-google').addEventListener('click',async()=>{
 });
 $('auth-logout').addEventListener('click',async()=>{
   if(!state.firebase)return;
-  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#inicio';}
+  try{await state.firebase.signOut(state.firebase.auth);$('auth-dialog').close();window.location.hash='#necesidades';}
   catch(error){feedback('auth-feedback',authError(error));}
 });
 function authError(error){
