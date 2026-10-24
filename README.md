@@ -1,4 +1,20 @@
 # lonecesito
+## Rediseño visual premium v2 (octubre de 2026)
+
+- Nueva composición de **portada** con encabezado equilibrado, logo centrado, título más legible, superficie blanca y cuatro acciones diferenciadas por color, tamaño y jerarquía. Las acciones siguen apareciendo **solo en Inicio**.
+- Las vistas interiores obtienen encabezados en superficie clara, filtros, campo de búsqueda y lista pastel con proporciones coherentes. **Los nombres de las necesidades continúan en una sola línea**, sin espacios entre filas.
+- Las fichas abiertas se presentan en capas: categoría/estado, título y ubicación, detalles en celdas bien delimitadas, descripción, fotografía completa a la derecha, aviso y acciones grandes. Se conserva el **ancho base de dos columnas** del detalle y la ficha solo se construye al abrir su fila.
+- Mejoras de presentación en el asistente de publicación: tipografía, campos, barra de progreso, avisos y acciones. El footer sigue compacto.
+- Adaptación en pantallas de 320 px a escritorio, con controles especiales para ancho de los cuatro accesos en móviles y metadatos en una columna cuando la ficha es estrecha.
+- Cambios limitados al CSS y al identificador de caché del CSS en HTML; **JavaScript y lógica interna intactos**.
+
+**Pruebas:** 84 casos de lógica y estructura aprobados mediante ejecución aislada, sin IDs duplicados ni referencias a elementos eliminados, CSS equilibrado y contrastes AA de texto y botones verificados. La comprobación visual manual en distintos navegadores/teléfonos sigue pendiente.
+
+El lenguaje «300 % mejor» se interpreta como una petición de mejora visual sustancial, no como un indicador cuantitativo verificable.
+
+**Estado:** sigue siendo una demostración local sin Firebase ni comunicación real entre usuarios.
+
+---
 ## Fichas desplegables: composición visual mejorada (octubre de 2026)
 
 - Las fichas completas que se abren al pulsar una necesidad ahora muestran una jerarquía más clara: encabezado de categoría y estado, título, ubicación, características, descripción, fotografía lateral, aviso y botones de acción.
