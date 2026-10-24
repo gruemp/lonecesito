@@ -32,7 +32,7 @@ service cloud.firestore {
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'description','title','contactPhone','contactConsent',
+          'description','title','contactPhone','contactConsent','picture',
           // Solo se permite retirar los campos heredados de la interfaz antigua.
           'category','city','subcategory','quantity','condition','budget',
           'desiredDate','status'
