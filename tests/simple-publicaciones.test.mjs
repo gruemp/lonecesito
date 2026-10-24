@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.14');
+  assert.equal(APP_VERSION,'2.2.15');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -573,8 +573,11 @@ test('cuatro pestañas: una fila en PC y dos en móvil, en orden lógico',()=>{
  assert.deepEqual(links,['inicio','publicar','mis-publicaciones','necesidades']);
  assert.match(css,/\.site-header \.top-nav\{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?\.site-header \.top-nav\{[^}]*grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
- assert.match(css,/\.home-visual-screen \.welcome-banner img\{[^}]*max-height:calc\(100dvh - 140px\)/);
+  assert.match(css,/--home-frame-width:min\(calc\(100% - 32px\),1440px/);
  assert.match(css,/\.home-visual-screen \.welcome-banner img\{[^}]*object-fit:contain/);
+  assert.match(css,/\.home-visual-screen\{[^}]*width:var\(--home-frame-width\)/);
+  assert.match(css,/\.site-header \.header-layout\{[^}]*width:var\(--home-frame-width\)/);
+  assert.match(css,/@media\(max-width:680px\)\{[\s\S]*?--home-frame-width:min\(calc\(100% - 20px\)/);
 });
 test('tercera imagen ocupa Inicio, sin fichas ni buscador',()=>{
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
