@@ -639,7 +639,7 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-fichas-diseno-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
@@ -798,7 +798,7 @@ test('el contraste de los cuatro colores de texto alcanza WCAG AA',()=>{
 test('la actualización es solo visual y se sirve sin caché de CSS anterior',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-fichas-diseno-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   assert.ok(js.includes("const row=el('details','need-list-row')"));
   assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
@@ -811,7 +811,7 @@ test('la actualización es solo visual y se sirve sin caché de CSS anterior',()
 
 test('las fichas desplegadas tienen jerarquía tipográfica y clasificación visible',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   for(const item of [
     '.need-list-content .need-card-head{',
     '.need-list-content .need-card-head .category{',
@@ -826,7 +826,7 @@ test('las fichas desplegadas tienen jerarquía tipográfica y clasificación vis
 });
 test('las fichas ordenan los detalles en bloque legible y descripción sin truncar',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   assert.ok(layer.includes('.need-list-content .need-card-meta{'));
   assert.ok(layer.includes('background:#f6f9f6'));
   assert.ok(layer.includes('padding:12px 13px 12px 30px'));
@@ -840,7 +840,7 @@ test('las fichas ordenan los detalles en bloque legible y descripción sin trunc
 test('las fotografías de ficha se ven proporcionadas a la derecha del texto',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   assert.ok(layer.includes('.need-list-content .need-card-overview{'));
   assert.ok(layer.includes('align-items:start'));
   assert.ok(layer.includes('min-width:0'));
@@ -853,7 +853,7 @@ test('las fotografías de ficha se ven proporcionadas a la derecha del texto',()
 });
 test('las acciones de las fichas son simétricas y se diferencian por significado',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   for(const marker of [
     '.need-list-content .need-card-actions{',
     'justify-content:center',
@@ -870,7 +870,7 @@ test('las acciones de las fichas son simétricas y se diferencian por significad
 });
 test('las fichas conservan los anchos base de las columnas en escritorio y móvil',()=>{
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   const base=css.slice(0,css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
   assert.ok(base.includes('grid-template-columns:minmax(0,1fr) minmax(116px,29%)'));
   assert.ok(base.includes('grid-template-columns:minmax(0,1fr) minmax(90px,36%)'));
@@ -883,7 +883,7 @@ test('las fichas conservan los anchos base de las columnas en escritorio y móvi
 test('las filas cerradas siguen compactas y las fichas se crean únicamente al abrirlas',()=>{
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
-  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'));
+  const layer=css.slice(css.lastIndexOf('FICHAS DESPLEGADAS · Composición visual final'),css.lastIndexOf('LO NECESITO / VISUAL V2'));
   assert.ok(app.includes("const row=el('details','need-list-row')"));
   assert.ok(app.includes('if(row.open){'));
   assert.ok(app.includes("content.append(needCard(request,context))"));
@@ -896,7 +896,7 @@ test('las filas cerradas siguen compactas y las fichas se crean únicamente al a
 test('la nueva capa visual mantiene los tres contextos y los controles existentes',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const app=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-fichas-diseno-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-premium-2'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const id of ['request-grid','my-requests-grid','accepted-grid','publish-form','request-city','request-photo-preview'])
     assert.ok(html.includes('id="'+id+'"'),'Falta '+id);
@@ -905,4 +905,109 @@ test('la nueva capa visual mantiene los tres contextos y los controles existente
   assert.ok(app.includes("renderNeedList(container,state.requests,'propias')"));
   assert.ok(app.includes("renderNeedList(list,accepted,'aceptadas')"));
   assert.equal(/id="detail-dialog"/.test(html),false);
+});
+
+
+test('el rediseño premium conserva la navegación y las pantallas originales',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(html.includes('20261023-premium-2'));
+  assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
+  assert.ok(css.includes('LO NECESITO / VISUAL V2'));
+  for(const id of ['inicio','necesidades','mis-necesidades','aceptadas','request-grid','my-requests-grid','accepted-grid','publish-form'])
+    assert.ok(html.includes('id="'+id+'"'),id);
+  assert.ok(js.includes('export function applyScreenNavigation(root,screenId)'));
+});
+test('la portada premium usa un panel editorial y cuatro acciones proporcionadas',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  for(const item of [
+    '.compact-header-inner{','.compact-brand-mark{','.hero-copy{','.hero .eyebrow{',
+    '.hero h1{','.hero-description{','.hero .publish-cta.action-cta,',
+    '#screen-navigation a.action-cta{','.action-cta .action-copy strong{',
+    'border-radius:26px','max-width:480px','grid-template-columns:29px minmax(0,1fr) 20px'
+  ])assert.ok(layer.includes(item),'Falta ajuste '+item);
+  assert.ok(layer.includes('background:linear-gradient(160deg,#fff'));
+});
+test('los cuatro botones principales mantienen el mismo ancho en teléfonos',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  assert.ok(layer.includes('.hero-copy{\n    width:100%;\n    padding:23px 16px 21px'));
+  assert.ok(layer.includes('#screen-navigation{width:min(calc(100% - 32px),480px)'));
+  assert.ok(layer.includes('.hero-copy{padding:21px 12px 19px}'));
+  assert.ok(layer.includes('#screen-navigation{width:min(calc(100% - 24px),480px)'));
+});
+test('los listados de nombres siguen compactos y con colores pastel',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  assert.ok(layer.includes(':is(#request-grid,#my-requests-grid,#accepted-grid) > .need-list-row:nth-child(n) > .need-list-summary'));
+  assert.ok(layer.includes('background:var(--row-bg)'));
+  assert.ok(layer.includes('background:var(--row-open)'));
+  assert.ok(layer.includes('color:var(--row-ink)'));
+  assert.ok(layer.includes('min-height:41px'));
+  assert.ok(js.includes("const row=el('details','need-list-row')"));
+  assert.ok(js.includes("heading.append(el('span','need-list-title',request.title))"));
+  assert.ok(js.includes("content.append(needCard(request,context))"));
+});
+test('las fichas destacan sus datos en dos columnas amplias y fotos completas',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  for(const marker of [
+    '.need-list-content .need-card-head{',
+    '.need-list-content .need-card .need-card-title{',
+    '.need-list-content .need-card-meta{',
+    'grid-template-columns:repeat(2,minmax(0,1fr))',
+    '.need-list-content .need-card-meta li,',
+    '.need-list-content .need-card-photo{',
+    'object-fit:contain',
+    '.need-list-content .need-card-note{',
+    '.need-list-content .need-card-actions{'
+  ])assert.ok(layer.includes(marker),'No se rediseñó '+marker);
+  assert.ok(layer.includes('.need-list-content .need-card-meta{grid-template-columns:minmax(0,1fr)'));
+});
+test('el diseño premium conserva las columnas originales en móvil',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  const previous=css.slice(0,css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  assert.ok(previous.includes('grid-template-columns:minmax(0,1fr) minmax(116px,29%)'));
+  assert.ok(previous.includes('grid-template-columns:minmax(0,1fr) minmax(90px,36%)'));
+  assert.ok(previous.includes('grid-template-columns:minmax(0,1fr) 82px'));
+  assert.equal(layer.includes('.need-card-overview{grid-template-columns:'),false);
+  for(const point of ['@media(min-width:900px){','@media(max-width:680px){','@media(max-width:380px){'])
+    assert.ok(layer.includes(point));
+  assert.ok(layer.includes('min-width:0'));
+  assert.ok(layer.includes('overflow-wrap:anywhere'));
+});
+test('acciones, formulario, búsqueda y footer se rediseñan sin efectos decorativos',()=>{
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  const layer=css.slice(css.lastIndexOf('LO NECESITO / VISUAL V2'));
+  for(const s of [
+    '.need-list-content .need-card-actions .need-card-primary{',
+    '.need-list-content .need-card-actions .need-card-secondary{',
+    '.need-list-content .need-card-actions .need-action-cancel{',
+    '.filter{','.quick-search input{','.compact-filters{',
+    '.wizard-progress{','.wizard-bars{','.dialog-form input:not([type=checkbox]):not([type=file])',
+    '.site-footer.compact-footer{'
+  ])assert.ok(layer.includes(s),'No se mejoró '+s);
+  assert.equal(layer.includes('transition:'),false);
+  assert.equal(layer.includes('animation:'),false);
+});
+test('las combinaciones nuevas conservan contraste AA',()=>{
+  const samples=[
+    ['143a2d','ffffff'],['526d5e','ffffff'],
+    ['1b5844','eaf6ed'],['234e74','ebf3fd'],
+    ['724e20','fff4df'],['3d5847','f4f8f4'],
+    ['4d6757','f3f8f3'],['943c36','fff2f0'],
+    ['ffffff','195943'],['ffffff','265f87']
+  ];
+  const lum=hex=>{
+    const nums=[0,2,4].map(i=>parseInt(hex.slice(i,i+2),16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);
+    return .2126*nums[0]+.7152*nums[1]+.0722*nums[2];
+  };
+  for(const [fg,bg] of samples){
+    const a=lum(fg),b=lum(bg),contrast=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+    assert.ok(contrast>=4.5,'Contraste bajo '+fg+'/'+bg+' : '+contrast);
+  }
 });
