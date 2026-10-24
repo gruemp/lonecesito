@@ -639,7 +639,7 @@ test('las ayudas y estilos también se adaptan a teléfonos sin aumentar las fil
 
 test('el pulido visual conserva los cuatro destinos y todo el contenido actual',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
-  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-pulido-1'));
+  assert.ok(html.includes('2026-10-22_estilos.css?v=20261023-colores-1'));
   assert.ok(html.includes('2026-10-22_app.js?v=20261023-didactica-1'));
   for(const marker of [
     'id="hero-publish"','href="#necesidades" data-explore',
