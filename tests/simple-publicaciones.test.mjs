@@ -17,8 +17,8 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 });
 test('se conserva la versión visible y sin avisos de pruebas',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.9');
-  assert.match(html,/<span id="release-version">Versión 2\.2\.9<\/span>/);
+  assert.equal(APP_VERSION,'2.2.10');
+  assert.match(html,/<span id="release-version">Versión 2\.2\.10<\/span>/);
   assert.ok(html.indexOf('class="release-bar"')<html.indexOf('<header class="site-header">'));
   assert.doesNotMatch(html,/mode-notice|example-note|Ver cambios/);
 });
@@ -84,7 +84,7 @@ test('las fichas ahorran altura sin esconder texto ni apretar el ancho',()=>{
   assert.match(css,/\.publication-card:nth-child\(4n\)/);
   assert.match(css,/#need-description\{min-height:148px;/);
   assert.match(js,/legacyDetails\(record,\{forCard:true\}\)/);
-  assert.match(html,/Versión 2\.2\.9/);
+  assert.match(html,/Versión 2\.2\.10/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
 });
 test('dos iconos independientes: llamada con tel y WhatsApp con endpoint API',()=>{
@@ -129,7 +129,7 @@ test('el diseño de ejemplos y fichas reales es idéntico salvo el destino segur
   assert.match(code,/record\.example===true\s*\?exampleWhatsappUrl/);
   assert.doesNotMatch(code,/EJEMPLO FICTICIO|Teléfono de ejemplo|Esta es una ficha ilustrativa/);
   assert.doesNotMatch(html,/mode-notice|example-note/);
-  assert.match(html,/Versión 2\.2\.9/);
+  assert.match(html,/Versión 2\.2\.10/);
 });
 
 
@@ -224,7 +224,7 @@ test('las fichas de ejemplo conservan dos iconos y nunca marcan un teléfono fic
 test('el formulario informa del destino público del teléfono aunque la ficha no lo escriba',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/Tu número no se mostrará escrito, pero estará disponible en los enlaces públicos/);
-  assert.match(html,/Versión 2\.2\.9/);
+  assert.match(html,/Versión 2\.2\.10/);
 });
 test('AGENTS y la guía documentan el marcador de llamada y los iconos sin número',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
@@ -299,7 +299,7 @@ test('solo dos campos de publicación con micrófono y foto dentro del editor',(
   assert.match(editor,/id="photo-preview"/);
   assert.match(html,/id="photo-picker" type="file"[^>]* hidden /);
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  assert.match(css,/\.entry-toolbar\{position:absolute;/);
+  assert.match(css,/#publish-form \.publish-controls\{\s*display:grid;/);
   assert.match(css,/\.voice-tool\.listening\{/);
   assert.match(css,/\.photo-preview\[hidden\]\{display:none!important\}/);
 });
@@ -396,7 +396,7 @@ test('queda entrega transportable con estado Firebase y aprendizajes sin promete
   const readme=readFileSync(new URL('../README.md',import.meta.url),'utf8');
   for(const file of [agents,readme])assert.match(file,/CONTINUIDAD-Y-APRENDIZAJES\.md/);
   assert.match(guide,/object-fit: contain/);
-  assert.match(handoff,/2\.2\.9/);
+  assert.match(handoff,/2\.2\.10/);
   assert.match(handoff,/Firebase.*vacía|firebase-config\.js.*vacía|firebase-config\.js.*vacías/i);
   assert.match(handoff,/Aprendizajes del diseño/);
   assert.match(handoff,/No.*comparten|no se comparten|no.*aparecen en los navegadores/i);
@@ -558,8 +558,67 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
   const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
   const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
   for(const content of [agents,guide,handoff]){
-    assert.match(content,/2\.2\.9/);
+    assert.match(content,/2\.2\.10/);
     assert.match(content,/una sola fila/i);
     assert.match(content,/cinco iconos|cinco botones/i);
+  }
+});
+
+
+test('fila única: teléfono con icono a la izquierda, imagen, micrófono y enviar',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
+  const controls=form.match(/<div class="publish-controls">([\s\S]*?)<\/div>\s*<p id="form-feedback"/);
+  assert.ok(controls,'No está la fila de publicación');
+  const part=controls[1];
+  const ordered=['class="phone-field"','class="phone-field-icon"','id="need-phone"','id="add-photo"','id="voice-button"','id="save-button"'];
+  let last=-1;
+  for(const name of ordered){
+    const position=part.indexOf(name);
+    assert.ok(position>last,'Orden incorrecto en la fila: '+name);
+    last=position;
+  }
+  assert.match(part,/id="need-phone"[^>]*placeholder="Ej: 300 123 4567"/);
+  assert.match(part,/id="save-button" type="submit"[^>]*aria-label="Publicar"/);
+  assert.match(part,/id="save-button"[\s\S]*?<svg[\s\S]*?<path d="m22 2-7 20-4-9-9-4Z"/);
+  assert.doesNotMatch(part,/Publicar necesidad|>Publicar</);
+  assert.doesNotMatch(form,/Número de WhatsApp|class="field-help"/);
+  assert.match(part,/for="need-phone" class="visually-hidden"/);
+});
+test('CSS conserva una sola fila en móvil y usa el ancho restante para el teléfono',()=>{
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(css,/#publish-form \.publish-controls\{\s*display:grid;grid-template-columns:minmax\(0,1fr\) 44px 44px 52px;/);
+  assert.match(css,/#publish-form \.phone-field\{display:flex;align-items:center;/);
+  assert.match(css,/#publish-form \.phone-field-icon\{[^}]*flex:0 0 20px/);
+  assert.match(css,/#publish-form \.phone-field #need-phone\{[^}]*width:100%;min-width:0/);
+  assert.match(css,/@media\(max-width:450px\)[\s\S]*?\.publish-controls\{grid-template-columns:minmax\(0,1fr\) 42px 42px 45px/);
+  assert.match(css,/@media\(max-width:345px\)[\s\S]*?\.publish-controls\{grid-template-columns:minmax\(0,1fr\) repeat\(3,38px\)/);
+  assert.match(css,/#publish-form \.need-entry\.has-photo-preview #need-description\{padding-bottom:60px\}/);
+});
+test('Enter activa el mismo envío del botón sin duplicarlo, Shift Enter inserta línea',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  assert.match(js,/function publishOnEnter\(event\)/);
+  assert.match(js,/event\.key!=='Enter'\|\|event\.shiftKey\|\|event\.isComposing\|\|event\.keyCode===229\|\|event\.repeat/);
+  assert.match(js,/event\.preventDefault\(\)/);
+  assert.match(js,/if\(state\.saving\)return/);
+  assert.match(js,/form\.requestSubmit\(\$\('save-button'\)\)/);
+  assert.match(js,/\$\('need-description'\)\.addEventListener\('keydown',publishOnEnter\)/);
+  assert.match(js,/\$\('need-phone'\)\.addEventListener\('keydown',publishOnEnter\)/);
+  assert.match(js,/\$\('publish-form'\)\.addEventListener\('submit',async event=>\{/);
+});
+test('el icono de envío permanece al crear y al guardar cambios',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(js,/\$\('save-button'\)\.setAttribute\('aria-label','Publicar'\)/);
+  assert.match(js,/\$\('save-button'\)\.setAttribute\('aria-label','Guardar cambios'\)/);
+  assert.doesNotMatch(js,/\$\('save-button'\)\.textContent=/);
+  assert.match(html,/id="cancel-edit"[^>]*aria-label="Cancelar edición" hidden/);
+});
+test('las instrucciones para futuras IA describen la nueva fila y el teclado',()=>{
+  for(const path of ['../AGENTS.md','../docs/PREFERENCIAS-LO-NECESITO.md','../docs/CONTINUIDAD-Y-APRENDIZAJES.md']){
+    const content=readFileSync(new URL(path,import.meta.url),'utf8');
+    assert.match(content,/2\.2\.10/);
+    assert.match(content,/Shift\+Enter|Shift \+ Enter/);
+    assert.match(content,/Ej: 300 123 4567/);
   }
 });
