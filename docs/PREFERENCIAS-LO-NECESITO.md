@@ -53,6 +53,14 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 - **No añadir Gemini ni búsqueda con inteligencia artificial**. Esa idea se consideró y se descartó; mantener la búsqueda de texto existente salvo nueva autorización expresa.
 - Mantener buen contraste, lectura accesible, adaptación a distintos anchos y sin desbordamiento horizontal.
 
+### Portada, micrófono e imagen del producto (actualización 2.2.5)
+
+- La portada **no** debe mostrar el titular grande «Publica lo que necesitas. Encuentra quién puede ofrecerlo.» ni el pie «LoNecesito · Publica lo que necesitas. Contacta directamente por WhatsApp.». Esos textos ocupaban altura innecesaria. Al entrar en la dirección principal, mostrar directamente el listado de necesidades debajo de los tres botones persistentes.
+- La caja de texto «¿Qué necesitas?» debe incluir **un icono de micrófono** que permita hablar para completar el mismo texto. Emplear reconocimiento integrado del navegador en español (`SpeechRecognition` / `webkitSpeechRecognition`), sin Gemini ni registro/almacenamiento de audio en LoNecesito. Mostrar cuándo escucha y permitir detener. El teclado permanece disponible y puede haber navegadores sin soporte. En algunos navegadores un proveedor externo puede procesar el audio: no prometer dictado exclusivamente local. Solo informar problemas cuando ocurran, no con banners.
+- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (marcador gráfico discreto). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
+- Quien publica puede adjuntar una fotografía opcional mediante **icono integrado en la caja de necesidad**. No añadir un campo visible más a los dos existentes. Reducir resolución y tamaño antes de almacenar; conservar o quitar la foto durante la edición y adaptar las reglas de actualización en Firestore.
+- Los ejemplos siguen mostrando el mismo espacio a la derecha y los mismos controles que las fichas reales, sin textos de prueba intrusivos.
+
 ## 5. Versión de publicación visible
 
 Al inicio de **todas** las pantallas hay una barra discreta que muestra **solo «Versión X.Y.Z»**, sin fecha, enlaces, avisos ni notas adicionales. Aumentar en **cada modificación que se publique**, incluso si es solo visual o textual. Sincronizar:
