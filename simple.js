@@ -333,6 +333,7 @@ $('voice-button').addEventListener('click',()=>{
 function updatePhotoPreview(){
   const preview=$('photo-preview');
   preview.hidden=!pictureDraft;
+  $('need-description').parentElement.classList.toggle('has-photo-preview',Boolean(pictureDraft));
   $('photo-preview-image').src=pictureDraft||'';
   $('photo-picker').value='';
 }
@@ -393,8 +394,10 @@ function resetForm(){
   stopDictation();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
-  $('save-button').textContent='Publicar necesidad';
+  $('save-button').setAttribute('aria-label','Publicar');
+  $('save-button').title='Publicar';
   $('cancel-edit').hidden=true;
+  document.querySelector('.publish-controls').classList.remove('editing');
   feedback('form-feedback','');
 }
 function editRecord(record){
@@ -404,12 +407,28 @@ function editRecord(record){
   $('need-description').value=legacyDetails(record);
   $('need-phone').value=record.contactPhone||'';
   pictureDraft=record.picture||'';updatePhotoPreview();
-  $('save-button').textContent='Guardar cambios';
+  $('save-button').setAttribute('aria-label','Guardar cambios');
+  $('save-button').title='Guardar cambios';
   $('cancel-edit').hidden=false;
+  document.querySelector('.publish-controls').classList.add('editing');
   window.location.hash='#publicar';
   showView();
 }
 $('cancel-edit').addEventListener('click',()=>{resetForm();window.location.hash='#mis-publicaciones';});
+
+// Enter publica con la misma validación que el botón de envío; Shift+Enter crea una nueva línea.
+// No se envía durante la composición del teclado (acentos, IME) ni por teclas mantenidas.
+function publishOnEnter(event){
+  if(event.key!=='Enter'||event.shiftKey||event.isComposing||event.keyCode===229||event.repeat)return;
+  if(event.ctrlKey||event.altKey||event.metaKey)return;
+  event.preventDefault();
+  if(state.saving)return;
+  const form=$('publish-form');
+  if(typeof form.requestSubmit==='function')form.requestSubmit($('save-button'));
+  else $('save-button').click();
+}
+$('need-description').addEventListener('keydown',publishOnEnter);
+$('need-phone').addEventListener('keydown',publishOnEnter);
 async function deleteRecord(record){
   if(!canManage(record,currentUid()))return;
   if(!window.confirm('¿Eliminar definitivamente esta publicación?'))return;

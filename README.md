@@ -1,3 +1,11 @@
+# Versión 2.2.10 — envío sin texto y teléfono en fila única
+
+El área «¿Qué necesitas?» mantiene una sola caja. Inmediatamente debajo hay **una fila horizontal** con icono de teléfono, una caja que muestra **«Ej: 300 123 4567»** dentro, icono para imagen, icono para dictar y botón verde con **solo un icono de avión de papel**. No se muestra «Número de WhatsApp» ni «Publicar necesidad» en esa fila. Enter publica; Shift+Enter añade una línea cuando se está escribiendo en la descripción. Editar usa el mismo icono con nombre accesible «Guardar cambios» y permite cancelar mediante X.
+
+La guía para otras IA se actualizó en [AGENTS.md](AGENTS.md), [preferencias](docs/PREFERENCIAS-LO-NECESITO.md) y [documento de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md). Firebase aún no está configurado.
+
+---
+
 # Versión 2.2.9 — acciones compactas en una fila
 
 La ficha de «Mis publicaciones» muestra **cinco botones con solo iconos en una fila**: llamar, WhatsApp, compartir PNG (símbolo de tres puntos conectados), editar y eliminar. Los visitantes ven únicamente los tres primeros iconos. No se repiten acciones en otra fila. Permisos y confirmación de eliminación siguen intactos. Diseño adaptado a pantallas pequeñas con botones táctiles y colores diferenciados.
