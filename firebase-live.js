@@ -130,7 +130,15 @@ async function launchFirebase(){
     }
     accountBtn.textContent=state.profile?.name||(state.user?'Completar perfil':'Entrar');
     if(state.user&&!state.profile)openAccount();
+    if(state.user&&state.profile&&accountDialog.open)accountDialog.close();
     renderAll();
+    // Si la persona pulsó «Aceptar» antes de iniciar sesión, se completa
+    // automáticamente la aplicación cuando ya tiene perfil y consentimiento.
+    if(state.user&&state.profile?.discloseConsent&&state.pending){
+      const pending=state.pending;state.pending=null;
+      try{await submitApplication(pending);}
+      catch(error){notify(error.message);}
+    }
   }
   onAuthStateChanged(auth,user=>{state.user=user;changeUser().catch(e=>notify(e.message));});
 
