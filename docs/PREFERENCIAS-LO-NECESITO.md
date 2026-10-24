@@ -1,10 +1,20 @@
+## Actualización vigente — versión 2.2.8
+
+- Eliminar de las tres pantallas los encabezados y párrafos mostrados por el usuario: «Necesidades publicadas» / «Encuentra necesidades y contacta directamente por WhatsApp.»; «Mis publicaciones» / «Edita o elimina tus publicaciones cuando lo necesites.»; «Publica lo que necesitas» / «Describe tu necesidad y deja tu WhatsApp.». Los botones superiores **siguen existiendo** con sus nombres.
+- **Fichas sin títulos.** Todo el texto libre se muestra íntegro y justificado como un solo cuerpo, desde la primera línea. Los detalles antiguos se incorporan al mismo cuerpo cuando corresponda; sin etiquetas o bloques aparte.
+- **Altura natural** según el texto, la imagen opcional y los botones; sin espacios sobrantes.
+- **Sin mínimo de caracteres**: aceptar cualquier texto no vacío (1–4.000 caracteres), no imponer 10 ni otro mínimo artificial. El campo de WhatsApp sigue siendo requerido.
+- **Con fotografía**: imagen a la derecha, encajada sin recortes. **Sin fotografía**: el texto abarca todo el ancho; ninguna columna de imagen queda reservada.
+- El **PNG de compartir debe reflejar exactamente estas reglas**: sin título adicional, cuerpo a ancho completo si no hay imagen, y altura adaptada al contenido.
+- Esta actualización reemplaza cualquier indicación anterior en este archivo de dejar vacío el hueco de la imagen cuando no se adjunta foto.
+
 ### Presentación de fichas y PNG compartido (versión 2.2.7)
 
 - La descripción se muestra **justificada** siempre que sea un párrafo, incluso a la izquierda de una foto. Mantener última línea normal para evitar espacios exagerados.
-- Cada ficha reserva la columna derecha para una fotografía opcional. La imagen de cualquier tamaño se ajusta automáticamente con `object-fit: contain` sin cortar información. **Sin imagen: la columna está vacía por completo**. No mostrar fondo de color, borde, tarjeta vacía, icono de fotografía ni texto. **No** expandir el texto hacia ese hueco, aunque permanezca vacío.
+- Cada ficha reserva la columna derecha para una fotografía opcional. La imagen de cualquier tamaño se ajusta automáticamente con `object-fit: contain` sin cortar información. **Sin imagen: no crear columna de fotografía y expandir el texto a todo el ancho**. No mostrar fondo, borde, tarjeta vacía, icono ni aviso.
 - No mostrar la palabra **«Contactar»** ni encabezados redundantes en la fila de acciones.
 - Mantener tres **botones solo con iconos**, visualmente separados: teléfono azul, WhatsApp verde y **compartir PNG** en un tercer color. Los controles del dueño Editar y Eliminar siguen apareciendo únicamente al propio autor.
-- Compartir/exportar PNG con el título, el texto completo justificado y la foto si existe; si no existe, dejar reservado el espacio blanco. Priorizar la hoja nativa de compartir del dispositivo (`navigator.share` con archivo PNG) y, cuando no esté disponible, ofrecer descarga del PNG sin servidor. Para que una imagen compartida por otra aplicación permita contactar al autor, **el número real se imprime solo dentro del PNG**; no se muestra escrito en la ficha web. En los ejemplos no imprimir teléfonos falsos.
+- Compartir/exportar PNG **sin título independiente**, con todo el texto justificado y la foto si existe; si no existe, el texto debe ocupar todo el ancho y el alto depende del contenido. Priorizar la hoja nativa de compartir del dispositivo (`navigator.share` con archivo PNG) y, cuando no esté disponible, ofrecer descarga del PNG sin servidor. Para que una imagen compartida por otra aplicación permita contactar al autor, **el número real se imprime solo dentro del PNG**; no se muestra escrito en la ficha web. En los ejemplos no imprimir teléfonos falsos.
 - No agregar chips separados para ciudad, presupuesto, cantidad ni otros datos; permanecen en el único texto del requerimiento.
 
 # LoNecesito — preferencias, decisiones y protocolo para continuar el proyecto
@@ -31,11 +41,11 @@ La pantalla Publicar debe tener:
 1. **Una caja grande de texto**: «¿Qué necesitas?». Allí el autor redacta todo: nombre o tipo de producto/servicio, lugar, características, cantidad, presupuesto, condición, fecha, observaciones. **No se deben extraer esos datos a campos separados**.
 2. **Una entrada para «Número de WhatsApp»**. El teléfono no aparece como texto en las fichas, pero estará expuesto en los enlaces públicos para llamadas y WhatsApp. El usuario debe conocerlo antes de publicar.
 
-El guardado puede derivar datos internos imprescindibles (identificador, autor, fecha técnica de creación y un título calculado de la primera línea), pero **no debe solicitar más campos** al usuario. Mantener las reglas de validación y acceso, y la protección de datos personales.
+El guardado puede derivar datos internos imprescindibles (identificador, autor, fecha técnica de creación y un título técnico no visible), pero **no debe solicitar más campos** al usuario. Mantener las reglas de validación y acceso, y la protección de datos personales.
 
 ## 3. Composición exacta de una ficha
 
-- **Título**: primera frase/línea derivada de lo que el usuario escribió, visualmente diferenciado, sin volver a repetirla en el cuerpo.
+- **Sin títulos en las fichas**: mostrar toda la necesidad, desde su primera palabra, en un único texto justificado. El título calculado puede existir internamente para compatibilidad, pero no se presenta por separado.
 - **Cuerpo único y completo**: todo el resto del texto del requerimiento. **No** crear recuadros separados, chips, filas, badges ni columnas para ciudad, ubicación, presupuesto, cantidad, condición, categoría o fecha. Si existen campos históricos, incorporarlos a este mismo cuerpo de texto, legibles y sin perder información.
 - **Contacto**: la ficha muestra **solo dos botones con iconos, sin números escritos ni textos visibles**. Icono de teléfono: enlace `tel:+<numero_normalizado>`, abre la aplicación de marcado del celular. Icono de WhatsApp: enlace `https://api.whatsapp.com/send?phone=<numero_normalizado>&text=<mensaje_codificado>`, abre la conversación. Cada icono necesita `aria-label` y `title` explicativos para accesibilidad. Mantener ambos botones compactos, próximos y diferenciados por color.
 - **Administración**: botones «Editar» y «Eliminar» únicamente cuando el visitante es autor. No mostrar acciones de aceptación, resolución, aplicación o seguimiento.
@@ -66,7 +76,7 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 
 - La portada **no** debe mostrar el titular grande «Publica lo que necesitas. Encuentra quién puede ofrecerlo.» ni el pie «LoNecesito · Publica lo que necesitas. Contacta directamente por WhatsApp.». Esos textos ocupaban altura innecesaria. Al entrar en la dirección principal, mostrar directamente el listado de necesidades debajo de los tres botones persistentes.
 - La caja de texto «¿Qué necesitas?» debe incluir **un icono de micrófono** que permita hablar para completar el mismo texto. Emplear reconocimiento integrado del navegador en español (`SpeechRecognition` / `webkitSpeechRecognition`), sin Gemini ni registro/almacenamiento de audio en LoNecesito. Mostrar cuándo escucha y permitir detener. El teclado permanece disponible y puede haber navegadores sin soporte. En algunos navegadores un proveedor externo puede procesar el audio: no prometer dictado exclusivamente local. Solo informar problemas cuando ocurran, no con banners.
-- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (sin ningún marcador si está vacía). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. Si no hay foto, dejar el área **completamente vacía**, sin marcador, recuadro, texto ni fondo. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
+- En la **derecha de cada ficha** se reserva una zona para la imagen del producto o servicio, incluso si la necesidad no lleva foto (sin ningún marcador si está vacía). La imagen nunca debe bajar al pie de la tarjeta ni desplazar innecesariamente los botones de contacto. Si no hay foto, **el texto ocupará todo el ancho de la ficha** y no existirá un área vacía reservada. En un celular debe verse una columna de texto legible y una imagen lateral compacta.
 - Quien publica puede adjuntar una fotografía opcional mediante **icono integrado en la caja de necesidad**. No añadir un campo visible más a los dos existentes. Reducir resolución y tamaño antes de almacenar; conservar o quitar la foto durante la edición y adaptar las reglas de actualización en Firestore.
 - Los ejemplos siguen mostrando el mismo espacio a la derecha y los mismos controles que las fichas reales, sin textos de prueba intrusivos.
 
@@ -74,7 +84,7 @@ Nota de seguridad: el esquema `tel:` solicita al sistema operativo abrir la apli
 
 - **Al tocar cualquier parte de una fotografía real** en una ficha, abrir un visor modal en primer plano. Mostrar el archivo **completo y sin recortes** con ajuste `object-fit: contain` sobre fondo oscuro; no abrir otra página ni navegar lejos de la necesidad.
 - El visor debe tener una **X** fácil de alcanzar, cerrarse con **Escape** y con toque sobre el fondo fuera de la imagen; mantener accesibilidad (botón con nombre, foco y retorno a la publicación).
-- Permitir la misma ampliación al tocar la miniatura de la fotografía dentro del editor. Las fichas sin imagen mantienen su marcador a la derecha, pero ese marcador no debe aparentar una fotografía real ni abrir un visor vacío.
+- Permitir la misma ampliación al tocar la miniatura de la fotografía dentro del editor. Sin fotografía no existe marcador ni control de ampliación.
 - La presentación lateral compacta de las fotos en las fichas sigue intacta y los ejemplos usan exactamente el mismo componente.
 - **Cierre de diseño:** esta iteración se da por completada en versión 2.2.6. La descripción de aprendizajes, del estado técnico y de las tareas restantes para publicar un servicio multiusuario se encuentra en **[CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md)**. La configuración y el despliegue de Firebase siguen siendo tareas independientes.
 
