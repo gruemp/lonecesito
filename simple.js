@@ -108,6 +108,22 @@ function contactLink(href,kind,label){
   a.append(contactIcon(kind));
   return a;
 }
+/* Visor modal compartido por todas las fotos: permite cerrar, tocar fuera o Escape. */
+function openImageViewer(src,title){
+  if(!/^data:image\/(?:jpeg|png|webp);base64,[a-zA-Z0-9+/=]+$/.test(src))return;
+  const dialog=$('image-dialog');
+  const img=$('image-dialog-photo');
+  img.src=src;
+  img.alt='Fotografía completa de '+String(title||'la necesidad');
+  if(!dialog.open)dialog.showModal();
+}
+$('close-image').addEventListener('click',()=>$('image-dialog').close());
+$('image-dialog').addEventListener('click',event=>{
+  if(event.target===$('image-dialog'))$('image-dialog').close();
+});
+$('image-dialog').addEventListener('close',()=>{
+  $('image-dialog-photo').removeAttribute('src');
+});
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
@@ -132,7 +148,13 @@ function renderCard(record,owner){
     img.src=photo;
     img.alt='Fotografía de '+title;
     img.loading='lazy';
-    media.append(img);
+    const enlarge=el('button','publication-photo-button');
+    enlarge.type='button';
+    enlarge.title='Ver fotografía completa';
+    enlarge.setAttribute('aria-label','Ampliar fotografía de '+title);
+    enlarge.append(img);
+    enlarge.addEventListener('click',()=>openImageViewer(photo,title));
+    media.append(enlarge);
   }else{
     const placeholder=el('span','photo-placeholder');
     placeholder.setAttribute('aria-hidden','true');
@@ -260,6 +282,9 @@ function updatePhotoPreview(){
   $('photo-preview-image').src=pictureDraft||'';
   $('photo-picker').value='';
 }
+$('preview-photo').addEventListener('click',()=>{
+  if(pictureDraft)openImageViewer(pictureDraft,'la publicación');
+});
 $('add-photo').addEventListener('click',()=>$('photo-picker').click());
 $('remove-photo').addEventListener('click',()=>{
   pictureDraft='';updatePhotoPreview();
