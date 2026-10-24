@@ -56,7 +56,7 @@ service cloud.firestore {
     function validPublicNeed(data) {
       return publicNeedFields(data)
         && data.ownerUid is string
-        && data.title is string && data.title.size() >= 1 && data.title.size() <= 4000
+        && data.title is string && data.title.size() >= 1
         && data.city is string && data.city.size() >= 2 && data.city.size() <= 80
         && data.category in ['bienes','servicios']
         && data.subcategory is string && data.subcategory.size() >= 1 && data.subcategory.size() <= 80
