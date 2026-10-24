@@ -202,13 +202,16 @@ test('la navegación compacta distingue publicar de aceptar',()=>{
   assert.equal(resolveScreen('#mis-propuestas'),'aceptadas');
   assert.equal(resolveScreen('#favoritos'),'necesidades');
 });
-test('la portada y las listas no cargan imágenes automáticamente',()=>{
+test('el HTML inicial no añade imágenes antes de entrar a Explorar',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   assert.equal(/<img\b/i.test(html),false,'El HTML inicial no debe incluir imágenes visibles');
   assert.equal(/rel="preload"[^>]*as="image"/i.test(html),false);
-  assert.ok(html.includes('Ver detalles'));
+  assert.ok(html.includes('Lista de necesidades individualizadas'));
   assert.ok(html.includes('¿Qué necesitas?'));
-  assert.ok(html.includes('Ver necesidades para aceptar'));
+  assert.ok(html.includes('Soluciona una necesidad y gana dinero por ello'));
+  assert.ok(html.includes('Mis necesidades publicadas'));
+  assert.ok(html.includes('Necesidades aceptadas'));
+  assert.ok(html.includes('id="request-grid"'));
   assert.ok(!html.includes('Ver necesidades para ofertar'));
   assert.ok(html.includes('href="#necesidades" data-explore'));
 });
@@ -226,7 +229,7 @@ test('solo una vista está visible al iniciar y todas tienen su navegación corr
   const screens=[...html.matchAll(/\bdata-screen="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(screens,[...SCREEN_IDS]);
 });
-test('las fotos se revelan bajo demanda en el formulario de necesidad y los detalles',()=>{
+test('las fotos se revelan en formularios y detalles, pero son automáticas en Explorar',()=>{
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   assert.ok(js.includes("button.addEventListener('click',()=>{"));
@@ -235,7 +238,9 @@ test('las fotos se revelan bajo demanda en el formulario de necesidad y los deta
   assert.ok(js.includes("const image=pictureNode(data,caption)"));
   assert.ok(js.includes("addPictureToggle(box,current,'Fotografía seleccionada')"));
   assert.ok(js.includes("addPictureToggle(photo,request.picture"));
-  assert.ok(js.includes("addPictureToggle(reveal,request.picture"));
+  assert.ok(js.includes("const image=pictureNode(request.picture"));
+  assert.ok(js.includes("'request-card-media'+(request.picture?' has-photo':' no-photo')"));
+  assert.ok(js.includes("el('span','no-photo-label','Sin foto')"));
   assert.ok(html.includes('id="request-photo-preview"'));
   assert.ok(!html.includes('id="proposal-photo-preview"'));
   assert.ok(html.includes('id="detail-photo"'));
@@ -313,7 +318,8 @@ test('la interfaz del proveedor no contiene acciones para crear propuestas ni fo
   const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
   assert.equal(/id="(?:proposal|provider|access)-(?:form|dialog)"/.test(html),false);
-  assert.ok(html.includes('data-accept-request="empaques"'));
+  assert.ok(js.includes('accept.dataset.acceptRequest=request.id'));
+  assert.ok(js.includes('grid.replaceChildren(...records().map(addUserCard))'));
   assert.ok(html.includes('id="accepted-grid"'));
   assert.ok(js.includes("acceptNeedLocally(state,request)"));
   assert.ok(js.includes("grid.addEventListener('click'"));
@@ -321,4 +327,52 @@ test('la interfaz del proveedor no contiene acciones para crear propuestas ni fo
   assert.ok(!js.includes("$('#provider-form')"));
   assert.ok(!js.includes("function openProposalFor("));
   assert.ok(!js.includes("function proposalAction("));
+});
+
+test('una sola letra sirve como título de necesidad y no hay límite fijo de longitud',()=>{
+  assert.equal(normalizeRequest({...req,title:'A'}).title,'A');
+  assert.equal(normalizeRequest({...req,title:' ñ '}).title,'ñ');
+  const long='Producto de prueba '.repeat(1000);
+  assert.equal(normalizeRequest({...req,title:long}).title,long);
+  assert.equal(buildDraft({...req,title:long}).title,long);
+  assert.throws(()=>normalizeRequest({...req,title:'   '}),/Escribe/);
+});
+test('la entrada inicial y el título del asistente no imponen maxlength ni minlength',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  for(const id of ['hero-need','request-title']){
+    const tag=html.match(new RegExp('<input[^>]+id="'+id+'"[^>]*>'));
+    assert.ok(tag,'Falta el campo '+id);
+    assert.equal(/(?:minlength|maxlength)=/.test(tag[0]),false,'Hay una restricción de caracteres en '+id);
+    assert.ok(tag[0].includes('required'),'Debe impedirse solo el valor vacío');
+  }
+});
+test('cada tarjeta de Explorar separa texto, resumen y foto lateral automática',()=>{
+  const js=readFileSync(new URL('./2026-10-22_app.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  assert.ok(js.includes("el('p','card-summary',request.description)"));
+  assert.ok(js.includes("article.append(content,media)"));
+  assert.ok(js.includes("const image=pictureNode(request.picture"));
+  assert.ok(js.includes("media.append(image)"));
+  assert.ok(js.includes("'Sin foto'"));
+  assert.ok(css.includes('#request-grid .request-card{'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 156px'));
+  assert.ok(css.includes('grid-template-columns:minmax(0,1fr) 106px'));
+  assert.ok(css.includes('border-left:5px solid'));
+});
+test('el menú contiene textos completos y se distribuye en dos columnas móviles',()=>{
+  const html=readFileSync(new URL('./index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('./2026-10-22_estilos.css',import.meta.url),'utf8');
+  for(const name of ['Soluciona una necesidad y gana dinero por ello','Mis necesidades publicadas','Necesidades aceptadas']){
+    assert.ok(html.includes(name),'Falta '+name);
+  }
+  assert.ok(css.includes('grid-template-columns:repeat(2,minmax(0,1fr))'));
+  assert.ok(css.includes('white-space:normal'));
+});
+test('un título largo sobrevive al ciclo de almacenamiento y recarga',()=>{
+  const title='Necesito '.repeat(800);
+  const saved={...req,id:'titulo-largo',title};
+  const st=decodeState(JSON.stringify({version:1,requests:[saved]}));
+  assert.equal(st.requests.length,1);
+  assert.equal(st.requests[0].title,title);
+  assert.equal(buildDraft({...req,title}).title,title);
 });
