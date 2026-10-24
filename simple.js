@@ -1,4 +1,5 @@
 import {APP_VERSION,EXAMPLE_PUBLICATIONS,cleanPublication,whatsappUrl,exampleWhatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
+import {makeCardPng} from './card-png.js?v=20261024-v227';
 
 const $=id=>document.getElementById(id);
 const pages=['necesidades','mis-publicaciones','publicar'];
@@ -126,6 +127,43 @@ $('image-dialog').addEventListener('click',event=>{
 $('image-dialog').addEventListener('close',()=>{
   $('image-dialog-photo').removeAttribute('src');
 });
+async function sharePublicationPng(record){
+  const title=String(record.title||derivedTitle(record.description)||'Necesidad');
+  try{
+    const number=record.example?null:'+'+normalizeWhatsApp(record.contactPhone);
+    const full=legacyDetails(record,{forCard:true});
+    const remainder=full.startsWith(title)?full.slice(title.length).trimStart():full;
+    const blob=await makeCardPng({
+      title,description:remainder,picture:record.picture||'',
+      contactPhone:number,example:record.example===true
+    });
+    const filename='lonecesito-necesidad.png';
+    if(typeof File==='function'&&typeof navigator.share==='function'){
+      const file=new File([blob],filename,{type:'image/png'});
+      const canUseFiles=typeof navigator.canShare==='function'&&navigator.canShare({files:[file]});
+      if(canUseFiles){
+        try{
+          await navigator.share({files:[file],title:'LoNecesito · '+title});
+          return;
+        }catch(error){
+          if(error.name==='AbortError')return;
+          // Si el sistema no permite compartir, ofrecer la descarga del mismo PNG.
+        }
+      }
+    }
+    const url=URL.createObjectURL(blob);
+    const download=el('a');
+    download.href=url;
+    download.download=filename;
+    document.body.append(download);
+    download.click();
+    download.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    toast('Ficha preparada en formato PNG.');
+  }catch(error){
+    toast('No se pudo compartir la ficha como imagen.');
+  }
+}
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
