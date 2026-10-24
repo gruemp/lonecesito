@@ -498,3 +498,6 @@ dialog{width:min(100% - 20px,610px);max-height:calc(100dvh - 20px);overflow:auto
   .need-card-photo{min-height:105px}
   :is(#request-grid,#my-requests-grid,#accepted-grid) .need-card .need-card-title{font-size:17px}
 }
+
+/* Encabezado legible también frente a reglas heredadas de Explorar. */
+:is(#request-grid,#my-requests-grid,#accepted-grid) .need-card-head .category{font-size:12px;grid-column:auto}
