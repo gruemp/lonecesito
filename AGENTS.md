@@ -15,6 +15,7 @@
 
 - Barra superior permanente con **exactamente cuatro pestañas** en orden de lectura: **Inicio → Publicar lo que necesito → Mis publicaciones → Ver necesidades**.
 - En **PC** (más de 680 px), disponer las cuatro pestañas en **una única fila horizontal**. En **celular** (hasta 680 px), conservar dos filas de dos botones. Colores diferenciados y pestaña activa identificable.
+- En PC, los cuatro botones y la imagen de Inicio comparten **los mismos márgenes laterales**. Ajustar el ancho de la imagen 16:9 a la altura útil de la ventana para mostrarla completa a zoom 100 %, sin recortes ni desplazamiento en escritorios habituales.
 - Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la tercera imagen seleccionada** (tres personajes y secuencia «Publica → La ven → Te contactan»), conservada como **assets/lonecesito-presentacion.webp**. Mostrarla **completa sin recortes, centrada y sin deformaciones**, ajustada al ancho disponible y a la altura visible del navegador cuando sea necesario. No modificar ni sustituirla por una propuesta anterior ni agregar texto, buscador, fichas o botones redundantes bajo ella.
 - **Ver necesidades** contiene **buscador y fichas reales**; **Mis publicaciones**, solo publicaciones del autor; **Publicar**, editor. El banner no aparece en estas pestañas.
 
@@ -55,7 +56,7 @@
 
 ## 7. Diseño, textos e iconografía
 
-- **Ahorrar el máximo espacio vertical posible, no horizontal**. Interfaz muy compacta pero legible, sin truncar contenido. La disposición de navegación en PC y móvil debe ser la misma; ajustar solo dimensiones necesarias.
+- **Ahorrar el máximo espacio vertical posible, no horizontal**. Interfaz muy compacta pero legible, sin truncar contenido. Mantener las mismas acciones y el mismo orden, aunque la presentación sea una fila en PC y dos en móvil.
 - **Párrafos de descripción justificados**, última línea alineada naturalmente; títulos centrados cuando convengan en lugares que **sí** tengan título, pero **las fichas no llevan ninguno**.
 - **Colores sobrios y distintos** para diferenciar controles; cada icono es una acción independiente. Usar símbolos habituales reconocibles (marcador, WhatsApp, compartir de tres nodos, lápiz, papelera, foto, micrófono, avión de papel).
 - **Cero ruido**: sin carteles obvios de pruebas/demo, frases explicativas redundantes, eslóganes grandes, avisos repetitivos, números ficticios, títulos de sección superfluos ni pie promocional. Los errores reales y estados necesarios sí se pueden mostrar discretamente.
@@ -74,7 +75,7 @@
 
 1. **Leer código vigente** de la rama **codex/diseno-original**, no asumir que main ni los archivos de versiones anteriores representan la web. Leer antes AGENTS.md, las preferencias y continuidad.
 2. **Hacer solo lo pedido**. No agregar mensajes didácticos o cambios de estilo espontáneos. Si hay conflicto con una regla anterior, actualizarla; **no apilar normas incompatibles**.
-3. Usar **rama nueva** desde codex/diseno-original, cambios verificables y PR dirigido a esa rama. Cuando el usuario ordene **aplicarlo directamente a la página**, fusionar y verificar GitHub Pages; no afectar main.
+3. Usar **rama nueva** desde codex/diseno-original, cambios verificables y PR dirigido a esa rama. Al completar un cambio solicitado, **publicarlo inmediatamente** mediante PR y fusión en la rama de GitHub Pages, sin pedir otra autorización; verificar el resultado disponible e informar las pruebas no realizadas. No afectar main.
 4. Probar sintaxis, comportamiento, regresiones, búsqueda, acciones, versión oculta, ausencia de ejemplos, y responsive **móvil y PC**. Decir expresamente qué pruebas físicas/Firestore no se realizaron.
 5. Mantener **reglas portables para otra IA**, en **AGENTS.md**, **docs/PREFERENCIAS-LO-NECESITO.md** y **docs/CONTINUIDAD-Y-APRENDIZAJES.md**. Alinear la documentación y pruebas con la decisión reciente; el historial queda en Git.
 6. Evitar modificar la interfaz cuando la solicitud sea solo de documentación. Los cambios exclusivamente documentales no requieren incrementar la versión técnica.
