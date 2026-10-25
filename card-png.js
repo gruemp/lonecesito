@@ -90,7 +90,7 @@ export async function makeCardPng({description,picture,contactPhone,example}){
   const bodyY=margin+padding;
   const footerY=bodyY+bodyHeight+25;
   const hasPhone=!example&&Boolean(contactPhone);
-  const footerHeight=hasPhone?102:66;
+  const footerHeight=hasPhone?132:66;
   const height=Math.ceil(footerY+footerHeight+margin);
 
   drawing.width=width;drawing.height=height;
@@ -108,11 +108,25 @@ export async function makeCardPng({description,picture,contactPhone,example}){
 
   ctx.beginPath();ctx.moveTo(left,footerY);ctx.lineTo(width-left,footerY);
   ctx.strokeStyle='#dfeae4';ctx.lineWidth=2;ctx.stroke();
-  ctx.font='bold 26px system-ui, sans-serif';ctx.fillStyle='#175b45';
-  ctx.fillText('LoNecesito',left,footerY+40);
+  ctx.font='bold 30px system-ui, sans-serif';ctx.fillStyle='#175b45';
+  ctx.fillText('LoNecesito',left,footerY+63);
   if(hasPhone){
-    ctx.font='28px system-ui, sans-serif';ctx.fillStyle='#2c4c40';
-    ctx.fillText('Teléfono y WhatsApp: '+String(contactPhone),left,footerY+79);
+    // El número aparece siempre en el PNG real, destacado en una banda sobria.
+    const digits=String(contactPhone).replace(/\\D/g,'');
+    const number=/^57[3-9]\\d{9}$/.test(digits)
+      ?'+57 '+digits.slice(2,5)+' '+digits.slice(5,8)+' '+digits.slice(8)
+      :String(contactPhone).trim();
+    const panelWidth=480,panelHeight=98,panelX=width-left-panelWidth,panelY=footerY+15;
+    ctx.fillStyle='#e8f5ef';
+    roundedRect(ctx,panelX,panelY,panelWidth,panelHeight,19);
+    ctx.fill();
+    ctx.font='bold 17px system-ui, sans-serif';ctx.fillStyle='#4b745e';
+    ctx.fillText('TELÉFONO · WHATSAPP',panelX+25,panelY+32);
+    let size=34;
+    do{ctx.font='bold '+size+'px system-ui, sans-serif';size-=1;}
+    while(ctx.measureText(number).width>panelWidth-50&&size>19);
+    ctx.fillStyle='#17493e';
+    ctx.fillText(number,panelX+25,panelY+75);
   }
 
   return new Promise((resolve,reject)=>{
