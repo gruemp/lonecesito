@@ -117,7 +117,7 @@ export function locationFromNaturaGeocoders(coords,osmResponse={},bigResponse={}
   const big=bigResponse&&typeof bigResponse==='object'?bigResponse:{};
   // Natura prueba city/town/village/municipality/county antes de rendirse.
   const osmCity=osmText(a.city||a.town||a.village||a.municipality||
-    a.city_district||a.county||a.state)
+    a.county)
     .replace(/^(?:Municipio|Distrito)(?:\s+(?:de|del))?\s+/i,'').trim();
   const osmMunicipality=municipalityFromOsm(a);
   // La API de respaldo puede poner la ciudad en «locality», no en «city».
@@ -125,7 +125,7 @@ export function locationFromNaturaGeocoders(coords,osmResponse={},bigResponse={}
   const municipality=osmMunicipality||osmText(big.municipality)||
     (osmCity&&!a.county?osmCity:'');
   return locationFromGps(coords,{
-    countryName:osmText(a.country)||osmText(big.countryName||big.country),
+    countryName:osmText(a.country||a.country_code)||osmText(big.countryName||big.country),
     principalSubdivision:osmText(a.state||a.region)||
       osmText(big.principalSubdivision||big.department),
     municipality,
