@@ -110,3 +110,17 @@ test('1.000 caracteres para nuevas publicaciones y edición histórica conservad
     description:'D'.repeat(1501)
   }));
 });
+
+test('ubicación GPS solo opcional, válida y guardada por el dueño',async()=>{
+  const coords={latitude:11.24,longitude:-74.21,accuracy:18,country:'Colombia',
+    department:'Magdalena',city:'Santa Marta',address:'',neighborhood:'El Rodadero'};
+  await assertSucceeds(setDoc(doc(db(A),'requests','con-gps'),{...publication(A),location:coords}));
+  await assertSucceeds(updateDoc(doc(db(A),'requests','con-gps'),{location:deleteField()}));
+  await assertFails(setDoc(doc(db(A),'requests','gps-invalido'),{
+    ...publication(A),location:{...coords,latitude:200}
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','gps-extra'),{
+    ...publication(A),location:{...coords,ownerEmail:'personal@example.com'}
+  }));
+  await assertFails(updateDoc(doc(db(B),'requests','con-gps'),{location:coords}));
+});
