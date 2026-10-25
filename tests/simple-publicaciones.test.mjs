@@ -863,7 +863,7 @@ test('dirección opcional en la misma fila y persistida también sin GPS',async(
   assert.ok(height>300);
 });
 
-test('país, departamento, ciudad y barrio siguen visibles aun cuando el servicio no los identifica',()=>{
+test('país, departamento y ciudad visibles; sin el campo barrio o localidad',()=>{
   const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
   const f=new Function(module.replace(/^export /gm,'')+
     ';return {locationFromGps,locationLines,googleMapsLocationUrl,googleMapsDirectionsUrl};')();
@@ -991,8 +991,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   assert.equal(urls.length,0);
   pin.click();
   assert.equal(clearCount,1);
-  await Promise.resolve();await Promise.resolve();await Promise.resolve();
-  await Promise.resolve();await Promise.resolve();
+  await new Promise(resolve=>setImmediate(resolve));
   assert.equal(urls.length,2);
   assert.ok(urls.some(url=>url.includes('nominatim.openstreetmap.org/reverse')));
   assert.ok(urls.some(url=>url.includes('api.bigdatacloud.net')));
