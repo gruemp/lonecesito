@@ -19,8 +19,7 @@ export function locationFromGps(coords,geocode={}){
     country:safeText(geocode.countryName||geocode.country),
     department:safeText(geocode.principalSubdivision||geocode.department),
     city:safeText(geocode.city),
-    address:safeText(geocode.address), // El proveedor gratuito no ofrece siempre calle/número.
-    neighborhood:safeText(geocode.localityName||geocode.locality||geocode.neighborhood)
+    address:safeText(geocode.address) // Calle/número si los devuelve el mapa, nunca inventados
   };
 }
 export function validLocation(location){
@@ -34,8 +33,8 @@ export function locationLines(location,addressText='',showUnavailable=false){
   const hasGps=validLocation(location);
   const declared=cleanAddressText(addressText);
   if(!hasGps)return declared?['Dirección indicada por el autor: '+declared]:[];
-  // Conservar siempre país, departamento, ciudad y barrio en la caja GPS,
-  // incluso cuando un proveedor no los identifica. Nunca inventar la dirección.
+  // Mostrar país, departamento y ciudad si existen, sin confundirlos
+  // con una calle postal. Los barrios heredados dejan de mostrarse.
   const parts=[
     ['País',location.country],['Departamento',location.department],
     ['Ciudad',location.city]
