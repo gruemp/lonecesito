@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.25');
+  assert.equal(APP_VERSION,'2.2.26');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -788,7 +788,7 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
     ';return {locationFromGps,locationLines,validLocation,cleanAddressText};')();
   const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
     addEventListener(t,fn){this[t]=fn;}};
-  const nodes={'gps-preview':{},'gps-label':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
+  const nodes={'gps-preview':{},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
     'need-address':{value:'Calle 10 #5-20'}};
   let receive,stops=0,requests=0;
   const geo={watchPosition(fn,err,opts){
@@ -838,7 +838,7 @@ test('dirección opcional en la misma fila y persistida también sin GPS',async(
   assert.match(js,/if\(addressText\)data\.addressText=addressText/);
   assert.match(js,/if\(current\.addressText&&!addressText\)updated\.addressText=api\.deleteField\(\)/);
   assert.match(js,/addressText:record\.addressText\|\|''/);
-  assert.match(js,/locationLines\(location,addressText\)/);
+  assert.match(js,/locationLines\(location,addressText,true\)/);
   assert.match(css,/#publish-form \.draft-audio-row>\.audio-control-row\{/);
   assert.match(rules,/addressText\.size\(\) <= 180/);
   const {locationLines,cleanAddressText}=new Function(model.replace(/^export /gm,'')+
@@ -862,4 +862,66 @@ test('dirección opcional en la misma fila y persistida también sin GPS',async(
   assert.ok(labels.includes('Dirección indicada por el autor: Calle 10 #5-20, Centro'));
   assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
   assert.ok(height>300);
+});
+
+test('país, departamento, ciudad y barrio siguen visibles aun cuando el servicio no los identifica',()=>{
+  const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(module.replace(/^export /gm,'')+
+    ';return {locationFromGps,locationLines,googleMapsLocationUrl,googleMapsDirectionsUrl};')();
+  const location=f.locationFromGps({latitude:11.234,longitude:-74.211,accuracy:14},{});
+  const detail=f.locationLines(location,'Carrera 5 #10-20',true);
+  assert.ok(detail.includes('País: No identificado'));
+  assert.ok(detail.includes('Departamento: No identificado'));
+  assert.ok(detail.includes('Ciudad: No identificado'));
+  assert.ok(detail.includes('Barrio o localidad: No identificado'));
+  assert.ok(detail.includes('Dirección indicada por el autor: Carrera 5 #10-20'));
+  assert.ok(detail.includes('Precisión estimada: ±14 m'));
+  assert.ok(detail.includes('Dirección aproximada del GPS: no disponible'));
+  assert.deepEqual(f.locationLines(null,'Carrera 5 #10-20',true),
+    ['Dirección indicada por el autor: Carrera 5 #10-20']);
+});
+test('enlaces de Google Maps usan coordenadas del autor y direcciones compatibles con Maps URLs',()=>{
+  const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(module.replace(/^export /gm,'')+
+    ';return {locationFromGps,googleMapsLocationUrl,googleMapsDirectionsUrl};')();
+  const gps=f.locationFromGps({latitude:11.23456789,longitude:-74.21117899,accuracy:10});
+  const mapUrl=new URL(f.googleMapsLocationUrl(gps));
+  assert.equal(mapUrl.origin,'https://www.google.com');
+  assert.equal(mapUrl.pathname,'/maps/search/');
+  assert.equal(mapUrl.searchParams.get('api'),'1');
+  assert.equal(mapUrl.searchParams.get('query'),'11.234568,-74.211179');
+  const directions=new URL(f.googleMapsDirectionsUrl(gps));
+  assert.equal(directions.pathname,'/maps/dir/');
+  assert.equal(directions.searchParams.get('destination'),'11.234568,-74.211179');
+  assert.equal(directions.searchParams.has('origin'),false);
+  const addressOnly=new URL(f.googleMapsLocationUrl(null,'Calle 20 #8-10, Barranquilla'));
+  assert.equal(addressOnly.searchParams.get('query'),'Calle 20 #8-10, Barranquilla');
+  assert.equal(f.googleMapsDirectionsUrl(null,''),'');
+});
+test('distancia en línea recta calculada sin revelar ni guardar ubicación del visitante',()=>{
+  const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(module.replace(/^export /gm,'')+
+    ';return {distanceKmBetween,distanceLabel};')();
+  assert.equal(f.distanceKmBetween(10,-74,10,-74),0);
+  const oneDegree=f.distanceKmBetween(0,0,1,0);
+  assert.ok(oneDegree>111&&oneDegree<112);
+  assert.equal(f.distanceLabel(0.234),'234 m');
+  assert.equal(f.distanceLabel(2.45),'2,5 km');
+  assert.throws(()=>f.distanceKmBetween(92,0,0,0),/inválidas/);
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),
+    js.indexOf('function visibleItems(){'));
+  assert.match(card,/locationLines\(location,addressText,true\)/);
+  assert.match(card,/navigator\.geolocation\.getCurrentPosition/);
+  assert.match(card,/distanceKmBetween/);
+  assert.match(card,/Distancia aproximada en línea recta:/);
+  assert.match(card,/No es la distancia por carretera/);
+  assert.match(card,/enableHighAccuracy:true,maximumAge:0,timeout:15000/);
+  assert.doesNotMatch(card,/localStorage|setDoc|addDoc|watchPosition|fetch\(/);
+  assert.match(card,/if\(location\)\{/); // no numeric distance for address-only
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.match(html,/id="gps-map-link"/);
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(css,/\.publication-map-actions\{/);
+  assert.match(css,/\.publication-distance-button:disabled/);
 });
