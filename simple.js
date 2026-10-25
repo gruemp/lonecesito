@@ -1,6 +1,7 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2222';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2223';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2218';
+import {makeCardPng} from './card-png.js?v=20261025-v2223';
+import {locationFromGps,validLocation,locationLines} from './location-model.js?v=20261025-v2223';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -92,6 +93,8 @@ function contactIcon(kind){
     ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','m8.7 13.3 6.6 4.4','m15.3 6.3-6.6 4.4']:
     kind==='listen'?
     ['M11 5 6 9H2v6h4l5 4V5z','M15.5 8.5a5 5 0 0 1 0 7','M18.7 5.3a9.5 9.5 0 0 1 0 13.4']:
+    kind==='location'?
+    ['M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z','M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z']:
     kind==='play'?
     ['M7 4v16l13-8z']:
     kind==='restart'?
@@ -149,7 +152,7 @@ async function sharePublicationPng(record){
     const number='+'+normalizeWhatsApp(record.contactPhone);
     const blob=await makeCardPng({
       description,picture:record.picture||'',
-      contactPhone:number,example:false
+      contactPhone:number,location:record.location||null,example:false
     });
     const filename='lonecesito-necesidad.png';
     if(typeof File==='function'&&typeof navigator.share==='function'){
@@ -201,9 +204,11 @@ function setReadingButtons(panel,status){
   if(!panel)return;
   const controls=panel.readingButtons;
   if(!controls)return;
-  controls.play.disabled=status==='playing';
-  controls.pause.disabled=status!=='playing';
-  controls.resume.disabled=status!=='paused';
+  const action=status==='playing'?'Pausar lectura':status==='paused'?'Reanudar lectura':'Reproducir lectura';
+  controls.main.disabled=false;
+  controls.main.title=action;
+  controls.main.setAttribute('aria-label',action);
+  controls.main.replaceChildren(contactIcon(status==='playing'?'pause':'play'));
   controls.restart.disabled=false;
   panel.dataset.readingState=status;
 }
@@ -254,6 +259,10 @@ function speakReading(current){
 }
 function readingAction(panel,getText,action){
   const synth=window.speechSynthesis;
+  if(action==='toggle'){
+    const current=activeReading;
+    action=current?.panel===panel?(current.status==='playing'?'pause':'resume'):'play';
+  }
   if(action==='pause'){
     const current=activeReading;
     if(current?.panel!==panel||current.status!=='playing')return;
@@ -296,9 +305,7 @@ function createReadingPanel(getText){
   panel.setAttribute('aria-label','Controles de lectura en voz alta');
   const controls={};
   for(const [action,label,icon] of [
-    ['play','Reproducir desde el principio','play'],
-    ['pause','Pausar lectura','pause'],
-    ['resume','Reanudar lectura','resume'],
+    ['main','Reproducir lectura','play'],
     ['restart','Reiniciar lectura desde el principio','restart']
   ]){
     const button=el('button','audio-action audio-'+action);
@@ -306,7 +313,7 @@ function createReadingPanel(getText){
     button.title=label;
     button.setAttribute('aria-label',label);
     button.append(contactIcon(icon));
-    button.addEventListener('click',()=>readingAction(panel,getText,action));
+    button.addEventListener('click',()=>readingAction(panel,getText,action==='main'?'toggle':action));
     controls[action]=button;
     panel.append(button);
   }
@@ -386,7 +393,27 @@ function renderCard(record,owner){
     contact.append(edit,remove);
   }
   article.append(contact);
-  article.append(createReadingPanel(()=>fullText));
+  const tools=createReadingPanel(()=>fullText);
+  const pin=el('button','audio-action audio-location');
+  pin.type='button';
+  const location=validLocation(record.location)?record.location:null;
+  pin.title=location?'Ver ubicación GPS de la publicación':'Sin ubicación GPS registrada';
+  pin.setAttribute('aria-label',pin.title);
+  pin.disabled=!location;
+  pin.append(contactIcon('location'));
+  tools.append(pin);
+  article.append(tools);
+  if(location){
+    const details=el('div','publication-location',locationLines(location).join('\n'));
+    details.hidden=true;
+    details.setAttribute('aria-label','Ubicación GPS guardada por el autor');
+    pin.setAttribute('aria-expanded','false');
+    pin.addEventListener('click',()=>{
+      details.hidden=!details.hidden;
+      pin.setAttribute('aria-expanded',String(!details.hidden));
+    });
+    article.append(details);
+  }
   return article;
 }
 function visibleItems(){
@@ -408,6 +435,12 @@ function render(){
 }
 $('search').addEventListener('input',render);
 const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
+const locateButton=el('button','audio-action audio-location');
+locateButton.type='button';
+locateButton.title='Obtener ubicación GPS con permiso';
+locateButton.setAttribute('aria-label','Obtener ubicación GPS de esta publicación');
+locateButton.append(contactIcon('location'));
+draftReadingPanel.append(locateButton);
 $('draft-audio-row').append(draftReadingPanel);
 $('need-description').addEventListener('input',()=>{
   if(activeReading?.panel===draftReadingPanel)stopReading();
@@ -416,6 +449,71 @@ $('need-description').addEventListener('input',()=>{
 let recognition=null;
 let pictureDraft='';
 let pictureLoading=false;
+let locationDraft=null,locationRequestId=0,capturingLocation=false;
+function showLocationDraft(){
+  const preview=$('gps-preview');
+  preview.hidden=!validLocation(locationDraft);
+  $('gps-label').textContent=locationDraft?locationLines(locationDraft).join('\n'):'';
+  locateButton.title=locationDraft?'Actualizar ubicación GPS':'Obtener ubicación GPS con permiso';
+}
+$('gps-remove').addEventListener('click',()=>{
+  locationRequestId++;
+  locationDraft=null;
+  showLocationDraft();
+});
+function gpsErrorMessage(error){
+  if(error?.code===1)return 'Permiso de ubicación denegado. Actívalo en el navegador si deseas adjuntar GPS.';
+  if(error?.code===2)return 'No se pudo determinar la ubicación del dispositivo.';
+  if(error?.code===3)return 'El GPS tardó demasiado. Vuelve a intentarlo en un lugar con mejor señal.';
+  return 'No se pudo obtener la ubicación GPS.';
+}
+locateButton.addEventListener('click',()=>{
+  if(capturingLocation)return;
+  if(!navigator.geolocation||!window.isSecureContext){
+    toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
+  }
+  if(!window.confirm('¿Quieres adjuntar a tu publicación tus coordenadas GPS y precisión reales? Serán visibles para todos y se incluirán en el PNG. Para identificar país, ciudad y barrio, se enviarán tus coordenadas actuales a BigDataCloud.')){
+    return;
+  }
+  const requestId=++locationRequestId;
+  capturingLocation=true;locateButton.disabled=true;
+  locateButton.title='Obteniendo posición GPS…';
+  navigator.geolocation.getCurrentPosition(async position=>{
+    try{
+      // Guardar primero la posición de alta precisión, incluso si falla la dirección.
+      const coords=position.coords;
+      if(requestId!==locationRequestId)return;
+      locationDraft=locationFromGps(coords);
+      showLocationDraft();
+      const controller=new AbortController();
+      const deadline=setTimeout(()=>controller.abort(),9000);
+      try{
+        // Servicio diseñado para un único GPS obtenido voluntariamente desde
+        // este dispositivo. Sin seguimiento, IP fallback ni consultas en lotes.
+        const url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
+          +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
+          +'&localityLanguage=es';
+        const result=await fetch(url,{signal:controller.signal});
+        if(!result.ok)throw Error('Servicio de dirección no disponible');
+        const geo=await result.json();
+        if(requestId===locationRequestId){
+          locationDraft=locationFromGps(coords,geo);
+          showLocationDraft();
+        }
+      }catch{
+        if(requestId===locationRequestId)toast('GPS guardado. La dirección no estuvo disponible; se conservarán coordenadas y precisión.');
+      }finally{clearTimeout(deadline);}
+    }catch(error){
+      if(requestId===locationRequestId)toast(error.message||'El GPS devolvió datos inválidos.');
+    }finally{
+      if(requestId===locationRequestId){capturingLocation=false;locateButton.disabled=false;showLocationDraft();}
+    }
+  },error=>{
+    if(requestId!==locationRequestId)return;
+    capturingLocation=false;locateButton.disabled=false;
+    showLocationDraft();toast(gpsErrorMessage(error));
+  },{enableHighAccuracy:true,maximumAge:0,timeout:18000});
+});
 function setMicState(active){
   const button=$('voice-button');
   button.classList.toggle('listening',active);
@@ -533,6 +631,11 @@ $('photo-picker').addEventListener('change',async()=>{
 function resetForm(){
   stopReading();
   stopDictation();
+  locationRequestId++;
+  capturingLocation=false;
+  locationDraft=null;
+  locateButton.disabled=false;
+  showLocationDraft();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
   $('need-description').maxLength=1000;
@@ -552,6 +655,8 @@ function editRecord(record){
   $('need-description').maxLength=$('need-description').value.length>1000?4000:1000;
   $('need-phone').value=record.contactPhone||'';
   pictureDraft=record.picture||'';updatePhotoPreview();
+  locationDraft=validLocation(record.location)?{...record.location}:null;
+  showLocationDraft();
   $('save-button').setAttribute('aria-label','Guardar cambios');
   $('save-button').title='Guardar cambios';
   $('cancel-edit').hidden=false;
@@ -627,6 +732,7 @@ $('publish-form').addEventListener('submit',async event=>{
       contactPhone:$('need-phone').value
     },{originalDescription:current?legacyDetails(current):null});
     if(pictureDraft)data.picture=pictureDraft;
+    if(validLocation(locationDraft))data.location={...locationDraft};
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
     state.saving=true;$('save-button').disabled=true;
     if(state.mode==='demo'){
@@ -639,6 +745,7 @@ $('publish-form').addEventListener('submit',async event=>{
       if(current){
         const updated={...data};
         if(current.picture&&!pictureDraft)updated.picture=api.deleteField();
+        if(current.location&&!locationDraft)updated.location=api.deleteField();
         // Retirar campos de formularios anteriores; sus datos ya están en la descripción.
         for(const key of ['category','city','subcategory','quantity','condition','budget','desiredDate','status']){
           if(Object.prototype.hasOwnProperty.call(current,key))updated[key]=api.deleteField();
