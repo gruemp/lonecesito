@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.22');
+  assert.equal(APP_VERSION,'2.2.23');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -624,19 +624,20 @@ test('WhatsApp destaca únicamente la necesidad y usa el texto aprobado',()=>{
   assert.match(content,/^Hola, vi tu publicación en LoNecesito: \*«/);
   assert.match(content,/»\*\. ¿Aún lo necesitas\? Puedo ayudarte\.$/);
 });
-test('las fichas tienen dos filas: contacto más cuatro botones exclusivos de audio',()=>{
+test('dos botones de voz, pin GPS y ninguna geolocalización de visitantes',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('function visibleItems(){'));
-  assert.match(card,/article\.append\(createReadingPanel\(\(\)=>fullText\)\)/);
   assert.match(js,/const panel=el\('div','audio-control-row'\)/);
-  assert.match(js,/const current=\{panel,chunks,chunkIndex:0,charOffset:0,utterance:null,status:'playing'\}/);
-  assert.match(css,/\.publication-card \.contact-box\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
-  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
-  assert.match(css,/\.audio-control-row\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(js,/controls\.main\.replaceChildren\(contactIcon\(status==='playing'\?'pause':'play'\)\)/);
+  assert.match(card,/pin\.disabled=!location/);
+  assert.match(card,/locationLines\(location\)\.join\('\\n'\)/);
+  assert.match(card,/pin\.addEventListener\('click'/);
+  assert.match(css,/\.audio-control-row\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
   assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
+  assert.doesNotMatch(card,/getCurrentPosition/);
 });
-test('la voz se reproduce, pausa, reanuda y reinicia con botones separados',()=>{
+test('dos botones reproducen, pausan, reanudan y reinician',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const a=js.indexOf('let activeReading=null;');
   const b=js.indexOf('function renderCard(record,owner){',a);
@@ -646,23 +647,25 @@ test('la voz se reproduce, pausa, reanuda y reinicia con botones separados',()=>
     cancel(){const old=this.current;this.current=null;old?.onerror?.({error:'canceled'});}
   };
   const dom=(tag,klass)=>({tag,klass,children:[],dataset:{},disabled:false,
-    append(...nodes){this.children.push(...nodes);},
-    setAttribute(){},
+    append(...nodes){this.children.push(...nodes);},setAttribute(){},
+    replaceChildren(...nodes){this.children=nodes;},
     addEventListener(event,fn){this[event]=fn;}});
   const ctrl=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation','el',
     js.slice(a,b)+';return {createReadingPanel,stopReading};')(
       {speechSynthesis:synth},function Utterance(text){this.text=text;},
       kind=>({kind}),()=>{},null,()=>{},dom);
   const text='Necesito un ventilador Samurai Air Pro. '.repeat(10);
-  const panel=ctrl.createReadingPanel(()=>text), buttons=panel.readingButtons;
-  assert.equal(buttons.pause.disabled,true);
-  buttons.play.click();
+  const panel=ctrl.createReadingPanel(()=>text),buttons=panel.readingButtons;
+  assert.deepEqual(Object.keys(buttons),['main','restart']);
+  buttons.main.click();
   assert.equal(panel.dataset.readingState,'playing');
-  assert.equal(buttons.pause.disabled,false);
+  assert.equal(buttons.main.attributes,undefined);
+  assert.equal(buttons.main.children[0].kind,'pause');
   synth.current.onboundary({charIndex:23});
-  buttons.pause.click();
+  buttons.main.click();
   assert.equal(panel.dataset.readingState,'paused');
-  buttons.resume.click();
+  assert.equal(buttons.main.children[0].kind,'play');
+  buttons.main.click();
   assert.equal(panel.dataset.readingState,'playing');
   assert.equal(spoken[1],spoken[0].slice(23));
   buttons.restart.click();
@@ -670,13 +673,53 @@ test('la voz se reproduce, pausa, reanuda y reinicia con botones separados',()=>
   ctrl.stopReading();
   assert.equal(panel.dataset.readingState,'idle');
 });
-test('el editor tiene su segunda fila de lectura sin ubicación',()=>{
+test('GPS opcional en el editor: consentimiento explícito y precisión GPS',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
   assert.match(html,/id="draft-audio-row"/);
-  assert.doesNotMatch(html,/id="listen-draft"/);
-  assert.match(js,/const draftReadingPanel=createReadingPanel\(\(\)=>\$\('need-description'\)\.value\)/);
-  assert.doesNotMatch(html,/id="need-location"/);
+  assert.match(html,/id="gps-preview"/);
+  assert.match(html,/id="gps-remove"/);
+  assert.match(js,/navigator\.geolocation\.getCurrentPosition/);
+  assert.match(js,/enableHighAccuracy:true,maximumAge:0,timeout:18000/);
+  assert.match(js,/window\.confirm\('¿Quieres adjuntar/);
+  assert.match(js,/https:\/\/api\.bigdatacloud\.net\/data\/reverse-geocode-client/);
+  assert.match(js,/locationDraft=locationFromGps\(coords,geo\)/);
+  assert.match(js,/if\(current\.location&&!locationDraft\)updated\.location=api\.deleteField\(\)/);
+  assert.match(rules,/validLocation\(data\.location\)/);
+  assert.match(rules,/'picture','location'/);
+});
+test('coordenadas, precisión y dirección jerárquica sin inventar calle',async()=>{
+  const src=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(src.replace(/^export /gm,'')+
+    ';return {locationFromGps,locationLines,validLocation};')();
+  const loc=f.locationFromGps({latitude:11.23999965,longitude:-74.21567842,accuracy:18.6},
+    {countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta',localityName:'El Rodadero'});
+  assert.equal(loc.latitude,11.24);
+  assert.equal(loc.longitude,-74.215678);
+  assert.equal(loc.accuracy,19);
+  assert.equal(loc.address,'');
+  assert.ok(f.validLocation(loc));
+  assert.deepEqual(f.locationLines(loc),[
+    'País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
+    'Barrio o localidad: El Rodadero',
+    'Latitud: 11.240000 · Longitud: -74.215678','Precisión estimada: ±19 m'
+  ]);
+  assert.throws(()=>f.locationFromGps({latitude:120,longitude:0,accuracy:10}),/GPS/);
+  const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const labels=[];
+  const ctx={beginPath(){},moveTo(){},lineTo(){},quadraticCurveTo(){},closePath(){},
+    fill(){},stroke(){},fillRect(){},save(){},restore(){},clip(){},drawImage(){},
+    fillText(t){labels.push(t);},measureText(t){return {width:String(t).length*11};}};
+  const factory={createElement:()=>({getContext:()=>ctx,toBlob(cb){cb({type:'image/png'});}})};
+  const generate=new Function('document','Image',png.replace(/^export /gm,'')+
+    ';return makeCardPng;')(factory,undefined);
+  await generate({description:'Busco repuesto',contactPhone:'573001234567',location:loc,example:false});
+  for(const label of ['UBICACIÓN GPS','País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
+    'Barrio o localidad: El Rodadero','Precisión estimada: ±19 m'])
+    assert.ok(labels.includes(label),'Falta en PNG '+label);
+  assert.ok(labels.some(label=>label.includes('Latitud: 11.240000')));
+  assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
 });
 test('PNG muestra número real en banda distinguible sin añadir título a la ficha',async()=>{
   const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
