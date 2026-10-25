@@ -38,15 +38,13 @@ export function locationLines(location,addressText='',showUnavailable=false){
   // incluso cuando un proveedor no los identifica. Nunca inventar la dirección.
   const parts=[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city],['Dirección según GPS',location.address],
-    ['Barrio o localidad',location.neighborhood]
-  ].filter(([label,value])=>Boolean(safeText(value))||
-    (showUnavailable&&label!=='Dirección según GPS'))
+    ['Ciudad',location.city]
+  ].filter(([label,value])=>Boolean(safeText(value))||showUnavailable)
     .map(([label,value])=>label+': '+(safeText(value)||'No identificado'));
   if(declared)parts.push('Dirección indicada por el autor: '+declared);
-  const approximate=[location.address,location.neighborhood,location.city,
-    location.department,location.country].map(safeText).filter(Boolean);
-  parts.push('Dirección aproximada del GPS: '+(approximate.length?approximate.join(', '):'no disponible'));
+  // Una dirección aproximada debe ser una calle/numeración, NO una lista de
+  // ciudad/municipio/departamento que simule ser una dirección postal.
+  parts.push('Dirección aproximada: '+(safeText(location.address)||'Calle y número no identificados'));
   parts.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
   parts.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   return parts;
@@ -87,4 +85,16 @@ export function distanceKmBetween(lat1,lon1,lat2,lon2){
 export function distanceLabel(km){
   if(!Number.isFinite(km)||km<0)throw new Error('Distancia inválida.');
   return km<1?Math.round(km*1000)+' m':km.toLocaleString('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1})+' km';
+}
+
+
+/* El GPS por sí solo no detecta nomenclatura de calles. Nominatim devuelve
+   atributos de calle/número de OSM cuando existen; nunca inventar números. */
+export function streetAddressFromOsm(response){
+  const a=response&&typeof response==='object'?response.address:null;
+  if(!a||typeof a!=='object')return '';
+  const road=safeText(a.road||a.pedestrian||a.residential||a.street||a.living_street);
+  if(!road)return '';
+  const house=safeText(a.house_number).replace(/^#\s*/,'');
+  return safeText(house?road+' #'+house:road);
 }
