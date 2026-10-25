@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2221';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2222';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2218';
 
@@ -92,6 +92,10 @@ function contactIcon(kind){
     ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','m8.7 13.3 6.6 4.4','m15.3 6.3-6.6 4.4']:
     kind==='listen'?
     ['M11 5 6 9H2v6h4l5 4V5z','M15.5 8.5a5 5 0 0 1 0 7','M18.7 5.3a9.5 9.5 0 0 1 0 13.4']:
+    kind==='play'?
+    ['M7 4v16l13-8z']:
+    kind==='restart'?
+    ['M3 10a9 9 0 1 1 1 7','M3 4v6h6']:
     kind==='pause'?
     ['M7 5v14','M17 5v14']:
     kind==='resume'?
@@ -175,23 +179,9 @@ async function sharePublicationPng(record){
   }
 }
 let activeReading=null;
-function setReadingState(button,status){
-  const label=status==='playing'?'Pausar lectura':status==='paused'?'Reanudar lectura':
-    button.id==='listen-draft'?'Escuchar el texto de la publicación':'Escuchar publicación';
-  const description=label+(status==='idle'?'':'. Mantener pulsado un segundo para reiniciar desde el principio');
-  button.title=description;
-  button.setAttribute('aria-label',description);
-  button.setAttribute('aria-pressed',String(status!=='idle'));
-  button.dataset.readingState=status;
-  button.replaceChildren(contactIcon(status==='playing'?'pause':status==='paused'?'resume':'listen'));
-}
-// Lectura en tramos cortos: Android puede terminar el audio con pause()
-// y resume() no devuelve sonido. Se guarda el punto de lectura y se
-// crea una nueva locución del texto restante al reanudar.
 function readingChunks(text){
   const words=String(text||'').trim().match(/\S+\s*/g)||[];
-  const chunks=[];
-  const limit=155;
+  const chunks=[],limit=155;
   let part='';
   for(const word of words){
     if(part&&part.length+word.length>limit){chunks.push(part.trim());part='';}
@@ -205,10 +195,22 @@ function readingChunks(text){
   if(part.trim())chunks.push(part.trim());
   return chunks;
 }
+// Cada acción tiene su propio botón. Los estados se sincronizan en la
+// publicación activa y se restauran al cambiar de ficha o terminar la voz.
+function setReadingButtons(panel,status){
+  if(!panel)return;
+  const controls=panel.readingButtons;
+  if(!controls)return;
+  controls.play.disabled=status==='playing';
+  controls.pause.disabled=status!=='playing';
+  controls.resume.disabled=status!=='paused';
+  controls.restart.disabled=false;
+  panel.dataset.readingState=status;
+}
 function stopReading(){
   const previous=activeReading;
   activeReading=null;
-  if(previous)setReadingState(previous.button,'idle');
+  if(previous)setReadingButtons(previous.panel,'idle');
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
 }
 function speakReading(current){
@@ -229,8 +231,6 @@ function speakReading(current){
   const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-co')
     ||voices.find(voice=>voice.lang.toLowerCase().startsWith('es'));
   if(selected){utterance.voice=selected;utterance.lang=selected.lang;}
-  // Muchos móviles solo informan límites de palabra; sin ellos, al
-  // reanudar se repite como máximo el tramo corto actual, no todo el texto.
   utterance.onboundary=event=>{
     if(activeReading!==current||current.utterance!==utterance||current.status!=='playing')return;
     if(Number.isFinite(event.charIndex)){
@@ -252,78 +252,67 @@ function speakReading(current){
   try{synth.speak(utterance);}
   catch{stopReading();toast('No se pudo iniciar la lectura.');}
 }
-function listenPublication(button,text){
+function readingAction(panel,getText,action){
   const synth=window.speechSynthesis;
-  if(activeReading?.button===button){
+  if(action==='pause'){
     const current=activeReading;
-    if(current.status==='playing'){
-      // Cancelar una locución, no usar pause(): Android puede finalizarla.
-      current.status='paused';
-      current.utterance=null;
-      setReadingState(button,'paused');
-      try{synth.cancel();}
-      catch{stopReading();toast('No se pudo pausar la lectura.');}
-    }else if(current.status==='paused'){
-      current.status='playing';
-      setReadingState(button,'playing');
-      try{
-        // Vaciar cualquier cola bloqueada antes de una nueva locución.
-        synth.cancel();
-        if(synth.paused)synth.resume();
-        speakReading(current);
-      }catch{stopReading();toast('No se pudo reanudar la lectura.');}
-    }
+    if(current?.panel!==panel||current.status!=='playing')return;
+    current.status='paused';
+    current.utterance=null;
+    setReadingButtons(panel,'paused');
+    try{synth.cancel();}
+    catch{stopReading();toast('No se pudo pausar la lectura.');}
     return;
   }
+  if(action==='resume'){
+    const current=activeReading;
+    if(current?.panel!==panel||current.status!=='paused')return;
+    current.status='playing';
+    setReadingButtons(panel,'playing');
+    try{
+      synth.cancel();
+      if(synth.paused)synth.resume();
+      speakReading(current);
+    }catch{stopReading();toast('No se pudo reanudar la lectura.');}
+    return;
+  }
+  // Reproducir e iniciar de nuevo empiezan desde el primer carácter.
   stopReading();
   if(!synth||typeof SpeechSynthesisUtterance!=='function'){
     toast('La lectura en voz alta no está disponible en este navegador.');
     return;
   }
-  const chunks=readingChunks(text);
-  if(!chunks.length){
-    toast('Escribe primero el contenido que deseas escuchar.');
-    return;
-  }
+  const chunks=readingChunks(getText());
+  if(!chunks.length){toast('Escribe primero el contenido que deseas escuchar.');return;}
   if(recognition)stopDictation();
-  const current={button,chunks,chunkIndex:0,charOffset:0,utterance:null,status:'playing'};
+  const current={panel,chunks,chunkIndex:0,charOffset:0,utterance:null,status:'playing'};
   activeReading=current;
-  setReadingState(button,'playing');
+  setReadingButtons(panel,'playing');
   speakReading(current);
 }
-// Un segundo sobre el mismo icono reinicia desde el principio sin añadir controles.
-// El click que genera la pulsación prolongada se consume para no pausar
-// inmediatamente la nueva lectura al levantar el dedo.
-function enableReadingControl(button,getText){
-  let pressTimer=null;
-  let suppressClick=false;
-  const clearPress=()=>{
-    if(pressTimer!==null){clearTimeout(pressTimer);pressTimer=null;}
-  };
-  button.addEventListener('pointerdown',event=>{
-    if(event.button!==0||event.isPrimary===false)return;
-    clearPress();
-    suppressClick=false;
-    pressTimer=setTimeout(()=>{
-      pressTimer=null;
-      suppressClick=true;
-      stopReading();
-      listenPublication(button,getText());
-    },1000);
-  });
-  for(const type of ['pointerup','pointercancel','pointerleave'])
-    button.addEventListener(type,clearPress);
-  // Evitar el menú contextual del navegador en una pulsación larga de móvil.
-  button.addEventListener('contextmenu',event=>event.preventDefault());
-  button.addEventListener('keydown',()=>{clearPress();suppressClick=false;});
-  button.addEventListener('click',event=>{
-    if(suppressClick){
-      suppressClick=false;
-      event.preventDefault();
-      return;
-    }
-    listenPublication(button,getText());
-  });
+function createReadingPanel(getText){
+  const panel=el('div','audio-control-row');
+  panel.setAttribute('role','group');
+  panel.setAttribute('aria-label','Controles de lectura en voz alta');
+  const controls={};
+  for(const [action,label,icon] of [
+    ['play','Reproducir desde el principio','play'],
+    ['pause','Pausar lectura','pause'],
+    ['resume','Reanudar lectura','resume'],
+    ['restart','Reiniciar lectura desde el principio','restart']
+  ]){
+    const button=el('button','audio-action audio-'+action);
+    button.type='button';
+    button.title=label;
+    button.setAttribute('aria-label',label);
+    button.append(contactIcon(icon));
+    button.addEventListener('click',()=>readingAction(panel,getText,action));
+    controls[action]=button;
+    panel.append(button);
+  }
+  panel.readingButtons=controls;
+  setReadingButtons(panel,'idle');
+  return panel;
 }
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
@@ -377,14 +366,8 @@ function renderCard(record,owner){
   share.append(contactIcon('share'));
   share.addEventListener('click',()=>sharePublicationPng(record));
   contact.append(share);
-  // El mismo renderizador muestra el altavoz en Ver necesidades y Mis publicaciones.
-  const listen=el('button','contact-action listen-action');
-  listen.type='button';
-  setReadingState(listen,'idle');
-  enableReadingControl(listen,()=>fullText);
-  contact.append(listen);
-
-  // Una única fila: cuatro acciones para visitantes y seis para el autor.
+  // Primera fila: acciones generales (tres para visitantes, cinco para autor).
+  // La segunda fila contiene exclusivamente controles de lectura en voz alta.
   if(owner&&canManage(record,currentUid())){
     contact.classList.add('has-owner-actions');
     const edit=el('button','contact-action edit-action');
@@ -403,6 +386,7 @@ function renderCard(record,owner){
     contact.append(edit,remove);
   }
   article.append(contact);
+  article.append(createReadingPanel(()=>fullText));
   return article;
 }
 function visibleItems(){
@@ -423,11 +407,10 @@ function render(){
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
 }
 $('search').addEventListener('input',render);
-const listenDraft=$('listen-draft');
-setReadingState(listenDraft,'idle');
-enableReadingControl(listenDraft,()=>$('need-description').value);
+const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
+$('draft-audio-row').append(draftReadingPanel);
 $('need-description').addEventListener('input',()=>{
-  if(activeReading?.button===listenDraft)stopReading();
+  if(activeReading?.panel===draftReadingPanel)stopReading();
 });
 /* Dictado opcional mediante el navegador; el teclado sigue disponible siempre. */
 let recognition=null;
