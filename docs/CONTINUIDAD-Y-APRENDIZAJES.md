@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.23 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.24 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -136,3 +136,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - PNG incluye país, departamento, ciudad, dirección, barrio/localidad disponibles, luego latitud/longitud y precisión, así como teléfono.
 - location es un campo opcional persistido en modo local y definido en firestore.rules para modo nube. Las reglas requieren despliegue separado cuando haya Firebase activo; GitHub Pages solo publica código estático.
 - Pendiente probar GPS real, denegación de permisos, diseño táctil y reverse geocoding en dispositivos.
+
+## Cambio 2.2.24 — 25-10-2026
+- Se mejoró solo el comportamiento/apariencia del **mismo botón GPS** del editor, sin añadir controles ni modificar la estructura de filas. Al pulsar, se solicita confirmación de publicación de coordenadas y permiso del navegador como antes, ahora con geolocalización de varias mediciones `watchPosition` de alta precisión (sin usar ubicación en caché).
+- El propio pin cambia a estado animado «Midiendo GPS» y muestra la mejor precisión ±metros en tiempo real, sin mostrar una medición peor posterior. Al volverlo a pulsar, se corta el observador y se conserva la mejor ubicación registrada. También se detiene automáticamente al llegar a ±10 m o después de 30 segundos, lo primero que ocurra. ±10 m es objetivo estimado, nunca garantía física.
+- Tras detenerse se solicita **una única** consulta de dirección a BigDataCloud con la mejor coordenada final. Los puntos intermedios no se envían. Se mantienen sin cambios la etiqueta de ubicación, publicación del GPS de autor y PNG, y la indicación de precisión con metros. Si no llega ninguna posición, no reemplazar una ubicación ya guardada.
+- Al cancelar GPS, quitar ubicación, abandonar una edición, cambiar de vista o guardar, detener seguimiento y limpiar temporizadores. Solo botón GPS controla inicio/parada. En las fichas públicas **no se activa watchPosition ni se solicita permiso**.
+- Pruebas de dispositivo real para precisión, permisos, geocodificación y actualización visual pendientes.
