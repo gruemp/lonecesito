@@ -69,7 +69,20 @@ function paintImage(ctx,img,x,y,width,height){
 }
 /* PNG fiel a la ficha: sin título, altura según contenido y ancho total si no hay foto.
    El teléfono de una publicación real se incluye únicamente en la copia compartida. */
-export async function makeCardPng({description,picture,contactPhone,example}){
+export async function makeCardPng({description,picture,contactPhone,location,example}){
+  const hasLocation=!example&&location&&typeof location.latitude==='number'
+    &&Number.isFinite(location.latitude)&&typeof location.longitude==='number'
+    &&Number.isFinite(location.longitude)&&Number.isFinite(location.accuracy);
+  const placeFields=hasLocation?[
+    ['País',location.country],['Departamento',location.department],
+    ['Ciudad',location.city],['Dirección',location.address],
+    ['Barrio o localidad',location.neighborhood]
+  ].filter(([,value])=>Boolean(String(value||'').trim()))
+    .map(([label,value])=>label+': '+String(value).trim()):[];
+  if(hasLocation){
+    placeFields.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
+    placeFields.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
+  }
   const width=1080,margin=35,padding=46;
   const left=margin+padding;
   const available=width-2*left;
@@ -88,7 +101,12 @@ export async function makeCardPng({description,picture,contactPhone,example}){
   const photoHeight=hasPhoto?Math.min(340,Math.max(175,Math.round(imageWidth*aspect))):0;
   const bodyHeight=Math.max(paragraphHeight,photoHeight);
   const bodyY=margin+padding;
-  const footerY=bodyY+bodyHeight+25;
+  ctx.font='22px system-ui, sans-serif';
+  const locationWidth=available-50;
+  const gpsLines=placeFields.flatMap(line=>wrapLines(ctx,line,locationWidth).map(item=>item.text));
+  const locationY=bodyY+bodyHeight+20;
+  const locationHeight=hasLocation?60+gpsLines.length*32:0;
+  const footerY=locationY+locationHeight+(hasLocation?18:5);
   const hasPhone=!example&&Boolean(contactPhone);
   const footerHeight=hasPhone?132:66;
   const height=Math.ceil(footerY+footerHeight+margin);
@@ -105,6 +123,19 @@ export async function makeCardPng({description,picture,contactPhone,example}){
   ctx.font='33px system-ui, sans-serif';ctx.fillStyle='#334843';
   drawWrapped(ctx,bodyLines,left,bodyY+32,bodyWidth,lineHeight,true);
   if(hasPhoto)paintImage(ctx,img,left+bodyWidth+imageGap,bodyY,imageWidth,photoHeight);
+  if(hasLocation){
+    ctx.fillStyle='#eaf6f2';
+    roundedRect(ctx,left,locationY,available,locationHeight,18);
+    ctx.fill();
+    ctx.fillStyle='#17644d';ctx.font='bold 21px system-ui, sans-serif';
+    ctx.fillText('UBICACIÓN GPS',left+24,locationY+31);
+    ctx.font='22px system-ui, sans-serif';ctx.fillStyle='#254c45';
+    let lineY=locationY+61;
+    for(const line of gpsLines){
+      ctx.fillText(line,left+24,lineY);
+      lineY+=32;
+    }
+  }
 
   ctx.beginPath();ctx.moveTo(left,footerY);ctx.lineTo(width-left,footerY);
   ctx.strokeStyle='#dfeae4';ctx.lineWidth=2;ctx.stroke();

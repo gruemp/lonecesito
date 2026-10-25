@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.22 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.23 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -127,3 +127,12 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 El historial de Git y el README registran un proceso iterativo desde formularios, muestras y versiones visibles hasta esta experiencia simplificada. **Ese historial no es una segunda especificación activa.** Si una indicación histórica choca con las secciones anteriores, seguir la decisión reciente. Referencias: [commits y PR del repositorio](https://github.com/gruemp/lonecesito/pulls), incluido PR #42 para la navegación actual.
 
 **El estado de la interfaz está cerrado por ahora, no la infraestructura.** Cualquier IA que retome debe verificar de nuevo la configuración real de Firebase, el deployment y los datos antes de afirmar que existe un servicio compartido.
+
+## Cambio 2.2.23 — 25-10-2026
+- Voz simplificada: dos botones, uno dinámico reproducir/pausar/reanudar y otro reiniciar; se conserva la reanudación por tramos sin dependencia de la pausa nativa Android.
+- GPS opcional en la segunda fila: icono pin. Solo al crear/editar, pulsando el botón y confirmando difusión pública, el navegador HTTPS solicita geolocalización de alta precisión (maximumAge=0, timeout 18 s). Muestra latitud/longitud y precisión estimada, nunca editable manualmente. Permite quitar GPS.
+- Consulta de localidad a BigDataCloud desde el dispositivo en el momento de captura; no hay IP fallback ni seguimiento. Solo se guardan campos efectivamente devueltos; no inventar dirección o barrio. El proveedor recibe coordenadas e IP según su política.
+- Las fichas muestran la ubicación guardada por el autor. Sus visitantes no comparten su ubicación ni se les pregunta por GPS.
+- PNG incluye país, departamento, ciudad, dirección, barrio/localidad disponibles, luego latitud/longitud y precisión, así como teléfono.
+- location es un campo opcional persistido en modo local y definido en firestore.rules para modo nube. Las reglas requieren despliegue separado cuando haya Firebase activo; GitHub Pages solo publica código estático.
+- Pendiente probar GPS real, denegación de permisos, diseño táctil y reverse geocoding en dispositivos.
