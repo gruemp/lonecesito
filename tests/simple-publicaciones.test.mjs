@@ -7,18 +7,19 @@ const input={
   description:'Necesito que reparen una nevera que dejó de enfriar. Estoy en Santa Marta. Mi presupuesto es de 150.000 pesos.',
   contactPhone:'300 123 4567'
 };
-test('la interfaz muestra exactamente dos entradas de publicación',()=>{
+test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
   assert.match(form,/id="need-description"/);
   assert.match(form,/id="need-phone"/);
-  assert.equal([...form.matchAll(/<(?:textarea|input|select)\b/g)].length,2);
+  assert.equal([...form.matchAll(/<(?:textarea|input|select)\b/g)].length,3);
+  assert.match(form,/id="need-address"[^>]*maxlength="180"/);
   for(const old of ['need-category','need-city','need-title','need-budget','need-picture','need-quantity','need-condition','need-consent'])assert.doesNotMatch(form,new RegExp(old));
 });
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.24');
+  assert.equal(APP_VERSION,'2.2.25');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -631,7 +632,7 @@ test('dos botones de voz, pin GPS y ninguna geolocalización de visitantes',()=>
   assert.match(js,/const panel=el\('div','audio-control-row'\)/);
   assert.match(js,/controls\.main\.replaceChildren\(contactIcon\(status==='playing'\?'pause':'play'\)\)/);
   assert.match(card,/pin\.disabled=!location/);
-  assert.match(card,/locationLines\(location\)\.join\('\\n'\)/);
+  assert.match(card,/locationLines\(location,addressText\)\.join\('\\n'\)/);
   assert.match(card,/pin\.addEventListener\('click'/);
   assert.match(css,/\.audio-control-row\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
   assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
@@ -704,6 +705,7 @@ test('coordenadas, precisión y dirección jerárquica sin inventar calle',async
   assert.deepEqual(f.locationLines(loc),[
     'País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
     'Barrio o localidad: El Rodadero',
+    'Dirección aproximada del GPS: El Rodadero, Santa Marta, Magdalena, Colombia',
     'Latitud: 11.240000 · Longitud: -74.215678','Precisión estimada: ±19 m'
   ]);
   assert.throws(()=>f.locationFromGps({latitude:120,longitude:0,accuracy:10}),/GPS/);
@@ -716,7 +718,7 @@ test('coordenadas, precisión y dirección jerárquica sin inventar calle',async
   const generate=new Function('document','Image',png.replace(/^export /gm,'')+
     ';return makeCardPng;')(factory,undefined);
   await generate({description:'Busco repuesto',contactPhone:'573001234567',location:loc,example:false});
-  for(const label of ['UBICACIÓN GPS','País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
+  for(const label of ['UBICACIÓN GPS Y DIRECCIÓN','País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
     'Barrio o localidad: El Rodadero','Precisión estimada: ±19 m'])
     assert.ok(labels.includes(label),'Falta en PNG '+label);
   assert.ok(labels.some(label=>label.includes('Latitud: 11.240000')));
@@ -775,105 +777,89 @@ test('las imágenes para PC y móvil se muestran solo en Inicio',()=>{
   }
 });
 
-test('GPS: precisión mejora en tiempo real en el mismo botón y conserva el mejor valor',async()=>{
+
+test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
-  const b=js.indexOf('function setMicState(active){',a);
-  assert.ok(a>=0&&b>a);
-  const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
-  const loc=new Function(module.replace(/^export /gm,'')+
-    ';return {locationFromGps,validLocation,locationLines};')();
-  const buttons={};
-  const pin={className:'audio-action audio-location',children:[],title:'',
-    classes:new Set(),attrs:{},classList:{toggle(name,on){if(on)pin.classes.add(name);else pin.classes.delete(name);}},
-    setAttribute(name,value){this.attrs[name]=value;},
-    replaceChildren(...items){this.children=items;},
-    append(item){this.children.push(item);},
-    addEventListener(name,fn){this[name]=fn;}
-  };
-  const preview={hidden:true},label={textContent:''};
-  const remove={addEventListener(name,fn){this[name]=fn;}};
-  const els={'gps-preview':preview,'gps-label':label,'gps-remove':remove};
-  let success,error,nextId=0;
-  const cleared=[],timers=new Map(),requests=[];
-  const geo={watchPosition(ok,fail,options){
-    assert.deepEqual(options,{enableHighAccuracy:true,maximumAge:0,timeout:12000});
-    success=ok;error=fail;return 12;
-  },clearWatch(id){cleared.push(id);}};
-  const fakeFetch=async(url)=>{
-    requests.push(url);
-    return {ok:true,json:async()=>({countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta'})};
-  };
-  const ctrl=new Function('locateButton','$','el','contactIcon','navigator','window',
-    'locationFromGps','validLocation','locationLines','fetch','AbortController','toast',
-    'setTimeout','clearTimeout',
-    js.slice(a,b)+
-    ';return {get state(){return {capturingLocation,locationDraft,gpsWatchId,gpsBestCoords};}};')(
-      pin,id=>els[id],(tag,cls,txt)=>({tag,cls,textContent:txt,setAttribute(){}}),
-      kind=>({kind}),
-      {geolocation:geo},
-      {isSecureContext:true,confirm:()=>true},
-      loc.locationFromGps,loc.validLocation,loc.locationLines,fakeFetch,
-      class Abort {constructor(){this.signal={};}abort(){}},
-      ()=>{},
-      (fn,ms)=>{const id=++nextId;timers.set(id,{fn,ms});return id;},
-      id=>timers.delete(id)
-    );
+  const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const start=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
+  const end=js.indexOf('function setMicState(active){',start);
+  const {locationFromGps,locationLines,validLocation,cleanAddressText}=new Function(
+    model.replace(/^export /gm,'')+
+    ';return {locationFromGps,locationLines,validLocation,cleanAddressText};')();
+  const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
+    addEventListener(t,fn){this[t]=fn;}};
+  const nodes={'gps-preview':{},'gps-label':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
+    'need-address':{value:'Calle 10 #5-20'}};
+  let receive,stops=0,requests=0;
+  const geo={watchPosition(fn,err,opts){
+    receive=fn;
+    assert.deepEqual(opts,{enableHighAccuracy:true,maximumAge:0,timeout:12000});
+    return 0;
+  },clearWatch(id){assert.equal(id,0);stops++;}};
+  const controller=new Function(
+    'locateButton','$','el','contactIcon','navigator','window',
+    'locationFromGps','validLocation','locationLines','cleanAddressText',
+    'fetch','AbortController','toast','setTimeout','clearTimeout',
+    js.slice(start,end)+
+    ';return {get state(){return {capturingLocation,locationDraft};}};')(
+      pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
+      {geolocation:geo},{isSecureContext:true,confirm:()=>true},
+      locationFromGps,validLocation,locationLines,cleanAddressText,
+      async()=>{requests++;return {ok:true,json:async()=>({countryName:'Colombia',city:'Santa Marta'})};},
+      class Abort {constructor(){this.signal={};}abort(){}},()=>{},
+      ()=>1,()=>{});
   pin.click();
-  assert.equal(ctrl.state.capturingLocation,true);
-  assert.equal(pin.classes.has('gps-measuring'),true);
-  assert.equal(pin.children[1].textContent,'…');
-  success({coords:{latitude:11.24,longitude:-74.21,accuracy:46}});
-  assert.equal(pin.children[1].textContent,'±46m');
-  success({coords:{latitude:11.25,longitude:-74.22,accuracy:19}});
-  assert.equal(pin.children[1].textContent,'±19m');
-  success({coords:{latitude:11.26,longitude:-74.23,accuracy:23}});
-  assert.equal(pin.children[1].textContent,'±19m'); // never get worse
-  assert.equal(requests.length,0);
-  pin.click(); // manually stop using the very same button
-  assert.equal(ctrl.state.capturingLocation,false);
-  assert.equal(ctrl.state.gpsWatchId,null);
-  assert.deepEqual(cleared,[12]);
-  assert.equal(ctrl.state.locationDraft.accuracy,19);
-  assert.equal(pin.classes.has('gps-fixed'),true);
-  await Promise.resolve(); await Promise.resolve();
-  assert.equal(requests.length,1);
-  assert.match(requests[0],/latitude=11.25&longitude=-74.22/);
-  assert.equal(pin.children[1].textContent,'±19m');
-  assert.equal(label.textContent.includes('Precisión estimada: ±19 m'),true);
-});
-test('GPS: detención automática al lograr precisión y botón sin controles extra',async()=>{
-  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
-  const b=js.indexOf('function setMicState(active){',a);
-  const lm=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
-  const loc=new Function(lm.replace(/^export /gm,'')+';return {locationFromGps,locationLines,validLocation};')();
-  const elms={'gps-preview':{},'gps-label':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}}};
-  const pin={classList:{toggle(){}},setAttribute(){},
-    replaceChildren(){},append(){},addEventListener(t,fn){this[t]=fn;}};
-  let notify,clearCount=0;
-  const fetches=[];
-  const geo={watchPosition(success){notify=success;return 0;},clearWatch(id){assert.equal(id,0);clearCount++;}};
-  let nextId=0;const timers=new Map();
-  const module=new Function('locateButton','$','el','contactIcon','navigator','window',
-    'locationFromGps','validLocation','locationLines','fetch','AbortController','toast',
-    'setTimeout','clearTimeout',js.slice(a,b)+
-      ';return {get state(){return {capturingLocation,locationDraft};}};');
-  const ctrl=module(pin,id=>elms[id],()=>({setAttribute(){}}),()=>({}),{geolocation:geo},
-    {isSecureContext:true,confirm:()=>true},loc.locationFromGps,loc.validLocation,
-    loc.locationLines,async url=>{fetches.push(url);return {ok:true,json:async()=>({})};},
-    class Abort{constructor(){this.signal={};}abort(){}},()=>{},
-    (fn,ms)=>{let id=++nextId;timers.set(id,{fn,ms});return id;},id=>timers.delete(id));
+  receive({coords:{latitude:11.24,longitude:-74.21,accuracy:50}});
+  receive({coords:{latitude:11.25,longitude:-74.22,accuracy:8}});
+  receive({coords:{latitude:11.26,longitude:-74.23,accuracy:3}});
+  assert.equal(controller.state.capturingLocation,true);
+  assert.equal(controller.state.locationDraft.accuracy,3);
+  assert.equal(requests,0);
+  assert.equal(stops,0);
   pin.click();
-  notify({coords:{latitude:10,longitude:-70,accuracy:39}});
-  notify({coords:{latitude:10.0001,longitude:-70.0001,accuracy:8.9}});
-  assert.equal(ctrl.state.capturingLocation,false);
-  assert.equal(ctrl.state.locationDraft.accuracy,9);
-  assert.equal(clearCount,1); // watcher id zero must also clear
+  assert.equal(controller.state.capturingLocation,false);
+  assert.equal(stops,1);
   await Promise.resolve();await Promise.resolve();
-  assert.equal(fetches.length,1);
-  assert.match(js,/GPS_MAX_TIME_MS=30000, GPS_TARGET_METERS=10/);
-  assert.doesNotMatch(js,/getCurrentPosition\(/);
+  assert.equal(requests,1);
+  assert.doesNotMatch(js,/GPS_MAX_TIME_MS|GPS_TARGET_METERS/);
+  assert.match(js,/Pulsa nuevamente el botón GPS para detener la medición antes de publicar/);
+  assert.match(nodes['gps-label'].textContent,/Dirección indicada por el autor: Calle 10 #5-20/);
+  assert.match(nodes['gps-label'].textContent,/Dirección aproximada del GPS: Santa Marta, Colombia/);
+});
+test('dirección opcional en la misma fila y persistida también sin GPS',async()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.equal((html.match(/id="draft-audio-row"/g)||[]).length,1);
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
+  const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  assert.match(html,/id="need-address-field" class="address-field"/);
+  assert.match(html,/id="need-address"[^>]*maxlength="180"/);
+  assert.match(js,/draftReadingPanel\.append\(\$\('need-address-field'\)\)/);
+  assert.match(js,/if\(addressText\)data\.addressText=addressText/);
+  assert.match(js,/if\(current\.addressText&&!addressText\)updated\.addressText=api\.deleteField\(\)/);
+  assert.match(js,/addressText:record\.addressText\|\|''/);
+  assert.match(js,/locationLines\(location,addressText\)/);
+  assert.match(css,/#publish-form \.draft-audio-row>\.audio-control-row\{/);
+  assert.match(rules,/addressText\.size\(\) <= 180/);
+  const {locationLines,cleanAddressText}=new Function(model.replace(/^export /gm,'')+
+    ';return {locationLines,cleanAddressText};')();
+  assert.deepEqual(locationLines(null,' Calle 10 #5-20 '),
+    ['Dirección indicada por el autor: Calle 10 #5-20']);
+  assert.throws(()=>cleanAddressText('X'.repeat(181)),/180/);
+  const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const labels=[];
+  const ctx={beginPath(){},moveTo(){},lineTo(){},quadraticCurveTo(){},closePath(){},
+    fill(){},stroke(){},fillRect(){},save(){},restore(){},clip(){},drawImage(){},
+    fillText(t){labels.push(t);},measureText(t){return {width:String(t).length*11};}};
+  let height=0;
+  const factory={createElement:()=>({getContext:()=>ctx,set height(v){height=v;},
+    toBlob(cb){cb({type:'image/png'});}})};
+  const makeCardPng=new Function('document','Image',source.replace(/^export /gm,'')+
+    ';return makeCardPng;')(factory,undefined);
+  await makeCardPng({description:'Reparación',contactPhone:'573001234567',
+    addressText:'Calle 10 #5-20, Centro',example:false});
+  assert.ok(labels.includes('DIRECCIÓN'));
+  assert.ok(labels.includes('Dirección indicada por el autor: Calle 10 #5-20, Centro'));
+  assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
+  assert.ok(height>300);
 });

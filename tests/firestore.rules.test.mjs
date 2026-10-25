@@ -124,3 +124,25 @@ test('ubicación GPS solo opcional, válida y guardada por el dueño',async()=>{
   }));
   await assertFails(updateDoc(doc(db(B),'requests','con-gps'),{location:coords}));
 });
+
+test('dirección opcional sin GPS: autor puede crear, actualizar y borrar',async()=>{
+  const d=doc(db(A),'requests','solo-direccion');
+  await assertSucceeds(setDoc(d,{
+    ...publication(A),addressText:'Calle 10 #5-20, barrio Centro'
+  }));
+  await assertSucceeds(updateDoc(d,{addressText:'Avenida 1, edificio 4'}));
+  await assertSucceeds(updateDoc(d,{addressText:deleteField()}));
+  await assertFails(setDoc(doc(db(A),'requests','direccion-excesiva'),{
+    ...publication(A),addressText:'x'.repeat(181)
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','direccion-vacia'),{
+    ...publication(A),addressText:''
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','direccion-objeto'),{
+    ...publication(A),addressText:{street:'Calle 10'}
+  }));
+  await assertFails(updateDoc(d,{ownerUid:B}));
+  await assertFails(updateDoc(doc(db(B),'requests','solo-direccion'),{
+    addressText:'Suplantación'
+  }));
+});

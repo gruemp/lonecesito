@@ -80,7 +80,7 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 - El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Seis iconos en una sola fila, nunca en dos.
 - Compartir es el **símbolo familiar de tres puntos conectados**; se rechazó el anterior icono de flecha hacia arriba.
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
-- El teléfono no aparece escrito sobre la ficha web, pero sí en el PNG. Los enlaces siguen llamando por teléfono o WhatsApp. La lectura conserva SpeechSynthesis y pausas/reanudaciones mediante tramos cortos para Android; controles de voz separados en una segunda fila. Reiniciar empieza desde la primera palabra. El mismo grupo aparece en crear y editar. No usar ubicación todavía.
+- El teléfono no aparece escrito sobre la ficha web, pero sí en el PNG. Los enlaces siguen llamando por teléfono o WhatsApp. El audio utiliza dos botones en la segunda fila, con reanudación por tramos compatible con Android. La dirección opcional y el GPS aparecen aparte del texto de la descripción y se pueden consultar desde la ficha.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
 
 ## F. Imagen PNG al compartir
@@ -139,7 +139,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - [ ] ¿Con foto va a la derecha y amplía completa; sin foto, texto usa todo el ancho?
 - [ ] ¿En la ficha ajena hay 4 iconos y en la propia 6, incluido el altavoz, todos en una sola fila?
 - [ ] ¿El PNG representa fielmente texto/foto y contiene teléfono real?
-- [ ] ¿En el editor solo hay dos campos y una fila de controles con ejemplo telefónico interior?
+- [ ] ¿La descripción y el teléfono son obligatorios, la dirección es opcional, y el editor mantiene las dos filas compactas?
 - [ ] ¿Enter envía, Shift+Enter hace salto, micro y foto siguen funcionando?
 - [ ] ¿Solo el dueño puede editar/eliminar y el editor muestra papelera más X al editar?
 - [ ] ¿Desaparecieron ejemplos, versiones visibles, avisos molestos y controles descartados?
@@ -153,9 +153,13 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 ## Casos de uso responsivos y voz (aprobación 25-10-2026)
 - Inicio añade debajo de la portada vigente dos imágenes SVG, una para PC y otra para móvil, mostrando pares «quien necesita → quien puede ayudar»: repartidores, técnicos, profesores, cuidadores e independientes, con necesidades de Medellín, Bogotá, Cali, Barranquilla y Cartagena.
 - Mantener navegación de cuatro pestañas, sin agregar botón publicar inferior en móvil.
-- La segunda fila de iconos se limita al audio, por ahora **sin ubicación**. Captura geográfica, precisión y representación en PNG siguen pendientes de diálogo.
+- La segunda fila de controles del editor incluye dos botones de lectura, caja de dirección opcional y botón GPS; las fichas mantienen dos botones de lectura y un pin que muestra dirección o GPS guardados.
 
 ## Actualización aprobada — 2.2.23
 - Sustituye la anterior fila de cuatro controles de voz por tres iconos: un botón que cambia de reproducir a pausar y reanudar, un botón de reiniciar y un pin GPS. Mis publicaciones, Ver necesidades y editor respetan el mismo criterio.
-- En el editor el pin obtiene GPS actual únicamente al pulsarlo, aceptar compartir la ubicación públicamente y otorgar permiso del navegador. **Desde 2.2.24, el mismo botón pin muestra visualmente la mejor precisión en tiempo real (±metros), anima el ícono mientras mide y al pulsarlo otra vez detiene y conserva la mejor ubicación.** Detención automática tras 30 segundos o al alcanzar una precisión estimada de ±10 metros. Sin ningún control, fila ni campo nuevo. La etiqueta ineditable existente muestra latitud, longitud, precisión y dirección disponible. Se puede quitar. En las fichas el pin abre la ubicación guardada, nunca la del lector.
+- En el editor el pin obtiene GPS únicamente con confirmación expresa de publicación pública y permiso del navegador. **Desde 2.2.25, no se detiene automáticamente ni a los 30 segundos ni al alcanzar ±10 m.** Continúa actualizando en el mismo botón la mejor precisión estimada ±metros hasta que el usuario pulsa **nuevamente el mismo pin** para detener. No añade botón nuevo. La etiqueta informativa muestra la dirección aproximada deducida de la ubicación, sin inventar calles; la caja editable ubicada inmediatamente a la izquierda del pin permite añadir una dirección propia opcional. En las fichas el pin consulta únicamente la ubicación/dirección ya guardadas, nunca la posición del lector.
 - La ubicación exacta es pública si se adjunta a la publicación. La traducción geográfica solo muestra datos verificablemente devueltos: país, departamento, ciudad, dirección y barrio o localidad si están disponibles. BigDataCloud recibe las coordenadas actuales e IP para ayudar a resolver ciudad y localidad. PNG muestra los mismos datos en orden descendente y conserva teléfono.
+
+## Aprobación actual 2.2.25 — GPS continuo y dirección opcional
+- La segunda fila del editor ordena [reproducir/pausar/reanudar] [reiniciar] [caja de dirección] [pin GPS]. La caja imita el teléfono: icono de ubicación a la izquierda, ejemplo interno, sin rótulo visible y ancho flexible. No se admite una parada GPS automática por tiempo ni por objetivo de precisión; el segundo toque lo detiene y guarda la mejor muestra. Si se abandona el editor, cancelar por privacidad.
+- La dirección escrita por el autor es **opcional** (máx. 180 caracteres) y puede usarse sin GPS. Es pública, aparece al consultar la ficha y se incluye en el PNG. La etiqueta de GPS indica además la «Dirección aproximada del GPS», compuesta solo con las partes que devuelve el proveedor; puede no tener calle ni número. Mantener latitud, longitud, precisión, ciudad, departamento y país disponibles. No reemplazar la dirección que escribió el autor por la de un servicio externo.
