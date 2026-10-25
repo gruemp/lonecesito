@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.23');
+  assert.equal(APP_VERSION,'2.2.24');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -680,11 +680,12 @@ test('GPS opcional en el editor: consentimiento explícito y precisión GPS',()=
   assert.match(html,/id="draft-audio-row"/);
   assert.match(html,/id="gps-preview"/);
   assert.match(html,/id="gps-remove"/);
-  assert.match(js,/navigator\.geolocation\.getCurrentPosition/);
-  assert.match(js,/enableHighAccuracy:true,maximumAge:0,timeout:18000/);
+  assert.match(js,/navigator\.geolocation\.watchPosition/);
+  assert.match(js,/enableHighAccuracy:true,maximumAge:0,timeout:12000/);
   assert.match(js,/window\.confirm\('¿Quieres adjuntar/);
   assert.match(js,/https:\/\/api\.bigdatacloud\.net\/data\/reverse-geocode-client/);
   assert.match(js,/locationDraft=locationFromGps\(coords,geo\)/);
+  assert.match(js,/if\(capturingLocation\)\{finishGpsMeasurement\(\);return;\}/);
   assert.match(js,/if\(current\.location&&!locationDraft\)updated\.location=api\.deleteField\(\)/);
   assert.match(rules,/validLocation\(data\.location\)/);
   assert.match(rules,/'picture','location'/);
@@ -772,4 +773,107 @@ test('las imágenes para PC y móvil se muestran solo en Inicio',()=>{
       assert.ok(img.includes(city),'Falta '+city);
     assert.match(img,/<svg /);
   }
+});
+
+test('GPS: precisión mejora en tiempo real en el mismo botón y conserva el mejor valor',async()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
+  const b=js.indexOf('function setMicState(active){',a);
+  assert.ok(a>=0&&b>a);
+  const module=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const loc=new Function(module.replace(/^export /gm,'')+
+    ';return {locationFromGps,validLocation,locationLines};')();
+  const buttons={};
+  const pin={className:'audio-action audio-location',children:[],title:'',
+    classes:new Set(),attrs:{},classList:{toggle(name,on){if(on)pin.classes.add(name);else pin.classes.delete(name);}},
+    setAttribute(name,value){this.attrs[name]=value;},
+    replaceChildren(...items){this.children=items;},
+    append(item){this.children.push(item);},
+    addEventListener(name,fn){this[name]=fn;}
+  };
+  const preview={hidden:true},label={textContent:''};
+  const remove={addEventListener(name,fn){this[name]=fn;}};
+  const els={'gps-preview':preview,'gps-label':label,'gps-remove':remove};
+  let success,error,nextId=0;
+  const cleared=[],timers=new Map(),requests=[];
+  const geo={watchPosition(ok,fail,options){
+    assert.deepEqual(options,{enableHighAccuracy:true,maximumAge:0,timeout:12000});
+    success=ok;error=fail;return 12;
+  },clearWatch(id){cleared.push(id);}};
+  const fakeFetch=async(url)=>{
+    requests.push(url);
+    return {ok:true,json:async()=>({countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta'})};
+  };
+  const ctrl=new Function('locateButton','$','el','contactIcon','navigator','window',
+    'locationFromGps','validLocation','locationLines','fetch','AbortController','toast',
+    'setTimeout','clearTimeout',
+    js.slice(a,b)+
+    ';return {get state(){return {capturingLocation,locationDraft,gpsWatchId,gpsBestCoords};}};')(
+      pin,id=>els[id],(tag,cls,txt)=>({tag,cls,textContent:txt,setAttribute(){}}),
+      kind=>({kind}),
+      {geolocation:geo},
+      {isSecureContext:true,confirm:()=>true},
+      loc.locationFromGps,loc.validLocation,loc.locationLines,fakeFetch,
+      class Abort {constructor(){this.signal={};}abort(){}},
+      ()=>{},
+      (fn,ms)=>{const id=++nextId;timers.set(id,{fn,ms});return id;},
+      id=>timers.delete(id)
+    );
+  pin.click();
+  assert.equal(ctrl.state.capturingLocation,true);
+  assert.equal(pin.classes.has('gps-measuring'),true);
+  assert.equal(pin.children[1].textContent,'…');
+  success({coords:{latitude:11.24,longitude:-74.21,accuracy:46}});
+  assert.equal(pin.children[1].textContent,'±46m');
+  success({coords:{latitude:11.25,longitude:-74.22,accuracy:19}});
+  assert.equal(pin.children[1].textContent,'±19m');
+  success({coords:{latitude:11.26,longitude:-74.23,accuracy:23}});
+  assert.equal(pin.children[1].textContent,'±19m'); // never get worse
+  assert.equal(requests.length,0);
+  pin.click(); // manually stop using the very same button
+  assert.equal(ctrl.state.capturingLocation,false);
+  assert.equal(ctrl.state.gpsWatchId,null);
+  assert.deepEqual(cleared,[12]);
+  assert.equal(ctrl.state.locationDraft.accuracy,19);
+  assert.equal(pin.classes.has('gps-fixed'),true);
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal(requests.length,1);
+  assert.match(requests[0],/latitude=11.25&longitude=-74.22/);
+  assert.equal(pin.children[1].textContent,'±19m');
+  assert.equal(label.textContent.includes('Precisión estimada: ±19 m'),true);
+});
+test('GPS: detención automática al lograr precisión y botón sin controles extra',async()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
+  const b=js.indexOf('function setMicState(active){',a);
+  const lm=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const loc=new Function(lm.replace(/^export /gm,'')+';return {locationFromGps,locationLines,validLocation};')();
+  const elms={'gps-preview':{},'gps-label':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}}};
+  const pin={classList:{toggle(){}},setAttribute(){},
+    replaceChildren(){},append(){},addEventListener(t,fn){this[t]=fn;}};
+  let notify,clearCount=0;
+  const fetches=[];
+  const geo={watchPosition(success){notify=success;return 0;},clearWatch(id){assert.equal(id,0);clearCount++;}};
+  let nextId=0;const timers=new Map();
+  const module=new Function('locateButton','$','el','contactIcon','navigator','window',
+    'locationFromGps','validLocation','locationLines','fetch','AbortController','toast',
+    'setTimeout','clearTimeout',js.slice(a,b)+
+      ';return {get state(){return {capturingLocation,locationDraft};}};');
+  const ctrl=module(pin,id=>elms[id],()=>({setAttribute(){}}),()=>({}),{geolocation:geo},
+    {isSecureContext:true,confirm:()=>true},loc.locationFromGps,loc.validLocation,
+    loc.locationLines,async url=>{fetches.push(url);return {ok:true,json:async()=>({})};},
+    class Abort{constructor(){this.signal={};}abort(){}},()=>{},
+    (fn,ms)=>{let id=++nextId;timers.set(id,{fn,ms});return id;},id=>timers.delete(id));
+  pin.click();
+  notify({coords:{latitude:10,longitude:-70,accuracy:39}});
+  notify({coords:{latitude:10.0001,longitude:-70.0001,accuracy:8.9}});
+  assert.equal(ctrl.state.capturingLocation,false);
+  assert.equal(ctrl.state.locationDraft.accuracy,9);
+  assert.equal(clearCount,1); // watcher id zero must also clear
+  await Promise.resolve();await Promise.resolve();
+  assert.equal(fetches.length,1);
+  assert.match(js,/GPS_MAX_TIME_MS=30000, GPS_TARGET_METERS=10/);
+  assert.doesNotMatch(js,/getCurrentPosition\(/);
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  assert.equal((html.match(/id="draft-audio-row"/g)||[]).length,1);
 });
