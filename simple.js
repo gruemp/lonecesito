@@ -481,9 +481,11 @@ function updateGpsButton(){
 }
 function showLocationDraft(){
   const preview=$('gps-preview');
-  preview.hidden=!validLocation(locationDraft);
-  $('gps-label').textContent=validLocation(locationDraft)
-    ?locationLines(locationDraft,$('need-address').value).join('\n'):'';
+  const gpsExists=validLocation(locationDraft);
+  const declared=cleanAddressText($('need-address').value);
+  preview.hidden=!(gpsExists||declared);
+  $('gps-remove').hidden=!gpsExists;
+  $('gps-label').textContent=locationLines(locationDraft,declared).join('\n');
   updateGpsButton();
 }
 function stopGpsWatch(){
