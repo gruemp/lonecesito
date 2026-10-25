@@ -473,3 +473,9 @@ Rama propuesta: `codex/usabilidad-etapa1-2026-10-23`. Se apoya en el diseño y e
 **Pruebas:** ampliadas de 10 a 16. Se ejecutaron con éxito en un entorno JavaScript aislado usando las funciones reales y comprobaciones estructurales de HTML. Quedan pendientes la ejecución con Node mediante `npm run check && npm test`, pruebas visuales en navegador real, accesibilidad y comprobaciones móviles. No afirmar que estas últimas se realizaron.
 
 **Despliegue:** esta rama está destinada a revisión en Pull Request, no fusionada ni publicada automáticamente.
+
+
+## 2.2.29 — Direcciones de Natura sin Apps Script
+País, departamento, municipio, ciudad y calle se completan directamente desde OpenStreetMap/BigDataCloud conforme llega cada respuesta. En una publicación con GPS, editar → Actualizar dirección GPS → autorizar → guardar permite recuperar nombres faltantes desde el punto guardado, sin medir la ubicación actual. Una consulta fallida no borra datos conocidos de ese punto. Apartamento o complemento se escribe en la caja de dirección opcional; no se detecta por GPS. Se mantienen PNG, Maps y distancia local bajo permiso.
+
+Validación del flujo: `npm run test:location`. Sin Apps Script, backend de visitantes de Natura ni consultas automáticas al abrir fichas.
