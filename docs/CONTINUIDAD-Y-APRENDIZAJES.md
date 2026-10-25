@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.26 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.27 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -157,3 +157,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - En las fichas, dentro del panel que abre el pin, hay **Ver en Google Maps** y **Cómo llegar**. Si hay GPS, aparece además el botón **Distancia desde mí**. Únicamente tras pulsarlo se pide `navigator.geolocation.getCurrentPosition` con alta precisión y permiso del visitante. Distancia calculada localmente con fórmula de Haversine y rotulada «en línea recta; no es distancia por carretera». No guardar ni transmitir posición del visitante. Si deniega permiso, ofrecer Maps sin bloquear.
 - La consulta Maps Directions usa solo el destino del autor; Google Maps solicita/identifica origen conforme a sus controles. Con solo dirección manual, mostrar vínculos de Maps pero no una cifra de kilómetros local, porque no hay coordenadas del destino. Mapas, rutas y distancias NO se agregaron al PNG, porque allí no son interactivos ni representan una ubicación de visitante fija.
 - Se conservan GPS manual del autor hasta segundo toque, dirección opcional pública, controles de voz, layout e imágenes de Inicio. Pruebas de dispositivo real y emulador Firestore pendientes. Las reglas Firestore no cambiaron con esta actualización.
+
+## Cambio 2.2.27 — 25 de octubre de 2026
+- «Cómo llegar» pasa a llamarse **«Desde mí»** en el enlace de rutas de Google Maps; se mantiene «Distancia desde mí» como cálculo de distancia geográfica en línea recta independiente.
+- El desglose GPS sigue mostrando país, departamento, ciudad, dirección indicada por autor, coordenadas y precisión, pero **elimina la etiqueta barrio/localidad** de editor/fichas/PNG; en capturas nuevas ya no almacena ese atributo, aunque se aceptan publicaciones históricas que lo traigan.
+- «Dirección aproximada» ahora debe ser calle/número real si lo proporciona OpenStreetMap Nominatim al consultar las coordenadas finales de una captura VOLUNTARIA, p. ej. «Calle 10A #20A-06». Si se devuelve solo calle, no inventar número; si tampoco hay calle, presentar «Calle y número no identificados». Sin falsa «dirección» concatenando ciudad, departamento, país. No se pueden garantizar nomenclatura y número con GPS solo.
+- Al terminar la captura del GPS, se realizan hasta dos consultas puntuales desde el teléfono: BigDataCloud para región/ciudad y Nominatim para calle/número, no en cada medición, y solo tras consentimiento específico de divulgación de coordenadas. Datos OSM con atribución en la ficha/editor y PNG; las consultas al servicio público se limitan a una por segundo por navegador y deben migrarse a proveedor administrado si el uso escala. Los puntos del visitante que consulta distancia siguen siendo privados, sin geocodificación remota.
+- Versiones JS/CSS con caché actualizada. Pruebas de GPS real, política de cuota OSM, emulador Firestore y navegador físico pendientes. Las reglas Firestore mantienen compatibilidad con datos heredados.
