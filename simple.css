@@ -686,3 +686,32 @@ body:has(.image-dialog[open]){overflow:hidden}
 }
 
 #gps-remove[hidden]{display:none!important}
+
+
+/* 2.2.26 — jerarquía GPS completa, Maps y distancia privada bajo demanda. */
+.publication-location-lines{white-space:pre-line;overflow-wrap:anywhere}
+.publication-map-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.publication-map-link,.publication-route-link,.publication-distance-button,.gps-map-link{
+  display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;
+  min-height:40px;padding:8px 12px;border-radius:9px;border:1px solid #9dbfc2;
+  background:#fff;color:#135d75;text-decoration:none;font:inherit;
+  font-size:12px;font-weight:700;cursor:pointer
+}
+.publication-route-link{border-color:#a7c9ac;background:#f2faf2;color:#226444}
+.publication-distance-button{border-color:#d7b57c;background:#fff6e6;color:#80551f}
+.publication-distance-button:disabled{opacity:.65;cursor:wait}
+.publication-map-link:focus-visible,.publication-route-link:focus-visible,
+.publication-distance-button:focus-visible,.gps-map-link:focus-visible{
+  outline:3px solid #2c9ab4;outline-offset:2px
+}
+.publication-distance-result{min-height:0;margin:7px 2px 0;
+  font-size:12px;line-height:1.45;color:#245c56}
+.gps-preview{flex-wrap:wrap}
+.gps-map-link{margin-left:auto}
+.gps-map-link[hidden]{display:none}
+@media(max-width:390px){
+  .publication-map-actions{gap:5px}
+  .publication-map-link,.publication-route-link,.publication-distance-button{
+    font-size:11px;padding:7px 9px
+  }
+}
