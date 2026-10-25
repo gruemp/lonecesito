@@ -1,6 +1,6 @@
 import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2227';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2225';
+import {makeCardPng} from './card-png.js?v=20261025-v2227';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
   streetAddressFromOsm} from './location-model.js?v=20261025-v2227';
