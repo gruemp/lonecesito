@@ -782,12 +782,12 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
   const start=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
   const end=js.indexOf('function setMicState(active){',start);
-  const {locationFromGps,locationLines,validLocation,cleanAddressText}=new Function(
+  const {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm}=new Function(
     model.replace(/^export /gm,'')+
-    ';return {locationFromGps,locationLines,validLocation,cleanAddressText};')();
+    ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm};')();
   const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
     addEventListener(t,fn){this[t]=fn;}};
-  const nodes={'gps-preview':{},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
+  const nodes={'gps-preview':{},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-osm-credit':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
     'need-address':{value:'Calle 10 #5-20'}};
   let receive,stops=0,requests=0;
   const geo={watchPosition(fn,err,opts){
@@ -797,14 +797,14 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   },clearWatch(id){assert.equal(id,0);stops++;}};
   const controller=new Function(
     'locateButton','$','el','contactIcon','navigator','window',
-    'locationFromGps','validLocation','locationLines','cleanAddressText',
+    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm',
     'fetch','AbortController','toast','setTimeout','clearTimeout',
     js.slice(start,end)+
     ';return {get state(){return {capturingLocation,locationDraft};}};')(
       pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
       {geolocation:geo},{isSecureContext:true,confirm:()=>true},
-      locationFromGps,validLocation,locationLines,cleanAddressText,
-      async()=>{requests++;return {ok:true,json:async()=>({countryName:'Colombia',city:'Santa Marta'})};},
+      locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,
+      async url=>{requests++;return {ok:true,json:async()=>url.includes('nominatim')?{address:{}}:{countryName:'Colombia',city:'Santa Marta'}};},
       class Abort {constructor(){this.signal={};}abort(){}},()=>{},
       ()=>1,()=>{});
   pin.click();
@@ -818,8 +818,8 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   pin.click();
   assert.equal(controller.state.capturingLocation,false);
   assert.equal(stops,1);
-  await Promise.resolve();await Promise.resolve();
-  assert.equal(requests,1);
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(requests,2);
   assert.doesNotMatch(js,/GPS_MAX_TIME_MS|GPS_TARGET_METERS/);
   assert.match(js,/Pulsa nuevamente el botón GPS para detener la medición antes de publicar/);
   assert.match(nodes['gps-label'].textContent,/Dirección indicada por el autor: Calle 10 #5-20/);
