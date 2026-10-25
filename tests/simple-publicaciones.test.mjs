@@ -455,7 +455,7 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
   for(const content of [agents,guide,handoff]){
     assert.match(content,/2\.2\.13/);
     assert.match(content,/una sola fila/i);
-    assert.match(content,/seis iconos|seis botones/i);
+    assert.match(content,/seis iconos|seis botones|6 iconos/i);
   }
 });
 
