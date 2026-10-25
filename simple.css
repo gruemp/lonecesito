@@ -715,3 +715,12 @@ body:has(.image-dialog[open]){overflow:hidden}
     font-size:11px;padding:7px 9px
   }
 }
+
+
+/* 2.2.27 — atribución del dato de calle a OpenStreetMap. */
+.gps-osm-credit,.publication-osm-credit{
+  display:inline-block;color:#52716c;font-size:11px;
+  margin-top:6px;text-decoration:underline;text-underline-offset:2px
+}
+.gps-osm-credit[hidden]{display:none}
+.publication-osm-credit{margin-top:9px}
