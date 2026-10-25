@@ -1,9 +1,9 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2227';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2228';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2227';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
-  streetAddressFromOsm} from './location-model.js?v=20261025-v2227';
+  streetAddressFromOsm,locationFromNaturaGeocoders} from './location-model.js?v=20261025-v2228';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -582,8 +582,9 @@ function resolveGpsAddress(coords,requestId){
     const deadline=setTimeout(()=>controller.abort(),13000);
     try{
       // Se consultan solo las coordenadas finales autorizadas por el autor.
-      // BigDataCloud aporta país/departamento/ciudad; OSM calle y numeración
-      // cuando existen. Nunca se consulta a partir de GPS histórico/ajeno.
+      // Igual que en Natura, OSM aporta calle y también datos administrativos
+      // (city/town/village/municipality/state/country); BigDataCloud respalda
+      // ciudad/localidad, departamento y país. Se usa solo la muestra final.
       const cityUrl='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
         +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
         +'&localityLanguage=es';
@@ -604,16 +605,23 @@ function resolveGpsAddress(coords,requestId){
         lastStreetLookupAt=Date.now();
         const response=await fetch(streetUrl,{signal:controller.signal});
         if(!response.ok)throw Error('Calle no disponible');
-        return streetAddressFromOsm(await response.json());
+        return response.json();
       })();
       const [cityResult,streetResult]=await Promise.allSettled([cityRequest,streetRequest]);
       if(requestId!==locationRequestId)return;
       const geo=cityResult.status==='fulfilled'?cityResult.value:{};
-      const street=streetResult.status==='fulfilled'?streetResult.value:'';
-      locationDraft=locationFromGps(coords,{...geo,address:street});
+      const osm=streetResult.status==='fulfilled'?streetResult.value:{};
+      // A diferencia de la versión anterior, NO descartamos de OSM país,
+      // departamento, municipio ni ciudad. LoNecesito toma los mismos
+      // campos alternativos (city/town/village/municipality/county) de Natura.
+      locationDraft=locationFromNaturaGeocoders(coords,osm,geo);
       showLocationDraft();
-      if(!street)toast('GPS guardado. El mapa no identificó calle y número; puedes escribirlos en Dirección (opcional).');
-      else if(cityResult.status!=='fulfilled')toast('Calle identificada. País, departamento o ciudad pueden no estar disponibles.');
+      if(!locationDraft.address){
+        toast('GPS guardado. La calle o el número no se identificaron; puedes indicarlos en Dirección (opcional).');
+      }
+      if(!locationDraft.city||!locationDraft.department||!locationDraft.country){
+        toast('GPS guardado. Faltan datos administrativos del mapa; puedes volver a medir el GPS.');
+      }
     }catch{
       if(requestId===locationRequestId)
         toast('GPS guardado. No se pudo consultar la dirección.');
@@ -657,7 +665,7 @@ locateButton.addEventListener('click',()=>{
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
   }
-  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a BigDataCloud (país/ciudad) y OpenStreetMap (calle/número). Ambos servicios pueden recibir tu IP.')){
+  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a OpenStreetMap y BigDataCloud para identificar calle, municipio, ciudad, departamento y país. Ambos servicios pueden recibir tu IP.')){
     return;
   }
   const requestId=++locationRequestId;
