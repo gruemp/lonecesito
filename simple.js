@@ -1,6 +1,6 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2217';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2218';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261024-v228';
+import {makeCardPng} from './card-png.js?v=20261025-v2218';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -92,8 +92,10 @@ function contactIcon(kind){
     ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','m8.7 13.3 6.6 4.4','m15.3 6.3-6.6 4.4']:
     kind==='listen'?
     ['M11 5 6 9H2v6h4l5 4V5z','M15.5 8.5a5 5 0 0 1 0 7','M18.7 5.3a9.5 9.5 0 0 1 0 13.4']:
-    kind==='stop'?
-    ['M5 5h14v14H5z']:
+    kind==='pause'?
+    ['M7 5v14','M17 5v14']:
+    kind==='resume'?
+    ['M8 5v14l10-7z','M3 8a9 9 0 0 1 5-5','m3 1-3-1 1-3']:
     kind==='edit'?
     ['M12 20h9','M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z']:
     kind==='delete'?
@@ -173,43 +175,67 @@ async function sharePublicationPng(record){
   }
 }
 let activeReading=null;
+function setReadingState(button,status){
+  const label=status==='playing'?'Pausar lectura':status==='paused'?'Reanudar lectura':
+    button.id==='listen-draft'?'Escuchar el texto de la publicación':'Escuchar publicación';
+  button.title=label;
+  button.setAttribute('aria-label',label);
+  button.setAttribute('aria-pressed',String(status!=='idle'));
+  button.dataset.readingState=status;
+  button.replaceChildren(contactIcon(status==='playing'?'pause':status==='paused'?'resume':'listen'));
+}
 function stopReading(){
-  const current=activeReading;
+  const previous=activeReading;
   activeReading=null;
-  if(current){
-    current.button.setAttribute('aria-pressed','false');
-    current.button.setAttribute('aria-label','Escuchar publicación');
-    current.button.title='Escuchar publicación';
-    current.button.replaceChildren(contactIcon('listen'));
-  }
+  if(previous)setReadingState(previous.button,'idle');
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
 }
 function listenPublication(button,text){
-  if(activeReading?.button===button){stopReading();return;}
+  const synth=window.speechSynthesis;
+  if(activeReading?.button===button){
+    try{
+      if(activeReading.status==='playing'){
+        synth.pause();
+        activeReading.status='paused';
+        setReadingState(button,'paused');
+      }else if(activeReading.status==='paused'){
+        synth.resume();
+        activeReading.status='playing';
+        setReadingState(button,'playing');
+      }
+    }catch{toast('Este navegador no permite pausar o reanudar la lectura.');}
+    return;
+  }
   stopReading();
-  if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance!=='function'){
+  if(!synth||typeof SpeechSynthesisUtterance!=='function'){
     toast('La lectura en voz alta no está disponible en este navegador.');
     return;
   }
-  const utterance=new SpeechSynthesisUtterance(text);
+  const content=String(text||'').trim();
+  if(!content){
+    toast('Escribe primero el contenido que deseas escuchar.');
+    return;
+  }
+  if(recognition)stopDictation();
+  const utterance=new SpeechSynthesisUtterance(content);
   utterance.lang='es-CO';
   utterance.rate=1;
-  const voices=window.speechSynthesis.getVoices();
+  const voices=synth.getVoices();
   const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-co')
     ||voices.find(voice=>voice.lang.toLowerCase().startsWith('es'));
   if(selected){utterance.voice=selected;utterance.lang=selected.lang;}
-  activeReading={button,utterance};
-  button.setAttribute('aria-pressed','true');
-  button.setAttribute('aria-label','Detener lectura de publicación');
-  button.title='Detener lectura';
-  button.replaceChildren(contactIcon('stop'));
+  activeReading={button,utterance,status:'playing'};
+  setReadingState(button,'playing');
+  utterance.onpause=()=>{if(activeReading?.utterance===utterance){activeReading.status='paused';setReadingState(button,'paused');}};
+  utterance.onresume=()=>{if(activeReading?.utterance===utterance){activeReading.status='playing';setReadingState(button,'playing');}};
   utterance.onend=()=>{if(activeReading?.utterance===utterance)stopReading();};
   utterance.onerror=event=>{
     if(activeReading?.utterance!==utterance)return;
     stopReading();
     if(event.error!=='canceled'&&event.error!=='interrupted')toast('No se pudo leer la publicación.');
   };
-  window.speechSynthesis.speak(utterance);
+  try{synth.speak(utterance);}
+  catch{stopReading();toast('No se pudo iniciar la lectura.');}
 }
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
@@ -266,10 +292,7 @@ function renderCard(record,owner){
   // El mismo renderizador muestra el altavoz en Ver necesidades y Mis publicaciones.
   const listen=el('button','contact-action listen-action');
   listen.type='button';
-  listen.title='Escuchar publicación';
-  listen.setAttribute('aria-label','Escuchar publicación');
-  listen.setAttribute('aria-pressed','false');
-  listen.append(contactIcon('listen'));
+  setReadingState(listen,'idle');
   listen.addEventListener('click',()=>listenPublication(listen,fullText));
   contact.append(listen);
 
@@ -301,6 +324,7 @@ function visibleItems(){
   });
 }
 function render(){
+  if(activeReading)stopReading();
   const query=$('search').value.trim();
   const visible=visibleItems().filter(item=>publicationMatchesQuery(item,query));
   $('browse-list').replaceChildren(...visible.map(item=>renderCard(item,false)));
@@ -311,6 +335,12 @@ function render(){
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
 }
 $('search').addEventListener('input',render);
+const listenDraft=$('listen-draft');
+setReadingState(listenDraft,'idle');
+listenDraft.addEventListener('click',()=>listenPublication(listenDraft,$('need-description').value));
+$('need-description').addEventListener('input',()=>{
+  if(activeReading?.button===listenDraft)stopReading();
+});
 /* Dictado opcional mediante el navegador; el teclado sigue disponible siempre. */
 let recognition=null;
 let pictureDraft='';
@@ -430,6 +460,7 @@ $('photo-picker').addEventListener('change',async()=>{
   finally{pictureLoading=false;$('add-photo').disabled=false;$('photo-picker').value='';}
 });
 function resetForm(){
+  stopReading();
   stopDictation();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
