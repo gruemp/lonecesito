@@ -19,6 +19,7 @@ export function locationFromGps(coords,geocode={}){
     country:safeText(geocode.countryName||geocode.country),
     department:safeText(geocode.principalSubdivision||geocode.department),
     city:safeText(geocode.city),
+    municipality:safeText(geocode.municipality),
     address:safeText(geocode.address) // Calle/número si los devuelve el mapa, nunca inventados
   };
 }
@@ -37,8 +38,9 @@ export function locationLines(location,addressText='',showUnavailable=false){
   // con una calle postal. Los barrios heredados dejan de mostrarse.
   const parts=[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city]
-  ].filter(([label,value])=>Boolean(safeText(value))||showUnavailable)
+    ['Municipio',location.municipality],['Ciudad',location.city]
+  ].filter(([label,value])=>Boolean(safeText(value))||
+    (showUnavailable&&label!=='Municipio'))
     .map(([label,value])=>label+': '+(safeText(value)||'No identificado'));
   if(declared)parts.push('Dirección indicada por el autor: '+declared);
   // Una dirección aproximada debe ser una calle/numeración, NO una lista de
@@ -96,4 +98,37 @@ export function streetAddressFromOsm(response){
   if(!road)return '';
   const house=safeText(a.house_number).replace(/^#\s*/,'');
   return safeText(house?road+' #'+house:road);
+}
+
+
+/* Estrategia adaptada de Natura:
+ * Nominatim permite leer ciudad/town/village/municipality/county/estado,
+ * y BigDataCloud es respaldo de los campos administrativos. No debe usarse
+ * la ubicación por IP: una publicación necesita coordenadas consentidas.
+ */
+const osmText=v=>safeText(v).replace(/^Perímetro Urbano\s+/i,'');
+function municipalityFromOsm(address){
+  const raw=osmText(address.municipality||address.county);
+  return raw.replace(/^(?:Municipio|Distrito)(?:\s+(?:de|del))?\s+/i,'').trim();
+}
+export function locationFromNaturaGeocoders(coords,osmResponse={},bigResponse={}){
+  const a=osmResponse&&typeof osmResponse.address==='object'&&osmResponse.address?
+    osmResponse.address:{};
+  const big=bigResponse&&typeof bigResponse==='object'?bigResponse:{};
+  // Natura prueba city/town/village/municipality/county antes de rendirse.
+  const osmCity=osmText(a.city||a.town||a.village||a.municipality||
+    a.city_district||a.county||a.state);
+  const osmMunicipality=municipalityFromOsm(a);
+  // La API de respaldo puede poner la ciudad en «locality», no en «city».
+  const bigCity=osmText(big.city||big.locality||big.municipality);
+  const municipality=osmMunicipality||osmText(big.municipality)||
+    (osmCity&&!a.county?osmCity:'');
+  return locationFromGps(coords,{
+    countryName:osmText(a.country)||osmText(big.countryName||big.country),
+    principalSubdivision:osmText(a.state||a.region)||
+      osmText(big.principalSubdivision||big.department),
+    municipality,
+    city:osmCity||bigCity||municipality,
+    address:streetAddressFromOsm(osmResponse)
+  });
 }
