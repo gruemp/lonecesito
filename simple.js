@@ -1,8 +1,9 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2226';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2227';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2225';
+import {makeCardPng} from './card-png.js?v=20261025-v2227';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
-  googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel} from './location-model.js?v=20261025-v2226';
+  googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
+  streetAddressFromOsm} from './location-model.js?v=20261025-v2227';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -421,13 +422,20 @@ function renderCard(record,owner){
     maps.rel='noopener noreferrer';
     maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
     actions.append(maps);
-    const route=el('a','publication-route-link','Cómo llegar');
+    const route=el('a','publication-route-link','Desde mí');
     route.href=googleMapsDirectionsUrl(location,addressText);
     route.target='_blank';
     route.rel='noopener noreferrer';
-    route.setAttribute('aria-label','Ver ruta a esta necesidad en Google Maps');
+    route.setAttribute('aria-label','Ver ruta desde mi ubicación en Google Maps');
     actions.append(route);
     details.append(actions);
+    if(location?.address){
+      const attribution=el('a','publication-osm-credit','Datos de calles © OpenStreetMap');
+      attribution.href='https://www.openstreetmap.org/copyright';
+      attribution.target='_blank';
+      attribution.rel='noopener noreferrer';
+      details.append(attribution);
+    }
     if(location){
       const distanceButton=el('button','publication-distance-button','Distancia desde mí');
       distanceButton.type='button';
@@ -513,6 +521,7 @@ let pictureDraft='';
 let pictureLoading=false;
 let locationDraft=null,locationRequestId=0,capturingLocation=false;
 let gpsWatchId=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
+let lastStreetLookupAt=0;
 function updateGpsButton(){
   const hasFix=validLocation(locationDraft);
   const precision=capturingLocation
@@ -542,6 +551,8 @@ function showLocationDraft(){
   preview.hidden=!(gpsExists||declared);
   $('gps-remove').hidden=!gpsExists;
   $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
+  const credit=$('gps-osm-credit');
+  credit.hidden=!(gpsExists&&locationDraft.address);
   const maps=$('gps-map-link');
   const url=googleMapsLocationUrl(locationDraft,declared);
   maps.hidden=!url;
@@ -568,21 +579,44 @@ function resolveGpsAddress(coords,requestId){
   const controller=new AbortController();
   gpsGeocodeController=controller;
   const work=(async()=>{
-    const deadline=setTimeout(()=>controller.abort(),9000);
+    const deadline=setTimeout(()=>controller.abort(),13000);
     try{
-      const url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
+      // Se consultan solo las coordenadas finales autorizadas por el autor.
+      // BigDataCloud aporta país/departamento/ciudad; OSM calle y numeración
+      // cuando existen. Nunca se consulta a partir de GPS histórico/ajeno.
+      const cityUrl='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
         +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
         +'&localityLanguage=es';
-      const result=await fetch(url,{signal:controller.signal});
-      if(!result.ok)throw Error('Dirección no disponible');
-      const geo=await result.json();
-      if(requestId===locationRequestId){
-        locationDraft=locationFromGps(coords,geo);
-        showLocationDraft();
-      }
+      const streetUrl='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18'
+        +'&accept-language=es&lat='+encodeURIComponent(coords.latitude)
+        +'&lon='+encodeURIComponent(coords.longitude);
+      const cityRequest=fetch(cityUrl,{signal:controller.signal}).then(async response=>{
+        if(!response.ok)throw Error('Localidad no disponible');
+        return response.json();
+      });
+      // Una sola consulta inversa por medición final, nunca en el bucle GPS.
+      const streetRequest=(async()=>{
+        // Máximo una consulta por segundo desde este navegador.
+        // Respetar los límites de Nominatim; un solo GPS final por acción.
+        const delay=Math.max(0,1100-(Date.now()-lastStreetLookupAt));
+        if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+        if(controller.signal.aborted)throw Error('Consulta cancelada');
+        lastStreetLookupAt=Date.now();
+        const response=await fetch(streetUrl,{signal:controller.signal});
+        if(!response.ok)throw Error('Calle no disponible');
+        return streetAddressFromOsm(await response.json());
+      })();
+      const [cityResult,streetResult]=await Promise.allSettled([cityRequest,streetRequest]);
+      if(requestId!==locationRequestId)return;
+      const geo=cityResult.status==='fulfilled'?cityResult.value:{};
+      const street=streetResult.status==='fulfilled'?streetResult.value:'';
+      locationDraft=locationFromGps(coords,{...geo,address:street});
+      showLocationDraft();
+      if(!street)toast('GPS guardado. El mapa no identificó calle y número; puedes escribirlos en Dirección (opcional).');
+      else if(cityResult.status!=='fulfilled')toast('Calle identificada. País, departamento o ciudad pueden no estar disponibles.');
     }catch{
       if(requestId===locationRequestId)
-        toast('GPS guardado. La dirección no estuvo disponible; se conservarán coordenadas y precisión.');
+        toast('GPS guardado. No se pudo consultar la dirección.');
     }finally{
       clearTimeout(deadline);
       if(gpsGeocodeController===controller)gpsGeocodeController=null;
@@ -623,7 +657,7 @@ locateButton.addEventListener('click',()=>{
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
   }
-  if(!window.confirm('¿Quieres adjuntar a tu publicación tus coordenadas GPS y precisión reales? Serán visibles para todos y se incluirán en el PNG. Para identificar país, ciudad y barrio, se enviará la mejor coordenada final a BigDataCloud.')){
+  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a BigDataCloud (país/ciudad) y OpenStreetMap (calle/número). Ambos servicios pueden recibir tu IP.')){
     return;
   }
   const requestId=++locationRequestId;
