@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.20 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.21 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -14,13 +14,19 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
 - No cambia la portada ni el editor ni la configuración pendiente de Firebase. Verificación en celular físico y comprobación independiente de GitHub Pages pendientes si no se puede acceder al dispositivo externo.
 
+## Cambio 2.2.21 — 25 de octubre de 2026
+
+- Aprobación expresa: mantener pulsado un segundo el icono de voz para reiniciar desde el principio, esté reproduciéndose o pausado. Se aplica tanto a publicaciones como al borrador del editor; sin añadir iconos ni filas.
+- Implementado con eventos Pointer Events (`pointerdown` y cancelación con `pointerup`, `pointercancel` y `pointerleave`), un temporizador de 1.000 ms y supresión del clic posterior a la pulsación prolongada; se evita el menú contextual del botón. Los clics cortos siguen alternando reproducir/pausar/reanudar. Los estados tienen etiquetas accesibles que describen el gesto.
+- Verificar en móvil real (Android/iOS) que la pulsación larga no activa menú contextual ni pausa involuntaria; las pruebas simuladas no reemplazan dispositivo físico.
+
 ## Cambio 2.2.20 — 25 de octubre de 2026
 
 - Nuevo límite editorial de 1.000 caracteres para descripciones nuevas o modificadas. No hay mínimo aparte de no estar vacía; se cuentan los espacios.
 - Fichas históricas de más de 1.000 y hasta 4.000 caracteres se preservan íntegramente; se permite modificar teléfono o fotografía sin alterar descripción. Para editar su texto se exige ajustarlo a 1.000, nunca truncarlo automáticamente.
 - Editar implica longitud del textarea según texto histórico para evitar que el navegador corte la información al mostrarla; el dictado respeta el límite activo. Validación actualizada en modelo, editor y firestore.rules, con excepciones explícitas para actualizaciones de datos heredados.
 - Las reglas de Firestore en GitHub NO se despliegan solas; realizar su despliegue por separado al configurar el proyecto Firebase. Tests de Firestore agregados para emulador, aún pendientes de ejecutarse si no está activo.
-- La petición de reiniciar audio desde el comienzo durante una reproducción se encuentra en discusión, no fue implementada en esta versión. Actualmente, al terminar la lectura, el altavoz vuelve al estado inicial y permite reproducir toda la publicación nuevamente.
+- La petición de reiniciar audio mientras se reproduce o pausa quedó aprobada e implementada posteriormente en la versión 2.2.21 con pulsación prolongada de un segundo sobre el mismo icono.
 
 ## Corrección 2.2.19 — 25 de octubre de 2026
 
