@@ -345,10 +345,10 @@ body:has(.image-dialog[open]){overflow:hidden}
 
 
 /* v2.2.9 — única fila de controles, tanto en fichas propias como ajenas.
-   Las propias muestran cinco iconos; las ajenas solo llamar, WhatsApp y compartir. */
+   Las propias muestran seis iconos; las ajenas llamar, WhatsApp, compartir y escuchar. */
 .publication-card .contact-box{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:6px;
   margin-top:9px;
   padding:5px;
@@ -357,7 +357,7 @@ body:has(.image-dialog[open]){overflow:hidden}
   border-radius:11px;
 }
 .publication-card .contact-box.has-owner-actions{
-  grid-template-columns:repeat(5,minmax(0,1fr));
+  grid-template-columns:repeat(6,minmax(0,1fr));
 }
 .publication-card .contact-action{
   display:flex;
@@ -539,3 +539,8 @@ body:has(.image-dialog[open]){overflow:hidden}
   .search-panel{margin-bottom:10px}
   .publication-list{gap:9px}
 }
+
+/* v2.2.17: lectura de publicaciones; el altavoz comparte la fila única de acciones. */
+.publication-card .listen-action{background:#946018;border-color:#794d10;color:#fff}
+.publication-card .listen-action:hover{background:#7f5011}
+.publication-card .listen-action[aria-pressed="true"]{background:#694311;border-color:#694311}

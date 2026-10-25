@@ -1,6 +1,6 @@
 # Preferencias de LoNecesito — diseño y funcionamiento vigentes
 
-**Actualizado: 24 de octubre de 2026.** Este documento reemplaza como guía vigente la acumulación de versiones anteriores. Las decisiones descartadas siguen en el historial Git, pero **no son requisitos actuales**. Consultar también [AGENTS.md](../AGENTS.md) (normas operativas) y [CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md) (estado técnico).
+**Actualizado: 25 de octubre de 2026.** Este documento reemplaza como guía vigente la acumulación de versiones anteriores. Las decisiones descartadas siguen en el historial Git, pero **no son requisitos actuales**. Consultar también [AGENTS.md](../AGENTS.md) (normas operativas) y [CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md) (estado técnico).
 
 ## A. Concepto exacto del producto
 
@@ -76,11 +76,11 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 
 **Controles en la ficha**
 - Una sola fila, de iconos sin palabras visibles; acciones independientes, con **colores distintos** y al menos 44 px de alto en el móvil.
-- Todos ven tres: **llamar** (azul, abre marcador), **WhatsApp** (verde, abre conversación por API de WhatsApp), **compartir** (morado).
-- El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Cinco en una fila, no en dos.
+- Todos ven cuatro: **llamar** (azul, abre marcador), **WhatsApp** (verde, abre conversación por API de WhatsApp), **compartir** (morado) y **escuchar publicación** (ocre, altavoz).
+- El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Seis iconos en una sola fila, nunca en dos.
 - Compartir es el **símbolo familiar de tres puntos conectados**; se rechazó el anterior icono de flecha hacia arriba.
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
-- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje contextual. No hacer que ambos iconos abran WhatsApp.
+- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje aprobado: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Solo el resumen entre asteriscos se presenta en negrita en WhatsApp. El altavoz lee el contenido completo en español usando la voz del navegador (preferir es-CO), permite detenerlo al pulsar de nuevo y permanece disponible en todas las fichas tanto propias como ajenas. No hacer que ambos iconos abran WhatsApp.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
 
 ## F. Imagen PNG al compartir
@@ -137,7 +137,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - [ ] ¿La lista muestra solo fichas reales y el buscador incluye teléfono y tramos?
 - [ ] ¿La ficha contiene toda la descripción justificada, sin título ni chips?
 - [ ] ¿Con foto va a la derecha y amplía completa; sin foto, texto usa todo el ancho?
-- [ ] ¿En la ficha ajena hay 3 iconos y en la propia 5, todos en una sola fila?
+- [ ] ¿En la ficha ajena hay 4 iconos y en la propia 6, incluido el altavoz, todos en una sola fila?
 - [ ] ¿El PNG representa fielmente texto/foto y contiene teléfono real?
 - [ ] ¿En el editor solo hay dos campos y una fila de controles con ejemplo telefónico interior?
 - [ ] ¿Enter envía, Shift+Enter hace salto, micro y foto siguen funcionando?

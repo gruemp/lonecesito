@@ -1,6 +1,6 @@
 # LoNecesito — reglas actuales para cualquier IA
 
-**Vigencia: 24 de octubre de 2026.** Este documento es la **fuente de verdad operativa**. Leer también [Preferencias detalladas](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad técnica](docs/CONTINUIDAD-Y-APRENDIZAJES.md) antes de editar. **La instrucción expresa más reciente del usuario prevalece** sobre mensajes antiguos, versiones y requisitos históricos.
+**Vigencia: 25 de octubre de 2026.** Este documento es la **fuente de verdad operativa**. Leer también [Preferencias detalladas](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad técnica](docs/CONTINUIDAD-Y-APRENDIZAJES.md) antes de editar. **La instrucción expresa más reciente del usuario prevalece** sobre mensajes antiguos, versiones y requisitos históricos.
 
 **Prohibido recuperar funciones descartadas basándose en documentación vieja.** No mostrar publicaciones ficticias, versión visible, ofertas de proveedores ni avisos de prueba. La historia permanece consultable en Git.
 
@@ -36,10 +36,10 @@
 - **Con imagen:** ponerla **a la derecha**, ajustando proporción automáticamente **sin recortar ni deformar** (contain). Tocar **cualquier punto** de la imagen abre una vista completa en primer plano, con cierre X, Escape o toque exterior.
 - **Sin imagen:** el texto **ocupa todo el ancho**; no reservar columna, recuadro, marcador gráfico, icono ni aviso de ausencia.
 - **Una única fila de iconos** por ficha y opciones bien separadas:
-  - **Otros usuarios:** tres iconos: **llamar (azul)**, **WhatsApp (verde)** y **compartir PNG (morado)** con símbolo habitual de **tres puntos conectados**.
-  - **Autor:** los tres anteriores y después **editar (lápiz azul claro)** y **eliminar (papelera rojo claro)**: cinco en una sola fila.
+  - **Otros usuarios:** cuatro iconos: **llamar (azul)**, **WhatsApp (verde)**, **compartir PNG (morado)** con tres puntos conectados y **escuchar (ocre)** con símbolo de altavoz.
+  - **Autor:** los cuatro anteriores y después **editar (lápiz azul claro)** y **eliminar (papelera rojo claro)**: seis iconos en una sola fila.
 - Nada de palabras visibles dentro de esos botones, encabezado «Contactar» ni segunda fila «Editar / Eliminar». Mantener tamaño táctil mínimo de **44 px** en móvil, estados de foco y títulos/etiquetas accesibles.
-- **Llamada:** enlace de marcador tipo **tel:+número_normalizado**. **WhatsApp:** enlace **https://api.whatsapp.com/send** con teléfono y mensaje contextual. **No imprimir el teléfono en la ficha web**; estará en sus enlaces. No convertir el icono de teléfono en un atajo a WhatsApp.
+- **Llamada:** enlace de marcador tipo **tel:+número_normalizado**. **WhatsApp:** enlace **https://api.whatsapp.com/send** con mensaje «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.», donde solo el resumen va en negrita mediante asteriscos de WhatsApp. **Escuchar:** usar voz del navegador para leer el texto íntegro de la ficha (es-CO si disponible); pulsar de nuevo detiene la lectura, y el icono aparece tanto en Mis publicaciones como en Ver necesidades. **No imprimir el teléfono en la ficha web**; estará en sus enlaces. No convertir el icono de teléfono en un atajo a WhatsApp.
 
 ## 5. Compartir ficha en PNG
 
