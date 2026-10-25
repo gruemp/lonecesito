@@ -112,8 +112,8 @@ export async function makeCardPng({description,picture,contactPhone,example}){
   ctx.fillText('LoNecesito',left,footerY+63);
   if(hasPhone){
     // El número aparece siempre en el PNG real, destacado en una banda sobria.
-    const digits=String(contactPhone).replace(/\\D/g,'');
-    const number=/^57[3-9]\\d{9}$/.test(digits)
+    const digits=String(contactPhone).replace(/\D/g,'');
+    const number=/^57[3-9]\d{9}$/.test(digits)
       ?'+57 '+digits.slice(2,5)+' '+digits.slice(5,8)+' '+digits.slice(8)
       :String(contactPhone).trim();
     const panelWidth=480,panelHeight=98,panelX=width-left-panelWidth,panelY=footerY+15;
