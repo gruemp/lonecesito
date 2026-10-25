@@ -716,9 +716,9 @@ function resetForm(){
   locationRequestId++;
   cancelGpsTasks();
   locationDraft=null;
-  showLocationDraft();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
+  showLocationDraft();
   $('need-description').maxLength=1000;
   $('save-button').setAttribute('aria-label','Publicar');
   $('save-button').title='Publicar';
@@ -808,7 +808,10 @@ $('publish-form').addEventListener('submit',async event=>{
   if(state.mode==='cloud'&&!state.user){state.waitingForAuth=true;showAuth();return;}
   let current=null;
   try{
-    if(capturingLocation)finishGpsMeasurement();
+    if(capturingLocation){
+      feedback('form-feedback','Pulsa nuevamente el botón GPS para detener la medición antes de publicar.');
+      return;
+    }
     if(gpsGeocoding)await gpsGeocoding;
     current=state.items.find(item=>item.id===state.editingId);
     if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
