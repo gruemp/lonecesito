@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="760" height="810" viewBox="0 0 760 810" role="img" aria-labelledby="tit"><title id="tit">Ejemplos de necesidades y personas que pueden resolverlas: repartidores, técnicos, profesores, cuidadores y trabajadores independientes.</title><defs><linearGradient id="banner" x1="0" x2="1"><stop stop-color="#effbf5"/><stop offset="1" stop-color="#f5fbff"/></linearGradient>
+ <linearGradient id="need" x1="0" x2="1"><stop stop-color="#fff0ce"/><stop offset="1" stop-color="#fff9ef"/></linearGradient>
+ <linearGradient id="help" x1="0" x2="1"><stop stop-color="#e2f8ed"/><stop offset="1" stop-color="#f0fdf6"/></linearGradient></defs><rect width="760" height="810" fill="#fff"/><rect width="760" height="92" rx="19" fill="url(#banner)" stroke="#d8e7e3"/>
+ <circle cx="55" cy="46" r="32" fill="#c9f2d9"/><text x="32" y="60" font-size="45">💡</text>
+ <text x="105" y="33" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#0f3850">En LoNecesito conectamos</text><text x="105" y="63" font-family="Arial,Helvetica,sans-serif" font-size="25" font-weight="700" fill="#0f3850">necesidades con soluciones.</text><rect x="0" y="105" width="342" height="123" rx="20" fill="url(#need)" stroke="#f3ddb3"/>
+ <rect x="418" y="105" width="342" height="123" rx="20" fill="url(#help)" stroke="#cae8d7"/>
+ <text x="17" y="143" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#0c2a5c">¿Necesitas algo?</text>
+ <text x="17" y="177" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="500" fill="#174b53">Publica lo que buscas y</text><text x="17" y="200" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="500" fill="#174b53">recibe contacto directo.</text>
+ <text x="436" y="143" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#0d4c3d">¿Puedes ayudar?</text>
+ <text x="436" y="177" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="500" fill="#174b53">Encuentra solicitudes</text><text x="436" y="200" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="500" fill="#174b53">y ofrece tu solución.</text><rect x="0" y="238" width="342" height="104" rx="18" fill="#fff0d6" stroke="#dae7db"/>
+     <rect x="418" y="238" width="342" height="104" rx="18" fill="#e7f8ef" stroke="#d9e9ec"/>
+     <circle cx="44" cy="290" r="36" fill="#fff" opacity=".96"/>
+     <circle cx="463" cy="290" r="36" fill="#fff" opacity=".95"/>
+     <text x="44" y="299" text-anchor="middle" font-size="31">📦</text>
+     <text x="463" y="299" text-anchor="middle" font-size="31">🛵</text>
+     <text x="90" y="269" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">Recoger un paquete</text><text x="90" y="294" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">y llevarlo a su destino.</text>
+     <text x="90" y="333" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#4a6580">Medellín · Antioquia</text>
+     <text x="508" y="276" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#0d3151">Repartidor</text>
+     <text x="508" y="305" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">Entregas, mandados</text><text x="508" y="325" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">y domicilios.</text>
+     <path d="M352,290h41 l-12,-12 m12,12 l-12,12" fill="none" stroke="#18b35d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="0" y="350" width="342" height="104" rx="18" fill="#e6f4ff" stroke="#dae7db"/>
+     <rect x="418" y="350" width="342" height="104" rx="18" fill="#e7f5ff" stroke="#d9e9ec"/>
+     <circle cx="44" cy="402" r="36" fill="#fff" opacity=".96"/>
+     <circle cx="463" cy="402" r="36" fill="#fff" opacity=".95"/>
+     <text x="44" y="411" text-anchor="middle" font-size="31">🔧</text>
+     <text x="463" y="411" text-anchor="middle" font-size="31">🛠</text>
+     <text x="90" y="381" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">Mi nevera no enfría;</text><text x="90" y="406" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">necesito repararla.</text>
+     <text x="90" y="445" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#4a6580">Bogotá · Cundinamarca</text>
+     <text x="508" y="388" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#0d3151">Técnico u operario</text>
+     <text x="508" y="417" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">Repara equipos</text><text x="508" y="437" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">e instalaciones.</text>
+     <path d="M352,402h41 l-12,-12 m12,12 l-12,12" fill="none" stroke="#18b35d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="0" y="462" width="342" height="104" rx="18" fill="#fff5e7" stroke="#dae7db"/>
+     <rect x="418" y="462" width="342" height="104" rx="18" fill="#f4edff" stroke="#d9e9ec"/>
+     <circle cx="44" cy="514" r="36" fill="#fff" opacity=".96"/>
+     <circle cx="463" cy="514" r="36" fill="#fff" opacity=".95"/>
+     <text x="44" y="523" text-anchor="middle" font-size="31">📚</text>
+     <text x="463" y="523" text-anchor="middle" font-size="31">🎓</text>
+     <text x="90" y="493" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">Busco ayuda con</text><text x="90" y="518" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">un trabajo de inglés.</text>
+     <text x="90" y="557" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#4a6580">Cali · Valle del Cauca</text>
+     <text x="508" y="500" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#0d3151">Estudiante o profesor</text>
+     <text x="508" y="529" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">Apoyo en tareas</text><text x="508" y="549" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">e idiomas.</text>
+     <path d="M352,514h41 l-12,-12 m12,12 l-12,12" fill="none" stroke="#18b35d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="0" y="574" width="342" height="104" rx="18" fill="#ebfbef" stroke="#dae7db"/>
+     <rect x="418" y="574" width="342" height="104" rx="18" fill="#ecfcf4" stroke="#d9e9ec"/>
+     <circle cx="44" cy="626" r="36" fill="#fff" opacity=".96"/>
+     <circle cx="463" cy="626" r="36" fill="#fff" opacity=".95"/>
+     <text x="44" y="635" text-anchor="middle" font-size="31">💚</text>
+     <text x="463" y="635" text-anchor="middle" font-size="31">👪</text>
+     <text x="90" y="605" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">Alguien que cuide</text><text x="90" y="630" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">a mi hijo unas horas.</text>
+     <text x="90" y="669" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#4a6580">Barranquilla · Atlántico</text>
+     <text x="508" y="612" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#0d3151">Cuidador o familiar</text>
+     <text x="508" y="641" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">Acompañamiento</text><text x="508" y="661" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">y cuidado.</text>
+     <path d="M352,626h41 l-12,-12 m12,12 l-12,12" fill="none" stroke="#18b35d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><rect x="0" y="686" width="342" height="104" rx="18" fill="#f5efff" stroke="#dae7db"/>
+     <rect x="418" y="686" width="342" height="104" rx="18" fill="#eeeeff" stroke="#d9e9ec"/>
+     <circle cx="44" cy="738" r="36" fill="#fff" opacity=".96"/>
+     <circle cx="463" cy="738" r="36" fill="#fff" opacity=".95"/>
+     <text x="44" y="747" text-anchor="middle" font-size="31">🏪</text>
+     <text x="463" y="747" text-anchor="middle" font-size="31">💼</text>
+     <text x="90" y="717" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">Necesito ayuda con</text><text x="90" y="742" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#0d2b55">el diseño de mi logo.</text>
+     <text x="90" y="781" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#4a6580">Cartagena · Bolívar</text>
+     <text x="508" y="724" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#0d3151">Independiente</text>
+     <text x="508" y="753" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">Diseño, redacción</text><text x="508" y="773" font-family="Arial,Helvetica,sans-serif" font-size="16" font-weight="500" fill="#38566b">y otros servicios.</text>
+     <path d="M352,738h41 l-12,-12 m12,12 l-12,12" fill="none" stroke="#18b35d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
