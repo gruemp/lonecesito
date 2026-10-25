@@ -184,26 +184,94 @@ function setReadingState(button,status){
   button.dataset.readingState=status;
   button.replaceChildren(contactIcon(status==='playing'?'pause':status==='paused'?'resume':'listen'));
 }
+// Lectura en tramos cortos: Android puede terminar el audio con pause()
+// y resume() no devuelve sonido. Se guarda el punto de lectura y se
+// crea una nueva locución del texto restante al reanudar.
+function readingChunks(text){
+  const words=String(text||'').trim().match(/\S+\s*/g)||[];
+  const chunks=[];
+  const limit=155;
+  let part='';
+  for(const word of words){
+    if(part&&part.length+word.length>limit){chunks.push(part.trim());part='';}
+    if(word.length>limit){
+      for(let i=0;i<word.length;i+=limit){
+        const fragment=word.slice(i,i+limit).trim();
+        if(fragment)chunks.push(fragment);
+      }
+    }else part+=word;
+  }
+  if(part.trim())chunks.push(part.trim());
+  return chunks;
+}
 function stopReading(){
   const previous=activeReading;
   activeReading=null;
   if(previous)setReadingState(previous.button,'idle');
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
 }
+function speakReading(current){
+  if(activeReading!==current||current.status!=='playing')return;
+  while(current.chunkIndex<current.chunks.length &&
+    !current.chunks[current.chunkIndex].slice(current.charOffset).trim()){
+    current.chunkIndex++;current.charOffset=0;
+  }
+  if(current.chunkIndex>=current.chunks.length){stopReading();return;}
+  const synth=window.speechSynthesis;
+  const content=current.chunks[current.chunkIndex].slice(current.charOffset);
+  const baseOffset=current.charOffset;
+  const utterance=new SpeechSynthesisUtterance(content);
+  current.utterance=utterance;
+  utterance.lang='es-CO';
+  utterance.rate=1;
+  const voices=synth.getVoices();
+  const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-co')
+    ||voices.find(voice=>voice.lang.toLowerCase().startsWith('es'));
+  if(selected){utterance.voice=selected;utterance.lang=selected.lang;}
+  // Muchos móviles solo informan límites de palabra; sin ellos, al
+  // reanudar se repite como máximo el tramo corto actual, no todo el texto.
+  utterance.onboundary=event=>{
+    if(activeReading!==current||current.utterance!==utterance||current.status!=='playing')return;
+    if(Number.isFinite(event.charIndex)){
+      const offset=Math.max(0,Math.min(content.length,event.charIndex));
+      current.charOffset=Math.max(current.charOffset,baseOffset+offset);
+    }
+  };
+  utterance.onend=()=>{
+    if(activeReading!==current||current.utterance!==utterance||current.status!=='playing')return;
+    current.utterance=null;
+    current.chunkIndex++;current.charOffset=0;
+    speakReading(current);
+  };
+  utterance.onerror=event=>{
+    if(activeReading!==current||current.utterance!==utterance||current.status!=='playing')return;
+    stopReading();
+    if(event.error!=='canceled'&&event.error!=='interrupted')toast('No se pudo leer la publicación.');
+  };
+  try{synth.speak(utterance);}
+  catch{stopReading();toast('No se pudo iniciar la lectura.');}
+}
 function listenPublication(button,text){
   const synth=window.speechSynthesis;
   if(activeReading?.button===button){
-    try{
-      if(activeReading.status==='playing'){
-        synth.pause();
-        activeReading.status='paused';
-        setReadingState(button,'paused');
-      }else if(activeReading.status==='paused'){
-        synth.resume();
-        activeReading.status='playing';
-        setReadingState(button,'playing');
-      }
-    }catch{toast('Este navegador no permite pausar o reanudar la lectura.');}
+    const current=activeReading;
+    if(current.status==='playing'){
+      // Cancelar una locución, no usar pause(): Android puede finalizarla.
+      current.status='paused';
+      current.utterance=null;
+      setReadingState(button,'paused');
+      try{synth.cancel();}
+      catch{stopReading();toast('No se pudo pausar la lectura.');}
+    }else if(current.status==='paused'){
+      current.status='playing';
+      setReadingState(button,'playing');
+      try{
+        // Vaciar cualquier cola bloqueada antes de una nueva locución.
+        synth.cancel();
+        if(synth.paused)synth.resume();
+        speakReading(current);
+      }catch{stopReading();toast('No se pudo reanudar la lectura.');}
+    }
     return;
   }
   stopReading();
@@ -211,31 +279,16 @@ function listenPublication(button,text){
     toast('La lectura en voz alta no está disponible en este navegador.');
     return;
   }
-  const content=String(text||'').trim();
-  if(!content){
+  const chunks=readingChunks(text);
+  if(!chunks.length){
     toast('Escribe primero el contenido que deseas escuchar.');
     return;
   }
   if(recognition)stopDictation();
-  const utterance=new SpeechSynthesisUtterance(content);
-  utterance.lang='es-CO';
-  utterance.rate=1;
-  const voices=synth.getVoices();
-  const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-co')
-    ||voices.find(voice=>voice.lang.toLowerCase().startsWith('es'));
-  if(selected){utterance.voice=selected;utterance.lang=selected.lang;}
-  activeReading={button,utterance,status:'playing'};
+  const current={button,chunks,chunkIndex:0,charOffset:0,utterance:null,status:'playing'};
+  activeReading=current;
   setReadingState(button,'playing');
-  utterance.onpause=()=>{if(activeReading?.utterance===utterance){activeReading.status='paused';setReadingState(button,'paused');}};
-  utterance.onresume=()=>{if(activeReading?.utterance===utterance){activeReading.status='playing';setReadingState(button,'playing');}};
-  utterance.onend=()=>{if(activeReading?.utterance===utterance)stopReading();};
-  utterance.onerror=event=>{
-    if(activeReading?.utterance!==utterance)return;
-    stopReading();
-    if(event.error!=='canceled'&&event.error!=='interrupted')toast('No se pudo leer la publicación.');
-  };
-  try{synth.speak(utterance);}
-  catch{stopReading();toast('No se pudo iniciar la lectura.');}
+  speakReading(current);
 }
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
