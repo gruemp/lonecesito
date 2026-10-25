@@ -76,15 +76,16 @@ export async function makeCardPng({description,picture,contactPhone,location,add
   const declaredAddress=!example?String(addressText||'').trim().replace(/\s+/g,' ').slice(0,180):'';
   const placeFields=hasLocation?[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city],['Dirección según GPS',location.address],
-    ['Barrio o localidad',location.neighborhood]
+    ['Ciudad',location.city]
   ].filter(([,value])=>Boolean(String(value||'').trim()))
     .map(([label,value])=>label+': '+String(value).trim()):[];
   if(declaredAddress)placeFields.push('Dirección indicada por el autor: '+declaredAddress);
   if(hasLocation){
-    const approximate=[location.address,location.neighborhood,location.city,
-      location.department,location.country].map(value=>String(value||'').trim()).filter(Boolean);
-    placeFields.push('Dirección aproximada del GPS: '+(approximate.length?approximate.join(', '):'no disponible'));
+    // La dirección postal aproximada es calle/número obtenidos del mapa;
+    // ciudad y departamento se muestran aparte, no como dirección ficticia.
+    placeFields.push('Dirección aproximada: '+
+      (String(location.address||'').trim()||'Calle y número no identificados'));
+    if(location.address)placeFields.push('Datos de calles: © OpenStreetMap contributors');
     placeFields.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
     placeFields.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   }
