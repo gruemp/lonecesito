@@ -709,6 +709,9 @@ body:has(.image-dialog[open]){overflow:hidden}
 .gps-preview{flex-wrap:wrap}
 .gps-map-link{margin-left:auto}
 .gps-map-link[hidden]{display:none}
+.gps-map-link:disabled{opacity:.65;cursor:wait}
+.gps-status{font-size:12px;color:#245c56}
+.gps-status[hidden]{display:none}
 @media(max-width:390px){
   .publication-map-actions{gap:5px}
   .publication-map-link,.publication-route-link,.publication-distance-button{
@@ -724,3 +727,4 @@ body:has(.image-dialog[open]){overflow:hidden}
 }
 .gps-osm-credit[hidden]{display:none}
 .publication-osm-credit{margin-top:9px}
+

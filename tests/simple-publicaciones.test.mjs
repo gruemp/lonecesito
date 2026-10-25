@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.28');
+  assert.equal(APP_VERSION,'2.2.29');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -787,8 +787,9 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
     ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders};')();
   const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
     addEventListener(t,fn){this[t]=fn;}};
-  const nodes={'gps-preview':{},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-osm-credit':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
-    'need-address':{value:'Calle 10 #5-20'}};
+  const nodes={'gps-preview':{setAttribute(){}},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-osm-credit':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
+    'gps-status':{},'gps-refresh':{addEventListener(t,fn){this[t]=fn;}},
+    'need-address':{value:'Calle 10 #5-20',addEventListener(){}}};
   let receive,stops=0,requests=0;
   const geo={watchPosition(fn,err,opts){
     receive=fn;
@@ -798,7 +799,7 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   const controller=new Function(
     'locateButton','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm','locationFromNaturaGeocoders',
-    'fetch','AbortController','toast','setTimeout','clearTimeout',
+    'fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(start,end)+
     ';return {get state(){return {capturingLocation,locationDraft};}};')(
       pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
@@ -806,7 +807,7 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
       locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,
       async url=>{requests++;return {ok:true,json:async()=>url.includes('nominatim')?{address:{}}:{countryName:'Colombia',city:'Santa Marta'}};},
       class Abort {constructor(){this.signal={};}abort(){}},()=>{},
-      ()=>1,()=>{});
+      ()=>1,()=>{},{saving:false});
   pin.click();
   receive({coords:{latitude:11.24,longitude:-74.21,accuracy:50}});
   receive({coords:{latitude:11.25,longitude:-74.22,accuracy:8}});
@@ -954,11 +955,12 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
   const b=js.indexOf('function setMicState(active){',a);
   const f=new Function(model.replace(/^export /gm,'')+
-    ';return {streetAddressFromOsm,locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl};')();
+    ';return {streetAddressFromOsm,locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,locationFromNaturaGeocoders};')();
   const elms={
-    'gps-preview':{hidden:true},'gps-label':{textContent:''},'need-address':{value:'',addEventListener(){}},
+    'gps-preview':{hidden:true,setAttribute(){}},'gps-label':{textContent:''},'need-address':{value:'',addEventListener(){}},
     'gps-map-link':{hidden:true,removeAttribute(){}},
-    'gps-osm-credit':{hidden:true},
+    'gps-osm-credit':{hidden:true},'gps-status':{},
+    'gps-refresh':{addEventListener(t,fn){this[t]=fn;}},
     'gps-remove':{hidden:true,addEventListener(){}}
   };
   const pin={classes:new Set(),classList:{toggle(k,on){if(on)pin.classes.add(k);else pin.classes.delete(k);}},
@@ -968,7 +970,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   const urls=[],notices=[];
   const request=new Function('locateButton','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl',
-    'streetAddressFromOsm','locationFromNaturaGeocoders','fetch','AbortController','toast','setTimeout','clearTimeout',
+    'streetAddressFromOsm','locationFromNaturaGeocoders','fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(a,b)+';return {read:()=>({locationDraft,capturingLocation})};');
   const ctx=request(pin,key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
     kind=>({kind}),{geolocation:{
@@ -985,7 +987,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
         countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta'})};
     },
     class Abort{constructor(){this.signal={};}abort(){}},
-    message=>notices.push(message),()=>1,()=>{});
+    message=>notices.push(message),()=>1,()=>{},{saving:false});
   pin.click();
   fix({coords:{latitude:11.240123,longitude:-74.210123,accuracy:22}});
   assert.equal(urls.length,0);
@@ -1081,3 +1083,4 @@ test('PNG preserva municipio junto a país departamento ciudad precisión y tel�
     'Precisión estimada: ±12 m','TELÉFONO · WHATSAPP'])
     assert.ok(drawn.includes(text),text+' missing');
 });
+

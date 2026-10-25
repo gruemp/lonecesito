@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.28 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.29 (no visible al público)
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -169,5 +169,14 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Se estudió gruemp/natura: analytics-visitas.js obtiene administración y calle mediante reverse Nominatim y usa BigDataCloud como respaldo; el backend Apps Script utiliza Maps.newGeocoder().reverseGeocode con caché para obtener formatted_address.
 - LoNecesito ahora combina respuestas OSM y BigDataCloud en locationFromNaturaGeocoders. Antes descartaba país/departamento/ciudad de OSM, dependiendo exclusivamente de BigDataCloud: fallo de proveedor producía campos vacíos. Ahora extrae city/town/village/municipality/county/state/country de OSM y locality/city/principalSubdivision/countryName del respaldo.
 - Se añade municipality opcional (validado en firestore.rules) y rótulo Municipio a detalle y PNG. No copiar departamento como ciudad. Si calle/número no están, informar sin inventar nomenclatura. Se conserva mapa Desde mí, distancia por permiso, GPS continuo hasta segundo toque, ausencia del rótulo Barrio o localidad y dirección opcional.
-- No reutilizar endpoint de captura de visitas de Natura; no hay geocodificación al mostrar registros históricos por privacidad. Si faltan campos históricos, el autor puede editar y volver a captar GPS cuando esté en la ubicación real de la necesidad. Apps Script de Google de Natura necesitaría un backend nuevo para una integración posterior.
+- No reutilizar endpoint de captura de visitas de Natura; no hay geocodificación al mostrar registros históricos por privacidad. Si faltan campos históricos, el autor puede editar y actualizar voluntariamente la dirección del punto guardado (2.2.29), o volver a captar GPS en el lugar de la necesidad. El titular excluyó Apps Script expresamente; no integrar ese backend.
 - GitHub Pages publica solo la web; las reglas Firestore necesitan despliegue adicional. Pruebas de GPS reales, proveedores y emulador Firestore pendientes.
+
+
+## Cambio 2.2.29 — 25 de octubre de 2026
+- Confirmado en Natura analytics-visitas.js el flujo Nominatim con respaldo BigDataCloud. La adaptación 2.2.28 ya estaba fusionada al empezar esta revisión. Se mantiene exclusivamente resolución directa desde navegador, **sin Apps Script**.
+- Corregida la espera conjunta de proveedores: cada respuesta actualiza país/departamento/municipio/ciudad/calle inmediatamente; fallo o lentitud del otro no retrasa lo ya disponible. Las actualizaciones de la misma coordenada conservan valores conocidos si la nueva respuesta está vacía. Estado breve mientras resuelve.
+- El panel del editor incorpora Actualizar dirección GPS para recuperar ubicaciones antiguas con campos vacíos desde el punto guardado, bajo consentimiento explícito a OSM/BigDataCloud y sin geolocalizar al autor. Debe guardar después. Nunca geocodificar fichas automáticamente ni geocodificar al visitante que consulta distancias.
+- Municipio faltante queda visible como No identificado. Extracción tolera cadenas en blanco y Perimetro/Perímetro Urbano; vías OSM footway/path como Natura. Apartamento/piso/torre se indica manualmente en la misma caja opcional y se conserva sin sobrescribir.
+- Guardar espera la consulta con bloqueo previo de doble envío; salir/cancelar invalida respuestas tardías y guardados pendientes. Se conservan Maps Desde mí, Haversine y privacidad de la distancia del visitante. Sin cambios en Firestore ni Firebase.
+- Pruebas: nueva suite de 10 casos de flujo con proveedores simulados, consentimiento, punto histórico, fallos parciales/totales, cancelación, persistencia y doble envío; reparados dos arneses GPS existentes incompletos. Sintaxis de módulos verificada. La suite completa ya presentaba 53 fallos antes del cambio (38 del prototipo histórico y 15 de pruebas activas desactualizadas). Resultado final: 146/197 aprobadas, 51 fallos previos, ninguno nuevo; los dos arneses GPS reparados pasan. Las 20 comprobaciones seleccionadas de ubicación pasan. Prueba física de GPS, disponibilidad real de geocodificadores y Firestore Emulator pendientes.

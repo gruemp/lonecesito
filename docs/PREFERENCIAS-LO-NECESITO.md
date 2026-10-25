@@ -177,4 +177,11 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 ## 2.2.28 — Municipio y direcciones: adaptación de Natura
 - Combinar los datos de OpenStreetMap y BigDataCloud. Conservar país, departamento, municipio y ciudad identificados, incluso si una API falla; mostrar lo faltante honestamente. La dirección aproximada es exclusivamente una calle/número identificados, no una cadena de regiones.
 - Resolver municipio mediante city, town, village, municipality, county del GPS como hace Natura; fallback a locality/city de BigDataCloud. Conservar dirección escrita opcional por el autor. Mostrar el municipio en PNG y la etiqueta cuando exista.
-- No usar el endpoint de visitantes de Natura, IP aproximada ni la ubicación del lector sin su permiso. Google Apps Script de Natura es un geocodificador adicional de backend que requeriría integración separada para LoNecesito.
+- No usar el endpoint de visitantes de Natura, IP aproximada ni la ubicación del lector sin su permiso. **No usar Apps Script** en LoNecesito; resolver directamente con OSM y BigDataCloud desde el navegador.
+
+
+## 2.2.29 — Recuperar direcciones y completar apartamento sin Apps Script
+- País, departamento, municipio y ciudad se muestran según llegan de OSM/BigDataCloud; si falta municipio, indicarlo sin esconder la etiqueta. Los campos vacíos de un proveedor no bloquean los del otro.
+- En la edición de una publicación con GPS, **Actualizar dirección GPS** recupera información usando su punto guardado, tras consentimiento, sin tomar la ubicación actual. Guardar conserva los datos recuperados; si el servicio falla, no borrar los conocidos para ese mismo punto. No ejecutar consultas automáticamente al abrir fichas.
+- Escribir apartamento, piso o torre en la caja de dirección opcional existente; no deducirlos del GPS ni reemplazarlos con la dirección del mapa. Mantenerlos en ficha y PNG.
+- Mostrar un estado breve durante la consulta, esperar antes de guardar e impedir envíos duplicados o un guardado tardío después de salir del editor. Sin Apps Script ni cambios al cálculo local de distancias.

@@ -1,9 +1,9 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2228';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2229';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2228';
+import {makeCardPng} from './card-png.js?v=20261025-v2229';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
-  streetAddressFromOsm,locationFromNaturaGeocoders} from './location-model.js?v=20261025-v2228';
+  streetAddressFromOsm,locationFromNaturaGeocoders} from './location-model.js?v=20261025-v2229';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -39,7 +39,7 @@ function showView(){
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
     state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
   }
-  if(screen!=='publicar'&&capturingLocation)cancelGpsTasks();
+  if(screen!=='publicar'&&(capturingLocation||gpsGeocoding))cancelGpsTasks();
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
   document.querySelectorAll('[data-nav]').forEach(node=>{
@@ -550,6 +550,11 @@ function showLocationDraft(){
   const declared=cleanAddressText($('need-address').value);
   preview.hidden=!(gpsExists||declared);
   $('gps-remove').hidden=!gpsExists;
+  const refreshing=Boolean(gpsGeocodeController);
+  $('gps-refresh').hidden=!gpsExists;
+  $('gps-refresh').disabled=capturingLocation||refreshing;
+  $('gps-status').hidden=!refreshing;
+  preview.setAttribute('aria-busy',String(refreshing));
   $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
   const credit=$('gps-osm-credit');
   credit.hidden=!(gpsExists&&locationDraft.address);
@@ -568,16 +573,35 @@ function stopGpsWatch(){
   capturingLocation=false;
 }
 function cancelGpsTasks(){
+  locationRequestId++;
   stopGpsWatch();
   if(gpsGeocodeController){gpsGeocodeController.abort();gpsGeocodeController=null;}
   gpsGeocoding=null;
   gpsBestCoords=null;
-  updateGpsButton();
+  showLocationDraft();
 }
 // Solo geocodificar la mejor posición final. No enviar las mediciones intermedias.
 function resolveGpsAddress(coords,requestId){
   const controller=new AbortController();
   gpsGeocodeController=controller;
+  // En una actualización de coordenadas guardadas, conservar cada campo
+  // conocido si los proveedores no pueden recuperarlo esta vez.
+  const previous=locationDraft?{...locationDraft}:{};
+  let geo={},osm={};
+  const isCurrent=()=>requestId===locationRequestId&&
+    gpsGeocodeController===controller&&!controller.signal.aborted;
+  const applyResult=()=>{
+    if(!isCurrent())return;
+    const resolved=locationFromNaturaGeocoders(coords,osm,geo);
+    if(previous.latitude===resolved.latitude&&previous.longitude===resolved.longitude){
+      for(const field of ['country','department','municipality','city','address']){
+        if(!resolved[field])resolved[field]=previous[field]||'';
+      }
+    }
+    locationDraft=resolved;
+    showLocationDraft();
+  };
+  showLocationDraft();
   const work=(async()=>{
     const deadline=setTimeout(()=>controller.abort(),13000);
     try{
@@ -594,7 +618,7 @@ function resolveGpsAddress(coords,requestId){
       const cityRequest=fetch(cityUrl,{signal:controller.signal}).then(async response=>{
         if(!response.ok)throw Error('Localidad no disponible');
         return response.json();
-      });
+      }).then(data=>{geo=data;applyResult();});
       // Una sola consulta inversa por medición final, nunca en el bucle GPS.
       const streetRequest=(async()=>{
         // Máximo una consulta por segundo desde este navegador.
@@ -606,16 +630,9 @@ function resolveGpsAddress(coords,requestId){
         const response=await fetch(streetUrl,{signal:controller.signal});
         if(!response.ok)throw Error('Calle no disponible');
         return response.json();
-      })();
-      const [cityResult,streetResult]=await Promise.allSettled([cityRequest,streetRequest]);
-      if(requestId!==locationRequestId)return;
-      const geo=cityResult.status==='fulfilled'?cityResult.value:{};
-      const osm=streetResult.status==='fulfilled'?streetResult.value:{};
-      // A diferencia de la versión anterior, NO descartamos de OSM país,
-      // departamento, municipio ni ciudad. LoNecesito toma los mismos
-      // campos alternativos (city/town/village/municipality/county) de Natura.
-      locationDraft=locationFromNaturaGeocoders(coords,osm,geo);
-      showLocationDraft();
+      })().then(data=>{osm=data;applyResult();});
+      await Promise.allSettled([cityRequest,streetRequest]);
+      if(requestId!==locationRequestId||gpsGeocodeController!==controller)return;
       if(!locationDraft.address){
         toast('GPS guardado. La calle o el número no se identificaron; puedes indicarlos en Dirección (opcional).');
       }
@@ -627,7 +644,10 @@ function resolveGpsAddress(coords,requestId){
         toast('GPS guardado. No se pudo consultar la dirección.');
     }finally{
       clearTimeout(deadline);
-      if(gpsGeocodeController===controller)gpsGeocodeController=null;
+      if(gpsGeocodeController===controller){
+        gpsGeocodeController=null;
+        showLocationDraft();
+      }
     }
   })();
   gpsGeocoding=work;
@@ -648,7 +668,14 @@ function finishGpsMeasurement(){
   }
 }
 $('need-address').addEventListener('input',showLocationDraft);
+$('gps-refresh').addEventListener('click',()=>{
+  if(state.saving||capturingLocation||gpsGeocoding||!validLocation(locationDraft))return;
+  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? Se enviarán a OpenStreetMap y BigDataCloud, que también pueden recibir tu IP. No se medirá tu ubicación actual.'))return;
+  const coords={...locationDraft};
+  resolveGpsAddress(coords,++locationRequestId);
+});
 $('gps-remove').addEventListener('click',()=>{
+  if(state.saving)return;
   locationRequestId++;
   cancelGpsTasks();
   locationDraft=null;
@@ -661,6 +688,7 @@ function gpsErrorMessage(error){
   return 'No se pudo obtener la ubicación GPS.';
 }
 locateButton.addEventListener('click',()=>{
+  if(state.saving)return;
   if(capturingLocation){finishGpsMeasurement();return;}
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
@@ -668,8 +696,8 @@ locateButton.addEventListener('click',()=>{
   if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a OpenStreetMap y BigDataCloud para identificar calle, municipio, ciudad, departamento y país. Ambos servicios pueden recibir tu IP.')){
     return;
   }
-  const requestId=++locationRequestId;
   cancelGpsTasks();
+  const requestId=++locationRequestId;
   capturingLocation=true;
   gpsBestCoords=null;
   showLocationDraft();
@@ -917,7 +945,15 @@ $('publish-form').addEventListener('submit',async event=>{
       feedback('form-feedback','Pulsa nuevamente el botón GPS para detener la medición antes de publicar.');
       return;
     }
-    if(gpsGeocoding)await gpsGeocoding;
+    const requestId=locationRequestId;
+    state.saving=true;$('save-button').disabled=true;
+    if(gpsGeocoding){
+      feedback('form-feedback','Identificando dirección antes de guardar…');
+      await gpsGeocoding;
+    }
+    // Cancelar o salir del editor invalida también un envío que estaba
+    // esperando al geocodificador; no publicar un borrador diferente.
+    if(requestId!==locationRequestId)return;
     current=state.items.find(item=>item.id===state.editingId);
     if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     const data=cleanPublication({
@@ -929,7 +965,6 @@ $('publish-form').addEventListener('submit',async event=>{
     if(addressText)data.addressText=addressText;
     if(validLocation(locationDraft))data.location={...locationDraft};
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
-    state.saving=true;$('save-button').disabled=true;
     if(state.mode==='demo'){
       const base=current?{id:current.id,ownerUid:current.ownerUid,createdAt:current.createdAt}
         :{id:'local-'+Date.now()+'-'+Math.random().toString(36).slice(2),ownerUid:currentUid(),createdAt:Date.now()};
@@ -1037,3 +1072,4 @@ async function boot(){
   }
 }
 boot();
+
