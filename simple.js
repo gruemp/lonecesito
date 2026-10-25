@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2223';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2224';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2223';
 import {locationFromGps,validLocation,locationLines} from './location-model.js?v=20261025-v2223';
@@ -37,6 +37,7 @@ function showView(){
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
     state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
   }
+  if(screen!=='publicar'&&capturingLocation)cancelGpsTasks();
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
   document.querySelectorAll('[data-nav]').forEach(node=>{
@@ -450,17 +451,97 @@ let recognition=null;
 let pictureDraft='';
 let pictureLoading=false;
 let locationDraft=null,locationRequestId=0,capturingLocation=false;
+let gpsWatchId=null,gpsStopTimer=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
+const GPS_MAX_TIME_MS=30000, GPS_TARGET_METERS=10;
+function updateGpsButton(){
+  const hasFix=validLocation(locationDraft);
+  const precision=capturingLocation
+    ?(gpsBestCoords?Math.max(1,Math.round(gpsBestCoords.accuracy)):null)
+    :(hasFix?Math.round(locationDraft.accuracy):null);
+  locateButton.classList.toggle('gps-measuring',capturingLocation);
+  locateButton.classList.toggle('gps-fixed',hasFix&&!capturingLocation);
+  const label=capturingLocation
+    ?'Midiendo GPS'+(precision===null?'…':': ±'+precision+' m')+'. Pulsa otra vez para detener y conservar la mejor posición.'
+    :hasFix?'GPS guardado: precisión estimada ±'+precision+' m. Pulsa para mejorar.':
+      'Obtener ubicación GPS con permiso';
+  locateButton.title=label;
+  locateButton.setAttribute('aria-label',label);
+  locateButton.setAttribute('aria-pressed',String(capturingLocation));
+  locateButton.replaceChildren(contactIcon('location'));
+  if(capturingLocation||hasFix){
+    const hint=el('span','gps-button-reading',
+      precision===null?'…':'±'+precision+'m');
+    hint.setAttribute('aria-hidden','true');
+    locateButton.append(hint);
+  }
+}
 function showLocationDraft(){
   const preview=$('gps-preview');
   preview.hidden=!validLocation(locationDraft);
-  $('gps-label').textContent=locationDraft?locationLines(locationDraft).join('\n'):'';
-  locateButton.title=locationDraft?'Actualizar ubicación GPS':'Obtener ubicación GPS con permiso';
+  $('gps-label').textContent=validLocation(locationDraft)?locationLines(locationDraft).join('\n'):'';
+  updateGpsButton();
+}
+function stopGpsWatch(){
+  if(gpsWatchId!==null){
+    navigator.geolocation?.clearWatch(gpsWatchId);
+    gpsWatchId=null;
+  }
+  if(gpsStopTimer!==null){clearTimeout(gpsStopTimer);gpsStopTimer=null;}
+  capturingLocation=false;
+}
+function cancelGpsTasks(){
+  stopGpsWatch();
+  if(gpsGeocodeController){gpsGeocodeController.abort();gpsGeocodeController=null;}
+  gpsGeocoding=null;
+  gpsBestCoords=null;
+  updateGpsButton();
+}
+// Solo geocodificar la mejor posición final. No enviar las mediciones intermedias.
+function resolveGpsAddress(coords,requestId){
+  const controller=new AbortController();
+  gpsGeocodeController=controller;
+  const work=(async()=>{
+    const deadline=setTimeout(()=>controller.abort(),9000);
+    try{
+      const url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
+        +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
+        +'&localityLanguage=es';
+      const result=await fetch(url,{signal:controller.signal});
+      if(!result.ok)throw Error('Dirección no disponible');
+      const geo=await result.json();
+      if(requestId===locationRequestId){
+        locationDraft=locationFromGps(coords,geo);
+        showLocationDraft();
+      }
+    }catch{
+      if(requestId===locationRequestId)
+        toast('GPS guardado. La dirección no estuvo disponible; se conservarán coordenadas y precisión.');
+    }finally{
+      clearTimeout(deadline);
+      if(gpsGeocodeController===controller)gpsGeocodeController=null;
+    }
+  })();
+  gpsGeocoding=work;
+  work.finally(()=>{if(gpsGeocoding===work)gpsGeocoding=null;});
+}
+function finishGpsMeasurement(){
+  if(!capturingLocation)return;
+  const best=gpsBestCoords,requestId=locationRequestId;
+  stopGpsWatch();
+  gpsBestCoords=null;
+  if(best){
+    locationDraft=locationFromGps(best);
+    showLocationDraft();
+    resolveGpsAddress(best,requestId);
+  }else{
+    showLocationDraft();
+    toast('No se recibió una posición GPS. Inténtalo de nuevo al aire libre.');
+  }
 }
 $('gps-remove').addEventListener('click',()=>{
   locationRequestId++;
+  cancelGpsTasks();
   locationDraft=null;
-  capturingLocation=false;
-  locateButton.disabled=false;
   showLocationDraft();
 });
 function gpsErrorMessage(error){
@@ -470,51 +551,49 @@ function gpsErrorMessage(error){
   return 'No se pudo obtener la ubicación GPS.';
 }
 locateButton.addEventListener('click',()=>{
-  if(capturingLocation)return;
+  if(capturingLocation){finishGpsMeasurement();return;}
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
   }
-  if(!window.confirm('¿Quieres adjuntar a tu publicación tus coordenadas GPS y precisión reales? Serán visibles para todos y se incluirán en el PNG. Para identificar país, ciudad y barrio, se enviarán tus coordenadas actuales a BigDataCloud.')){
+  if(!window.confirm('¿Quieres adjuntar a tu publicación tus coordenadas GPS y precisión reales? Serán visibles para todos y se incluirán en el PNG. Para identificar país, ciudad y barrio, se enviará la mejor coordenada final a BigDataCloud.')){
     return;
   }
   const requestId=++locationRequestId;
-  capturingLocation=true;locateButton.disabled=true;
-  locateButton.title='Obteniendo posición GPS…';
-  navigator.geolocation.getCurrentPosition(async position=>{
-    try{
-      // Guardar primero la posición de alta precisión, incluso si falla la dirección.
+  cancelGpsTasks();
+  capturingLocation=true;
+  gpsBestCoords=null;
+  showLocationDraft();
+  try{
+    gpsWatchId=navigator.geolocation.watchPosition(position=>{
+      if(requestId!==locationRequestId||!capturingLocation)return;
       const coords=position.coords;
-      if(requestId!==locationRequestId)return;
-      locationDraft=locationFromGps(coords);
-      showLocationDraft();
-      const controller=new AbortController();
-      const deadline=setTimeout(()=>controller.abort(),9000);
-      try{
-        // Servicio diseñado para un único GPS obtenido voluntariamente desde
-        // este dispositivo. Sin seguimiento, IP fallback ni consultas en lotes.
-        const url='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
-          +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
-          +'&localityLanguage=es';
-        const result=await fetch(url,{signal:controller.signal});
-        if(!result.ok)throw Error('Servicio de dirección no disponible');
-        const geo=await result.json();
-        if(requestId===locationRequestId){
-          locationDraft=locationFromGps(coords,geo);
-          showLocationDraft();
-        }
-      }catch{
-        if(requestId===locationRequestId)toast('GPS guardado. La dirección no estuvo disponible; se conservarán coordenadas y precisión.');
-      }finally{clearTimeout(deadline);}
-    }catch(error){
-      if(requestId===locationRequestId)toast(error.message||'El GPS devolvió datos inválidos.');
-    }finally{
-      if(requestId===locationRequestId){capturingLocation=false;locateButton.disabled=false;showLocationDraft();}
-    }
-  },error=>{
-    if(requestId!==locationRequestId)return;
-    capturingLocation=false;locateButton.disabled=false;
-    showLocationDraft();toast(gpsErrorMessage(error));
-  },{enableHighAccuracy:true,maximumAge:0,timeout:18000});
+      try{locationFromGps(coords);}catch{return;}
+      if(!gpsBestCoords||coords.accuracy<gpsBestCoords.accuracy){
+        gpsBestCoords=coords;
+        locationDraft=locationFromGps(coords);
+        showLocationDraft();
+      }
+      if(coords.accuracy<=GPS_TARGET_METERS)finishGpsMeasurement();
+    },error=>{
+      if(requestId!==locationRequestId||!capturingLocation)return;
+      // El dispositivo puede mejorar en la siguiente medición. Solo la
+      // denegación de permiso detiene el proceso inmediatamente.
+      if(error?.code===1){
+        stopGpsWatch();
+        gpsBestCoords=null;
+        showLocationDraft();
+        toast(gpsErrorMessage(error));
+      }
+    },{enableHighAccuracy:true,maximumAge:0,timeout:12000});
+    gpsStopTimer=setTimeout(()=>{
+      if(requestId===locationRequestId)finishGpsMeasurement();
+    },GPS_MAX_TIME_MS);
+  }catch(error){
+    stopGpsWatch();
+    gpsBestCoords=null;
+    showLocationDraft();
+    toast(gpsErrorMessage(error));
+  }
 });
 function setMicState(active){
   const button=$('voice-button');
@@ -634,9 +713,8 @@ function resetForm(){
   stopReading();
   stopDictation();
   locationRequestId++;
-  capturingLocation=false;
+  cancelGpsTasks();
   locationDraft=null;
-  locateButton.disabled=false;
   showLocationDraft();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
@@ -727,6 +805,8 @@ $('publish-form').addEventListener('submit',async event=>{
   if(state.mode==='cloud'&&!state.user){state.waitingForAuth=true;showAuth();return;}
   let current=null;
   try{
+    if(capturingLocation)finishGpsMeasurement();
+    if(gpsGeocoding)await gpsGeocoding;
     current=state.items.find(item=>item.id===state.editingId);
     if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     const data=cleanPublication({
