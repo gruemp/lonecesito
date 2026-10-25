@@ -12,7 +12,7 @@ service cloud.firestore {
         && loc.keys().hasAll(['latitude','longitude','accuracy'])
         && loc.keys().hasOnly([
           'latitude','longitude','accuracy','country','department','city',
-          'address','neighborhood'
+          'municipality','address','neighborhood'
         ])
         && loc.latitude is number && loc.latitude >= -90 && loc.latitude <= 90
         && loc.longitude is number && loc.longitude >= -180 && loc.longitude <= 180
@@ -23,6 +23,8 @@ service cloud.firestore {
             (loc.department is string && loc.department.size() <= 160))
         && (!loc.keys().hasAny(['city']) ||
             (loc.city is string && loc.city.size() <= 160))
+        && (!loc.keys().hasAny(['municipality']) ||
+            (loc.municipality is string && loc.municipality.size() <= 160))
         && (!loc.keys().hasAny(['address']) ||
             (loc.address is string && loc.address.size() <= 160))
         && (!loc.keys().hasAny(['neighborhood']) ||
