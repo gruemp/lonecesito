@@ -76,7 +76,7 @@ export async function makeCardPng({description,picture,contactPhone,location,add
   const declaredAddress=!example?String(addressText||'').trim().replace(/\s+/g,' ').slice(0,180):'';
   const placeFields=hasLocation?[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city]
+    ['Municipio',location.municipality],['Ciudad',location.city]
   ].filter(([,value])=>Boolean(String(value||'').trim()))
     .map(([label,value])=>label+': '+String(value).trim()):[];
   if(declaredAddress)placeFields.push('Dirección indicada por el autor: '+declaredAddress);
