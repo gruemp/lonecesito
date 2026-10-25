@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.21');
+  assert.equal(APP_VERSION,'2.2.22');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -410,7 +410,7 @@ test('el PNG no genera título y adapta el ancho y el alto si falta imagen',()=>
 });
 
 
-test('la ficha propia integra las seis acciones en una sola fila sin palabras visibles',()=>{
+test('la ficha propia conserva contacto y edición en la primera fila',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
@@ -424,10 +424,10 @@ test('la ficha propia integra las seis acciones en una sola fila sin palabras vi
   assert.match(card,/contact\.append\(edit,remove\)/);
   assert.doesNotMatch(card,/el\('div','owner-actions'\)|outline-button','Editar'|danger-button','Eliminar'/);
   assert.equal((card.match(/article\.append\(contact\)/g)||[]).length,1);
-  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{\s*grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
-  assert.match(css,/\.publication-card \.contact-box\{\s*display:grid;\s*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
+  assert.match(css,/\.publication-card \.contact-box\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
 });
-test('los seis botones con icono son accesibles y conservan sus colores',()=>{
+test('los iconos de contacto son accesibles y conservan sus colores',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
@@ -449,14 +449,14 @@ test('compartir usa icono de tres puntos conectados y no flecha hacia arriba',()
   assert.match(icon,/m8\.7 13\.3 6\.6 4\.4/);
   assert.doesNotMatch(icon,/M12 16V3/);
 });
-test('la preferencia de fila única está guardada para próximas IA',()=>{
+test('las reglas actuales describen las dos filas de voz y contacto',()=>{
   const agents=readFileSync(new URL('../AGENTS.md',import.meta.url),'utf8');
   const guide=readFileSync(new URL('../docs/PREFERENCIAS-LO-NECESITO.md',import.meta.url),'utf8');
   const handoff=readFileSync(new URL('../docs/CONTINUIDAD-Y-APRENDIZAJES.md',import.meta.url),'utf8');
   for(const content of [agents,guide,handoff]){
     assert.match(content,/2\.2\.13/);
-    assert.match(content,/una sola fila/i);
-    assert.match(content,/seis iconos|seis botones|6 iconos/i);
+    assert.match(content,/segunda fila|dos filas/i);
+    assert.match(content,/reanudar/i);
   }
 });
 
@@ -464,7 +464,7 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
 test('fila única: teléfono con icono a la izquierda, imagen, micrófono y enviar',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
-  const controls=form.match(/<div class="publish-controls">([\s\S]*?)<\/div>\s*<p id="form-feedback"/);
+  const controls=form.match(/<div class="publish-controls">([\s\S]*?)<\/div>\s*<div id="draft-audio-row"/);
   assert.ok(controls,'No está la fila de publicación');
   const part=controls[1];
   const ordered=['class="phone-field"','class="phone-field-icon"','id="need-phone"','id="add-photo"','id="voice-button"','id="save-button"'];
@@ -624,108 +624,59 @@ test('WhatsApp destaca únicamente la necesidad y usa el texto aprobado',()=>{
   assert.match(content,/^Hola, vi tu publicación en LoNecesito: \*«/);
   assert.match(content,/»\*\. ¿Aún lo necesitas\? Puedo ayudarte\.$/);
 });
-test('altavoz en cada ficha; lector nativo y una sola fila de 4 o 6 íconos',()=>{
+test('las fichas tienen dos filas: contacto más cuatro botones exclusivos de audio',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
-  assert.match(card,/enableReadingControl\(listen,\(\)=>fullText\)/);
-  assert.match(card,/contact\.append\(listen\)/);
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('function visibleItems(){'));
+  assert.match(card,/article\.append\(createReadingPanel\(\(\)=>fullText\)\)/);
+  assert.match(js,/const panel=el\('div','audio-control-row'\)/);
+  assert.match(js,/const current=\{panel,chunks,chunkIndex:0,charOffset:0,utterance:null,status:'playing'\}/);
+  assert.match(css,/\.publication-card \.contact-box\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
+  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{grid-template-columns:repeat\(5,minmax\(0,1fr\)\)\}/);
+  assert.match(css,/\.audio-control-row\{display:grid;grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
   assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
-  assert.match(js,/utterance\.lang='es-CO'/);
-  assert.match(js,/window\.speechSynthesis\.cancel\(\)/);
-  assert.match(card,/setReadingState\(listen,'idle'\)/);
-  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
-  assert.match(css,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
-  assert.match(css,/\.publication-card \.listen-action/);
 });
-
-test('reanudar funciona aun si pause() termina el audio en Android',()=>{
+test('la voz se reproduce, pausa, reanuda y reinicia con botones separados',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const start=js.indexOf('let activeReading=null;');
-  const end=js.indexOf('function renderCard(record,owner){',start);
-  assert.ok(start>=0&&end>start);
-  const calls=[];
-  const synth={
-    paused:false,
-    getVoices:()=>[{lang:'es-CO'}],
-    speak(utterance){calls.push(['speak',utterance.text]);this.current=utterance;},
-    // En un Android afectado, pausa no funciona y reanudar es silencioso.
-    pause(){throw Error('No se debe invocar pause()');},
-    resume(){throw Error('No se debe invocar resume() si no está pausado');},
-    cancel(){
-      calls.push(['cancel']);
-      const previous=this.current;this.current=null;
-      // La locución cancelada puede emitir 'end' o 'error' inmediatamente.
-      previous?.onend?.();
-      previous?.onerror?.({error:'canceled'});
-    }
+  const a=js.indexOf('let activeReading=null;');
+  const b=js.indexOf('function renderCard(record,owner){',a);
+  const spoken=[];
+  const synth={paused:false,current:null,getVoices:()=>[],
+    speak(u){spoken.push(u.text);this.current=u;},
+    cancel(){const old=this.current;this.current=null;old?.onerror?.({error:'canceled'});}
   };
-  const Controller=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation',
-    js.slice(start,end)+';return {listenPublication,stopReading,readingChunks};');
-  function Utterance(text){this.text=text;}
-  const {listenPublication,stopReading,readingChunks}=Controller(
-    {speechSynthesis:synth},Utterance,kind=>({kind}),()=>{},null,()=>{});
-  const button={id:'listen-draft',dataset:{},attributes:{},
-    setAttribute(name,value){this.attributes[name]=value;},
-    replaceChildren(icon){this.icon=icon;}};
-  const text='Busco el repuesto correcto para el ventilador Samurai Air Pro. '.repeat(8);
-  assert.ok(readingChunks(text).length>=3);
-  listenPublication(button,text);
-  assert.equal(button.dataset.readingState,'playing');
-  assert.equal(button.icon.kind,'pause');
-  assert.ok(synth.current?.text);
-  // Simulamos que la voz ya avanzó hasta la mitad del primer tramo.
-  synth.current.onboundary({charIndex:48});
-  const initial=synth.current.text;
-  listenPublication(button,text);
-  assert.equal(button.dataset.readingState,'paused');
-  assert.equal(button.icon.kind,'resume');
-  assert.equal(synth.current,null);
-  listenPublication(button,text);
-  assert.equal(button.dataset.readingState,'playing');
-  assert.equal(button.icon.kind,'pause');
-  assert.notEqual(synth.current,null);
-  assert.equal(synth.current.text,initial.slice(48));
-  assert.equal(calls.filter(([type])=>type==='speak').length,2);
-  // Terminar ese fragmento continúa por el resto de tramos.
-  synth.current.onend();
-  assert.equal(calls.filter(([type])=>type==='speak').length,3);
-  stopReading();
-  assert.equal(button.dataset.readingState,'idle');
-  assert.equal(button.icon.kind,'listen');
-  assert.equal(synth.current,null);
+  const dom=(tag,klass)=>({tag,klass,children:[],dataset:{},disabled:false,
+    append(...nodes){this.children.push(...nodes);},
+    setAttribute(){},
+    addEventListener(event,fn){this[event]=fn;}});
+  const ctrl=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation','el',
+    js.slice(a,b)+';return {createReadingPanel,stopReading};')(
+      {speechSynthesis:synth},function Utterance(text){this.text=text;},
+      kind=>({kind}),()=>{},null,()=>{},dom);
+  const text='Necesito un ventilador Samurai Air Pro. '.repeat(10);
+  const panel=ctrl.createReadingPanel(()=>text), buttons=panel.readingButtons;
+  assert.equal(buttons.pause.disabled,true);
+  buttons.play.click();
+  assert.equal(panel.dataset.readingState,'playing');
+  assert.equal(buttons.pause.disabled,false);
+  synth.current.onboundary({charIndex:23});
+  buttons.pause.click();
+  assert.equal(panel.dataset.readingState,'paused');
+  buttons.resume.click();
+  assert.equal(panel.dataset.readingState,'playing');
+  assert.equal(spoken[1],spoken[0].slice(23));
+  buttons.restart.click();
+  assert.equal(spoken[2],spoken[0]);
+  ctrl.stopReading();
+  assert.equal(panel.dataset.readingState,'idle');
 });
-test('pausa sin eventos de palabra repite como máximo un tramo corto',()=>{
-  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const start=js.indexOf('let activeReading=null;');
-  const end=js.indexOf('function renderCard(record,owner){',start);
-  const utterances=[];
-  const synth={paused:false,getVoices:()=>[],
-    speak(value){utterances.push(value);},
-    cancel(){utterances.at(-1)?.onerror?.({error:'canceled'});}};
-  const control=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation',
-    js.slice(start,end)+';return {listenPublication,readingChunks};')(
-      {speechSynthesis:synth},function Utterance(text){this.text=text;},kind=>({kind}),()=>{},null,()=>{});
-  const button={dataset:{},setAttribute(){},replaceChildren(){}};
-  const text='Necesito encontrar un repuesto disponible esta semana. '.repeat(12);
-  control.listenPublication(button,text);
-  utterances.at(-1).onend();
-  control.listenPublication(button,text); // pausa en el segundo tramo
-  control.listenPublication(button,text); // nuevo speak, no resume nativo
-  assert.equal(utterances.at(-1).text,control.readingChunks(text)[1]);
-  assert.ok(utterances.at(-1).text.length<=155);
-});
-test('el editor permite escuchar su texto y conserva una fila de controles',()=>{
+test('el editor tiene su segunda fila de lectura sin ubicación',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  const controls=html.slice(html.indexOf('<div class="publish-controls">'),html.indexOf('<p id="form-feedback"'));
-  const order=['need-phone','add-photo','voice-button','listen-draft','save-button','delete-edit','cancel-edit'];
-  let last=-1;
-  for(const id of order){const at=controls.indexOf('id="'+id+'"');assert.ok(at>last,'Desorden: '+id);last=at;}
-  assert.match(js,/enableReadingControl\(listenDraft,\(\)=>\$\('need-description'\)\.value\)/);
-  assert.match(css,/#publish-form \.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,44px\)\}/);
-  assert.match(css,/@media\(max-width:345px\)[\s\S]*?\.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,30px\);gap:2px\}/);
+  assert.match(html,/id="draft-audio-row"/);
+  assert.doesNotMatch(html,/id="listen-draft"/);
+  assert.match(js,/const draftReadingPanel=createReadingPanel\(\(\)=>\$\('need-description'\)\.value\)/);
+  assert.doesNotMatch(html,/id="need-location"/);
 });
 test('PNG muestra número real en banda distinguible sin añadir título a la ficha',async()=>{
   const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
@@ -764,80 +715,18 @@ test('nuevo límite de 1.000 caracteres y textos históricos conservados',()=>{
   assert.match(rules,/request\.resource\.data\.description == resource\.data\.description/);
 });
 
-test('mantener pulsado un segundo reinicia desde el comienzo y no hace pausa al soltar',()=>{
-  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  const start=js.indexOf('let activeReading=null;');
-  const end=js.indexOf('function renderCard(record,owner){',start);
-  assert.ok(start>=0&&end>start);
-  const scheduled=new Map();
-  let timerId=0;
-  const speakCalls=[];
-  const synth={
-    paused:false,
-    getVoices:()=>[{lang:'es-CO'}],
-    speak(utterance){this.current=utterance;speakCalls.push(utterance.text);},
-    cancel(){const previous=this.current;this.current=null;previous?.onerror?.({error:'canceled'});}
-  };
-  const create=new Function('window','SpeechSynthesisUtterance','contactIcon','toast',
-    'recognition','stopDictation','setTimeout','clearTimeout',
-    js.slice(start,end)+';return {enableReadingControl,stopReading};');
-  const controller=create({speechSynthesis:synth},function Utterance(text){this.text=text;},
-    kind=>({kind}),()=>{},null,()=>{},
-    (fn,delay)=>{assert.equal(delay,1000);const id=++timerId;scheduled.set(id,fn);return id;},
-    id=>{scheduled.delete(id);});
-  const events=new Map();
-  const button={
-    id:'listen-draft',dataset:{},attributes:{},
-    setAttribute(k,v){this.attributes[k]=v;},
-    replaceChildren(icon){this.icon=icon;},
-    addEventListener(type,fn){if(!events.has(type))events.set(type,[]);events.get(type).push(fn);}
-  };
-  const fire=(type,extra={})=>{const e={button:0,isPrimary:true,defaultPrevented:false,
-    preventDefault(){this.defaultPrevented=true;},...extra};
-    for(const listener of events.get(type)||[])listener(e);
-    return e;
-  };
-  const tick=()=>{const entries=[...scheduled.values()];scheduled.clear();for(const fn of entries)fn();};
-  const fullText='Necesito reparar un ventilador Samurai Air Pro en Santa Marta. '.repeat(5);
-  controller.enableReadingControl(button,()=>fullText);
-  fire('pointerdown');fire('pointerup');fire('click');
-  assert.equal(button.dataset.readingState,'playing');
-  assert.equal(speakCalls.length,1);
-  assert.equal(speakCalls[0],fullText.trim().slice(0,speakCalls[0].length));
-  synth.current.onboundary({charIndex:33});
-  // Pulsación corta pausa.
-  fire('pointerdown');fire('pointerup');fire('click');
-  assert.equal(button.dataset.readingState,'paused');
-  // Una pulsación larga, desde el estado de pausa, reinicia inmediatamente.
-  fire('pointerdown');tick();
-  assert.equal(button.dataset.readingState,'playing');
-  assert.equal(speakCalls.length,2);
-  assert.equal(speakCalls[1],speakCalls[0]);
-  const release=fire('pointerup');
-  const click=fire('click');
-  assert.equal(click.defaultPrevented,true);
-  assert.equal(button.dataset.readingState,'playing');
-  assert.equal(speakCalls.length,2);
-  // Un toque breve posterior vuelve a pausar normalmente.
-  fire('pointerdown');fire('pointerup');fire('click');
-  assert.equal(button.dataset.readingState,'paused');
-  fire('pointerdown');fire('pointercancel');tick();
-  assert.equal(button.dataset.readingState,'paused');
-  fire('pointerdown');fire('pointerleave');tick();
-  assert.equal(button.dataset.readingState,'paused');
-  const context=fire('contextmenu');
-  assert.equal(context.defaultPrevented,true);
-  controller.stopReading();
-  assert.equal(button.dataset.readingState,'idle');
-});
-test('pulsación larga disponible en fichas y editor sin añadir iconos',()=>{
-  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+test('las imágenes para PC y móvil se muestran solo en Inicio',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  assert.match(js,/enableReadingControl\(listen,\(\)=>fullText\)/);
-  assert.match(js,/enableReadingControl\(listenDraft,\(\)=>\$\('need-description'\)\.value\)/);
-  assert.match(js,/setTimeout\(\(\)=>\{[\s\S]*?stopReading\(\);[\s\S]*?listenPublication\(button,getText\(\)\);[\s\S]*?\},1000\)/);
-  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
-  assert.match(css,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
-  assert.equal((html.match(/id="listen-draft"/g)||[]).length,1);
+  const a=readFileSync(new URL('../assets/lonecesito-casos-pc.svg',import.meta.url),'utf8');
+  const b=readFileSync(new URL('../assets/lonecesito-casos-movil.svg',import.meta.url),'utf8');
+  const home=html.split('<section id="inicio"')[1].split('</section>')[0];
+  assert.match(home,/lonecesito-presentacion-dos-pasos\.png/);
+  assert.match(home,/media="\(max-width:680px\)" srcset="assets\/lonecesito-casos-movil\.svg"/);
+  assert.match(home,/src="assets\/lonecesito-casos-pc\.svg"/);
+  assert.doesNotMatch(home,/<button|href="#publicar"/);
+  for(const img of [a,b]){
+    for(const city of ['Medellín','Bogotá','Cali','Barranquilla','Cartagena'])
+      assert.ok(img.includes(city),'Falta '+city);
+    assert.match(img,/<svg /);
+  }
 });
