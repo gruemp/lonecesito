@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.19 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.20 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -13,6 +13,14 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - Mensaje contextual de WhatsApp: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Se destaca solo la necesidad.
 - Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
 - No cambia la portada ni el editor ni la configuración pendiente de Firebase. Verificación en celular físico y comprobación independiente de GitHub Pages pendientes si no se puede acceder al dispositivo externo.
+
+## Cambio 2.2.20 — 25 de octubre de 2026
+
+- Nuevo límite editorial de 1.000 caracteres para descripciones nuevas o modificadas. No hay mínimo aparte de no estar vacía; se cuentan los espacios.
+- Fichas históricas de más de 1.000 y hasta 4.000 caracteres se preservan íntegramente; se permite modificar teléfono o fotografía sin alterar descripción. Para editar su texto se exige ajustarlo a 1.000, nunca truncarlo automáticamente.
+- Editar implica longitud del textarea según texto histórico para evitar que el navegador corte la información al mostrarla; el dictado respeta el límite activo. Validación actualizada en modelo, editor y firestore.rules, con excepciones explícitas para actualizaciones de datos heredados.
+- Las reglas de Firestore en GitHub NO se despliegan solas; realizar su despliegue por separado al configurar el proyecto Firebase. Tests de Firestore agregados para emulador, aún pendientes de ejecutarse si no está activo.
+- La petición de reiniciar audio desde el comienzo durante una reproducción se encuentra en discusión, no fue implementada en esta versión. Actualmente, al terminar la lectura, el altavoz vuelve al estado inicial y permite reproducir toda la publicación nuevamente.
 
 ## Corrección 2.2.19 — 25 de octubre de 2026
 
@@ -38,7 +46,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - **Inicio:** solo la **imagen aprobada de dos pasos**: «1. Publica lo que necesitas» (licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp). Archivo: **assets/lonecesito-presentacion-dos-pasos.png**, 1819 × 865. Se ajusta al viewport para aparecer completa al 100 % de zoom, alineada con la navegación, sin recortes ni deformaciones. La imagen anterior queda como respaldo y la variante con mayonesa fue descartada.
 - **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
 - **Mis publicaciones:** solo las publicaciones creadas por el dueño.
-- **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
+- **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo de 1.000 para nuevas publicaciones o cambios de descripción; texto histórico >1.000 sin modificaciones se conserva hasta su tamaño previo máximo de 4.000).
 - **Controles del editor:** una fila con teléfono e icono a su izquierda y marcador «Ej: 300 123 4567» dentro; foto, micrófono y envío por avión de papel, **sin texto visible en el botón verde**. Enter envía; Shift+Enter salta de línea. En edición aparecen además papelera y X para cancelar, en esa fila.
 - **Fichas:** sin título visual; todo el texto justificado y visible, alto según contenido. **Con foto:** derecha, ajuste sin cortes, pulsar para ver completa y cerrar con X/Escape/toque fuera. **Sin foto:** texto a todo el ancho, sin huecos ni marcadores.
 - **Acciones de ficha:** una sola fila de **4 iconos** para visitantes (marcador telefónico azul, WhatsApp verde, compartir PNG morado de tres puntos conectados y escuchar, pausar y reanudar lectura con altavoz ocre e iconos dinámicos); **6 iconos** para dueño (+ lápiz y papelera). El lector usa Web Speech API, es-CO si hay voz disponible; mensaje WhatsApp con resumen de necesidad en negrita mediante *asteriscos*. No imprimir el número sobre la ficha, no escribir «Contactar».
