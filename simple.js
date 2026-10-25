@@ -438,6 +438,7 @@ function render(){
 }
 $('search').addEventListener('input',render);
 const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
+draftReadingPanel.setAttribute('aria-label','Lectura, dirección opcional y GPS');
 // Dos iconos de audio, después una caja de dirección análoga a la de teléfono,
 // y el pin GPS en el extremo derecho de la misma fila.
 draftReadingPanel.append($('need-address-field'));
