@@ -684,3 +684,5 @@ body:has(.image-dialog[open]){overflow:hidden}
   #publish-form .address-field-icon{flex-basis:14px;width:14px;height:14px}
   #publish-form .address-field #need-address{font-size:10px}
 }
+
+#gps-remove[hidden]{display:none!important}
