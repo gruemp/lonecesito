@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.27 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.28 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -164,3 +164,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - «Dirección aproximada» ahora debe ser calle/número real si lo proporciona OpenStreetMap Nominatim al consultar las coordenadas finales de una captura VOLUNTARIA, p. ej. «Calle 10A #20A-06». Si se devuelve solo calle, no inventar número; si tampoco hay calle, presentar «Calle y número no identificados». Sin falsa «dirección» concatenando ciudad, departamento, país. No se pueden garantizar nomenclatura y número con GPS solo.
 - Al terminar la captura del GPS, se realizan hasta dos consultas puntuales desde el teléfono: BigDataCloud para región/ciudad y Nominatim para calle/número, no en cada medición, y solo tras consentimiento específico de divulgación de coordenadas. Datos OSM con atribución en la ficha/editor y PNG; las consultas al servicio público se limitan a una por segundo por navegador y deben migrarse a proveedor administrado si el uso escala. Los puntos del visitante que consulta distancia siguen siendo privados, sin geocodificación remota.
 - Versiones JS/CSS con caché actualizada. Pruebas de GPS real, política de cuota OSM, emulador Firestore y navegador físico pendientes. Las reglas Firestore mantienen compatibilidad con datos heredados.
+
+## Cambio 2.2.28 — 25-10-2026
+- Se estudió gruemp/natura: analytics-visitas.js obtiene administración y calle mediante reverse Nominatim y usa BigDataCloud como respaldo; el backend Apps Script utiliza Maps.newGeocoder().reverseGeocode con caché para obtener formatted_address.
+- LoNecesito ahora combina respuestas OSM y BigDataCloud en locationFromNaturaGeocoders. Antes descartaba país/departamento/ciudad de OSM, dependiendo exclusivamente de BigDataCloud: fallo de proveedor producía campos vacíos. Ahora extrae city/town/village/municipality/county/state/country de OSM y locality/city/principalSubdivision/countryName del respaldo.
+- Se añade municipality opcional (validado en firestore.rules) y rótulo Municipio a detalle y PNG. No copiar departamento como ciudad. Si calle/número no están, informar sin inventar nomenclatura. Se conserva mapa Desde mí, distancia por permiso, GPS continuo hasta segundo toque, ausencia del rótulo Barrio o localidad y dirección opcional.
+- No reutilizar endpoint de captura de visitas de Natura; no hay geocodificación al mostrar registros históricos por privacidad. Si faltan campos históricos, el autor puede editar y volver a captar GPS cuando esté en la ubicación real de la necesidad. Apps Script de Google de Natura necesitaría un backend nuevo para una integración posterior.
+- GitHub Pages publica solo la web; las reglas Firestore necesitan despliegue adicional. Pruebas de GPS reales, proveedores y emulador Firestore pendientes.
