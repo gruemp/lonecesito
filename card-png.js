@@ -69,17 +69,22 @@ function paintImage(ctx,img,x,y,width,height){
 }
 /* PNG fiel a la ficha: sin título, altura según contenido y ancho total si no hay foto.
    El teléfono de una publicación real se incluye únicamente en la copia compartida. */
-export async function makeCardPng({description,picture,contactPhone,location,example}){
+export async function makeCardPng({description,picture,contactPhone,location,addressText,example}){
   const hasLocation=!example&&location&&typeof location.latitude==='number'
     &&Number.isFinite(location.latitude)&&typeof location.longitude==='number'
     &&Number.isFinite(location.longitude)&&Number.isFinite(location.accuracy);
+  const declaredAddress=!example?String(addressText||'').trim().replace(/\s+/g,' ').slice(0,180):'';
   const placeFields=hasLocation?[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city],['Dirección',location.address],
+    ['Ciudad',location.city],['Dirección según GPS',location.address],
     ['Barrio o localidad',location.neighborhood]
   ].filter(([,value])=>Boolean(String(value||'').trim()))
     .map(([label,value])=>label+': '+String(value).trim()):[];
+  if(declaredAddress)placeFields.push('Dirección indicada por el autor: '+declaredAddress);
   if(hasLocation){
+    const approximate=[location.address,location.neighborhood,location.city,
+      location.department,location.country].map(value=>String(value||'').trim()).filter(Boolean);
+    placeFields.push('Dirección aproximada del GPS: '+(approximate.length?approximate.join(', '):'no disponible'));
     placeFields.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
     placeFields.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   }
@@ -105,8 +110,9 @@ export async function makeCardPng({description,picture,contactPhone,location,exa
   const locationWidth=available-50;
   const gpsLines=placeFields.flatMap(line=>wrapLines(ctx,line,locationWidth).map(item=>item.text));
   const locationY=bodyY+bodyHeight+20;
-  const locationHeight=hasLocation?60+gpsLines.length*32:0;
-  const footerY=locationY+locationHeight+(hasLocation?18:5);
+  const hasAddressBlock=Boolean(hasLocation||declaredAddress);
+  const locationHeight=hasAddressBlock?60+gpsLines.length*32:0;
+  const footerY=locationY+locationHeight+(hasAddressBlock?18:5);
   const hasPhone=!example&&Boolean(contactPhone);
   const footerHeight=hasPhone?132:66;
   const height=Math.ceil(footerY+footerHeight+margin);
@@ -123,12 +129,12 @@ export async function makeCardPng({description,picture,contactPhone,location,exa
   ctx.font='33px system-ui, sans-serif';ctx.fillStyle='#334843';
   drawWrapped(ctx,bodyLines,left,bodyY+32,bodyWidth,lineHeight,true);
   if(hasPhoto)paintImage(ctx,img,left+bodyWidth+imageGap,bodyY,imageWidth,photoHeight);
-  if(hasLocation){
+  if(hasAddressBlock){
     ctx.fillStyle='#eaf6f2';
     roundedRect(ctx,left,locationY,available,locationHeight,18);
     ctx.fill();
     ctx.fillStyle='#17644d';ctx.font='bold 21px system-ui, sans-serif';
-    ctx.fillText('UBICACIÓN GPS',left+24,locationY+31);
+    ctx.fillText(hasLocation?'UBICACIÓN GPS Y DIRECCIÓN':'DIRECCIÓN',left+24,locationY+31);
     ctx.font='22px system-ui, sans-serif';ctx.fillStyle='#254c45';
     let lineY=locationY+61;
     for(const line of gpsLines){
