@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.25 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.26 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -150,3 +150,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Las publicaciones conservan `addressText` separado de `location`: se puede escribir sin GPS, editar o quitar. Al pulsar pin de la ficha se muestra «Dirección indicada por el autor» y, cuando hay coordenadas, «Dirección aproximada del GPS» sintetizada de los componentes que devuelve BigDataCloud, además de latitud, longitud, precisión y detalles administrativos. Nunca se inventan calles ni números.
 - PNG incluye la dirección del autor con o sin GPS; si hay GPS incluye ambos tipos de dirección, ciudad, departamento, país y precisión, y conserva el número de teléfono. Las reglas Firestore admiten `addressText` opcional, con longitud validada y permisos del autor, pero requieren despliegue separado a Firebase.
 - Pruebas simuladas y prueba física posterior de GPS continuo/dirección pendientes de registrar; el GPS prolongado puede consumir batería y la precisión reportada nunca garantiza exactitud.
+
+## Cambio 2.2.26 — 25-10-2026
+- Se restablece en el cuadro de ubicación el desglose país/departamento/ciudad/barrio cuando están disponibles, y etiquetas «No identificado» cuando faltan. No inventar valores ni rellenar con una ciudad fija. Se mantienen campo libre del autor, dirección GPS aproximada, coordenadas y precisión; el formato PNG existente sigue intacto.
+- `location-model.js` incorpora helpers puros de **Google Maps URLs** de búsqueda y ruta, con coordenadas del GPS del autor preferidas sobre la dirección de texto, o búsqueda textual si solo se publicó una dirección; no hace falta API key. En el editor se puede abrir Google Maps desde la propia caja informativa cuando hay ubicación/dirección.
+- En las fichas, dentro del panel que abre el pin, hay **Ver en Google Maps** y **Cómo llegar**. Si hay GPS, aparece además el botón **Distancia desde mí**. Únicamente tras pulsarlo se pide `navigator.geolocation.getCurrentPosition` con alta precisión y permiso del visitante. Distancia calculada localmente con fórmula de Haversine y rotulada «en línea recta; no es distancia por carretera». No guardar ni transmitir posición del visitante. Si deniega permiso, ofrecer Maps sin bloquear.
+- La consulta Maps Directions usa solo el destino del autor; Google Maps solicita/identifica origen conforme a sus controles. Con solo dirección manual, mostrar vínculos de Maps pero no una cifra de kilómetros local, porque no hay coordenadas del destino. Mapas, rutas y distancias NO se agregaron al PNG, porque allí no son interactivos ni representan una ubicación de visitante fija.
+- Se conservan GPS manual del autor hasta segundo toque, dirección opcional pública, controles de voz, layout e imágenes de Inicio. Pruebas de dispositivo real y emulador Firestore pendientes. Las reglas Firestore no cambiaron con esta actualización.

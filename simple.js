@@ -1,7 +1,8 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2225';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2226';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2225';
-import {locationFromGps,validLocation,locationLines,cleanAddressText} from './location-model.js?v=20261025-v2225';
+import {locationFromGps,validLocation,locationLines,cleanAddressText,
+  googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel} from './location-model.js?v=20261025-v2226';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -407,9 +408,63 @@ function renderCard(record,owner){
   tools.append(pin);
   article.append(tools);
   if(location||addressText){
-    const details=el('div','publication-location',locationLines(location,addressText).join('\n'));
+    const details=el('div','publication-location');
     details.hidden=true;
     details.setAttribute('aria-label','Dirección y ubicación guardadas por el autor');
+    const lines=el('div','publication-location-lines',
+      locationLines(location,addressText,true).join('\n'));
+    details.append(lines);
+    const actions=el('div','publication-map-actions');
+    const maps=el('a','publication-map-link','Ver en Google Maps');
+    maps.href=googleMapsLocationUrl(location,addressText);
+    maps.target='_blank';
+    maps.rel='noopener noreferrer';
+    maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
+    actions.append(maps);
+    const route=el('a','publication-route-link','Cómo llegar');
+    route.href=googleMapsDirectionsUrl(location,addressText);
+    route.target='_blank';
+    route.rel='noopener noreferrer';
+    route.setAttribute('aria-label','Ver ruta a esta necesidad en Google Maps');
+    actions.append(route);
+    details.append(actions);
+    if(location){
+      const distanceButton=el('button','publication-distance-button','Distancia desde mí');
+      distanceButton.type='button';
+      distanceButton.title='Consultar distancia aproximada en línea recta desde tu ubicación actual';
+      distanceButton.setAttribute('aria-label',distanceButton.title);
+      const distanceInfo=el('p','publication-distance-result');
+      distanceInfo.setAttribute('role','status');
+      distanceButton.addEventListener('click',()=>{
+        if(!navigator.geolocation||!window.isSecureContext){
+          distanceInfo.textContent='La distancia requiere permiso de ubicación en un navegador HTTPS.';
+          return;
+        }
+        distanceButton.disabled=true;
+        distanceInfo.textContent='Consultando tu ubicación para calcular la distancia…';
+        // Obtener UNA sola lectura por petición del visitante, sin guardarla
+        // en Firestore/localStorage, compartirla ni comunicarla a LoNecesito.
+        navigator.geolocation.getCurrentPosition(position=>{
+          distanceButton.disabled=false;
+          try{
+            const km=distanceKmBetween(
+              position.coords.latitude,position.coords.longitude,
+              location.latitude,location.longitude);
+            distanceInfo.textContent='Distancia aproximada en línea recta: '+
+              distanceLabel(km)+'. No es la distancia por carretera.';
+          }catch{
+            distanceInfo.textContent='No se pudo calcular la distancia con estas coordenadas.';
+          }
+        },error=>{
+          distanceButton.disabled=false;
+          distanceInfo.textContent=error?.code===1?
+            'Permiso de ubicación denegado. Puedes ver la ruta en Google Maps.':
+            'No se pudo obtener tu ubicación. Puedes consultar la ruta en Google Maps.';
+        },{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+      });
+      actions.append(distanceButton);
+      details.append(distanceInfo);
+    }
     pin.setAttribute('aria-expanded','false');
     pin.addEventListener('click',()=>{
       details.hidden=!details.hidden;
@@ -486,7 +541,12 @@ function showLocationDraft(){
   const declared=cleanAddressText($('need-address').value);
   preview.hidden=!(gpsExists||declared);
   $('gps-remove').hidden=!gpsExists;
-  $('gps-label').textContent=locationLines(locationDraft,declared).join('\n');
+  $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
+  const maps=$('gps-map-link');
+  const url=googleMapsLocationUrl(locationDraft,declared);
+  maps.hidden=!url;
+  if(url)maps.href=url;
+  else maps.removeAttribute('href');
   updateGpsButton();
 }
 function stopGpsWatch(){
