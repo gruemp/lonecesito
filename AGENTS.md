@@ -90,3 +90,10 @@
 - Conservar arriba la portada existente de dos pasos. Bajo ella, mostrar una ilustración independiente para PC y otra para celular, en el formato de dos lados «¿Necesitas algo? → ¿Puedes ayudar?», con pares de ejemplos en Medellín, Bogotá, Cali, Barranquilla y Cartagena. Son imágenes explicativas, no publicaciones reales.
 - No añadir botón extra «Publicar lo que necesito» bajo las imágenes.
 - **Ubicación no autorizada para implementar todavía**: no pedir geolocalización ni colocar coordenadas en fichas/PNG en esta versión.
+
+## Reglas vigentes 2.2.23 — voz de dos botones y GPS opcional
+- Este apartado sustituye las referencias anteriores a cuatro controles de voz y a ubicación pendiente. Primera fila de fichas: llamada, WhatsApp, compartir, y en las propias editar y eliminar. Segunda fila: botón dinámico reproducir/pausar/reanudar, botón reiniciar y botón GPS. También en el editor.
+- Únicamente el autor puede capturar GPS al crear o editar, por acción voluntaria y confirmación de que se publicará la ubicación exacta. El navegador solicita permiso de localización; no hay seguimiento continuo. Las publicaciones ajenas jamás solicitan la ubicación del visitante; muestran solamente la guardada por su autor.
+- Guardar latitud, longitud y precisión estimada en metros. Consultar una sola vez el servicio BigDataCloud desde el dispositivo para los componentes geográficos disponibles (país, departamento, ciudad y localidad); si no se obtiene calle, dirección o barrio, no inventarlos. Avisar de que BigDataCloud recibe las coordenadas y dirección IP del dispositivo.
+- La ubicación es opcional y se presenta como etiqueta no editable, con opción de quitarla. En PNG orden: país, departamento, ciudad, dirección, barrio/localidad, coordenadas y precisión, únicamente para datos existentes. El teléfono continúa en su banda independiente.
+- El modo local persiste GPS; el modo nube requiere además despliegue de firestore.rules en Firebase (GitHub Pages no despliega reglas).
