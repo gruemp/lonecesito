@@ -1,6 +1,6 @@
 /* Versión técnica interna; nunca mostrar número de versión en la interfaz. */
-export const APP_VERSION = '2.2.16';
-export const APP_VERSION_DATE = '2026-10-24';
+export const APP_VERSION = '2.2.17';
+export const APP_VERSION_DATE = '2026-10-25';
 
 /* Modelo sencillo: el autor solo escribe su necesidad y su WhatsApp. */
 export function normalizeWhatsApp(value) {
@@ -29,8 +29,10 @@ export function cleanPublication(fields) {
 }
 export function whatsappUrl(number,description) {
   const digits=normalizeWhatsApp(number);
-  const first=derivedTitle(description);
-  const text='Hola, vi tu necesidad en LoNecesito: '+first+'. ¿Podemos hablar?';
+  const line=(String(description||'').split(/\n/).find(value=>value.trim())||'').trim().replace(/\s+/g,' ');
+  const draft=line.slice(0,120);
+  const first=line.length>120&&/\S/.test(line[120])?(draft.slice(0,draft.lastIndexOf(' ')).trim()||draft):draft;
+  const text='Hola, vi tu publicación en LoNecesito: *«'+first+'»*. ¿Aún lo necesitas? Puedo ayudarte.';
   return 'https://api.whatsapp.com/send?phone='+digits+'&text='+encodeURIComponent(text);
 }
 export function canManage(publication,uid) {

@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.16');
+  assert.equal(APP_VERSION,'2.2.17');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -409,7 +409,7 @@ test('el PNG no genera título y adapta el ancho y el alto si falta imagen',()=>
 });
 
 
-test('la ficha propia integra las cinco acciones en una sola fila sin palabras visibles',()=>{
+test('la ficha propia integra las seis acciones en una sola fila sin palabras visibles',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
@@ -423,10 +423,10 @@ test('la ficha propia integra las cinco acciones en una sola fila sin palabras v
   assert.match(card,/contact\.append\(edit,remove\)/);
   assert.doesNotMatch(card,/el\('div','owner-actions'\)|outline-button','Editar'|danger-button','Eliminar'/);
   assert.equal((card.match(/article\.append\(contact\)/g)||[]).length,1);
-  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{\s*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
-  assert.match(css,/\.publication-card \.contact-box\{\s*display:grid;\s*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.publication-card \.contact-box\.has-owner-actions\{\s*grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.publication-card \.contact-box\{\s*display:grid;\s*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
 });
-test('los cinco botones con icono son accesibles y conservan sus colores',()=>{
+test('los seis botones con icono son accesibles y conservan sus colores',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
@@ -455,7 +455,7 @@ test('la preferencia de fila única está guardada para próximas IA',()=>{
   for(const content of [agents,guide,handoff]){
     assert.match(content,/2\.2\.13/);
     assert.match(content,/una sola fila/i);
-    assert.match(content,/cinco iconos|cinco botones/i);
+    assert.match(content,/seis iconos|seis botones/i);
   }
 });
 
@@ -612,4 +612,28 @@ test('buscador por tramos e índice de campos públicos y teléfono',()=>{
  assert.match(search,/terms\.every\(term=>index\.includes\(term\)\)/);
  assert.match(search,/normalize\('NFD'\)/);
  assert.doesNotMatch(search,/['"](?:ownerUid|ownerEmail|apiKey)['"]/);
+});
+
+test('WhatsApp destaca únicamente la necesidad y usa el texto aprobado',()=>{
+  const url=new URL(whatsappUrl('3001234567','Busco repuesto de ventilador'));
+  assert.equal(url.searchParams.get('text'),
+    'Hola, vi tu publicación en LoNecesito: *«Busco repuesto de ventilador»*. ¿Aún lo necesitas? Puedo ayudarte.');
+  const long='Necesito '+ 'ventilador '.repeat(30);
+  const content=new URL(whatsappUrl('3001234567',long)).searchParams.get('text');
+  assert.match(content,/^Hola, vi tu publicación en LoNecesito: \*«/);
+  assert.match(content,/»\*\. ¿Aún lo necesitas\? Puedo ayudarte\.$/);
+});
+test('altavoz en cada ficha; lector nativo y una sola fila de 4 o 6 íconos',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
+  assert.match(card,/listenPublication\(listen,fullText\)/);
+  assert.match(card,/contact\.append\(listen\)/);
+  assert.match(js,/new SpeechSynthesisUtterance\(text\)/);
+  assert.match(js,/utterance\.lang='es-CO'/);
+  assert.match(js,/window\.speechSynthesis\.cancel\(\)/);
+  assert.match(card,/aria-pressed/);
+  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
+  assert.match(css,/\.publication-card \.listen-action/);
 });

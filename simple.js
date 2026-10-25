@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2217';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261024-v228';
 
@@ -30,6 +30,7 @@ function saveLocal(items){
   state.items=items;render();
 }
 function showView(){
+  if(activeReading)stopReading();
   const page=window.location.hash.slice(1);
   const screen=pages.includes(page)?page:'inicio';
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
@@ -89,6 +90,10 @@ function contactIcon(kind){
     ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z']:
     kind==='share'?
     ['M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','M18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6z','m8.7 13.3 6.6 4.4','m15.3 6.3-6.6 4.4']:
+    kind==='listen'?
+    ['M11 5 6 9H2v6h4l5 4V5z','M15.5 8.5a5 5 0 0 1 0 7','M18.7 5.3a9.5 9.5 0 0 1 0 13.4']:
+    kind==='stop'?
+    ['M5 5h14v14H5z']:
     kind==='edit'?
     ['M12 20h9','M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z']:
     kind==='delete'?
@@ -167,6 +172,45 @@ async function sharePublicationPng(record){
     toast('No se pudo compartir la ficha como imagen.');
   }
 }
+let activeReading=null;
+function stopReading(){
+  const current=activeReading;
+  activeReading=null;
+  if(current){
+    current.button.setAttribute('aria-pressed','false');
+    current.button.setAttribute('aria-label','Escuchar publicación');
+    current.button.title='Escuchar publicación';
+    current.button.replaceChildren(contactIcon('listen'));
+  }
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
+}
+function listenPublication(button,text){
+  if(activeReading?.button===button){stopReading();return;}
+  stopReading();
+  if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance!=='function'){
+    toast('La lectura en voz alta no está disponible en este navegador.');
+    return;
+  }
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang='es-CO';
+  utterance.rate=1;
+  const voices=window.speechSynthesis.getVoices();
+  const selected=voices.find(voice=>voice.lang.toLowerCase()==='es-co')
+    ||voices.find(voice=>voice.lang.toLowerCase().startsWith('es'));
+  if(selected){utterance.voice=selected;utterance.lang=selected.lang;}
+  activeReading={button,utterance};
+  button.setAttribute('aria-pressed','true');
+  button.setAttribute('aria-label','Detener lectura de publicación');
+  button.title='Detener lectura';
+  button.replaceChildren(contactIcon('stop'));
+  utterance.onend=()=>{if(activeReading?.utterance===utterance)stopReading();};
+  utterance.onerror=event=>{
+    if(activeReading?.utterance!==utterance)return;
+    stopReading();
+    if(event.error!=='canceled'&&event.error!=='interrupted')toast('No se pudo leer la publicación.');
+  };
+  window.speechSynthesis.speak(utterance);
+}
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
@@ -219,9 +263,17 @@ function renderCard(record,owner){
   share.append(contactIcon('share'));
   share.addEventListener('click',()=>sharePublicationPng(record));
   contact.append(share);
+  // El mismo renderizador muestra el altavoz en Ver necesidades y Mis publicaciones.
+  const listen=el('button','contact-action listen-action');
+  listen.type='button';
+  listen.title='Escuchar publicación';
+  listen.setAttribute('aria-label','Escuchar publicación');
+  listen.setAttribute('aria-pressed','false');
+  listen.append(contactIcon('listen'));
+  listen.addEventListener('click',()=>listenPublication(listen,fullText));
+  contact.append(listen);
 
-  // Una sola fila en las fichas propias: llamar, WhatsApp, compartir, editar y eliminar.
-  // Quien no es dueño solo puede llamar, escribir y compartir.
+  // Una única fila: cuatro acciones para visitantes y seis para el autor.
   if(owner&&canManage(record,currentUid())){
     contact.classList.add('has-owner-actions');
     const edit=el('button','contact-action edit-action');
