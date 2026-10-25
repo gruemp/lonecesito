@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.21 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.22 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -11,8 +11,15 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 ## Cambios aprobados e implementados el 25-10-2026
 
 - Mensaje contextual de WhatsApp: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Se destaca solo la necesidad.
-- Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
+- Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en dos filas: 3 iconos para visitantes y 5 para el dueño en la primera; cuatro independientes de voz en la segunda. Si el navegador no soporta voz, muestra aviso puntual.
 - No cambia la portada ni el editor ni la configuración pendiente de Firebase. Verificación en celular físico y comprobación independiente de GitHub Pages pendientes si no se puede acceder al dispositivo externo.
+
+## Cambio 2.2.22 — 25 de octubre de 2026
+
+- Se añadieron dos imágenes SVG de casos de uso bajo la portada original, una PC y una móvil, con parejas entre personas solicitantes y posibles ayudantes. Incluyen ciudades Medellín, Bogotá, Cali, Barranquilla y Cartagena. No se puso botón adicional al final de Inicio.
+- Primera fila de cada ficha: contacto, compartir y, si es el autor, editar y eliminar. Segunda fila independiente: cuatro botones de voz para reproducir, pausar, reanudar y reiniciar; también disponible en el editor.
+- No se implementó ubicación. Consentimiento, geocodificación inversa, precisión y datos compartidos se siguen discutiendo.
+- Las ilustraciones son informativas, no casos reales publicados. Verificación física móvil y navegador externo pendientes.
 
 ## Cambio 2.2.21 — 25 de octubre de 2026
 
@@ -55,7 +62,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo de 1.000 para nuevas publicaciones o cambios de descripción; texto histórico >1.000 sin modificaciones se conserva hasta su tamaño previo máximo de 4.000).
 - **Controles del editor:** una fila con teléfono e icono a su izquierda y marcador «Ej: 300 123 4567» dentro; foto, micrófono y envío por avión de papel, **sin texto visible en el botón verde**. Enter envía; Shift+Enter salta de línea. En edición aparecen además papelera y X para cancelar, en esa fila.
 - **Fichas:** sin título visual; todo el texto justificado y visible, alto según contenido. **Con foto:** derecha, ajuste sin cortes, pulsar para ver completa y cerrar con X/Escape/toque fuera. **Sin foto:** texto a todo el ancho, sin huecos ni marcadores.
-- **Acciones de ficha:** una sola fila de **4 iconos** para visitantes (marcador telefónico azul, WhatsApp verde, compartir PNG morado de tres puntos conectados y escuchar, pausar y reanudar lectura con altavoz ocre e iconos dinámicos); **6 iconos** para dueño (+ lápiz y papelera). El lector usa Web Speech API, es-CO si hay voz disponible; mensaje WhatsApp con resumen de necesidad en negrita mediante *asteriscos*. No imprimir el número sobre la ficha, no escribir «Contactar».
+- **Acciones de ficha:** primera fila, llamar/WhatsApp/compartir (visitantes); más editar/eliminar (autor). Segunda fila fija de voz: reproducir, pausar, reanudar y reiniciar. Sin geolocalización todavía.
 - **Compartir:** generar PNG local fiel al contenido sin título visual, foto solo si existe y **teléfono real dentro del PNG en banda elegante de contacto**; usar compartir nativo o descargar. El número no se imprime sobre la ficha web.
 - **No mostrar ejemplos ni versión:** no hay necesidades ficticias, números de prueba ni barra «Versión X.Y.Z» en ninguna pantalla. Tampoco avisos de demo que estorben.
 - **Diseño:** máxima economía vertical **sin sacrificar ancho ni claridad**; colores diferenciados, opciones independientes, texto descriptivo justificado con última línea natural; mantener misma experiencia esencial en PC y celular.

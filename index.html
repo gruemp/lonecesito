@@ -7,9 +7,9 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261025-v2221">
+  <link rel="stylesheet" href="simple.css?v=20261025-v2222">
   <script src="firebase-config.js"></script>
-  <script type="module" src="simple.js?v=20261025-v2221"></script>
+  <script type="module" src="simple.js?v=20261025-v2222"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -29,6 +29,14 @@
   <section id="inicio" class="screen home-visual-screen" aria-label="Inicio de LoNecesito">
     <figure class="welcome-banner">
       <img src="assets/lonecesito-presentacion-dos-pasos.png" width="1819" height="865" alt="LoNecesito: 1. Publica lo que necesitas. 2. Lo ven y te contactan por llamada o WhatsApp." decoding="async" fetchpriority="high">
+    </figure>
+    <figure class="use-cases-art" aria-label="Ejemplos ilustrativos de personas que buscan soluciones y quienes pueden ayudarlas en diferentes ciudades de Colombia">
+      <picture>
+        <source media="(max-width:680px)" srcset="assets/lonecesito-casos-movil.svg">
+        <img src="assets/lonecesito-casos-pc.svg" width="1240" height="619"
+          alt="En LoNecesito conectamos necesidades con soluciones. Ejemplos en Medellín, Bogotá, Cali, Barranquilla y Cartagena: entregas con repartidores, reparaciones con técnicos, estudios con profesores, cuidado y diseño con independientes."
+          loading="lazy" decoding="async">
+      </picture>
     </figure>
   </section>
 
@@ -70,9 +78,6 @@
         <button id="voice-button" type="button" class="entry-tool voice-tool" title="Dictar necesidad" aria-label="Dictar necesidad por voz" aria-pressed="false">
           <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
         </button>
-        <button id="listen-draft" type="button" class="entry-tool preview-listen-tool" title="Escuchar el texto de la publicación" aria-label="Escuchar el texto de la publicación" aria-pressed="false">
-          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.7 5.3a9.5 9.5 0 0 1 0 13.4"/></svg>
-        </button>
         <button id="save-button" type="submit" class="button primary-button publish-icon-button" title="Publicar" aria-label="Publicar">
           <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
         </button>
@@ -81,6 +86,7 @@
         </button>
         <button id="cancel-edit" type="button" class="button outline-button cancel-icon-button" title="Cancelar edición" aria-label="Cancelar edición" hidden>×</button>
       </div>
+      <div id="draft-audio-row" class="draft-audio-row" aria-label="Controles de lectura del texto" role="group"></div>
       <p id="form-feedback" class="feedback" role="alert" hidden></p>
     </form>
     <input id="photo-picker" type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="Seleccionar fotografía del producto">

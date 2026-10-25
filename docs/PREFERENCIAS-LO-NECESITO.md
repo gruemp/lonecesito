@@ -50,7 +50,7 @@ No pedir un mínimo de caracteres: **un único carácter no vacío es válido**;
 
 La fila directamente debajo del editor se presenta, en orden:
 
-**[icono teléfono + caja Ej: 300 123 4567] [foto] [micrófono] [escuchar / pausar / reanudar] [icono verde de avión de papel]**
+**Fila 1:** teléfono, foto, micrófono y enviar (más borrar/cancelar en edición). **Fila 2:** reproducir, pausar, reanudar y reiniciar mediante cuatro botones independientes.
 
 - El icono verde **no lleva la palabra «Publicar»** en su superficie; accesiblemente sí se denomina «Publicar» o «Guardar cambios».
 - Enter desde descripción o teléfono activa publicar/guardar por la misma ruta que el icono. **Shift+Enter inserta un salto de línea** en la descripción. Evitar publicar involuntariamente mientras se compone texto con un teclado IME o al repetir una tecla.
@@ -76,11 +76,11 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 
 **Controles en la ficha**
 - Una sola fila, de iconos sin palabras visibles; acciones independientes, con **colores distintos** y al menos 44 px de alto en el móvil.
-- Todos ven cuatro: **llamar** (azul, abre marcador), **WhatsApp** (verde, abre conversación por API de WhatsApp), **compartir** (morado) y **escuchar publicación** (ocre, altavoz).
+- **Primera fila pública:** llamar, WhatsApp y compartir PNG (3 iconos). **Primera fila del autor:** los anteriores más editar y eliminar (5 iconos). **Segunda fila en todas las fichas:** reproducir, pausar, reanudar y reiniciar voz (4 iconos).
 - El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Seis iconos en una sola fila, nunca en dos.
 - Compartir es el **símbolo familiar de tres puntos conectados**; se rechazó el anterior icono de flecha hacia arriba.
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
-- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje aprobado: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Solo el resumen entre asteriscos se presenta en negrita en WhatsApp. El altavoz lee el contenido completo en español usando la voz del navegador (preferir es-CO), permite pausar al pulsar de nuevo y reanudar en otro toque sin volver al inicio del texto. Como algunos navegadores Android silencian SpeechSynthesis tras pausa nativa, dividir en tramos cortos (hasta 155 caracteres), guardar progreso de palabra cuando el navegador lo reporte, cancelar el audio para pausar y crear una locución nueva al reanudar. Si no hay eventos de palabra se repite como máximo el tramo corto actual; no usar pause()/resume() nativos. El ícono alterna entre altavoz (listo), pausa (reproduciendo) y reanudar (pausado). Mantenerlo pulsado durante un segundo reinicia la lectura desde el principio en cualquier estado, sin añadir un botón ni segunda fila; al soltar el dedo se evita que el clic derivado pause inmediatamente. Esta acción está tanto en las fichas como en el editor. Está en todas las fichas, propias y ajenas, y en el formulario para oír el texto escrito antes de publicar. No hacer que ambos iconos abran WhatsApp.
+- El teléfono no aparece escrito sobre la ficha web, pero sí en el PNG. Los enlaces siguen llamando por teléfono o WhatsApp. La lectura conserva SpeechSynthesis y pausas/reanudaciones mediante tramos cortos para Android; controles de voz separados en una segunda fila. Reiniciar empieza desde la primera palabra. El mismo grupo aparece en crear y editar. No usar ubicación todavía.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
 
 ## F. Imagen PNG al compartir
@@ -149,3 +149,8 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ---
 **Fuentes vigentes:** [AGENTS.md](../AGENTS.md) · [Continuidad técnica](CONTINUIDAD-Y-APRENDIZAJES.md) · [Código GitHub](https://github.com/gruemp/lonecesito/tree/codex/diseno-original).
+
+## Casos de uso responsivos y voz (aprobación 25-10-2026)
+- Inicio añade debajo de la portada vigente dos imágenes SVG, una para PC y otra para móvil, mostrando pares «quien necesita → quien puede ayudar»: repartidores, técnicos, profesores, cuidadores e independientes, con necesidades de Medellín, Bogotá, Cali, Barranquilla y Cartagena.
+- Mantener navegación de cuatro pestañas, sin agregar botón publicar inferior en móvil.
+- La segunda fila de iconos se limita al audio, por ahora **sin ubicación**. Captura geográfica, precisión y representación en PNG siguen pendientes de diálogo.

@@ -564,3 +564,45 @@ body:has(.image-dialog[open]){overflow:hidden}
   #publish-form .phone-field #need-phone{font-size:10px}
   #publish-form .publish-controls .entry-tool svg{width:18px;height:18px}
 }
+
+
+/* 2.2.22 — ilustraciones aprobadas en Inicio: dos formatos, sin controles extra. */
+.home-visual-screen .use-cases-art{display:block;width:100%;margin:12px 0 0;padding:0;border:0;background:transparent}
+.home-visual-screen .use-cases-art picture,.home-visual-screen .use-cases-art img{
+  display:block;width:100%;max-width:none;height:auto
+}
+.home-visual-screen .use-cases-art img{border-radius:14px;box-shadow:0 2px 11px rgba(20,60,55,.06)}
+@media(max-width:680px){
+  .home-visual-screen .use-cases-art{margin-top:9px}
+  .home-visual-screen .use-cases-art img{border-radius:9px}
+}
+/* Primera fila: contacto/compartir/editar/eliminar. Segunda: lectura independiente. */
+.publication-card .contact-box{grid-template-columns:repeat(3,minmax(0,1fr))}
+.publication-card .contact-box.has-owner-actions{grid-template-columns:repeat(5,minmax(0,1fr))}
+.publication-card .audio-control-row{margin-top:5px}
+.audio-control-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%;min-width:0}
+.publication-card .audio-control-row{padding:5px;border:1px solid #e1e8d5;border-radius:11px;background:#f9faf4;box-sizing:border-box}
+.audio-action{display:flex;align-items:center;justify-content:center;min-width:0;width:100%;min-height:46px;border:1px solid #ccb989;border-radius:9px;background:#fff0cd;color:#755018;cursor:pointer}
+.audio-action .contact-icon{width:24px;height:24px;flex:none;display:block}
+.audio-play{background:#d8f1e6;border-color:#b0d9c5;color:#17684d}
+.audio-pause{background:#ffedc7;border-color:#edcd85;color:#88591d}
+.audio-resume{background:#dce9ff;border-color:#c3d8f4;color:#245b94}
+.audio-restart{background:#eee6fa;border-color:#d6c6ef;color:#714fa0}
+.audio-action:hover:not(:disabled){filter:brightness(.95)}
+.audio-action:disabled{cursor:default;opacity:.46;filter:grayscale(.18)}
+.audio-action:focus-visible{outline:3px solid #d8a944;outline-offset:2px}
+#publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 44px 44px 52px}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,44px)}
+#publish-form .draft-audio-row{margin-top:5px}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 42px 42px 45px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,35px);gap:3px}
+  .audio-control-row{gap:5px}
+  .audio-action{min-height:44px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,36px);gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,30px);gap:2px}
+  .audio-control-row{gap:3px}
+  .audio-action .contact-icon{width:20px;height:20px}
+}

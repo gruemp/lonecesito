@@ -19,11 +19,11 @@
 - Al abrir sin hash, mostrar **Inicio**. Únicamente allí va **la imagen nueva de dos pasos aprobada por el usuario**: «1. Publica lo que necesitas» (ejemplo de licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp). Su recurso vigente es **assets/lonecesito-presentacion-dos-pasos.png** (1819 × 865). La imagen anterior de tres pasos queda como respaldo histórico, fuera de la web; **no usar la variante con mayonesa**. Mostrarla completa, centrada y sin recortes o deformaciones. No añadir buscador, fichas ni controles redundantes en Inicio.
 - **Ver necesidades** contiene **buscador y fichas reales**; **Mis publicaciones**, solo publicaciones del autor; **Publicar**, editor. El banner no aparece en estas pestañas.
 
-## 3. Editor: exclusivamente dos campos y una fila
+## 3. Editor: exclusivamente dos campos y dos filas de controles
 
 - **Solo dos entradas visibles:** una caja amplia para la **descripción íntegra de la necesidad** y una caja de **teléfono**. No crear casillas de título, ciudad, categoría, cantidad, presupuesto, precio, fecha ni condición. Esa información, si importa, va en el único texto.
 - Descripción **no vacía**, sin mínimo artificial de caracteres (límite actual de 1.000 para nuevas publicaciones y descripciones modificadas). **La foto es opcional**. Al editar registros anteriores cuyo texto supera 1.000 caracteres, conservarlo íntegro sin cortar ni sobrescribir: permitir guardar cambios de contacto/fotografía si el texto permanece sin cambios; si se modifica la descripción, exigir que el nuevo texto no supere 1.000 caracteres. Mantener compatibilidad de datos históricos de hasta 4.000 caracteres.
-- Bajo el texto, **una única fila horizontal**: caja de teléfono **con icono telefónico a su izquierda** y ejemplo **«Ej: 300 123 4567» dentro de la caja**, después icono de fotografía, icono de micrófono, **icono ocre para escuchar/pausar/reanudar el texto antes de publicar**, y **botón verde con solo el icono de envío (avión de papel)**. No escribir «Número de WhatsApp», «Publicar» ni «Publicar necesidad» como rótulos visibles en esa fila. Sí conservar etiquetas accesibles.
+- Bajo la descripción, primera fila: teléfono, fotografía, micrófono y publicar (más eliminar/cancelar en edición). Segunda fila independiente: reproducir, pausar, reanudar y reiniciar voz. Sin ubicación hasta decidirla expresamente.
 - **Enter publica o guarda** desde la descripción o el teléfono usando el mismo formulario validado; **Shift+Enter** inserta salto de línea en la descripción. Respetar composición IME, teclas repetidas y protección ante doble envío.
 - Micrófono de dictado en español (preferiblemente **es-CO**) mediante reconocimiento del navegador disponible, con inicio/detención por interacción. El teclado sigue siempre disponible; en navegadores sin dictado, informar solo al intentar usarlo. No integrar Gemini.
 - Icono de foto: elegir **una foto**, comprimir antes de almacenar; miniatura dentro del editor, pulsable para ampliación y con opción de quitar, sin desplazar la fila.
@@ -35,11 +35,8 @@
 - **Altura natural según contenido**, máxima economía **vertical**, sin estrechar horizontalmente ni reducir la comprensión. La ficha debe leerse de un vistazo en móviles siempre que el contenido lo permita.
 - **Con imagen:** ponerla **a la derecha**, ajustando proporción automáticamente **sin recortar ni deformar** (contain). Tocar **cualquier punto** de la imagen abre una vista completa en primer plano, con cierre X, Escape o toque exterior.
 - **Sin imagen:** el texto **ocupa todo el ancho**; no reservar columna, recuadro, marcador gráfico, icono ni aviso de ausencia.
-- **Una única fila de iconos** por ficha y opciones bien separadas:
-  - **Otros usuarios:** cuatro iconos: **llamar (azul)**, **WhatsApp (verde)**, **compartir PNG (morado)** con tres puntos conectados y **escuchar (ocre)** con símbolo de altavoz.
-  - **Autor:** los cuatro anteriores y después **editar (lápiz azul claro)** y **eliminar (papelera rojo claro)**: seis iconos en una sola fila.
-- Nada de palabras visibles dentro de esos botones, encabezado «Contactar» ni segunda fila «Editar / Eliminar». Mantener tamaño táctil mínimo de **44 px** en móvil, estados de foco y títulos/etiquetas accesibles.
-- **Llamada:** enlace de marcador tipo **tel:+número_normalizado**. **WhatsApp:** enlace **https://api.whatsapp.com/send** con mensaje «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.», donde solo el resumen va en negrita mediante asteriscos de WhatsApp. **Escuchar:** usar voz del navegador para leer el texto íntegro de la ficha (es-CO si disponible); el primer toque reproduce, el segundo pausa y el siguiente reanuda el audio por tramos desde la última palabra informada por el navegador; sin evento de palabra se puede repetir solo el tramo corto actual, nunca reiniciar la publicación completa. No depender de speechSynthesis.pause()/resume(): en Android pueden dejar la locución muda. Usar cancelación y nueva locución del texto pendiente; una pulsación prolongada de un segundo sobre el mismo icono reinicia la lectura desde el comienzo incluso si estaba en reproducción o pausa (el click al soltar no debe pausar de inmediato); el icono cambia de altavoz a pausa y reanudar según el estado y aparece tanto en Mis publicaciones como en Ver necesidades y también en el formulario para leer el borrador. **No imprimir el teléfono en la ficha web**; estará en sus enlaces. No convertir el icono de teléfono en un atajo a WhatsApp.
+- **Dos filas por ficha:** primera fila, 3 iconos para visitantes (llamar, WhatsApp y compartir PNG), 5 para el autor (más editar y borrar); segunda fila, 4 botones independientes de voz (reproducir, pausar, reanudar y reiniciar). Sin palabras visibles en los botones; altura táctil mínima 44 px.
+- **Llamada** y **WhatsApp** siguen enlazando directamente, con el resumen de necesidad en negrita en WhatsApp. **Voz:** ahora hay cuatro botones distintos en la segunda fila, también en el editor. Los tramos cortos (155 caracteres) y la cancelación/reanudación compatible con Android se conservan; una voz activa a la vez. Reiniciar vuelve al comienzo sin pulsaciones prolongadas. **Ubicación queda pendiente y NO se implementa ahora.**
 
 ## 5. Compartir ficha en PNG
 
@@ -88,3 +85,8 @@
 - Preferencias detalladas: [docs/PREFERENCIAS-LO-NECESITO.md](docs/PREFERENCIAS-LO-NECESITO.md)
 - Estado y pasos pendientes: [docs/CONTINUIDAD-Y-APRENDIZAJES.md](docs/CONTINUIDAD-Y-APRENDIZAJES.md)
 - Archivos activos: **index.html, simple.css, simple.js, simple-model.js, simple-search.js, card-png.js, firebase-config.js, firestore.rules**.
+
+## 2.2.22 — Inicio con casos de uso
+- Conservar arriba la portada existente de dos pasos. Bajo ella, mostrar una ilustración independiente para PC y otra para celular, en el formato de dos lados «¿Necesitas algo? → ¿Puedes ayudar?», con pares de ejemplos en Medellín, Bogotá, Cali, Barranquilla y Cartagena. Son imágenes explicativas, no publicaciones reales.
+- No añadir botón extra «Publicar lo que necesito» bajo las imágenes.
+- **Ubicación no autorizada para implementar todavía**: no pedir geolocalización ni colocar coordenadas en fichas/PNG en esta versión.
