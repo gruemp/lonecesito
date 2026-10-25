@@ -459,6 +459,8 @@ function showLocationDraft(){
 $('gps-remove').addEventListener('click',()=>{
   locationRequestId++;
   locationDraft=null;
+  capturingLocation=false;
+  locateButton.disabled=false;
   showLocationDraft();
 });
 function gpsErrorMessage(error){
