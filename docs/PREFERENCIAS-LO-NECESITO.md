@@ -46,7 +46,7 @@ La página comienza con **cuatro botones**, en el siguiente orden de lectura y d
 1. **Una caja grande de texto** donde se escribe TODO el requerimiento, incluida la ciudad, cantidad, presupuesto, fecha o condición cuando el autor lo considere relevante.
 2. **Una sola caja de teléfono**, con el ejemplo **«Ej: 300 123 4567» dentro**, y un icono de teléfono a la **izquierda** de esa entrada. Nunca escribir la etiqueta visible «Número de WhatsApp».
 
-No pedir un mínimo de caracteres: **un único carácter no vacío es válido**; permanece el límite técnico máximo de 4.000 caracteres de la implementación vigente. Teléfono obligatorio y validado. Foto **no obligatoria**.
+No pedir un mínimo de caracteres: **un único carácter no vacío es válido**; el máximo ahora es 1.000 caracteres por publicación nueva o texto modificado. Las publicaciones anteriores de mayor longitud no se recortan: pueden conservar íntegra su descripción al editar únicamente teléfono o imagen; para cambiar su texto deben reducirlo a 1.000 caracteres o menos. Teléfono obligatorio y validado. Foto **no obligatoria**.
 
 La fila directamente debajo del editor se presenta, en orden:
 

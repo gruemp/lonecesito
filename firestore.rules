@@ -26,9 +26,13 @@ service cloud.firestore {
       allow get, list: if true;
       allow create: if owns(request.resource.data)
         && validPublication(request.resource.data)
+        && request.resource.data.description.size() <= 1000
         && request.resource.data.createdAt == request.time;
       allow update: if owns(resource.data)
         && validPublication(request.resource.data)
+        && (request.resource.data.description.size() <= 1000
+          || (resource.data.description.size() > 1000
+            && request.resource.data.description == resource.data.description))
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([

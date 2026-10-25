@@ -90,3 +90,23 @@ test('foto opcional: solo el autor puede añadir, cambiar o quitar una imagen',a
     ...publication(A),picture:'x'.repeat(400001)
   }));
 });
+
+test('1.000 caracteres para nuevas publicaciones y edición histórica conservadora',async()=>{
+  await assertSucceeds(setDoc(doc(db(A),'requests','limite-exacto'),{
+    ...publication(A),description:'A'.repeat(1000),title:'A'
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','limite-excedido'),{
+    ...publication(A),description:'B'.repeat(1001),title:'B'
+  }));
+  await env.withSecurityRulesDisabled(async ctx=>{
+    await setDoc(doc(ctx.firestore(),'requests','anterior-extensa'),{
+      ...publication(A),description:'C'.repeat(1500),title:'C'
+    });
+  });
+  await assertSucceeds(updateDoc(doc(db(A),'requests','anterior-extensa'),{
+    contactPhone:'573001234568'
+  }));
+  await assertFails(updateDoc(doc(db(A),'requests','anterior-extensa'),{
+    description:'D'.repeat(1501)
+  }));
+});

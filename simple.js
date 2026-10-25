@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2218';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2220';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2218';
 
@@ -434,7 +434,7 @@ $('voice-button').addEventListener('click',()=>{
       if(!transcript)return;
       const textarea=$('need-description');
       const join=textarea.value&&!/\s$/.test(textarea.value)?' ':'';
-      textarea.value=(textarea.value+join+transcript).slice(0,4000);
+      textarea.value=(textarea.value+join+transcript).slice(0,textarea.maxLength);
       textarea.dispatchEvent(new Event('input',{bubbles:true}));
     };
     instance.onerror=event=>{
@@ -517,6 +517,7 @@ function resetForm(){
   stopDictation();
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
+  $('need-description').maxLength=1000;
   $('save-button').setAttribute('aria-label','Publicar');
   $('save-button').title='Publicar';
   $('cancel-edit').hidden=true;
@@ -529,6 +530,8 @@ function editRecord(record){
   resetForm();
   state.editingId=record.id;
   $('need-description').value=legacyDetails(record);
+  // Las fichas anteriores de más de 1.000 caracteres se conservan íntegras.
+  $('need-description').maxLength=$('need-description').value.length>1000?4000:1000;
   $('need-phone').value=record.contactPhone||'';
   pictureDraft=record.picture||'';updatePhotoPreview();
   $('save-button').setAttribute('aria-label','Guardar cambios');
@@ -599,13 +602,13 @@ $('publish-form').addEventListener('submit',async event=>{
   if(state.mode==='cloud'&&!state.user){state.waitingForAuth=true;showAuth();return;}
   let current=null;
   try{
+    current=state.items.find(item=>item.id===state.editingId);
+    if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     const data=cleanPublication({
       description:$('need-description').value,
       contactPhone:$('need-phone').value
-    });
+    },{originalDescription:current?legacyDetails(current):null});
     if(pictureDraft)data.picture=pictureDraft;
-    current=state.items.find(item=>item.id===state.editingId);
-    if(state.editingId&&!canManage(current,currentUid()))throw Error('Solo puedes editar tus propias publicaciones.');
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
     state.saving=true;$('save-button').disabled=true;
     if(state.mode==='demo'){
