@@ -1,5 +1,5 @@
 /* Versión técnica interna; nunca mostrar número de versión en la interfaz. */
-export const APP_VERSION = '2.2.19';
+export const APP_VERSION = '2.2.20';
 export const APP_VERSION_DATE = '2026-10-25';
 
 /* Modelo sencillo: el autor solo escribe su necesidad y su WhatsApp. */
@@ -16,9 +16,13 @@ export function derivedTitle(description) {
   const first=(lines.find(line=>line.trim())||'').trim().replace(/\s+/g,' ');
   return first.slice(0,120);
 }
-export function cleanPublication(fields) {
+export function cleanPublication(fields,{originalDescription=null}={}) {
   const description=String(fields.description||'').trim().replace(/\r\n?/g,'\n');
-  if(!description||description.length>4000)throw new Error('Escribe tu necesidad (máximo 4.000 caracteres).');
+  const original=originalDescription==null?null:String(originalDescription).trim().replace(/\r\n?/g,'\n');
+  if(!description||description.length>4000)throw new Error('Escribe tu necesidad (máximo 1.000 caracteres).');
+  // Permitir actualizar el teléfono o la foto de fichas antiguas sin recortar el texto.
+  if(description.length>1000&&description!==original)
+    throw new Error('La descripción no debe superar 1.000 caracteres.');
   const contactPhone=normalizeWhatsApp(fields.contactPhone);
   return {
     description,
