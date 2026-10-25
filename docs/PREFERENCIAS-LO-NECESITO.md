@@ -154,3 +154,8 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - Inicio añade debajo de la portada vigente dos imágenes SVG, una para PC y otra para móvil, mostrando pares «quien necesita → quien puede ayudar»: repartidores, técnicos, profesores, cuidadores e independientes, con necesidades de Medellín, Bogotá, Cali, Barranquilla y Cartagena.
 - Mantener navegación de cuatro pestañas, sin agregar botón publicar inferior en móvil.
 - La segunda fila de iconos se limita al audio, por ahora **sin ubicación**. Captura geográfica, precisión y representación en PNG siguen pendientes de diálogo.
+
+## Actualización aprobada — 2.2.23
+- Sustituye la anterior fila de cuatro controles de voz por tres iconos: un botón que cambia de reproducir a pausar y reanudar, un botón de reiniciar y un pin GPS. Mis publicaciones, Ver necesidades y editor respetan el mismo criterio.
+- En el editor el pin obtiene GPS actual únicamente al pulsarlo, aceptar compartir la ubicación públicamente y otorgar permiso del navegador. Se presenta una etiqueta ineditable de latitud, longitud, precisión y dirección disponible. Se puede quitar. En las fichas el pin abre la ubicación guardada, nunca la del lector.
+- La ubicación exacta es pública si se adjunta a la publicación. La traducción geográfica solo muestra datos verificablemente devueltos: país, departamento, ciudad, dirección y barrio o localidad si están disponibles. BigDataCloud recibe las coordenadas actuales e IP para ayudar a resolver ciudad y localidad. PNG muestra los mismos datos en orden descendente y conserva teléfono.
