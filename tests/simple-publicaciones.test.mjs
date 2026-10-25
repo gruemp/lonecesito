@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.18');
+  assert.equal(APP_VERSION,'2.2.19');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -638,37 +638,81 @@ test('altavoz en cada ficha; lector nativo y una sola fila de 4 o 6 íconos',()=
   assert.match(css,/\.publication-card \.listen-action/);
 });
 
-test('lectura en tres estados: reproducir, pausar y reanudar sin reiniciar',()=>{
+test('reanudar funciona aun si pause() termina el audio en Android',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const start=js.indexOf('let activeReading=null;');
   const end=js.indexOf('function renderCard(record,owner){',start);
   assert.ok(start>=0&&end>start);
   const calls=[];
-  const synth={getVoices:()=>[{lang:'es-CO'}],speak:u=>calls.push(['speak',u.text]),
-    pause:()=>calls.push(['pause']),resume:()=>calls.push(['resume']),cancel:()=>calls.push(['cancel'])};
+  const synth={
+    paused:false,
+    getVoices:()=>[{lang:'es-CO'}],
+    speak(utterance){calls.push(['speak',utterance.text]);this.current=utterance;},
+    // En un Android afectado, pausa no funciona y reanudar es silencioso.
+    pause(){throw Error('No se debe invocar pause()');},
+    resume(){throw Error('No se debe invocar resume() si no está pausado');},
+    cancel(){
+      calls.push(['cancel']);
+      const previous=this.current;this.current=null;
+      // La locución cancelada puede emitir 'end' o 'error' inmediatamente.
+      previous?.onend?.();
+      previous?.onerror?.({error:'canceled'});
+    }
+  };
   const Controller=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation',
-    js.slice(start,end)+';return {listenPublication,stopReading};');
+    js.slice(start,end)+';return {listenPublication,stopReading,readingChunks};');
   function Utterance(text){this.text=text;}
-  const {listenPublication,stopReading}=Controller({speechSynthesis:synth},Utterance,kind=>({kind}),
-    ()=>{},null,()=>{});
+  const {listenPublication,stopReading,readingChunks}=Controller(
+    {speechSynthesis:synth},Utterance,kind=>({kind}),()=>{},null,()=>{});
   const button={id:'listen-draft',dataset:{},attributes:{},
     setAttribute(name,value){this.attributes[name]=value;},
     replaceChildren(icon){this.icon=icon;}};
-  listenPublication(button,'Texto íntegro del borrador');
+  const text='Busco el repuesto correcto para el ventilador Samurai Air Pro. '.repeat(8);
+  assert.ok(readingChunks(text).length>=3);
+  listenPublication(button,text);
   assert.equal(button.dataset.readingState,'playing');
   assert.equal(button.icon.kind,'pause');
-  listenPublication(button,'Texto íntegro del borrador');
+  assert.ok(synth.current?.text);
+  // Simulamos que la voz ya avanzó hasta la mitad del primer tramo.
+  synth.current.onboundary({charIndex:48});
+  const initial=synth.current.text;
+  listenPublication(button,text);
   assert.equal(button.dataset.readingState,'paused');
   assert.equal(button.icon.kind,'resume');
-  listenPublication(button,'Texto íntegro del borrador');
+  assert.equal(synth.current,null);
+  listenPublication(button,text);
   assert.equal(button.dataset.readingState,'playing');
   assert.equal(button.icon.kind,'pause');
-  assert.equal(calls.filter(([action])=>action==='speak').length,1);
-  assert.ok(calls.some(([action])=>action==='pause'));
-  assert.ok(calls.some(([action])=>action==='resume'));
+  assert.notEqual(synth.current,null);
+  assert.equal(synth.current.text,initial.slice(48));
+  assert.equal(calls.filter(([type])=>type==='speak').length,2);
+  // Terminar ese fragmento continúa por el resto de tramos.
+  synth.current.onend();
+  assert.equal(calls.filter(([type])=>type==='speak').length,3);
   stopReading();
   assert.equal(button.dataset.readingState,'idle');
   assert.equal(button.icon.kind,'listen');
+  assert.equal(synth.current,null);
+});
+test('pausa sin eventos de palabra repite como máximo un tramo corto',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const start=js.indexOf('let activeReading=null;');
+  const end=js.indexOf('function renderCard(record,owner){',start);
+  const utterances=[];
+  const synth={paused:false,getVoices:()=>[],
+    speak(value){utterances.push(value);},
+    cancel(){utterances.at(-1)?.onerror?.({error:'canceled'});}};
+  const control=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation',
+    js.slice(start,end)+';return {listenPublication,readingChunks};')(
+      {speechSynthesis:synth},function Utterance(text){this.text=text;},kind=>({kind}),()=>{},null,()=>{});
+  const button={dataset:{},setAttribute(){},replaceChildren(){}};
+  const text='Necesito encontrar un repuesto disponible esta semana. '.repeat(12);
+  control.listenPublication(button,text);
+  utterances.at(-1).onend();
+  control.listenPublication(button,text); // pausa en el segundo tramo
+  control.listenPublication(button,text); // nuevo speak, no resume nativo
+  assert.equal(utterances.at(-1).text,control.readingChunks(text)[1]);
+  assert.ok(utterances.at(-1).text.length<=155);
 });
 test('el editor permite escuchar su texto y conserva una fila de controles',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');

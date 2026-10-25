@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.18 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.19 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -14,12 +14,19 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
 - No cambia la portada ni el editor ni la configuración pendiente de Firebase. Verificación en celular físico y comprobación independiente de GitHub Pages pendientes si no se puede acceder al dispositivo externo.
 
+## Corrección 2.2.19 — 25 de octubre de 2026
+
+- Motivo: el botón «Reanudar» dejaba de producir sonido en navegadores Android. `speechSynthesis.pause()` puede terminar la locución en vez de pausarla; `resume()` no restablece la voz.
+- Solución: cortar el texto en tramos breves (hasta 155 caracteres); al pulsar Pausa cancelar la voz y conservar tramo/desplazamiento obtenido mediante `onboundary`; al pulsar Reanudar crear una locución nueva con el texto restante. Si el navegador no informa progreso de palabra, repetir solo el tramo actual, no todo el texto. Ignorar eventos de cancelación antiguos para evitar saltos.
+- Comprobación: simulación de fallo Android con eventos `end` y `error` de cancelación; se verificó audio nuevo al reanudar y continuidad del resto de tramos. Prueba física Android pendiente.
+- Instrucción operativa vigente del titular: cada modificación solicitada debe publicarse inmediatamente en GitHub Pages, sin pedir permiso adicional. Mantener ramas y pruebas.
+
 ## Actualización 2.2.18 — 25 de octubre de 2026
 
 - Reproducción de voz con estados visibles: altavoz (iniciar), pausa (detener temporalmente) y reanudar (continuar desde el punto anterior); un único audio activo.
 - Botón para escuchar el texto de la nueva publicación en el editor, en la misma fila compacta de teléfono, foto, micrófono y envío; también funciona durante edición.
 - PNG compartido con número telefónico visible, formateado y destacado en una banda de contacto. No se imprime el número dentro de la ficha pública.
-- El comportamiento de pausa/reanudación depende de la compatibilidad de SpeechSynthesis de cada navegador y debe verificarse en dispositivos físicos.
+- Desde 2.2.19 se evita pausa y reanudación nativas problemáticas; la continuidad se reproduce mediante nuevas locuciones cortas. Aún requiere verificación en dispositivos físicos.
 
 ## 1. Qué problema resuelve la web
 
