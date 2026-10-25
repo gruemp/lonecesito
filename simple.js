@@ -37,7 +37,7 @@ function showView(){
   if(screen==='publicar'&&state.mode==='cloud'&&!state.user){
     state.waitingForAuth=true;showAuth();window.location.hash='#inicio';return;
   }
-  if(screen!=='publicar'&&capturingLocation)finishGpsMeasurement();
+  if(screen!=='publicar'&&capturingLocation)cancelGpsTasks();
   if(screen!=='publicar'&&state.editingId)resetForm();
   for(const name of pages)$(name).hidden=name!==screen;
   document.querySelectorAll('[data-nav]').forEach(node=>{
