@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2229';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2230';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2229';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,

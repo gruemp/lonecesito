@@ -130,3 +130,7 @@
 - Dentro del panel GPS del editor, Actualizar dirección GPS consulta las coordenadas ya guardadas, con consentimiento explícito para ambos servicios. No llamar a geolocation ni transmitir coordenadas al abrir o editar automáticamente. Si una actualización falla, conservar los campos anteriores de esa misma coordenada. Nunca trasladar nombres de una coordenada distinta.
 - Apartamento, piso, torre o complemento se escriben en la misma caja opcional de dirección (180 caracteres); GPS no los identifica. Conservarlos al consultar proveedores, editar, guardar y exportar PNG. No añadir otro campo.
 - Guardar espera la resolución pendiente y bloquea envíos duplicados. Salir/cancelar invalida las consultas y cualquier envío que estuviera esperando; no aceptar respuestas tardías en otro borrador. Sin cambios en distancias, Maps, reglas Firestore o analíticas.
+
+## 2.2.30 — Panel GPS legible en móvil
+- El texto de ubicación ocupa su propia fila con ancho flexible completo, reservando únicamente el botón de quitar a la derecha. Los botones Actualizar dirección GPS y Ver en Google Maps se agrupan debajo, con salto de fila según espacio, sin comprimir el texto en una columna estrecha.
+- Estado y atribución ocupan filas completas. Mantener todos los datos y acciones existentes; sin cambios a geocodificación, permisos, apartamento, distancias o PNG. Comprobar el panel desplegado, no solo el editor vacío.

@@ -185,3 +185,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - En la edición de una publicación con GPS, **Actualizar dirección GPS** recupera información usando su punto guardado, tras consentimiento, sin tomar la ubicación actual. Guardar conserva los datos recuperados; si el servicio falla, no borrar los conocidos para ese mismo punto. No ejecutar consultas automáticamente al abrir fichas.
 - Escribir apartamento, piso o torre en la caja de dirección opcional existente; no deducirlos del GPS ni reemplazarlos con la dirección del mapa. Mantenerlos en ficha y PNG.
 - Mostrar un estado breve durante la consulta, esperar antes de guardar e impedir envíos duplicados o un guardado tardío después de salir del editor. Sin Apps Script ni cambios al cálculo local de distancias.
+
+## 2.2.30 — Panel GPS legible en móvil
+- El texto de ubicación ocupa su propia fila con ancho flexible completo, reservando únicamente el botón de quitar a la derecha. Los botones Actualizar dirección GPS y Ver en Google Maps se agrupan debajo, con salto de fila según espacio, sin comprimir el texto en una columna estrecha.
+- Estado y atribución ocupan filas completas. Mantener todos los datos y acciones existentes; sin cambios a geocodificación, permisos, apartamento, distancias o PNG. Comprobar el panel desplegado, no solo el editor vacío.
