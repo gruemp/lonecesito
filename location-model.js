@@ -30,14 +30,19 @@ export function validLocation(location){
     &&typeof lon==='number'&&Number.isFinite(lon)&&lon>= -180&&lon<=180
     &&typeof accuracy==='number'&&Number.isFinite(accuracy)&&accuracy>0&&accuracy<=100000;
 }
-export function locationLines(location,addressText=''){
+export function locationLines(location,addressText='',showUnavailable=false){
   const hasGps=validLocation(location);
   const declared=cleanAddressText(addressText);
   if(!hasGps)return declared?['Dirección indicada por el autor: '+declared]:[];
+  // Conservar siempre país, departamento, ciudad y barrio en la caja GPS,
+  // incluso cuando un proveedor no los identifica. Nunca inventar la dirección.
   const parts=[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city],['Dirección según GPS',location.address],['Barrio o localidad',location.neighborhood]
-  ].filter(([,value])=>Boolean(safeText(value))).map(([label,value])=>label+': '+safeText(value));
+    ['Ciudad',location.city],['Dirección según GPS',location.address],
+    ['Barrio o localidad',location.neighborhood]
+  ].filter(([label,value])=>Boolean(safeText(value))||
+    (showUnavailable&&label!=='Dirección según GPS'))
+    .map(([label,value])=>label+': '+(safeText(value)||'No identificado'));
   if(declared)parts.push('Dirección indicada por el autor: '+declared);
   const approximate=[location.address,location.neighborhood,location.city,
     location.department,location.country].map(safeText).filter(Boolean);
@@ -45,4 +50,41 @@ export function locationLines(location,addressText=''){
   parts.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
   parts.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   return parts;
+}
+
+
+/* Enlaces de Maps sin clave API y sin geolocalizar al visitante. */
+function mapsDestination(location,addressText=''){
+  if(validLocation(location)){
+    return location.latitude.toFixed(6)+','+location.longitude.toFixed(6);
+  }
+  return cleanAddressText(addressText);
+}
+export function googleMapsLocationUrl(location,addressText=''){
+  const destination=mapsDestination(location,addressText);
+  if(!destination)return '';
+  return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(destination);
+}
+export function googleMapsDirectionsUrl(location,addressText=''){
+  const destination=mapsDestination(location,addressText);
+  if(!destination)return '';
+  // Google Maps solicita o detecta el punto de partida bajo sus permisos.
+  return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(destination);
+}
+export function distanceKmBetween(lat1,lon1,lat2,lon2){
+  const vals=[lat1,lon1,lat2,lon2].map(Number);
+  if(vals.some(v=>!Number.isFinite(v))||Math.abs(vals[0])>90||
+    Math.abs(vals[2])>90||Math.abs(vals[1])>180||Math.abs(vals[3])>180)
+    throw new Error('Coordenadas inválidas para calcular distancia.');
+  const radians=degrees=>degrees*Math.PI/180;
+  const latDelta=radians(vals[2]-vals[0]),lonDelta=radians(vals[3]-vals[1]);
+  const h=Math.sin(latDelta/2)**2+
+    Math.cos(radians(vals[0]))*Math.cos(radians(vals[2]))*
+    Math.sin(lonDelta/2)**2;
+  const arc=2*Math.atan2(Math.sqrt(Math.min(1,h)),Math.sqrt(Math.max(0,1-h)));
+  return 6371.0088*arc; // kilómetros sobre superficie esférica, no ruta por carretera.
+}
+export function distanceLabel(km){
+  if(!Number.isFinite(km)||km<0)throw new Error('Distancia inválida.');
+  return km<1?Math.round(km*1000)+' m':km.toLocaleString('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1})+' km';
 }
