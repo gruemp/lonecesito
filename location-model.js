@@ -1,5 +1,10 @@
 /* Ubicación voluntaria del autor. Nunca geolocalizar a visitantes de fichas. */
 const safeText=value=>String(value||'').trim().replace(/\s+/g,' ').slice(0,160);
+export function cleanAddressText(value){
+  const text=String(value||'').trim().replace(/\s+/g,' ');
+  if(text.length>180)throw new Error('La dirección no debe superar 180 caracteres.');
+  return text;
+}
 export function locationFromGps(coords,geocode={}){
   const latitude=Number(coords?.latitude),longitude=Number(coords?.longitude),
     accuracy=Number(coords?.accuracy);
@@ -25,12 +30,18 @@ export function validLocation(location){
     &&typeof lon==='number'&&Number.isFinite(lon)&&lon>= -180&&lon<=180
     &&typeof accuracy==='number'&&Number.isFinite(accuracy)&&accuracy>0&&accuracy<=100000;
 }
-export function locationLines(location){
-  if(!validLocation(location))return [];
+export function locationLines(location,addressText=''){
+  const hasGps=validLocation(location);
+  const declared=cleanAddressText(addressText);
+  if(!hasGps)return declared?['Dirección indicada por el autor: '+declared]:[];
   const parts=[
     ['País',location.country],['Departamento',location.department],
-    ['Ciudad',location.city],['Dirección',location.address],['Barrio o localidad',location.neighborhood]
+    ['Ciudad',location.city],['Dirección según GPS',location.address],['Barrio o localidad',location.neighborhood]
   ].filter(([,value])=>Boolean(safeText(value))).map(([label,value])=>label+': '+safeText(value));
+  if(declared)parts.push('Dirección indicada por el autor: '+declared);
+  const approximate=[location.address,location.neighborhood,location.city,
+    location.department,location.country].map(safeText).filter(Boolean);
+  parts.push('Dirección aproximada del GPS: '+(approximate.length?approximate.join(', '):'no disponible'));
   parts.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
   parts.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   return parts;
