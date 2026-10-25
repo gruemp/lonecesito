@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.19');
+  assert.equal(APP_VERSION,'2.2.20');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -32,8 +32,9 @@ test('el modelo almacena únicamente la necesidad, teléfono y título derivado'
   assert.equal(need.title,derivedTitle(input.description));
 });
 test('se admite un texto largo y se rechazan necesidades vacías',()=>{
-  const need=cleanPublication({...input,description:'Necesito '+ 'detalles '.repeat(150)});
-  assert.ok(need.description.length>1000);
+  const need=cleanPublication({...input,description:'x'.repeat(1000)});
+  assert.equal(need.description.length,1000);
+  assert.throws(()=>cleanPublication({...input,description:'x'.repeat(1001)}),/1.000/);
   assert.equal(cleanPublication({...input,description:'a'}).description,'a');
   assert.equal(cleanPublication({...input,description:'abc'}).description,'abc');
   assert.throws(()=>cleanPublication({...input,description:'   '}));
@@ -207,7 +208,7 @@ test('dictado del navegador en español con permiso, detener y teclado convencio
   assert.match(js,/function stopDictation\(\)/);
   assert.match(js,/current\.abort\(\)/);
   assert.match(js,/setMicState\(true\)/);
-  assert.match(js,/textarea\.value=\(textarea\.value\+join\+transcript\)\.slice\(0,4000\)/);
+  assert.match(js,/textarea\.value=\(textarea\.value\+join\+transcript\)\.slice\(0,textarea\.maxLength\)/);
   assert.match(js,/micrófono del teclado/);
 });
 test('las fichas reservan imagen derecha y dejan vacío el espacio si falta fotografía',()=>{
@@ -741,4 +742,24 @@ test('PNG muestra número real en banda distinguible sin añadir título a la fi
   assert.ok(drawn.includes('+57 300 123 4567'));
   assert.ok(drawn.includes('LoNecesito'));
   assert.ok(!drawn.some(item=>String(item).startsWith('Repuesto para ventilador:')));
+});
+
+test('nuevo límite de 1.000 caracteres y textos históricos conservados',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
+  assert.match(html,/id="need-description"[^>]*maxlength="1000"/);
+  assert.match(js,/\$\('need-description'\)\.maxLength=1000/);
+  assert.match(js,/maxLength=\$\('need-description'\)\.value\.length>1000\?4000:1000/);
+  assert.match(js,/originalDescription:current\?legacyDetails\(current\):null/);
+  const old='Texto anterior muy extenso. '+ 'Detalle '.repeat(170);
+  assert.ok(old.length>1000&&old.length<4000);
+  assert.equal(cleanPublication({description:old,contactPhone:'3001234567'},
+    {originalDescription:old}).description,old);
+  assert.throws(()=>cleanPublication({description:old+' Cambio',contactPhone:'3001234567'},
+    {originalDescription:old}),/1.000/);
+  assert.equal(cleanPublication({description:'Nueva redacción',contactPhone:'3001234567'},
+    {originalDescription:old}).description,'Nueva redacción');
+  assert.match(rules,/request\.resource\.data\.description\.size\(\) <= 1000/);
+  assert.match(rules,/request\.resource\.data\.description == resource\.data\.description/);
 });
