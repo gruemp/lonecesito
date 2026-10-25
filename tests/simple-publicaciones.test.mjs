@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.20');
+  assert.equal(APP_VERSION,'2.2.21');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -628,7 +628,7 @@ test('altavoz en cada ficha; lector nativo y una sola fila de 4 o 6 íconos',()=
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
-  assert.match(card,/listenPublication\(listen,fullText\)/);
+  assert.match(card,/enableReadingControl\(listen,\(\)=>fullText\)/);
   assert.match(card,/contact\.append\(listen\)/);
   assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
   assert.match(js,/utterance\.lang='es-CO'/);
@@ -723,7 +723,7 @@ test('el editor permite escuchar su texto y conserva una fila de controles',()=>
   const order=['need-phone','add-photo','voice-button','listen-draft','save-button','delete-edit','cancel-edit'];
   let last=-1;
   for(const id of order){const at=controls.indexOf('id="'+id+'"');assert.ok(at>last,'Desorden: '+id);last=at;}
-  assert.match(js,/listenDraft\.addEventListener\('click',\(\)=>listenPublication\(listenDraft,\$\('need-description'\)\.value\)\)/);
+  assert.match(js,/enableReadingControl\(listenDraft,\(\)=>\$\('need-description'\)\.value\)/);
   assert.match(css,/#publish-form \.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,44px\)\}/);
   assert.match(css,/@media\(max-width:345px\)[\s\S]*?\.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,30px\);gap:2px\}/);
 });
@@ -762,4 +762,82 @@ test('nuevo límite de 1.000 caracteres y textos históricos conservados',()=>{
     {originalDescription:old}).description,'Nueva redacción');
   assert.match(rules,/request\.resource\.data\.description\.size\(\) <= 1000/);
   assert.match(rules,/request\.resource\.data\.description == resource\.data\.description/);
+});
+
+test('mantener pulsado un segundo reinicia desde el comienzo y no hace pausa al soltar',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const start=js.indexOf('let activeReading=null;');
+  const end=js.indexOf('function renderCard(record,owner){',start);
+  assert.ok(start>=0&&end>start);
+  const scheduled=new Map();
+  let timerId=0;
+  const speakCalls=[];
+  const synth={
+    paused:false,
+    getVoices:()=>[{lang:'es-CO'}],
+    speak(utterance){this.current=utterance;speakCalls.push(utterance.text);},
+    cancel(){const previous=this.current;this.current=null;previous?.onerror?.({error:'canceled'});}
+  };
+  const create=new Function('window','SpeechSynthesisUtterance','contactIcon','toast',
+    'recognition','stopDictation','setTimeout','clearTimeout',
+    js.slice(start,end)+';return {enableReadingControl,stopReading};');
+  const controller=create({speechSynthesis:synth},function Utterance(text){this.text=text;},
+    kind=>({kind}),()=>{},null,()=>{},
+    (fn,delay)=>{assert.equal(delay,1000);const id=++timerId;scheduled.set(id,fn);return id;},
+    id=>{scheduled.delete(id);});
+  const events=new Map();
+  const button={
+    id:'listen-draft',dataset:{},attributes:{},
+    setAttribute(k,v){this.attributes[k]=v;},
+    replaceChildren(icon){this.icon=icon;},
+    addEventListener(type,fn){if(!events.has(type))events.set(type,[]);events.get(type).push(fn);}
+  };
+  const fire=(type,extra={})=>{const e={button:0,isPrimary:true,defaultPrevented:false,
+    preventDefault(){this.defaultPrevented=true;},...extra};
+    for(const listener of events.get(type)||[])listener(e);
+    return e;
+  };
+  const tick=()=>{const entries=[...scheduled.values()];scheduled.clear();for(const fn of entries)fn();};
+  const fullText='Necesito reparar un ventilador Samurai Air Pro en Santa Marta. '.repeat(5);
+  controller.enableReadingControl(button,()=>fullText);
+  fire('pointerdown');fire('pointerup');fire('click');
+  assert.equal(button.dataset.readingState,'playing');
+  assert.equal(speakCalls.length,1);
+  assert.equal(speakCalls[0],fullText.trim().slice(0,speakCalls[0].length));
+  synth.current.onboundary({charIndex:33});
+  // Pulsación corta pausa.
+  fire('pointerdown');fire('pointerup');fire('click');
+  assert.equal(button.dataset.readingState,'paused');
+  // Una pulsación larga, desde el estado de pausa, reinicia inmediatamente.
+  fire('pointerdown');tick();
+  assert.equal(button.dataset.readingState,'playing');
+  assert.equal(speakCalls.length,2);
+  assert.equal(speakCalls[1],speakCalls[0]);
+  const release=fire('pointerup');
+  const click=fire('click');
+  assert.equal(click.defaultPrevented,true);
+  assert.equal(button.dataset.readingState,'playing');
+  assert.equal(speakCalls.length,2);
+  // Un toque breve posterior vuelve a pausar normalmente.
+  fire('pointerdown');fire('pointerup');fire('click');
+  assert.equal(button.dataset.readingState,'paused');
+  fire('pointerdown');fire('pointercancel');tick();
+  assert.equal(button.dataset.readingState,'paused');
+  fire('pointerdown');fire('pointerleave');tick();
+  assert.equal(button.dataset.readingState,'paused');
+  const context=fire('contextmenu');
+  assert.equal(context.defaultPrevented,true);
+  controller.stopReading();
+  assert.equal(button.dataset.readingState,'idle');
+});
+test('pulsación larga disponible en fichas y editor sin añadir iconos',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  assert.match(js,/enableReadingControl\(listen,\(\)=>fullText\)/);
+  assert.match(js,/enableReadingControl\(listenDraft,\(\)=>\$\('need-description'\)\.value\)/);
+  assert.match(js,/setTimeout\(\(\)=>\{[\s\S]*?stopReading\(\);[\s\S]*?listenPublication\(button,getText\(\)\);[\s\S]*?\},1000\)/);
+  assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
+  assert.equal((html.match(/id="listen-draft"/g)||[]).length,1);
 });

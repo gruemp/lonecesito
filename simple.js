@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2220';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2221';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2218';
 
@@ -178,8 +178,9 @@ let activeReading=null;
 function setReadingState(button,status){
   const label=status==='playing'?'Pausar lectura':status==='paused'?'Reanudar lectura':
     button.id==='listen-draft'?'Escuchar el texto de la publicación':'Escuchar publicación';
-  button.title=label;
-  button.setAttribute('aria-label',label);
+  const description=label+(status==='idle'?'':'. Mantener pulsado un segundo para reiniciar desde el principio');
+  button.title=description;
+  button.setAttribute('aria-label',description);
   button.setAttribute('aria-pressed',String(status!=='idle'));
   button.dataset.readingState=status;
   button.replaceChildren(contactIcon(status==='playing'?'pause':status==='paused'?'resume':'listen'));
@@ -290,6 +291,40 @@ function listenPublication(button,text){
   setReadingState(button,'playing');
   speakReading(current);
 }
+// Un segundo sobre el mismo icono reinicia desde el principio sin añadir controles.
+// El click que genera la pulsación prolongada se consume para no pausar
+// inmediatamente la nueva lectura al levantar el dedo.
+function enableReadingControl(button,getText){
+  let pressTimer=null;
+  let suppressClick=false;
+  const clearPress=()=>{
+    if(pressTimer!==null){clearTimeout(pressTimer);pressTimer=null;}
+  };
+  button.addEventListener('pointerdown',event=>{
+    if(event.button!==0||event.isPrimary===false)return;
+    clearPress();
+    suppressClick=false;
+    pressTimer=setTimeout(()=>{
+      pressTimer=null;
+      suppressClick=true;
+      stopReading();
+      listenPublication(button,getText());
+    },1000);
+  });
+  for(const type of ['pointerup','pointercancel','pointerleave'])
+    button.addEventListener(type,clearPress);
+  // Evitar el menú contextual del navegador en una pulsación larga de móvil.
+  button.addEventListener('contextmenu',event=>event.preventDefault());
+  button.addEventListener('keydown',()=>{clearPress();suppressClick=false;});
+  button.addEventListener('click',event=>{
+    if(suppressClick){
+      suppressClick=false;
+      event.preventDefault();
+      return;
+    }
+    listenPublication(button,getText());
+  });
+}
 function renderCard(record,owner){
   const article=el('article','publication-card '+(record.category==='bienes'?'card-goods':record.category==='servicios'?'card-services':'card-general'));
   const description=String(record.description||'').trim();
@@ -346,7 +381,7 @@ function renderCard(record,owner){
   const listen=el('button','contact-action listen-action');
   listen.type='button';
   setReadingState(listen,'idle');
-  listen.addEventListener('click',()=>listenPublication(listen,fullText));
+  enableReadingControl(listen,()=>fullText);
   contact.append(listen);
 
   // Una única fila: cuatro acciones para visitantes y seis para el autor.
@@ -390,7 +425,7 @@ function render(){
 $('search').addEventListener('input',render);
 const listenDraft=$('listen-draft');
 setReadingState(listenDraft,'idle');
-listenDraft.addEventListener('click',()=>listenPublication(listenDraft,$('need-description').value));
+enableReadingControl(listenDraft,()=>$('need-description').value);
 $('need-description').addEventListener('input',()=>{
   if(activeReading?.button===listenDraft)stopReading();
 });
