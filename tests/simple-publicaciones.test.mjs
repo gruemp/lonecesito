@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.26');
+  assert.equal(APP_VERSION,'2.2.27');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -632,7 +632,7 @@ test('dos botones de voz, pin GPS y ninguna geolocalización de visitantes',()=>
   assert.match(js,/const panel=el\('div','audio-control-row'\)/);
   assert.match(js,/controls\.main\.replaceChildren\(contactIcon\(status==='playing'\?'pause':'play'\)\)/);
   assert.match(card,/pin\.disabled=!location/);
-  assert.match(card,/locationLines\(location,addressText\)\.join\('\\n'\)/);
+  assert.match(card,/locationLines\(location,addressText,true\)\.join\('\\n'\)/);
   assert.match(card,/pin\.addEventListener\('click'/);
   assert.match(css,/\.audio-control-row\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
   assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
@@ -704,8 +704,7 @@ test('coordenadas, precisión y dirección jerárquica sin inventar calle',async
   assert.ok(f.validLocation(loc));
   assert.deepEqual(f.locationLines(loc),[
     'País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
-    'Barrio o localidad: El Rodadero',
-    'Dirección aproximada del GPS: El Rodadero, Santa Marta, Magdalena, Colombia',
+    'Dirección aproximada: Calle y número no identificados',
     'Latitud: 11.240000 · Longitud: -74.215678','Precisión estimada: ±19 m'
   ]);
   assert.throws(()=>f.locationFromGps({latitude:120,longitude:0,accuracy:10}),/GPS/);
@@ -719,7 +718,7 @@ test('coordenadas, precisión y dirección jerárquica sin inventar calle',async
     ';return makeCardPng;')(factory,undefined);
   await generate({description:'Busco repuesto',contactPhone:'573001234567',location:loc,example:false});
   for(const label of ['UBICACIÓN GPS Y DIRECCIÓN','País: Colombia','Departamento: Magdalena','Ciudad: Santa Marta',
-    'Barrio o localidad: El Rodadero','Precisión estimada: ±19 m'])
+    'Dirección aproximada: Calle y número no identificados','Precisión estimada: ±19 m'])
     assert.ok(labels.includes(label),'Falta en PNG '+label);
   assert.ok(labels.some(label=>label.includes('Latitud: 11.240000')));
   assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
@@ -824,7 +823,7 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   assert.doesNotMatch(js,/GPS_MAX_TIME_MS|GPS_TARGET_METERS/);
   assert.match(js,/Pulsa nuevamente el botón GPS para detener la medición antes de publicar/);
   assert.match(nodes['gps-label'].textContent,/Dirección indicada por el autor: Calle 10 #5-20/);
-  assert.match(nodes['gps-label'].textContent,/Dirección aproximada del GPS: Santa Marta, Colombia/);
+  assert.match(nodes['gps-label'].textContent,/Dirección aproximada: Calle y número no identificados/);
 });
 test('dirección opcional en la misma fila y persistida también sin GPS',async()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
@@ -873,10 +872,10 @@ test('país, departamento, ciudad y barrio siguen visibles aun cuando el servici
   assert.ok(detail.includes('País: No identificado'));
   assert.ok(detail.includes('Departamento: No identificado'));
   assert.ok(detail.includes('Ciudad: No identificado'));
-  assert.ok(detail.includes('Barrio o localidad: No identificado'));
+  assert.ok(!detail.some(text=>text.includes('Barrio o localidad')));
   assert.ok(detail.includes('Dirección indicada por el autor: Carrera 5 #10-20'));
   assert.ok(detail.includes('Precisión estimada: ±14 m'));
-  assert.ok(detail.includes('Dirección aproximada del GPS: no disponible'));
+  assert.ok(detail.includes('Dirección aproximada: Calle y número no identificados'));
   assert.deepEqual(f.locationLines(null,'Carrera 5 #10-20',true),
     ['Dirección indicada por el autor: Carrera 5 #10-20']);
 });
@@ -912,6 +911,8 @@ test('distancia en línea recta calculada sin revelar ni guardar ubicación del 
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),
     js.indexOf('function visibleItems(){'));
   assert.match(card,/locationLines\(location,addressText,true\)/);
+  assert.match(card,/const route=el\('a','publication-route-link','Desde mí'\)/);
+  assert.doesNotMatch(card,/Cómo llegar/);
   assert.match(card,/navigator\.geolocation\.getCurrentPosition/);
   assert.match(card,/distanceKmBetween/);
   assert.match(card,/Distancia aproximada en línea recta:/);
@@ -924,4 +925,100 @@ test('distancia en línea recta calculada sin revelar ni guardar ubicación del 
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   assert.match(css,/\.publication-map-actions\{/);
   assert.match(css,/\.publication-distance-button:disabled/);
+});
+
+test('OSM obtiene calle y numeración en formato colombiano sin inventar datos',()=>{
+  const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(model.replace(/^export /gm,'')+
+    ';return {streetAddressFromOsm,locationFromGps,locationLines};')();
+  assert.equal(f.streetAddressFromOsm({address:{road:'Calle 10A',house_number:'20A-06'}}),
+    'Calle 10A #20A-06');
+  assert.equal(f.streetAddressFromOsm({address:{road:'Carrera 4'}}),'Carrera 4');
+  assert.equal(f.streetAddressFromOsm({address:{house_number:'12-40'}}),'');
+  assert.equal(f.streetAddressFromOsm({address:{road:'Calle 10A',house_number:'#20A-06'}}),
+    'Calle 10A #20A-06');
+  const gps=f.locationFromGps({latitude:11.24,longitude:-74.21,accuracy:9},
+    {countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta',
+      address:'Calle 10A #20A-06',localityName:'Centro'});
+  const lines=f.locationLines(gps,'',true);
+  assert.ok(lines.includes('País: Colombia'));
+  assert.ok(lines.includes('Departamento: Magdalena'));
+  assert.ok(lines.includes('Ciudad: Santa Marta'));
+  assert.ok(lines.includes('Dirección aproximada: Calle 10A #20A-06'));
+  assert.ok(lines.includes('Precisión estimada: ±9 m'));
+  assert.ok(!lines.some(line=>/barrio|localidad/i.test(line)));
+});
+test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sola vez',async()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
+  const b=js.indexOf('function setMicState(active){',a);
+  const f=new Function(model.replace(/^export /gm,'')+
+    ';return {streetAddressFromOsm,locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl};')();
+  const elms={
+    'gps-preview':{hidden:true},'gps-label':{textContent:''},'need-address':{value:'',addEventListener(){}},
+    'gps-map-link':{hidden:true,removeAttribute(){}},
+    'gps-osm-credit':{hidden:true},
+    'gps-remove':{hidden:true,addEventListener(){}}
+  };
+  const pin={classes:new Set(),classList:{toggle(k,on){if(on)pin.classes.add(k);else pin.classes.delete(k);}},
+    children:[],replaceChildren(...nodes){this.children=nodes;},append(node){this.children.push(node);},
+    setAttribute(){},addEventListener(type,fn){this[type]=fn;}};
+  let fix,clearCount=0;
+  const urls=[],notices=[];
+  const request=new Function('locateButton','$','el','contactIcon','navigator','window',
+    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl',
+    'streetAddressFromOsm','fetch','AbortController','toast','setTimeout','clearTimeout',
+    js.slice(a,b)+';return {read:()=>({locationDraft,capturingLocation})};');
+  const ctx=request(pin,key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
+    kind=>({kind}),{geolocation:{
+      watchPosition(success){fix=success;return 0;},
+      clearWatch(){clearCount++;}
+    }},{isSecureContext:true,confirm:()=>true},
+    f.locationFromGps,f.validLocation,f.locationLines,f.cleanAddressText,f.googleMapsLocationUrl,
+    f.streetAddressFromOsm,
+    async url=>{
+      urls.push(url);
+      if(url.includes('nominatim.openstreetmap.org'))
+        return {ok:true,json:async()=>({address:{road:'Calle 10A',house_number:'20A-06'}})};
+      return {ok:true,json:async()=>({
+        countryName:'Colombia',principalSubdivision:'Magdalena',city:'Santa Marta'})};
+    },
+    class Abort{constructor(){this.signal={};}abort(){}},
+    message=>notices.push(message),()=>1,()=>{});
+  pin.click();
+  fix({coords:{latitude:11.240123,longitude:-74.210123,accuracy:22}});
+  assert.equal(urls.length,0);
+  pin.click();
+  assert.equal(clearCount,1);
+  await Promise.resolve();await Promise.resolve();await Promise.resolve();
+  await Promise.resolve();await Promise.resolve();
+  assert.equal(urls.length,2);
+  assert.ok(urls.some(url=>url.includes('nominatim.openstreetmap.org/reverse')));
+  assert.ok(urls.some(url=>url.includes('api.bigdatacloud.net')));
+  assert.equal(ctx.read().locationDraft.address,'Calle 10A #20A-06');
+  assert.equal(elms['gps-osm-credit'].hidden,false);
+  assert.match(elms['gps-label'].textContent,/Dirección aproximada: Calle 10A #20A-06/);
+  assert.doesNotMatch(elms['gps-label'].textContent,/Barrio o localidad/);
+});
+test('PNG conserva país, departamento, ciudad y calle sin barrio',async()=>{
+  const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const labels=[];
+  const ctx={beginPath(){},moveTo(){},lineTo(){},quadraticCurveTo(){},closePath(){},
+    fill(){},stroke(){},fillRect(){},save(){},restore(){},clip(){},drawImage(){},
+    fillText(x){labels.push(x);},measureText(x){return {width:String(x).length*12};}};
+  const makeCardPng=new Function('document','Image',source.replace(/^export /gm,'')+
+    ';return makeCardPng;')(
+      {createElement:()=>({getContext:()=>ctx,toBlob(fn){fn({type:'image/png'});}})},undefined);
+  await makeCardPng({description:'Necesito reparaciones',
+    contactPhone:'573001234567',location:{latitude:11.24,longitude:-74.21,accuracy:9,
+      country:'Colombia',department:'Magdalena',city:'Santa Marta',
+      address:'Calle 10A #20A-06',neighborhood:'Centro'},example:false});
+  assert.ok(labels.includes('País: Colombia'));
+  assert.ok(labels.includes('Departamento: Magdalena'));
+  assert.ok(labels.includes('Ciudad: Santa Marta'));
+  assert.ok(labels.includes('Dirección aproximada: Calle 10A #20A-06'));
+  assert.ok(labels.includes('Datos de calles: © OpenStreetMap contributors'));
+  assert.ok(!labels.some(x=>/barrio|localidad/i.test(x)));
+  assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
 });
