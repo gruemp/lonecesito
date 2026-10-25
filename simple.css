@@ -544,3 +544,23 @@ body:has(.image-dialog[open]){overflow:hidden}
 .publication-card .listen-action{background:#946018;border-color:#794d10;color:#fff}
 .publication-card .listen-action:hover{background:#7f5011}
 .publication-card .listen-action[aria-pressed="true"]{background:#694311;border-color:#694311}
+
+/* v2.2.18 — escuchar borrador en la misma fila; control claro para play/pausa/reanudar. */
+#publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 44px 44px 44px 52px}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,44px)}
+#publish-form .preview-listen-tool{background:#fff4df;border-color:#dbbd84;color:#815511}
+#publish-form .preview-listen-tool[data-reading-state="playing"]{background:#8b651d;border-color:#8b651d;color:#fff}
+#publish-form .preview-listen-tool[data-reading-state="paused"]{background:#f9e1b0;border-color:#b88433;color:#66420c}
+.publication-card .listen-action[data-reading-state="paused"]{background:#ead19a;border-color:#be903e;color:#69420b}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,39px) 43px;gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,34px);gap:3px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(4,34px);gap:3px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,30px);gap:2px}
+  #publish-form .phone-field{padding:0 3px;gap:2px}
+  #publish-form .phone-field-icon{width:14px;height:14px;flex-basis:14px}
+  #publish-form .phone-field #need-phone{font-size:10px}
+  #publish-form .publish-controls .entry-tool svg{width:18px;height:18px}
+}

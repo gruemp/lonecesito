@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.17 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.18 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -11,8 +11,15 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 ## Cambios aprobados e implementados el 25-10-2026
 
 - Mensaje contextual de WhatsApp: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Se destaca solo la necesidad.
-- Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque detiene la voz. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
+- Lectura en voz alta del texto completo desde el icono de altavoz en todas las fichas. Un segundo toque pausa la voz; el siguiente reanuda desde el punto donde quedó. Control en una sola fila: cuatro botones para visitantes, seis para el dueño. Si el navegador no soporta voz, muestra aviso puntual.
 - No cambia la portada ni el editor ni la configuración pendiente de Firebase. Verificación en celular físico y comprobación independiente de GitHub Pages pendientes si no se puede acceder al dispositivo externo.
+
+## Actualización 2.2.18 — 25 de octubre de 2026
+
+- Reproducción de voz con estados visibles: altavoz (iniciar), pausa (detener temporalmente) y reanudar (continuar desde el punto anterior); un único audio activo.
+- Botón para escuchar el texto de la nueva publicación en el editor, en la misma fila compacta de teléfono, foto, micrófono y envío; también funciona durante edición.
+- PNG compartido con número telefónico visible, formateado y destacado en una banda de contacto. No se imprime el número dentro de la ficha pública.
+- El comportamiento de pausa/reanudación depende de la compatibilidad de SpeechSynthesis de cada navegador y debe verificarse en dispositivos físicos.
 
 ## 1. Qué problema resuelve la web
 
@@ -27,8 +34,8 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo técnico actual 4.000).
 - **Controles del editor:** una fila con teléfono e icono a su izquierda y marcador «Ej: 300 123 4567» dentro; foto, micrófono y envío por avión de papel, **sin texto visible en el botón verde**. Enter envía; Shift+Enter salta de línea. En edición aparecen además papelera y X para cancelar, en esa fila.
 - **Fichas:** sin título visual; todo el texto justificado y visible, alto según contenido. **Con foto:** derecha, ajuste sin cortes, pulsar para ver completa y cerrar con X/Escape/toque fuera. **Sin foto:** texto a todo el ancho, sin huecos ni marcadores.
-- **Acciones de ficha:** una sola fila de **4 iconos** para visitantes (marcador telefónico azul, WhatsApp verde, compartir PNG morado de tres puntos conectados y escuchar o detener lectura con altavoz ocre); **6 iconos** para dueño (+ lápiz y papelera). El lector usa Web Speech API, es-CO si hay voz disponible; mensaje WhatsApp con resumen de necesidad en negrita mediante *asteriscos*. No imprimir el número sobre la ficha, no escribir «Contactar».
-- **Compartir:** generar PNG local fiel al contenido sin título visual, foto solo si existe y **teléfono real dentro del PNG**; usar compartir nativo o descargar. El número no se imprime sobre la ficha web.
+- **Acciones de ficha:** una sola fila de **4 iconos** para visitantes (marcador telefónico azul, WhatsApp verde, compartir PNG morado de tres puntos conectados y escuchar, pausar y reanudar lectura con altavoz ocre e iconos dinámicos); **6 iconos** para dueño (+ lápiz y papelera). El lector usa Web Speech API, es-CO si hay voz disponible; mensaje WhatsApp con resumen de necesidad en negrita mediante *asteriscos*. No imprimir el número sobre la ficha, no escribir «Contactar».
+- **Compartir:** generar PNG local fiel al contenido sin título visual, foto solo si existe y **teléfono real dentro del PNG en banda elegante de contacto**; usar compartir nativo o descargar. El número no se imprime sobre la ficha web.
 - **No mostrar ejemplos ni versión:** no hay necesidades ficticias, números de prueba ni barra «Versión X.Y.Z» en ninguna pantalla. Tampoco avisos de demo que estorben.
 - **Diseño:** máxima economía vertical **sin sacrificar ancho ni claridad**; colores diferenciados, opciones independientes, texto descriptivo justificado con última línea natural; mantener misma experiencia esencial en PC y celular.
 

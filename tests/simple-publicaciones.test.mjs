@@ -18,7 +18,7 @@ test('la interfaz muestra exactamente dos entradas de publicación',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.17');
+  assert.equal(APP_VERSION,'2.2.18');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -325,7 +325,7 @@ test('todas las fichas tienen tercer botón para compartir PNG sin palabra Conta
 test('la exportación PNG usa canvas, hoja nativa de compartir o descarga',()=>{
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const png=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
-  assert.match(js,/import \{makeCardPng\} from '.\/card-png\.js\?v=20261024-v228'/);
+  assert.match(js,/import \{makeCardPng\} from '.\/card-png\.js\?v=20261025-v2218'/);
   assert.match(js,/async function sharePublicationPng\(record\)/);
   assert.match(js,/navigator\.share\(\{files:\[file\],title:/);
   assert.match(js,/new File\(\[blob\],filename,\{type:'image\/png'\}\)/);
@@ -629,11 +629,72 @@ test('altavoz en cada ficha; lector nativo y una sola fila de 4 o 6 íconos',()=
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),js.indexOf('\nfunction visibleItems(){'));
   assert.match(card,/listenPublication\(listen,fullText\)/);
   assert.match(card,/contact\.append\(listen\)/);
-  assert.match(js,/new SpeechSynthesisUtterance\(text\)/);
+  assert.match(js,/new SpeechSynthesisUtterance\(content\)/);
   assert.match(js,/utterance\.lang='es-CO'/);
   assert.match(js,/window\.speechSynthesis\.cancel\(\)/);
-  assert.match(card,/aria-pressed/);
+  assert.match(card,/setReadingState\(listen,'idle'\)/);
   assert.match(css,/grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
   assert.match(css,/grid-template-columns:repeat\(6,minmax\(0,1fr\)\)/);
   assert.match(css,/\.publication-card \.listen-action/);
+});
+
+test('lectura en tres estados: reproducir, pausar y reanudar sin reiniciar',()=>{
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const start=js.indexOf('let activeReading=null;');
+  const end=js.indexOf('function renderCard(record,owner){',start);
+  assert.ok(start>=0&&end>start);
+  const calls=[];
+  const synth={getVoices:()=>[{lang:'es-CO'}],speak:u=>calls.push(['speak',u.text]),
+    pause:()=>calls.push(['pause']),resume:()=>calls.push(['resume']),cancel:()=>calls.push(['cancel'])};
+  const Controller=new Function('window','SpeechSynthesisUtterance','contactIcon','toast','recognition','stopDictation',
+    js.slice(start,end)+';return {listenPublication,stopReading};');
+  function Utterance(text){this.text=text;}
+  const {listenPublication,stopReading}=Controller({speechSynthesis:synth},Utterance,kind=>({kind}),
+    ()=>{},null,()=>{});
+  const button={id:'listen-draft',dataset:{},attributes:{},
+    setAttribute(name,value){this.attributes[name]=value;},
+    replaceChildren(icon){this.icon=icon;}};
+  listenPublication(button,'Texto íntegro del borrador');
+  assert.equal(button.dataset.readingState,'playing');
+  assert.equal(button.icon.kind,'pause');
+  listenPublication(button,'Texto íntegro del borrador');
+  assert.equal(button.dataset.readingState,'paused');
+  assert.equal(button.icon.kind,'resume');
+  listenPublication(button,'Texto íntegro del borrador');
+  assert.equal(button.dataset.readingState,'playing');
+  assert.equal(button.icon.kind,'pause');
+  assert.equal(calls.filter(([action])=>action==='speak').length,1);
+  assert.ok(calls.some(([action])=>action==='pause'));
+  assert.ok(calls.some(([action])=>action==='resume'));
+  stopReading();
+  assert.equal(button.dataset.readingState,'idle');
+  assert.equal(button.icon.kind,'listen');
+});
+test('el editor permite escuchar su texto y conserva una fila de controles',()=>{
+  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
+  const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
+  const controls=html.slice(html.indexOf('<div class="publish-controls">'),html.indexOf('<p id="form-feedback"'));
+  const order=['need-phone','add-photo','voice-button','listen-draft','save-button','delete-edit','cancel-edit'];
+  let last=-1;
+  for(const id of order){const at=controls.indexOf('id="'+id+'"');assert.ok(at>last,'Desorden: '+id);last=at;}
+  assert.match(js,/listenDraft\.addEventListener\('click',\(\)=>listenPublication\(listenDraft,\$\('need-description'\)\.value\)\)/);
+  assert.match(css,/#publish-form \.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,44px\)\}/);
+  assert.match(css,/@media\(max-width:345px\)[\s\S]*?\.publish-controls\.editing\{grid-template-columns:minmax\(0,1fr\) repeat\(6,30px\);gap:2px\}/);
+});
+test('PNG muestra número real en banda distinguible sin añadir título a la ficha',async()=>{
+  const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const drawn=[];
+  const ctx={beginPath(){},moveTo(){},lineTo(){},quadraticCurveTo(){},closePath(){},
+    fill(){},stroke(){},fillRect(){},save(){},restore(){},clip(){},drawImage(){},
+    fillText(value){drawn.push(value);},measureText(value){return {width:String(value).length*15};}};
+  const fakeDocument={createElement:()=>({getContext:()=>ctx,toBlob(cb){cb({type:'image/png'});}})};
+  const generate=new Function('document','Image',source.replace(/^export /gm,'')+';return makeCardPng;')(fakeDocument,undefined);
+  const result=await generate({description:'Busco repuesto en Santa Marta',
+    picture:'',contactPhone:'+573001234567',example:false});
+  assert.equal(result.type,'image/png');
+  assert.ok(drawn.includes('TELÉFONO · WHATSAPP'));
+  assert.ok(drawn.includes('+57 300 123 4567'));
+  assert.ok(drawn.includes('LoNecesito'));
+  assert.ok(!drawn.some(item=>String(item).startsWith('Repuesto para ventilador:')));
 });

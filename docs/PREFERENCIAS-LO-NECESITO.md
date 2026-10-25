@@ -50,7 +50,7 @@ No pedir un mínimo de caracteres: **un único carácter no vacío es válido**;
 
 La fila directamente debajo del editor se presenta, en orden:
 
-**[icono teléfono + caja Ej: 300 123 4567] [foto] [micrófono] [icono verde de avión de papel]**
+**[icono teléfono + caja Ej: 300 123 4567] [foto] [micrófono] [escuchar / pausar / reanudar] [icono verde de avión de papel]**
 
 - El icono verde **no lleva la palabra «Publicar»** en su superficie; accesiblemente sí se denomina «Publicar» o «Guardar cambios».
 - Enter desde descripción o teléfono activa publicar/guardar por la misma ruta que el icono. **Shift+Enter inserta un salto de línea** en la descripción. Evitar publicar involuntariamente mientras se compone texto con un teclado IME o al repetir una tecla.
@@ -80,14 +80,14 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 - El dueño ve además dos más, **editar** (lápiz azul claro) y **eliminar** (papelera rojiza). Seis iconos en una sola fila, nunca en dos.
 - Compartir es el **símbolo familiar de tres puntos conectados**; se rechazó el anterior icono de flecha hacia arriba.
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
-- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje aprobado: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Solo el resumen entre asteriscos se presenta en negrita en WhatsApp. El altavoz lee el contenido completo en español usando la voz del navegador (preferir es-CO), permite detenerlo al pulsar de nuevo y permanece disponible en todas las fichas tanto propias como ajenas. No hacer que ambos iconos abran WhatsApp.
+- El número telefónico **no se escribe sobre la ficha**. El icono azul utiliza el marcador nativo por enlace telefónico y el verde dirige a **api.whatsapp.com/send** con mensaje aprobado: «Hola, vi tu publicación en LoNecesito: *«[resumen]»*. ¿Aún lo necesitas? Puedo ayudarte.». Solo el resumen entre asteriscos se presenta en negrita en WhatsApp. El altavoz lee el contenido completo en español usando la voz del navegador (preferir es-CO), permite pausar al pulsar de nuevo y reanudar en otro toque sin repetir desde el principio. El ícono alterna entre altavoz (listo), pausa (reproduciendo) y reanudar (pausado). Está en todas las fichas, propias y ajenas, y en el formulario para oír el texto escrito antes de publicar. No hacer que ambos iconos abran WhatsApp.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
 
 ## F. Imagen PNG al compartir
 
 - El icono de compartir genera **una imagen PNG de la ficha**, no solo una URL de la web.
 - PNG **sin título añadido**, con toda la descripción justificada y **sin espacio reservado** cuando no hay foto; si hay foto, va a la derecha y completa.
-- **El número real del autor sí aparece dentro del PNG**: la imagen enviada es estática y sin ese dato el destinatario no podría llamarlo. La ficha web sigue sin imprimirlo.
+- **El número real del autor sí aparece dentro del PNG**: destacarlo elegantemente en una banda de contacto «TELÉFONO · WHATSAPP» con el número legible y formateado, porque la imagen enviada es estática y sin ese dato el destinatario no podría llamarlo. La ficha web sigue sin imprimirlo.
 - Usar las opciones nativas de compartir archivo cuando el navegador las soporte; como respaldo, descargar el PNG. Generarlo en el propio navegador.
 - No utilizar teléfonos ficticios en imágenes exportadas ni imprimir mensajes sobre pruebas.
 
