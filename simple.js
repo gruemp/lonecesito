@@ -429,6 +429,13 @@ function renderCard(record,owner){
     route.setAttribute('aria-label','Ver ruta desde mi ubicación en Google Maps');
     actions.append(route);
     details.append(actions);
+    if(location?.address){
+      const attribution=el('a','publication-osm-credit','Datos de calles © OpenStreetMap');
+      attribution.href='https://www.openstreetmap.org/copyright';
+      attribution.target='_blank';
+      attribution.rel='noopener noreferrer';
+      details.append(attribution);
+    }
     if(location){
       const distanceButton=el('button','publication-distance-button','Distancia desde mí');
       distanceButton.type='button';
@@ -514,6 +521,7 @@ let pictureDraft='';
 let pictureLoading=false;
 let locationDraft=null,locationRequestId=0,capturingLocation=false;
 let gpsWatchId=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
+let lastStreetLookupAt=0;
 function updateGpsButton(){
   const hasFix=validLocation(locationDraft);
   const precision=capturingLocation
@@ -543,6 +551,8 @@ function showLocationDraft(){
   preview.hidden=!(gpsExists||declared);
   $('gps-remove').hidden=!gpsExists;
   $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
+  const credit=$('gps-osm-credit');
+  credit.hidden=!(gpsExists&&locationDraft.address);
   const maps=$('gps-map-link');
   const url=googleMapsLocationUrl(locationDraft,declared);
   maps.hidden=!url;
@@ -585,10 +595,17 @@ function resolveGpsAddress(coords,requestId){
         return response.json();
       });
       // Una sola consulta inversa por medición final, nunca en el bucle GPS.
-      const streetRequest=fetch(streetUrl,{signal:controller.signal}).then(async response=>{
+      const streetRequest=(async()=>{
+        // Máximo una consulta por segundo desde este navegador.
+        // Respetar los límites de Nominatim; un solo GPS final por acción.
+        const delay=Math.max(0,1100-(Date.now()-lastStreetLookupAt));
+        if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+        if(controller.signal.aborted)throw Error('Consulta cancelada');
+        lastStreetLookupAt=Date.now();
+        const response=await fetch(streetUrl,{signal:controller.signal});
         if(!response.ok)throw Error('Calle no disponible');
         return streetAddressFromOsm(await response.json());
-      });
+      })();
       const [cityResult,streetResult]=await Promise.allSettled([cityRequest,streetRequest]);
       if(requestId!==locationRequestId)return;
       const geo=cityResult.status==='fulfilled'?cityResult.value:{};
