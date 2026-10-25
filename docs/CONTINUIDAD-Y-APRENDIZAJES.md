@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.24 (no visible al público)  
+**Versión interna del código de interfaz:** 2.2.25 (no visible al público)  
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -59,7 +59,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - **Inicio:** solo la **imagen aprobada de dos pasos**: «1. Publica lo que necesitas» (licuadora) → «2. Lo ven y te contactan» (llamada o WhatsApp). Archivo: **assets/lonecesito-presentacion-dos-pasos.png**, 1819 × 865. Se ajusta al viewport para aparecer completa al 100 % de zoom, alineada con la navegación, sin recortes ni deformaciones. La imagen anterior queda como respaldo y la variante con mayonesa fue descartada.
 - **Ver necesidades:** buscador en vivo, con coincidencias parciales por varios términos, sin tildes/mayúsculas, indexando campos públicos históricos y números telefónicos completos/parciales. Solo necesidades **reales**.
 - **Mis publicaciones:** solo las publicaciones creadas por el dueño.
-- **Publicar:** **dos entradas**: una descripción completa libre y teléfono. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo de 1.000 para nuevas publicaciones o cambios de descripción; texto histórico >1.000 sin modificaciones se conserva hasta su tamaño previo máximo de 4.000).
+- **Publicar:** dos entradas obligatorias (descripción completa y teléfono) más una tercera caja de **dirección opcional**, junto al botón GPS en la segunda fila. No pedir título, ciudad ni presupuesto aparte. La descripción admite cualquier longitud no vacía (máximo de 1.000 para nuevas publicaciones o cambios de descripción; texto histórico >1.000 sin modificaciones se conserva hasta su tamaño previo máximo de 4.000).
 - **Controles del editor:** una fila con teléfono e icono a su izquierda y marcador «Ej: 300 123 4567» dentro; foto, micrófono y envío por avión de papel, **sin texto visible en el botón verde**. Enter envía; Shift+Enter salta de línea. En edición aparecen además papelera y X para cancelar, en esa fila.
 - **Fichas:** sin título visual; todo el texto justificado y visible, alto según contenido. **Con foto:** derecha, ajuste sin cortes, pulsar para ver completa y cerrar con X/Escape/toque fuera. **Sin foto:** texto a todo el ancho, sin huecos ni marcadores.
 - **Acciones de ficha:** primera fila, llamar/WhatsApp/compartir (visitantes); más editar/eliminar (autor). Segunda fila fija de voz: reproducir, pausar, reanudar y reiniciar. Sin geolocalización todavía.
@@ -105,7 +105,7 @@ Este documento permite que una nueva IA retome el proyecto con contexto real y s
 - Los **colores distintos** ayudan a percibir acciones independientes; cada botón debe comunicar inmediatamente su propósito. Los iconos deben ser reconocibles, especialmente compartir mediante **tres nodos unidos**, no una flecha genérica.
 - **La ficha es la pieza central del diseño.** Sin títulos, justificación de todo el cuerpo, foto a la derecha solo si existe y acciones en una sola fila. No crear cajas de ciudad, categoría, presupuesto ni fecha.
 - Cuando alguien habla de buscar «por tramos» quiere **fragmentos de palabras y coincidencias parciales de teléfono**, no un formulario de filtros restrictivo ni Gemini.
-- El editor usa **solo dos campos**: libertad total al describir la necesidad y un número para contactar. Micrófono y foto son opciones, no campos obligatorios.
+- El editor tiene **dos campos obligatorios** (descripción libre y teléfono) y **una dirección opcional**, ubicada al lado del GPS; micrófono y foto siguen siendo opciones.
 - Evitar los **mensajes que fastidian**, incluso si son técnicamente precisos: documentar límites del prototipo y pruebas en GitHub y en las respuestas de desarrollo, no ocupar constantemente la UI con ello. Mostrar solo información útil para una acción.
 - El usuario cambia y afina preferencias **a partir de imágenes y capturas**. Actualizar reglas cuando cambie de opinión y **retirar órdenes anteriores**. No conservar dos interpretaciones contradictorias.
 - La ilustración vigente es **la primera de dos pasos aprobada por el usuario**: ejemplo con licuadora, no con mayonesa; refleja publicación y contacto directo, sin ofertas ni negociación dentro de la web.
@@ -143,3 +143,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Tras detenerse se solicita **una única** consulta de dirección a BigDataCloud con la mejor coordenada final. Los puntos intermedios no se envían. Se mantienen sin cambios la etiqueta de ubicación, publicación del GPS de autor y PNG, y la indicación de precisión con metros. Si no llega ninguna posición, no reemplazar una ubicación ya guardada.
 - Al cancelar GPS, quitar ubicación, abandonar una edición, cambiar de vista o guardar, detener seguimiento y limpiar temporizadores. Solo botón GPS controla inicio/parada. En las fichas públicas **no se activa watchPosition ni se solicita permiso**.
 - Pruebas de dispositivo real para precisión, permisos, geocodificación y actualización visual pendientes.
+
+## Cambio 2.2.25 — 25 de octubre de 2026 (vigente)
+- El autor solicitó expresamente que el GPS **no se detenga automáticamente** por haber alcanzado ±10 m ni por 30 segundos. El observador de precisión continúa indefinidamente en el editor hasta pulsar por segunda vez el pin. Mientras mide conserva la mejor muestra y el mismo pin muestra ±metros. Por privacidad, abandonar el editor, quitar GPS o cancelar detiene el observador; intentar publicar durante medición pide que se detenga desde el pin antes de guardar.
+- En la misma segunda fila, **inmediatamente a la izquierda del botón GPS**, se incorporó una caja de dirección opcional `need-address` con icono a la izquierda y placeholder dentro, replicando criterios de la caja del teléfono. Los dos botones de voz permanecen a su izquierda. No se añadió otra fila. Límite 180 caracteres, campo opcional y público.
+- Las publicaciones conservan `addressText` separado de `location`: se puede escribir sin GPS, editar o quitar. Al pulsar pin de la ficha se muestra «Dirección indicada por el autor» y, cuando hay coordenadas, «Dirección aproximada del GPS» sintetizada de los componentes que devuelve BigDataCloud, además de latitud, longitud, precisión y detalles administrativos. Nunca se inventan calles ni números.
+- PNG incluye la dirección del autor con o sin GPS; si hay GPS incluye ambos tipos de dirección, ciudad, departamento, país y precisión, y conserva el número de teléfono. Las reglas Firestore admiten `addressText` opcional, con longitud validada y permisos del autor, pero requieren despliegue separado a Firebase.
+- Pruebas simuladas y prueba física posterior de GPS continuo/dirección pendientes de registrar; el GPS prolongado puede consumir batería y la precisión reportada nunca garantiza exactitud.
