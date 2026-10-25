@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.27');
+  assert.equal(APP_VERSION,'2.2.28');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -782,9 +782,9 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
   const start=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
   const end=js.indexOf('function setMicState(active){',start);
-  const {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm}=new Function(
+  const {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders}=new Function(
     model.replace(/^export /gm,'')+
-    ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm};')();
+    ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders};')();
   const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
     addEventListener(t,fn){this[t]=fn;}};
   const nodes={'gps-preview':{},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-osm-credit':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
@@ -797,13 +797,13 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   },clearWatch(id){assert.equal(id,0);stops++;}};
   const controller=new Function(
     'locateButton','$','el','contactIcon','navigator','window',
-    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm',
+    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm','locationFromNaturaGeocoders',
     'fetch','AbortController','toast','setTimeout','clearTimeout',
     js.slice(start,end)+
     ';return {get state(){return {capturingLocation,locationDraft};}};')(
       pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
       {geolocation:geo},{isSecureContext:true,confirm:()=>true},
-      locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,
+      locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,
       async url=>{requests++;return {ok:true,json:async()=>url.includes('nominatim')?{address:{}}:{countryName:'Colombia',city:'Santa Marta'}};},
       class Abort {constructor(){this.signal={};}abort(){}},()=>{},
       ()=>1,()=>{});
@@ -968,7 +968,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   const urls=[],notices=[];
   const request=new Function('locateButton','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl',
-    'streetAddressFromOsm','fetch','AbortController','toast','setTimeout','clearTimeout',
+    'streetAddressFromOsm','locationFromNaturaGeocoders','fetch','AbortController','toast','setTimeout','clearTimeout',
     js.slice(a,b)+';return {read:()=>({locationDraft,capturingLocation})};');
   const ctx=request(pin,key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
     kind=>({kind}),{geolocation:{
@@ -976,7 +976,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
       clearWatch(){clearCount++;}
     }},{isSecureContext:true,confirm:()=>true},
     f.locationFromGps,f.validLocation,f.locationLines,f.cleanAddressText,f.googleMapsLocationUrl,
-    f.streetAddressFromOsm,
+    f.streetAddressFromOsm,f.locationFromNaturaGeocoders,
     async url=>{
       urls.push(url);
       if(url.includes('nominatim.openstreetmap.org'))
@@ -1020,4 +1020,64 @@ test('PNG conserva país, departamento, ciudad y calle sin barrio',async()=>{
   assert.ok(labels.includes('Datos de calles: © OpenStreetMap contributors'));
   assert.ok(!labels.some(x=>/barrio|localidad/i.test(x)));
   assert.ok(labels.includes('TELÉFONO · WHATSAPP'));
+});
+
+
+test('Natura: OSM aporta municipio y ciudad; BigDataCloud respalda departamento y país',()=>{
+  const source=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(source.replace(/^export /gm,'')+
+    ';return {locationFromNaturaGeocoders,locationLines};')();
+  const coords={latitude:11.24,longitude:-74.21,accuracy:12};
+  const osm={address:{
+    road:'Calle 10A',house_number:'20A-06',
+    city:'Santa Marta',county:'Municipio de Santa Marta',
+    state:'Magdalena',country:'Colombia'}};
+  const data=f.locationFromNaturaGeocoders(coords,osm,{});
+  assert.equal(data.city,'Santa Marta');
+  assert.equal(data.department,'Magdalena');
+  assert.equal(data.country,'Colombia');
+  assert.equal(data.municipality,'Santa Marta');
+  assert.equal(data.address,'Calle 10A #20A-06');
+  assert.ok(f.locationLines(data,'',true).includes('Municipio: Santa Marta'));
+  const fallback=f.locationFromNaturaGeocoders(coords,{},{countryName:'Colombia',
+    principalSubdivision:'Magdalena',locality:'Santa Marta'});
+  assert.equal(fallback.city,'Santa Marta');
+  assert.equal(fallback.department,'Magdalena');
+  assert.equal(fallback.country,'Colombia');
+  assert.equal(fallback.address,'');
+});
+test('Natura: village/town/municipality/county son fuentes alternativas de municipio',()=>{
+  const source=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
+  const f=new Function(source.replace(/^export /gm,'')+
+    ';return {locationFromNaturaGeocoders};')();
+  const coords={latitude:4.61,longitude:-74.08,accuracy:22};
+  for(const [key,value] of [['town','Facatativá'],['village','Minca'],
+    ['municipality','Ciénaga'],['county','Municipio de Aracataca']]){
+    const valueResult=f.locationFromNaturaGeocoders(coords,{
+      address:{[key]:value,state:'Magdalena',country:'Colombia'}
+    },{});
+    assert.equal(valueResult.city,value.replace(/^Municipio de /,''));
+    assert.equal(valueResult.department,'Magdalena');
+  }
+  const neither=f.locationFromNaturaGeocoders(coords,{},{});
+  assert.equal(neither.city,'');
+  assert.equal(neither.department,'');
+});
+test('PNG preserva municipio junto a país departamento ciudad precisión y teléfono',async()=>{
+  const source=readFileSync(new URL('../card-png.js',import.meta.url),'utf8');
+  const drawn=[];
+  const ctx={beginPath(){},moveTo(){},lineTo(){},quadraticCurveTo(){},closePath(){},
+    fill(){},stroke(){},fillRect(){},save(){},restore(){},clip(){},drawImage(){},
+    fillText(x){drawn.push(x);},measureText(x){return {width:String(x).length*10};}};
+  const gen=new Function('document','Image',source.replace(/^export /gm,'')+
+    ';return makeCardPng;')(
+      {createElement:()=>({getContext:()=>ctx,toBlob(cb){cb({type:'image/png'});}})},undefined);
+  await gen({description:'Necesito mensajero',contactPhone:'573001234567',
+    location:{latitude:11.24,longitude:-74.21,accuracy:12,
+      country:'Colombia',department:'Magdalena',municipality:'Santa Marta',
+      city:'Santa Marta',address:'Calle 10A #20A-06'},example:false});
+  for(const text of ['País: Colombia','Departamento: Magdalena','Municipio: Santa Marta',
+    'Ciudad: Santa Marta','Dirección aproximada: Calle 10A #20A-06',
+    'Precisión estimada: ±12 m','TELÉFONO · WHATSAPP'])
+    assert.ok(drawn.includes(text),text+' missing');
 });
