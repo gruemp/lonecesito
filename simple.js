@@ -1,7 +1,7 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2224';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2225';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2223';
-import {locationFromGps,validLocation,locationLines} from './location-model.js?v=20261025-v2223';
+import {makeCardPng} from './card-png.js?v=20261025-v2225';
+import {locationFromGps,validLocation,locationLines,cleanAddressText} from './location-model.js?v=20261025-v2225';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -153,7 +153,7 @@ async function sharePublicationPng(record){
     const number='+'+normalizeWhatsApp(record.contactPhone);
     const blob=await makeCardPng({
       description,picture:record.picture||'',
-      contactPhone:number,location:record.location||null,example:false
+      contactPhone:number,location:record.location||null,addressText:record.addressText||'',example:false
     });
     const filename='lonecesito-necesidad.png';
     if(typeof File==='function'&&typeof navigator.share==='function'){
@@ -398,16 +398,18 @@ function renderCard(record,owner){
   const pin=el('button','audio-action audio-location');
   pin.type='button';
   const location=validLocation(record.location)?record.location:null;
-  pin.title=location?'Ver ubicación GPS de la publicación':'Sin ubicación GPS registrada';
+  const addressText=String(record.addressText||'').trim();
+  pin.title=location?'Ver ubicación y dirección de la publicación':
+    addressText?'Ver dirección indicada por el autor':'Sin ubicación ni dirección registrada';
   pin.setAttribute('aria-label',pin.title);
-  pin.disabled=!location;
+  pin.disabled=!(location||addressText);
   pin.append(contactIcon('location'));
   tools.append(pin);
   article.append(tools);
-  if(location){
-    const details=el('div','publication-location',locationLines(location).join('\n'));
+  if(location||addressText){
+    const details=el('div','publication-location',locationLines(location,addressText).join('\n'));
     details.hidden=true;
-    details.setAttribute('aria-label','Ubicación GPS guardada por el autor');
+    details.setAttribute('aria-label','Dirección y ubicación guardadas por el autor');
     pin.setAttribute('aria-expanded','false');
     pin.addEventListener('click',()=>{
       details.hidden=!details.hidden;
@@ -436,6 +438,9 @@ function render(){
 }
 $('search').addEventListener('input',render);
 const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
+// Dos iconos de audio, después una caja de dirección análoga a la de teléfono,
+// y el pin GPS en el extremo derecho de la misma fila.
+draftReadingPanel.append($('need-address-field'));
 const locateButton=el('button','audio-action audio-location');
 locateButton.type='button';
 locateButton.title='Obtener ubicación GPS con permiso';
@@ -451,8 +456,7 @@ let recognition=null;
 let pictureDraft='';
 let pictureLoading=false;
 let locationDraft=null,locationRequestId=0,capturingLocation=false;
-let gpsWatchId=null,gpsStopTimer=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
-const GPS_MAX_TIME_MS=30000, GPS_TARGET_METERS=10;
+let gpsWatchId=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
 function updateGpsButton(){
   const hasFix=validLocation(locationDraft);
   const precision=capturingLocation
@@ -478,7 +482,8 @@ function updateGpsButton(){
 function showLocationDraft(){
   const preview=$('gps-preview');
   preview.hidden=!validLocation(locationDraft);
-  $('gps-label').textContent=validLocation(locationDraft)?locationLines(locationDraft).join('\n'):'';
+  $('gps-label').textContent=validLocation(locationDraft)
+    ?locationLines(locationDraft,$('need-address').value).join('\n'):'';
   updateGpsButton();
 }
 function stopGpsWatch(){
@@ -486,7 +491,6 @@ function stopGpsWatch(){
     navigator.geolocation?.clearWatch(gpsWatchId);
     gpsWatchId=null;
   }
-  if(gpsStopTimer!==null){clearTimeout(gpsStopTimer);gpsStopTimer=null;}
   capturingLocation=false;
 }
 function cancelGpsTasks(){
@@ -538,6 +542,7 @@ function finishGpsMeasurement(){
     toast('No se recibió una posición GPS. Inténtalo de nuevo al aire libre.');
   }
 }
+$('need-address').addEventListener('input',showLocationDraft);
 $('gps-remove').addEventListener('click',()=>{
   locationRequestId++;
   cancelGpsTasks();
@@ -573,8 +578,7 @@ locateButton.addEventListener('click',()=>{
         locationDraft=locationFromGps(coords);
         showLocationDraft();
       }
-      if(coords.accuracy<=GPS_TARGET_METERS)finishGpsMeasurement();
-    },error=>{
+     },error=>{
       if(requestId!==locationRequestId||!capturingLocation)return;
       // El dispositivo puede mejorar en la siguiente medición. Solo la
       // denegación de permiso detiene el proceso inmediatamente.
@@ -585,10 +589,7 @@ locateButton.addEventListener('click',()=>{
         toast(gpsErrorMessage(error));
       }
     },{enableHighAccuracy:true,maximumAge:0,timeout:12000});
-    gpsStopTimer=setTimeout(()=>{
-      if(requestId===locationRequestId)finishGpsMeasurement();
-    },GPS_MAX_TIME_MS);
-  }catch(error){
+   }catch(error){
     stopGpsWatch();
     gpsBestCoords=null;
     showLocationDraft();
@@ -734,6 +735,7 @@ function editRecord(record){
   // Las fichas anteriores de más de 1.000 caracteres se conservan íntegras.
   $('need-description').maxLength=$('need-description').value.length>1000?4000:1000;
   $('need-phone').value=record.contactPhone||'';
+  $('need-address').value=record.addressText||'';
   pictureDraft=record.picture||'';updatePhotoPreview();
   locationDraft=validLocation(record.location)?{...record.location}:null;
   showLocationDraft();
@@ -783,6 +785,7 @@ function publishOnEnter(event){
 }
 $('need-description').addEventListener('keydown',publishOnEnter);
 $('need-phone').addEventListener('keydown',publishOnEnter);
+$('need-address').addEventListener('keydown',publishOnEnter);
 async function deleteRecord(record){
   if(!canManage(record,currentUid()))return false;
   if(!window.confirm('¿Eliminar definitivamente esta publicación?'))return false;
@@ -814,6 +817,8 @@ $('publish-form').addEventListener('submit',async event=>{
       contactPhone:$('need-phone').value
     },{originalDescription:current?legacyDetails(current):null});
     if(pictureDraft)data.picture=pictureDraft;
+    const addressText=cleanAddressText($('need-address').value);
+    if(addressText)data.addressText=addressText;
     if(validLocation(locationDraft))data.location={...locationDraft};
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
     state.saving=true;$('save-button').disabled=true;
@@ -828,6 +833,7 @@ $('publish-form').addEventListener('submit',async event=>{
         const updated={...data};
         if(current.picture&&!pictureDraft)updated.picture=api.deleteField();
         if(current.location&&!locationDraft)updated.location=api.deleteField();
+        if(current.addressText&&!addressText)updated.addressText=api.deleteField();
         // Retirar campos de formularios anteriores; sus datos ya están en la descripción.
         for(const key of ['category','city','subcategory','quantity','condition','budget','desiredDate','status']){
           if(Object.prototype.hasOwnProperty.call(current,key))updated[key]=api.deleteField();
