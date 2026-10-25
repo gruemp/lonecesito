@@ -32,7 +32,7 @@ service cloud.firestore {
       return data.keys().hasAll([
         'ownerUid','createdAt','description','title','contactPhone','contactConsent'
       ]) && data.keys().hasOnly([
-        'ownerUid','createdAt','description','title','contactPhone','contactConsent','picture','location'
+        'ownerUid','createdAt','description','title','contactPhone','contactConsent','picture','location','addressText'
       ])
       && data.ownerUid is string && data.ownerUid.size() > 0
       && data.createdAt is timestamp
@@ -42,7 +42,10 @@ service cloud.firestore {
       && data.contactConsent == true
       && (!data.keys().hasAny(['picture']) ||
           (data.picture is string && data.picture.size() <= 400000))
-       && (!data.keys().hasAny(['location']) || validLocation(data.location));
+       && (!data.keys().hasAny(['location']) || validLocation(data.location))
+       && (!data.keys().hasAny(['addressText']) ||
+           (data.addressText is string && data.addressText.size() >= 1
+            && data.addressText.size() <= 180));
     }
     match /requests/{requestId} {
       allow get, list: if true;
@@ -58,7 +61,7 @@ service cloud.firestore {
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'description','title','contactPhone','contactConsent','picture','location',
+          'description','title','contactPhone','contactConsent','picture','location','addressText',
           // Solo se permite retirar los campos heredados de la interfaz antigua.
           'category','city','subcategory','quantity','condition','budget',
           'desiredDate','status'
