@@ -177,7 +177,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 ## 2.2.28 — Municipio y direcciones: adaptación de Natura
 - Combinar los datos de OpenStreetMap y BigDataCloud. Conservar país, departamento, municipio y ciudad identificados, incluso si una API falla; mostrar lo faltante honestamente. La dirección aproximada es exclusivamente una calle/número identificados, no una cadena de regiones.
 - Resolver municipio mediante city, town, village, municipality, county del GPS como hace Natura; fallback a locality/city de BigDataCloud. Conservar dirección escrita opcional por el autor. Mostrar el municipio en PNG y la etiqueta cuando exista.
-- No usar el endpoint de visitantes de Natura, IP aproximada ni la ubicación del lector sin su permiso. **No usar Apps Script** en LoNecesito; resolver directamente con OSM y BigDataCloud desde el navegador.
+- No usar el endpoint de visitantes de Natura, IP aproximada ni la ubicación del lector sin su permiso. **Apps Script autorizado por la solicitud posterior:** adaptar el mecanismo Google de Natura en un servicio propio de LoNecesito. No usar el endpoint de visitas de Natura.
 
 
 ## 2.2.29 — Recuperar direcciones y completar apartamento sin Apps Script
@@ -195,3 +195,8 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - Aceptar únicamente número registrado con calle coincidente (normalizar solo espacios, tildes y mayúsculas), coordenadas válidas y punto a ≤25 m. Requerir precisión GPS estimada ≤25 m. Elegir el candidato más cercano entre un máximo de cinco; no cambiar de calle ni inventar números. Si falla o no hay candidato, mantener la calle.
 - Conservar número conocido de esa misma coordenada/calle si la actualización solo devuelve calle, sin consultar respaldo innecesario. No reemplazar dirección manual ni apartamento. El resultado sigue siendo aproximado y puede corresponder a un portal cercano.
 - El consentimiento identifica Nominatim, BigDataCloud y el respaldo condicional Photon (komoot), así como coordenadas/IP y aproximación. No consultar al abrir fichas, en cada muestra GPS ni al calcular la distancia del visitante. Mantener cancelación, límite total de consulta y moderación de uso.
+
+## 2.2.32 — Preferencia actual: implementar Apps Script como Natura
+- El titular autorizó implementar Apps Script si es necesario; esta indicación sustituye la anterior de no usarlo. La dirección de Google se obtiene mediante el mismo servicio Maps y formatted_address de Natura, sin integrar su analítica.
+- Proyecto independiente con caché temporal, privacidad y consentimiento de envío a Google. Configurar una URL real y comprobada; la URL vacía significa que la función no está activa y siguen los respaldos previos. El servicio independiente ya fue desplegado y verificado; conservar su URL e IDs reales en futuras actualizaciones.
+- Conservar toda dirección manual/apartamento. Dar prioridad a Google cuando haya un resultado útil, atribuirlo a Google Maps en panel/ficha/PNG y conservar ubicación conocida si falla. La geocodificación sigue siendo aproximada.

@@ -85,7 +85,8 @@ export async function makeCardPng({description,picture,contactPhone,location,add
     // ciudad y departamento se muestran aparte, no como dirección ficticia.
     placeFields.push('Dirección aproximada: '+
       (String(location.address||'').trim()||'Calle y número no identificados'));
-    if(location.address)placeFields.push('Datos de calles: © OpenStreetMap contributors');
+    if(location.address)placeFields.push(location.addressSource==='google'
+      ?'Dirección: Google Maps':'Datos de calles: © OpenStreetMap contributors');
     placeFields.push('Latitud: '+location.latitude.toFixed(6)+' · Longitud: '+location.longitude.toFixed(6));
     placeFields.push('Precisión estimada: ±'+Math.round(location.accuracy)+' m');
   }
@@ -171,3 +172,4 @@ export async function makeCardPng({description,picture,contactPhone,location,add
     drawing.toBlob(blob=>blob?resolve(blob):reject(new Error('No se pudo generar el PNG.')),'image/png');
   });
 }
+

@@ -1,10 +1,11 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2231';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2232';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2229';
+import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
   streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,
-  preserveStreetNumber} from './location-model.js?v=20261025-v2231';
+  preserveStreetNumber,locationFromGoogleGeocoder} from './location-model.js?v=20261025-v2232';
+import {googleGeocoderUrl,requestGoogleGeocode} from './google-geocoder.js?v=20261025-v2232';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -431,8 +432,9 @@ function renderCard(record,owner){
     actions.append(route);
     details.append(actions);
     if(location?.address){
-      const attribution=el('a','publication-osm-credit','Datos de calles © OpenStreetMap');
-      attribution.href='https://www.openstreetmap.org/copyright';
+      const google=location.addressSource==='google';
+      const attribution=el('a','publication-osm-credit',google?'Dirección: Google Maps':'Datos de calles © OpenStreetMap');
+      attribution.href=google?googleMapsLocationUrl(location,addressText):'https://www.openstreetmap.org/copyright';
       attribution.target='_blank';
       attribution.rel='noopener noreferrer';
       details.append(attribution);
@@ -559,6 +561,9 @@ function showLocationDraft(){
   $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
   const credit=$('gps-osm-credit');
   credit.hidden=!(gpsExists&&locationDraft.address);
+  const google=gpsExists&&locationDraft.addressSource==='google';
+  credit.textContent=google?'Dirección: Google Maps':'Calles: © OpenStreetMap';
+  credit.href=google?googleMapsLocationUrl(locationDraft):'https://www.openstreetmap.org/copyright';
   const maps=$('gps-map-link');
   const url=googleMapsLocationUrl(locationDraft,declared);
   maps.hidden=!url;
@@ -588,26 +593,45 @@ function resolveGpsAddress(coords,requestId){
   // En una actualización de coordenadas guardadas, conservar cada campo
   // conocido si los proveedores no pueden recuperarlo esta vez.
   const previous=locationDraft?{...locationDraft}:{};
-  let geo={},osm={},photonAddress='';
+  let geo={},osm={},photonAddress='',googleLocation=null;
   const isCurrent=()=>requestId===locationRequestId&&
     gpsGeocodeController===controller&&!controller.signal.aborted;
   const applyResult=()=>{
     if(!isCurrent())return;
     const resolved=locationFromNaturaGeocoders(coords,osm,geo);
     if(photonAddress)resolved.address=photonAddress;
+    if(googleLocation){
+      for(const field of ['country','department','municipality','city','address'])
+        if(googleLocation[field])resolved[field]=googleLocation[field];
+      if(googleLocation.address)resolved.addressSource='google';
+    }
     if(previous.latitude===resolved.latitude&&previous.longitude===resolved.longitude){
+      if(previous.addressSource==='google'&&previous.address&&!googleLocation?.address){
+        resolved.address=previous.address;resolved.addressSource='google';
+      }
       resolved.address=preserveStreetNumber(resolved.address,previous.address||'');
       for(const field of ['country','department','municipality','city','address']){
         if(!resolved[field])resolved[field]=previous[field]||'';
       }
+      if(resolved.address===previous.address&&previous.addressSource)
+        resolved.addressSource=previous.addressSource;
     }
     locationDraft=resolved;
     showLocationDraft();
   };
   showLocationDraft();
   const work=(async()=>{
-    const deadline=setTimeout(()=>controller.abort(),13000);
+    const deadline=setTimeout(()=>controller.abort(),googleGeocoderUrl()?25000:13000);
     try{
+      if(googleGeocoderUrl()){
+        try{
+          const payload=await requestGoogleGeocode(coords,{signal:controller.signal});
+          if(!isCurrent())return;
+          googleLocation=locationFromGoogleGeocoder(coords,payload);applyResult();
+          if(googleLocation.address&&googleLocation.country&&googleLocation.department&&googleLocation.city)return;
+        }catch{/* Si Google no responde, mantener los respaldos existentes. */}
+        if(!isCurrent())return;
+      }
       // Se consultan solo las coordenadas finales autorizadas por el autor.
       // Igual que en Natura, OSM aporta calle y también datos administrativos
       // (city/town/village/municipality/state/country); BigDataCloud respalda
@@ -690,7 +714,8 @@ function finishGpsMeasurement(){
 $('need-address').addEventListener('input',showLocationDraft);
 $('gps-refresh').addEventListener('click',()=>{
   if(state.saving||capturingLocation||gpsGeocoding||!validLocation(locationDraft))return;
-  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? Se enviarán a Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. La dirección encontrada será aproximada y puede corresponder a un portal cercano. No se medirá tu ubicación actual.'))return;
+  const google=googleGeocoderUrl()?'Se enviarán primero a Google mediante el Apps Script de LoNecesito. Si no hay resultado suficiente, se consultarán ':'Se enviarán a ';
+  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? '+google+'Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. El servicio de Google usa caché de hasta seis horas para ahorrar consultas. La dirección encontrada será aproximada y puede corresponder a un portal cercano. No se medirá tu ubicación actual.'))return;
   const coords={...locationDraft};
   resolveGpsAddress(coords,++locationRequestId);
 });
@@ -713,7 +738,8 @@ locateButton.addEventListener('click',()=>{
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
   }
-  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. La dirección encontrada será aproximada y puede corresponder a un portal cercano.')){
+  const google=googleGeocoderUrl()?'Google mediante el Apps Script de LoNecesito; si no hay resultado suficiente, se consultarán ':' ';
+  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a '+google+'Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. El servicio de Google usa caché de hasta seis horas para ahorrar consultas. La dirección encontrada será aproximada y puede corresponder a un portal cercano.')){
     return;
   }
   cancelGpsTasks();

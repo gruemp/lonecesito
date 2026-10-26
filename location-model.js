@@ -30,6 +30,17 @@ export function validLocation(location){
     &&typeof lon==='number'&&Number.isFinite(lon)&&lon>= -180&&lon<=180
     &&typeof accuracy==='number'&&Number.isFinite(accuracy)&&accuracy>0&&accuracy<=100000;
 }
+export function locationFromGoogleGeocoder(coords,payload){
+  if(payload?.ok!==true||payload.service!=='lonecesito-geocoder'||
+    !payload.result||typeof payload.result!=='object')throw new Error('Dirección Google no disponible.');
+  const result=payload.result;
+  const location=locationFromGps(coords,{
+    country:result.country,department:result.department,city:result.city,
+    municipality:result.municipality,address:result.address
+  });
+  if(location.address)location.addressSource='google';
+  return location;
+}
 export function locationLines(location,addressText='',showUnavailable=false){
   const hasGps=validLocation(location);
   const declared=cleanAddressText(addressText);

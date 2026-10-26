@@ -1,7 +1,8 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.31 (no visible al público)
+**Versión del código:** 2.2.32 (no visible al público)
+**Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -169,7 +170,7 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Se estudió gruemp/natura: analytics-visitas.js obtiene administración y calle mediante reverse Nominatim y usa BigDataCloud como respaldo; el backend Apps Script utiliza Maps.newGeocoder().reverseGeocode con caché para obtener formatted_address.
 - LoNecesito ahora combina respuestas OSM y BigDataCloud en locationFromNaturaGeocoders. Antes descartaba país/departamento/ciudad de OSM, dependiendo exclusivamente de BigDataCloud: fallo de proveedor producía campos vacíos. Ahora extrae city/town/village/municipality/county/state/country de OSM y locality/city/principalSubdivision/countryName del respaldo.
 - Se añade municipality opcional (validado en firestore.rules) y rótulo Municipio a detalle y PNG. No copiar departamento como ciudad. Si calle/número no están, informar sin inventar nomenclatura. Se conserva mapa Desde mí, distancia por permiso, GPS continuo hasta segundo toque, ausencia del rótulo Barrio o localidad y dirección opcional.
-- No reutilizar endpoint de captura de visitas de Natura; no hay geocodificación al mostrar registros históricos por privacidad. Si faltan campos históricos, el autor puede editar y actualizar voluntariamente la dirección del punto guardado (2.2.29), o volver a captar GPS en el lugar de la necesidad. El titular excluyó Apps Script expresamente; no integrar ese backend.
+- No reutilizar endpoint de captura de visitas de Natura; no hay geocodificación al mostrar registros históricos por privacidad. Si faltan campos históricos, el autor puede editar y actualizar voluntariamente la dirección del punto guardado (2.2.29), o volver a captar GPS en el lugar de la necesidad. La restricción inicial fue sustituida por autorización posterior para Apps Script; ver preparación 2.2.32. No reutilizar el backend de visitantes.
 - GitHub Pages publica solo la web; las reglas Firestore necesitan despliegue adicional. Pruebas de GPS reales, proveedores y emulador Firestore pendientes.
 
 
@@ -193,3 +194,12 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Prueba HTTP real del endpoint Photon: 200 y CORS permisivo. Caso público Unter den Linden 2, Berlín: búsqueda pública y consulta inversa producen dos candidatos; el selector recupera Unter den Linden #2. No se enviaron a terceros las coordenadas de las capturas del usuario.
 - Nuevas regresiones sobre selección, distancia/calle/precisión, numeración faltante, respaldo condicional, fallos, cancelación, persistencia, preservación de número y consentimiento. GPS físico del usuario y Firestore Emulator siguen pendientes; no se afirma recuperación de número en su ubicación concreta.
 - Referencias primarias: https://nominatim.org/release-docs/latest/api/Reverse/ · https://github.com/komoot/photon/blob/master/docs/api-v1.md · https://github.com/komoot/photon#demo-server .
+
+## Cambio 2.2.32 — Google Apps Script como Natura (25-10-2026)
+- Se comprobó Natura/visitantes-servicios.js: reverseGeocodeCached_ usa Google Maps, español, región co y primer formatted_address con caché de seis horas y dos minutos vacía. Se replicó únicamente ese mecanismo en apps-script/geocodificador/Code.gs, con manifiesto independiente; no se modificó Natura.
+- El usuario autorizó Apps Script expresamente y revocó la prohibición inicial. Servicio solo de geocodificación, sin identidad, teléfono, registros de visitas o Telegram. Validación de entradas, JSONP con callback aleatorio limitado, salida escapada y endpoint de estado.
+- google-geocoder.js consume el servicio por JSONP con URL de Apps Script /exec validada, timeout, cancelación y descarte de respuestas tardías. location-config.js tiene la URL real de la implementación 1 devuelta por Google, con estado anónimo y JSONP comprobados.
+- Cliente preparado para priorizar Google y su dirección formateada; conservar apartamento/manual, respaldos anteriores y datos conocidos del mismo punto. Campo addressSource opcional en reglas Firestore y atribución correcta en panel/ficha/PNG. El PR se completa después de configurar el endpoint real y se publica mediante Pages.
+- Pruebas locales: 35 casos de flujo, servidor Maps/caché simulado, JSONP, validación, selección, cancelación, persistencia y PNG aprobados; 7 regresiones seleccionadas adicionales. No son pruebas de Google real ni del GPS físico. Emulador Firestore no ejecutado.
+- Acceso a Google completado por el formulario seguro del navegador y cuenta elegida por el titular. Se creó LoNecesito — Geocodificador GPS y se desplegó versión 1 como propietario con acceso anónimo. Los IDs/URL están en deployment.json y .clasp.json. No se accedió ni copió CLASPRC_JSON de Natura ni se alteraron sus proyectos/workflows.
+- Verificación real HTTP sin sesión: estado ready; JSONP válido; muestra pública de Bogotá con datos administrativos sin calle y ejemplo oficial Times Square con dirección 1560 Broadway #1105, New York, NY 10036, EE. UU. (aprox. 7,65 s). No se probaron coordenadas privadas del usuario. Se amplió el timeout de Google a 12 s y el total con respaldos a 25 s por la latencia observada. Guía exacta: apps-script/geocodificador/README.md. Verificar Pages del commit final.
