@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.32');
+  assert.equal(APP_VERSION,'2.2.33');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -920,7 +920,7 @@ test('distancia en línea recta calculada sin revelar ni guardar ubicación del 
   assert.match(card,/No es la distancia por carretera/);
   assert.match(card,/enableHighAccuracy:true,maximumAge:0,timeout:15000/);
   assert.doesNotMatch(card,/localStorage|setDoc|addDoc|watchPosition|fetch\(/);
-  assert.match(card,/if\(location\)\{/); // no numeric distance for address-only
+  assert.match(card,/if\(!location\)\{/); // no numeric distance for address-only
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   assert.match(html,/id="gps-map-link"/);
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');

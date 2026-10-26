@@ -689,8 +689,9 @@ body:has(.image-dialog[open]){overflow:hidden}
 
 
 /* 2.2.26 — jerarquía GPS completa, Maps y distancia privada bajo demanda. */
-.publication-location-lines{white-space:pre-line;overflow-wrap:anywhere}
-.publication-map-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.publication-location{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;white-space:normal}
+.publication-location-lines{min-width:0;white-space:pre-line;overflow-wrap:anywhere}
+.publication-map-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;margin-top:2px}
 .publication-map-link,.publication-route-link,.publication-distance-button,.gps-map-link{
   display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;
   min-height:40px;padding:8px 12px;border-radius:9px;border:1px solid #9dbfc2;
@@ -699,13 +700,20 @@ body:has(.image-dialog[open]){overflow:hidden}
 }
 .publication-route-link{border-color:#a7c9ac;background:#f2faf2;color:#226444}
 .publication-distance-button{border-color:#d7b57c;background:#fff6e6;color:#80551f}
+.publication-map-actions>.publication-map-link,
+.publication-map-actions>.publication-route-link,
+.publication-map-actions>.publication-distance-button{
+  width:100%;min-width:0;min-height:44px;font-size:12px;
+  padding:8px 12px;white-space:normal;text-align:center;overflow-wrap:anywhere
+}
 .publication-distance-button:disabled{opacity:.65;cursor:wait}
 .publication-map-link:focus-visible,.publication-route-link:focus-visible,
 .publication-distance-button:focus-visible,.gps-map-link:focus-visible{
   outline:3px solid #2c9ab4;outline-offset:2px
 }
-.publication-distance-result{min-height:0;margin:7px 2px 0;
+.publication-distance-result{min-width:0;margin:0 2px;
   font-size:12px;line-height:1.45;color:#245c56}
+.publication-distance-result[hidden]{display:none}
 .gps-preview-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;min-width:0;white-space:normal}
 .gps-preview-actions .gps-map-link{flex:1 1 180px;min-width:0;max-width:100%;margin:0;overflow-wrap:normal;white-space:normal}
 .gps-preview>.gps-osm-credit,.gps-status{grid-column:1/-1;min-width:0}
@@ -713,12 +721,6 @@ body:has(.image-dialog[open]){overflow:hidden}
 .gps-map-link:disabled{opacity:.65;cursor:wait}
 .gps-status{font-size:12px;color:#245c56}
 .gps-status[hidden]{display:none}
-@media(max-width:390px){
-  .publication-map-actions{gap:5px}
-  .publication-map-link,.publication-route-link,.publication-distance-button{
-    font-size:11px;padding:7px 9px
-  }
-}
 
 
 /* 2.2.27 — atribución del dato de calle a OpenStreetMap. */
