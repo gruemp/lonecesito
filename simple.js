@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2232';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261026-v2233';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
@@ -418,35 +418,21 @@ function renderCard(record,owner){
       locationLines(location,addressText,true).join('\n'));
     details.append(lines);
     const actions=el('div','publication-map-actions');
-    const maps=el('a','publication-map-link','Ver en Google Maps');
-    maps.href=googleMapsLocationUrl(location,addressText);
-    maps.target='_blank';
-    maps.rel='noopener noreferrer';
-    maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
-    actions.append(maps);
-    const route=el('a','publication-route-link','Desde mí');
-    route.href=googleMapsDirectionsUrl(location,addressText);
-    route.target='_blank';
-    route.rel='noopener noreferrer';
-    route.setAttribute('aria-label','Ver ruta desde mi ubicación en Google Maps');
-    actions.append(route);
-    details.append(actions);
-    if(location?.address){
-      const google=location.addressSource==='google';
-      const attribution=el('a','publication-osm-credit',google?'Dirección: Google Maps':'Datos de calles © OpenStreetMap');
-      attribution.href=google?googleMapsLocationUrl(location,addressText):'https://www.openstreetmap.org/copyright';
-      attribution.target='_blank';
-      attribution.rel='noopener noreferrer';
-      details.append(attribution);
-    }
-    if(location){
+    {
       const distanceButton=el('button','publication-distance-button','Distancia desde mí');
       distanceButton.type='button';
       distanceButton.title='Consultar distancia aproximada en línea recta desde tu ubicación actual';
       distanceButton.setAttribute('aria-label',distanceButton.title);
       const distanceInfo=el('p','publication-distance-result');
+      distanceInfo.hidden=true;
       distanceInfo.setAttribute('role','status');
+      distanceInfo.setAttribute('aria-live','polite');
       distanceButton.addEventListener('click',()=>{
+        distanceInfo.hidden=false;
+        if(!location){
+          distanceInfo.textContent='Esta publicación no tiene coordenadas GPS. Consulta la ruta desde tu ubicación en «Desde mí».';
+          return;
+        }
         if(!navigator.geolocation||!window.isSecureContext){
           distanceInfo.textContent='La distancia requiere permiso de ubicación en un navegador HTTPS.';
           return;
@@ -454,7 +440,7 @@ function renderCard(record,owner){
         distanceButton.disabled=true;
         distanceInfo.textContent='Consultando tu ubicación para calcular la distancia…';
         // Obtener UNA sola lectura por petición del visitante, sin guardarla
-        // en Firestore/localStorage, compartirla ni comunicarla a LoNecesito.
+        // de forma persistente, compartirla ni comunicarla a LoNecesito.
         navigator.geolocation.getCurrentPosition(position=>{
           distanceButton.disabled=false;
           try{
@@ -473,8 +459,27 @@ function renderCard(record,owner){
             'No se pudo obtener tu ubicación. Puedes consultar la ruta en Google Maps.';
         },{enableHighAccuracy:true,maximumAge:0,timeout:15000});
       });
-      actions.append(distanceButton);
-      details.append(distanceInfo);
+      actions.append(distanceButton,distanceInfo);
+    }
+    const maps=el('a','publication-map-link','Ver en Google Maps');
+    maps.href=googleMapsLocationUrl(location,addressText);
+    maps.target='_blank';
+    maps.rel='noopener noreferrer';
+    maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
+    const route=el('a','publication-route-link','Desde mí');
+    route.href=googleMapsDirectionsUrl(location,addressText);
+    route.target='_blank';
+    route.rel='noopener noreferrer';
+    route.setAttribute('aria-label','Ver ruta desde mi ubicación en Google Maps');
+    actions.append(maps,route);
+    details.append(actions);
+    if(location?.address){
+      const google=location.addressSource==='google';
+      const attribution=el('a','publication-osm-credit',google?'Dirección: Google Maps':'Datos de calles © OpenStreetMap');
+      attribution.href=google?googleMapsLocationUrl(location,addressText):'https://www.openstreetmap.org/copyright';
+      attribution.target='_blank';
+      attribution.rel='noopener noreferrer';
+      details.append(attribution);
     }
     pin.setAttribute('aria-expanded','false');
     pin.addEventListener('click',()=>{

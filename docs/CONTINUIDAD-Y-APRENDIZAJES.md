@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
-**Revisión de documentación:** 25 de octubre de 2026  
-**Versión del código:** 2.2.32 (no visible al público)
+**Revisión de documentación:** 26 de octubre de 2026
+**Versión del código:** 2.2.33 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -203,3 +203,9 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Pruebas locales: 35 casos de flujo, servidor Maps/caché simulado, JSONP, validación, selección, cancelación, persistencia y PNG aprobados; 7 regresiones seleccionadas adicionales. No son pruebas de Google real ni del GPS físico. Emulador Firestore no ejecutado.
 - Acceso a Google completado por el formulario seguro del navegador y cuenta elegida por el titular. Se creó LoNecesito — Geocodificador GPS y se desplegó versión 1 como propietario con acceso anónimo. Los IDs/URL están en deployment.json y .clasp.json. No se accedió ni copió CLASPRC_JSON de Natura ni se alteraron sus proyectos/workflows.
 - Verificación real HTTP sin sesión: estado ready; JSONP válido; muestra pública de Bogotá con datos administrativos sin calle y ejemplo oficial Times Square con dirección 1560 Broadway #1105, New York, NY 10036, EE. UU. (aprox. 7,65 s). No se probaron coordenadas privadas del usuario. Se amplió el timeout de Google a 12 s y el total con respaldos a 25 s por la latencia observada. Guía exacta: apps-script/geocodificador/README.md. Verificar Pages del commit final.
+
+
+## Cambio 2.2.33 — Panel de ubicación en las listas (26-10-2026)
+- Mis publicaciones y Ver necesidades comparten renderCard. El panel desplegado conserva información y atribución, con texto a ancho completo y las acciones en una columna como el editor. Distancia desde mí va primero y conserva color diferenciado; los tres botones ocupan el ancho y tienen mínimo 44 px de alto. Resultado inmediatamente bajo distancia, oculto mientras no se usa.
+- Distancia solicita una lectura fresca del visitante solo al pulsar, calcula Haversine en memoria, informa línea recta y permite reintentar. Sin GPS de destino, el botón sigue disponible y orienta hacia Desde mí sin pedir posición ni inventar distancia. No se modifican geocodificadores, Apps Script, datos, PNG o Firestore.
+- Pruebas: siete casos nuevos ejecutan el renderizador real con DOM/geolocalización simulados para ambas vistas, orden de acciones, lectura actual y repetición, errores/permisos, dirección sin GPS, HTTPS y coordenadas inválidas. Sintaxis aprobada. Suite completa: 179/229 aprobadas, 50 fallos heredados, ningún fallo nuevo; la regresión antigua de distancia queda reparada. GPS físico, revisión visual en móvil y Firestore Emulator no ejecutados.
