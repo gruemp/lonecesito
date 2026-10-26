@@ -663,6 +663,9 @@ body:has(.image-dialog[open]){overflow:hidden}
 
 
 /* 2.2.36 — mapa y distancia en la misma fila, sin campo manual ni acciones debajo. */
+.local-import-panel{margin:0 0 10px}
+.local-import-panel[hidden]{display:none}
+.local-import-panel .button{max-width:100%;white-space:normal}
 .audio-control-row{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr) minmax(0,1fr)}
 #publish-form .draft-audio-row>.audio-control-row{
   grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr) minmax(0,1.3fr);

@@ -1,6 +1,6 @@
 # LoNecesito — reglas actuales para cualquier IA
 
-**Vigencia: 25 de octubre de 2026.** Este documento es la **fuente de verdad operativa**. Leer también [Preferencias detalladas](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad técnica](docs/CONTINUIDAD-Y-APRENDIZAJES.md) antes de editar. **La instrucción expresa más reciente del usuario prevalece** sobre mensajes antiguos, versiones y requisitos históricos.
+**Vigencia: 26 de octubre de 2026.** Este documento es la **fuente de verdad operativa**. Leer también [Preferencias detalladas](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad técnica](docs/CONTINUIDAD-Y-APRENDIZAJES.md) antes de editar. **La instrucción expresa más reciente del usuario prevalece** sobre mensajes antiguos, versiones y requisitos históricos.
 
 **Prohibido recuperar funciones descartadas basándose en documentación vieja.** No mostrar publicaciones ficticias, versión visible, ofertas de proveedores ni avisos de prueba. La historia permanece consultable en Git.
 
@@ -66,11 +66,12 @@
 
 ## 8. Datos, seguridad y estado real del servicio
 
-- **Decisión vigente del titular:** Firebase Authentication y Firestore para identidad y publicaciones compartidas; conservar Apps Script únicamente para geocodificación. Preparar inicialmente Spark sin facturación y fotos comprimidas dentro del documento según el modelo actual. Cloud Storage requiere Blaze: no habilitar facturación sin autorización concreta. Guía actual: docs/firebase-setup.md. La configuración sigue pendiente; no prometer servicio activado.
+- **Decisión vigente del titular:** Firebase Authentication y Firestore para identidad y publicaciones compartidas; conservar Apps Script únicamente para geocodificación. Preparar inicialmente Spark sin facturación y fotos comprimidas dentro del documento según el modelo actual. Cloud Storage requiere Blaze: no habilitar facturación sin autorización concreta. Guía actual: docs/firebase-setup.md. Proyecto real creado: lonecesito-4c42e, app LoNecesito web. Firestore Standard (default), nam5, plan Spark, actualmente con reglas que deniegan todo acceso de clientes. Configuración pública preparada en una rama, sin activar todavía la web. Autenticación, dominio gruemp.github.io y reglas públicas/autoría pendientes de aprobación expresa por rechazo automático de la revisión de acceso; no reintentar por otra vía. No prometer servicio activado.
 
 - **Firebase no estaba configurado** en el archivo de configuración del repositorio al establecer estas reglas. GitHub Pages hospeda una web estática; en modo local cada navegador ve sus propios datos, **no un tablón multiusuario compartido**. Nunca afirmar que Firebase o el servicio público están operativos sin verificarlo.
 - Cuando se active Firebase: autenticar donde corresponda, comprobar lectura pública y **editar/eliminar solo por el propietario** tanto en cliente como en reglas Firestore reales; ejecutar pruebas del emulador. GitHub Pages **no despliega las reglas**.
 - Publicar teléfono requiere consentimiento informado: el teléfono se usa públicamente en enlaces y PNG. Proteger datos privados y evitar incluir llaves secretas o datos de sesión en HTML, capturas y búsquedas.
+- Para recuperar publicaciones locales al activar Firebase: botón condicional solo en Mis publicaciones si hay registros propios del navegador; exigir sesión y confirmación del contenido público/cuenta antes de transferir. Conservar localStorage, excluir ejemplos/otros propietarios, validar campos, usar ID estable por autor/origen y transacción que nunca sobrescriba un documento existente. Marcar como completados solo registros confirmados en servidor; no truncar ni borrar los que fallen.
 - No borrar registros genuinos por quitar ejemplos, cambiar navegación o versionar. No introducir migraciones destructivas sin permiso.
 
 ## 9. Forma de trabajar — aprendizaje transversal

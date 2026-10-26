@@ -1,4 +1,5 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2236';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2237';
+import {localImportCandidates,importLocalPublications} from './local-import.js?v=20261025-v2237';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
@@ -12,6 +13,8 @@ const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
 const STORAGE='lonecesito-publicaciones-demo-v1';
 const state={mode:'loading',user:null,items:[],editingId:null,firebase:null,waitingForAuth:false,saving:false};
+let importingLocal=false;
+const importedLocalIds=new Set();
 const el=(tag,cls,value)=>{
   const node=document.createElement(tag);
   if(cls)node.className=cls;
@@ -458,7 +461,34 @@ function render(){
   $('mine-list').replaceChildren(...own.map(item=>renderCard(item,true)));
   $('mine-empty').hidden=own.length!==0;
   $('mine-empty').textContent=state.mode==='cloud'&&!state.user?'Inicia sesión para consultar tus publicaciones.':'Aún no tienes publicaciones. Crea la primera cuando lo necesites.';
+  const pending=state.mode==='cloud'?localImportCandidates(readLocal(),importedLocalIds):[];
+  $('local-import-panel').hidden=pending.length===0;
+  $('local-import-button').disabled=importingLocal;
 }
+const importStorageKey=()=>STORAGE+'-imported-'+window.LoNecesitoFirebaseConfig?.projectId;
+$('local-import-button').addEventListener('click',async()=>{
+  if(importingLocal||state.mode!=='cloud'||!state.firebase)return;
+  if(!state.user){showAuth();return;}
+  const candidates=localImportCandidates(readLocal(),importedLocalIds);
+  if(!candidates.length)return;
+  const user=state.user;
+  if(!window.confirm('¿Publicar '+candidates.length+' publicación(es) de este navegador con la cuenta '+
+    (user.email||'actual')+'? El texto, teléfono, foto y GPS guardados serán públicos en LoNecesito. Se conservará la copia local.'))return;
+  importingLocal=true;render();feedback('local-import-feedback','Recuperando publicaciones…');
+  try{
+    const result=await importLocalPublications(candidates,{uid:user.uid,api:state.firebase,describe:legacyDetails,
+      onComplete:id=>{
+        importedLocalIds.add(id);
+        try{localStorage.setItem(importStorageKey(),JSON.stringify([...importedLocalIds]));}catch{}
+      }});
+    const message=result.failed.length
+      ?'Se recuperaron '+(result.created+result.existing)+'. Quedan '+result.failed.length+
+        ' en este navegador: '+result.failed[0].message
+      :'Publicaciones recuperadas. Se conservaron las copias locales.';
+    feedback('local-import-feedback',message);toast(message);
+  }catch(error){feedback('local-import-feedback',error.message||'No se pudo recuperar. Las copias locales siguen guardadas.');}
+  finally{importingLocal=false;render();}
+});
 $('search').addEventListener('input',render);
 const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
 draftReadingPanel.setAttribute('aria-label','Lectura, mapa, distancia y GPS');
@@ -1031,6 +1061,10 @@ async function boot(){
     render();showView();return;
   }
   try{
+    try{
+      const completed=JSON.parse(localStorage.getItem(importStorageKey())||'[]');
+      if(Array.isArray(completed))completed.filter(id=>typeof id==='string').forEach(id=>importedLocalIds.add(id));
+    }catch{}
     const [appLib,authLib,dbLib]=await Promise.all([
       import('https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js'),
