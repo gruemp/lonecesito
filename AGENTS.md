@@ -66,6 +66,8 @@
 
 ## 8. Datos, seguridad y estado real del servicio
 
+- **Decisión vigente del titular:** Firebase Authentication y Firestore para identidad y publicaciones compartidas; conservar Apps Script únicamente para geocodificación. Preparar inicialmente Spark sin facturación y fotos comprimidas dentro del documento según el modelo actual. Cloud Storage requiere Blaze: no habilitar facturación sin autorización concreta. Guía actual: docs/firebase-setup.md. La configuración sigue pendiente; no prometer servicio activado.
+
 - **Firebase no estaba configurado** en el archivo de configuración del repositorio al establecer estas reglas. GitHub Pages hospeda una web estática; en modo local cada navegador ve sus propios datos, **no un tablón multiusuario compartido**. Nunca afirmar que Firebase o el servicio público están operativos sin verificarlo.
 - Cuando se active Firebase: autenticar donde corresponda, comprobar lectura pública y **editar/eliminar solo por el propietario** tanto en cliente como en reglas Firestore reales; ejecutar pruebas del emulador. GitHub Pages **no despliega las reglas**.
 - Publicar teléfono requiere consentimiento informado: el teléfono se usa públicamente en enlaces y PNG. Proteger datos privados y evitar incluir llaves secretas o datos de sesión en HTML, capturas y búsquedas.

@@ -1,40 +1,43 @@
-# Activación segura de Firebase para LoNecesito
+# Conectar Firebase a LoNecesito
 
-El modo multiusuario está preparado, pero todavía no está conectado: el repositorio no contiene la configuración de un proyecto Firebase. GitHub Pages solo publica archivos estáticos; no instala reglas de Firestore. Sin conexión, se mantiene la demostración local anterior.
+## Decisión vigente
 
-## Pasos de activación (en este orden)
+Firebase Authentication identifica al autor y Cloud Firestore guarda las publicaciones compartidas. GitHub Pages conserva la web. El Apps Script independiente existente se mantiene exclusivamente para resolver direcciones GPS, sin base de publicaciones en Sheets ni fotografías en Drive.
 
-1. Crear un proyecto en https://console.firebase.google.com/ y registrar una aplicación Web. Copiar los valores públicos apiKey, authDomain, projectId y appId. Nunca incluir claves de servicio administrativas.
-2. En Authentication, habilitar Correo electrónico/contraseña y Google. Añadir gruemp.github.io en dominios autorizados. No es necesario usar SMS.
-3. Crear Cloud Firestore e instalar las herramientas de desarrollo: `npm install` y `npm install -g firebase-tools`. Ejecutar **primero** `npm run test:rules` para probar `firestore.rules` en Firestore Emulator con usuarios simulados, incluidos propietarios, interesados y terceros. No usar reglas públicas.
-4. Solo **después de aprobar las pruebas de privacidad**, iniciar sesión con `firebase login` y publicar las reglas mediante `firebase deploy --only firestore:rules --project TU_PROJECT_ID`. Revisar además App Check, tratamiento de datos y cuotas antes del lanzamiento.
-5. Completar firebase-config.js con los valores exactos de la aplicación Web, y publicar la rama codex/diseno-original en GitHub Pages. La página activará firebase-live.js en lugar del modo local cuando la configuración sea completa.
-6. Probar publicación y aplicación en dos navegadores o sesiones independientes.
+La configuración pública en `firebase-config.js` sigue vacía: el servicio multiusuario **todavía no está activado**. En ese estado, `simple.js` guarda publicaciones en el navegador. No asumir que la conexión existe por tener el código preparado.
 
-## Lo implementado
+## Configuración del servicio
 
-- 40 subcategorías: 20 para Bienes y 20 para Servicios. Se mantienen todos los identificadores anteriores para evitar pérdida de registros.
-- Registro con correo o Google y perfil de nombre y teléfono. Los datos se piden una vez y pueden editarse en Tu cuenta. No se verifica el número con SMS.
-- Aplicación con un clic cuando hay sesión y perfil. Se crea en un lote atómico el documento de aplicación y su índice privado. Sin límite preestablecido de interesados. No se permiten aplicaciones repetidas o a solicitudes propias.
-- En las fichas privadas del propietario aparecen automáticamente nombres y teléfonos de quienes aplicaron. No tiene que aprobar previamente a nadie; puede llamar directamente.
-- Privacidad: profiles/{uid} solo lo lee ese usuario; requests/{id} es público sin datos de los interesados; requests/{id}/applications/{uid} solo lo leen el propietario del anuncio o el interesado sobre su propia aplicación; applicationsByUser/{uid}/items/{id} solo lo lee el interesado.
-- Las solicitudes se publican, editan, cierran y consultan en Firestore. Se conservan los tres pasos del asistente, fotografías opcionales comprimidas, filtros y listas desplegables.
-- No hay cargos, comisiones, pagos ni suscripciones para usuarios de LoNecesito. La operación de Firebase por el propietario está sujeta a cuotas y posibles costes: https://firebase.google.com/pricing .
+1. Conectar la integración oficial de Firebase para acceder a la cuenta del titular y verificar si ya existe un proyecto destinado a LoNecesito. No reutilizar recursos de Natura ni inventar IDs o configuración.
+2. Empezar con el plan Spark sin habilitar facturación. Crear o seleccionar un proyecto autorizado y registrar una aplicación web. Copiar su configuración pública exacta: `apiKey`, `authDomain`, `projectId` y `appId`. No incluir cuentas de servicio, tokens administrativos ni claves privadas en GitHub.
+3. Habilitar Authentication con Google y correo/contraseña, que son los métodos contemplados por la interfaz actual. Autorizar `gruemp.github.io`. Lectura pública de publicaciones sin iniciar sesión; sesión obligatoria para crear, editar y eliminar.
+4. Crear Firestore en modo de producción, inicialmente sin acceso de clientes. Registrar la ubicación elegida; no modificar bases existentes de otros proyectos. No activar reglas temporales que permitan escribir a cualquiera.
+5. Ejecutar `npm install` y `npm run test:rules`. El SDK de pruebas usa Firebase 12.4.0 y rules-unit-testing 5.0.0, compatibles entre sí. La CLI del comando está fijada en 14.18.0 para que las pruebas no cambien por instalar una versión distinta. El emulador requiere un Java compatible y usa únicamente `demo-lonecesito-privacidad`, sin datos de producción.
+6. Desplegar `firestore.rules` en el proyecto real mediante la integración o CLI autorizada después de aprobar las pruebas. Lectura pública solo en `requests`; creación por su propietario autenticado; editar/borrar solo por el autor; resto de colecciones denegadas. GitHub Pages **no despliega las reglas**.
+7. Completar `firebase-config.js` y publicar mediante PR a `codex/diseno-original`. El cliente activo es `simple.js`; `firebase-live.js` pertenece al prototipo histórico y no debe reactivarse.
+8. Verificar acceso, lectura en dos sesiones, creación/edición/borrado del autor y rechazo de cambios ajenos. Las comprobaciones contra producción deben usar datos expresamente autorizados; no mostrar publicaciones ficticias en la web.
 
-## Pruebas de privacidad imprescindibles antes de abrir el servicio
+## Fotografías y coste
 
-1. Un visitante anónimo puede ver las necesidades, pero no los perfiles ni aplicaciones.
-2. Propietario A publica; B crea cuenta, consiente y aplica; A ve el nombre y el teléfono de B sin aprobarle previamente.
-3. C no puede leer ni enumerar las aplicaciones de B; B solo puede leer la suya.
-4. B no puede suplantar a C al aplicar, inventar otro número ni editar una necesidad ajena.
-5. B no puede aplicar dos veces, ni a necesidades cerradas; varios interesados distintos sí pueden aplicar.
-6. Una solicitud sin foto o con foto comprimida se publica correctamente. El propietario puede actualizar su solicitud sin perder interesados.
-7. Al cerrar sesión desaparece el acceso a los datos privados. Google exige perfil y consentimiento la primera vez.
-8. Revisar medidas contra abuso, borrado y rectificación de datos antes del lanzamiento.
+El cliente actual comprime la foto y la guarda como `picture` dentro del documento de Firestore, con un máximo de 400.000 caracteres validado por las reglas. Esto permite empezar sin Cloud Storage, pero consume la capacidad de Firestore y la transferencia de cada lectura. Conservar los límites existentes y medir el uso.
 
-## Limitaciones
+Cloud Storage for Firebase requiere el plan Blaze con facturación. No habilitarlo, vincular medios de pago ni aceptar costes sin una autorización concreta del titular. Si se decide usarlo más adelante, preparar reglas de propietario, subida, sustitución, borrado y compatibilidad con las fotos existentes antes de activar la opción.
 
-- Hasta que se configure un proyecto Firebase y se publiquen estas reglas, NO hay almacenamiento multiusuario en producción.
-- No se ha verificado la titularidad de los números; no hay chat ni pagos.
-- Los registros antiguos del modo local no migran automáticamente a Firebase.
-- Se incluyen pruebas automáticas para Firebase Emulator, pero no se han ejecutado con el emulador en este entorno. Las pruebas estáticas del código no sustituyen esa ejecución.
+Referencias oficiales:
+- https://firebase.google.com/docs/firestore/quickstart
+- https://firebase.google.com/docs/firestore/quotas
+- https://firebase.google.com/docs/auth/web/google-signin
+- https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024
+
+## Publicaciones locales existentes
+
+Conectar Firebase no sube automáticamente las publicaciones guardadas en otros navegadores. No borrar `localStorage`, no presentar las fichas locales como públicas y no atribuir todos los registros a una cuenta nueva de forma automática. Antes de activar la conexión para usuarios que ya tengan datos, preparar un procedimiento explícito de importación de sus propias publicaciones y verificar descripción, teléfono, fotografía, GPS y direcciones históricas. El navegador original debe conservar una copia hasta comprobar el resultado.
+
+## Comprobaciones de seguridad
+
+- Visitante anónimo: puede leer publicaciones públicas; no puede crear, modificar o borrar.
+- Autor A: puede crear con su UID; B no puede suplantar a A, editar sus publicaciones, cambiar el propietario ni eliminarlas.
+- Validar descripción, teléfono, tamaño de fotografía, coordenadas, precisión y fuente de dirección. No permitir campos privados extra.
+- Conservar publicaciones antiguas, incluidas descripciones largas sin cambios y `addressText` histórico. No recuperar campo manual de dirección, avisos finales, perfiles, interesados, postulaciones, estados de contratación ni formularios descartados.
+- Verificar permisos desde el servidor; ocultar botones no es una regla de seguridad.
+- Registrar por separado pruebas del emulador y pruebas reales de producción. Ninguna sustituye a la otra.

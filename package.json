@@ -7,12 +7,12 @@
   "scripts": {
     "test": "node --test 2026-10-22_pruebas.test.js tests/simple-publicaciones.test.mjs tests/simple-search.test.mjs tests/location-flow.test.mjs tests/google-geocoder.test.mjs tests/publication-location.test.mjs",
     "check": "node --check 2026-10-22_app.js && node --check simple-model.js && node --check simple-search.js && node --check simple.js && node --check firebase-live.js && node --check tests/simple-publicaciones.test.mjs && node --check tests/simple-search.test.mjs && node --check tests/firestore.rules.test.mjs && node --check location-actions.js && node --check location-model.js && node --check card-png.js && node --check tests/location-flow.test.mjs && node --check tests/publication-location.test.mjs && node --check google-geocoder.js && node --check location-config.js && node --check tests/google-geocoder.test.mjs && node --check < apps-script/geocodificador/Code.gs",
-    "test:rules": "npx firebase-tools emulators:exec --only firestore --project demo-lonecesito-privacidad \"node --test tests/firestore.rules.test.mjs\"",
+    "test:rules": "npx firebase-tools@14.18.0 emulators:exec --only firestore --project demo-lonecesito-privacidad \"node --test tests/firestore.rules.test.mjs\"",
     "test:cards": "node --test tests/publication-location.test.mjs",
     "test:location": "node --test tests/location-flow.test.mjs tests/google-geocoder.test.mjs"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^6.0.0",
-    "firebase": "^12.4.0"
+    "@firebase/rules-unit-testing": "5.0.0",
+    "firebase": "12.4.0"
   }
 }
