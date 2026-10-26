@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 26 de octubre de 2026
-**Versión publicada:** 2.2.36; activación Firebase preparada como 2.2.37, todavía sin publicar (ninguna visible al público)
+**Versión del código:** 2.2.37 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -243,3 +243,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - **Bloqueo de revisión automática:** intento de activar y guardar correo/contraseña rechazado porque el permiso general de Firebase no especificaba ese método ni su alcance. Verificado el interruptor sin activar y cancelada la edición. No se probaron Google ni dominios/reglas por otra vía. Se requiere aprobación concreta para registro con Google y correo/contraseña, autorización de gruemp.github.io, lectura pública de datos de publicaciones y escritura/edición/borrado del propio autor. No confundir el posterior «continúa» con esa aprobación específica.
 - Código 2.2.37 preparado: configuración real y recuperación voluntaria de publicaciones locales. Botón solo cuando hay registros propios pendientes, con sesión y confirmación antes de transferir. SHA-256 y transacción impiden duplicados/sobrescrituras. Preservar teléfono/foto/GPS/dirección histórica y copias locales; rechazar sin truncar datos incompatibles. Marcadores solo tras éxito y cambio de cuenta detiene el proceso.
 - Sintaxis y ocho pruebas de recuperación aprobadas. Suite completa: 191/238 aprobadas, 47 fallos heredados, sin fallos nuevos frente a 2.2.36. Emulador: once casos de reglas y recuperación aprobados, incluido importar concurrentemente una sola ficha y conservar su edición posterior. No se publicará la conexión hasta habilitar y verificar los permisos aprobados. Pruebas reales de login, publicación multiusuario y móvil/GPS pendientes.
+
+
+## Firebase: permisos aprobados y aplicados — 26-10-2026
+- El titular autoriza expresamente todos los cambios del alcance concreto: Google + correo/contraseña, dominio gruemp.github.io y reglas con lectura pública de publicaciones (texto, teléfono, foto, GPS), crear por autor autenticado y editar/eliminar solo sus registros. Esa aprobación resuelve el rechazo previo: no volver a pedirla por el mismo alcance.
+- En consola se habilitan y verifican ambos proveedores. Google muestra nombre público LoNecesito y correo de soporte de la cuenta elegida; gruemp.github.io consta como dominio Custom autorizado. Sin facturación ni Storage/Analytics nuevos.
+- firestore.rules publicado desde el editor web y comprobado después de recargar copiando todo el archivo desde el editor (su DOM virtualiza líneas visibles). Coincidencia íntegra con el archivo del repositorio. Prueba real HTTP sin sesión: requests lectura 200; escritura de documento vacío sin credenciales 403 PERMISSION_DENIED, sin crear datos de muestra. El aislamiento entre autores sigue cubierto por las once pruebas del emulador.
+- Se completa PR #71 con configuración real y recuperación voluntaria. Las once pruebas de reglas/emulador y ocho de recuperación ya pasan; suite general con 47 fallos heredados sin nuevos. Comprobar despliegue Pages, carga anónima y acceso real después de fusionar. Recuperación de datos reales y móvil/GPS físico siguen pendientes de interacción del titular en su navegador de origen.

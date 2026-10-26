@@ -7,15 +7,15 @@ Firebase Authentication identifica al autor y Cloud Firestore guarda las publica
 ## Estado real (26-10-2026)
 
 - Proyecto creado desde la consola con la cuenta elegida por el titular: **lonecesito-4c42e**, nombre LoNecesito, plan Spark sin facturación.
-- Aplicación web registrada: **LoNecesito web**, app ID **1:18685710241:web:468014c5e9bc7b8054c5e0**. Configuración pública real preparada en la rama de activación; nunca usar credenciales administrativas.
-- Firestore Standard **(default)** creado en **nam5 (United States)**, modo de producción. Las reglas efectivas observadas son `allow read, write: if false;`; no hay publicaciones cargadas.
-- **No está activado aún el servicio multiusuario en GitHub Pages.** El intento de habilitar correo/contraseña fue rechazado por revisión automática porque la autorización previa no especificaba método/alcance. No reintentar por otra vía. Solicitar aprobación concreta para Google + correo/contraseña, dominio `gruemp.github.io` y reglas de lectura pública/autoría antes de guardar esos cambios.
+- Aplicación web registrada: **LoNecesito web**, app ID **1:18685710241:web:468014c5e9bc7b8054c5e0**. Configuración pública real incluida en el cliente 2.2.37; nunca usar credenciales administrativas.
+- Firestore Standard **(default)** creado en **nam5 (United States)**, modo de producción. Las reglas efectivas son las de `firestore.rules`: lectura pública de requests, crear solo por su autor autenticado y editar/borrar solo por su propietario. Verificadas completas desde el editor tras recargar; lectura anónima HTTP 200 y escritura anónima HTTP 403 PERMISSION_DENIED. No se crearon fichas de prueba.
+- **Autorización expresa recibida y aplicada:** Google y correo/contraseña habilitados; dominio `gruemp.github.io` agregado. Nombre público de acceso Google: LoNecesito, asistencia: la cuenta del titular seleccionada en consola. El rechazo inicial de revisión se resolvió solicitando el alcance concreto; no requiere otro permiso. El despliegue de Pages del commit final se verifica por separado.
 - No se aceptaron términos nuevos, no se vinculó facturación ni se habilitaron Storage, Analytics o servicios de IA adicionales.
 - Proyecto verificable: https://console.firebase.google.com/project/lonecesito-4c42e/firestore/databases/-default-/security/rules
 
 ## Configuración del servicio
 
-1. Conectar la integración oficial de Firebase para acceder a la cuenta del titular y verificar si ya existe un proyecto destinado a LoNecesito. No reutilizar recursos de Natura ni inventar IDs o configuración.
+1. Usar la integración oficial si está disponible o la consola web conforme a la autorización de navegador otorgada por el titular. El proyecto real ya existe: lonecesito-4c42e. No reutilizar recursos de Natura ni inventar IDs o configuración.
 2. Empezar con el plan Spark sin habilitar facturación. Crear o seleccionar un proyecto autorizado y registrar una aplicación web. Copiar su configuración pública exacta: `apiKey`, `authDomain`, `projectId` y `appId`. No incluir cuentas de servicio, tokens administrativos ni claves privadas en GitHub.
 3. Habilitar Authentication con Google y correo/contraseña, que son los métodos contemplados por la interfaz actual. Autorizar `gruemp.github.io`. Lectura pública de publicaciones sin iniciar sesión; sesión obligatoria para crear, editar y eliminar.
 4. Crear Firestore en modo de producción, inicialmente sin acceso de clientes. Registrar la ubicación elegida; no modificar bases existentes de otros proyectos. No activar reglas temporales que permitan escribir a cualquiera.
