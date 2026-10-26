@@ -1,7 +1,7 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2237';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261026-v2238';
 import {localImportCandidates,importLocalPublications} from './local-import.js?v=20261025-v2237';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
-import {makeCardPng} from './card-png.js?v=20261025-v2232';
+import {makeCardPng} from './card-png.js?v=20261026-v2238';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,
   streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,

@@ -116,7 +116,7 @@ export async function makeCardPng({description,picture,contactPhone,location,add
   const locationHeight=hasAddressBlock?60+gpsLines.length*32:0;
   const footerY=locationY+locationHeight+(hasAddressBlock?18:5);
   const hasPhone=!example&&Boolean(contactPhone);
-  const footerHeight=hasPhone?132:66;
+  const footerHeight=hasPhone?132:94;
   const height=Math.ceil(footerY+footerHeight+margin);
 
   drawing.width=width;drawing.height=height;
@@ -147,8 +147,16 @@ export async function makeCardPng({description,picture,contactPhone,location,add
 
   ctx.beginPath();ctx.moveTo(left,footerY);ctx.lineTo(width-left,footerY);
   ctx.strokeStyle='#dfeae4';ctx.lineWidth=2;ctx.stroke();
+  // La misma marca de la web, dibujada localmente: no carga recursos externos.
+  ctx.fillStyle='#17493e';
+  roundedRect(ctx,left,footerY+24,52,52,15);
+  ctx.fill();
+  ctx.fillStyle='#d7f486';ctx.font='bold 36px system-ui, sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('L',left+26,footerY+63);
+  ctx.textAlign='left';
   ctx.font='bold 30px system-ui, sans-serif';ctx.fillStyle='#175b45';
-  ctx.fillText('LoNecesito',left,footerY+63);
+  ctx.fillText('LoNecesito',left+66,footerY+63);
   if(hasPhone){
     // El número aparece siempre en el PNG real, destacado en una banda sobria.
     const digits=String(contactPhone).replace(/\D/g,'');
