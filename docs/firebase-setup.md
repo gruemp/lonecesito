@@ -4,11 +4,18 @@
 
 Firebase Authentication identifica al autor y Cloud Firestore guarda las publicaciones compartidas. GitHub Pages conserva la web. El Apps Script independiente existente se mantiene exclusivamente para resolver direcciones GPS, sin base de publicaciones en Sheets ni fotografías en Drive.
 
-La configuración pública en `firebase-config.js` sigue vacía: el servicio multiusuario **todavía no está activado**. En ese estado, `simple.js` guarda publicaciones en el navegador. No asumir que la conexión existe por tener el código preparado.
+## Estado real (26-10-2026)
+
+- Proyecto creado desde la consola con la cuenta elegida por el titular: **lonecesito-4c42e**, nombre LoNecesito, plan Spark sin facturación.
+- Aplicación web registrada: **LoNecesito web**, app ID **1:18685710241:web:468014c5e9bc7b8054c5e0**. Configuración pública real incluida en el cliente 2.2.37; nunca usar credenciales administrativas.
+- Firestore Standard **(default)** creado en **nam5 (United States)**, modo de producción. Las reglas efectivas son las de `firestore.rules`: lectura pública de requests, crear solo por su autor autenticado y editar/borrar solo por su propietario. Verificadas completas desde el editor tras recargar; lectura anónima HTTP 200 y escritura anónima HTTP 403 PERMISSION_DENIED. No se crearon fichas de prueba.
+- **Autorización expresa recibida y aplicada:** Google y correo/contraseña habilitados; dominio `gruemp.github.io` agregado. Nombre público de acceso Google: LoNecesito, asistencia: la cuenta del titular seleccionada en consola. El rechazo inicial de revisión se resolvió solicitando el alcance concreto; no requiere otro permiso. El despliegue de Pages del commit final se verifica por separado.
+- No se aceptaron términos nuevos, no se vinculó facturación ni se habilitaron Storage, Analytics o servicios de IA adicionales.
+- Proyecto verificable: https://console.firebase.google.com/project/lonecesito-4c42e/firestore/databases/-default-/security/rules
 
 ## Configuración del servicio
 
-1. Conectar la integración oficial de Firebase para acceder a la cuenta del titular y verificar si ya existe un proyecto destinado a LoNecesito. No reutilizar recursos de Natura ni inventar IDs o configuración.
+1. Usar la integración oficial si está disponible o la consola web conforme a la autorización de navegador otorgada por el titular. El proyecto real ya existe: lonecesito-4c42e. No reutilizar recursos de Natura ni inventar IDs o configuración.
 2. Empezar con el plan Spark sin habilitar facturación. Crear o seleccionar un proyecto autorizado y registrar una aplicación web. Copiar su configuración pública exacta: `apiKey`, `authDomain`, `projectId` y `appId`. No incluir cuentas de servicio, tokens administrativos ni claves privadas en GitHub.
 3. Habilitar Authentication con Google y correo/contraseña, que son los métodos contemplados por la interfaz actual. Autorizar `gruemp.github.io`. Lectura pública de publicaciones sin iniciar sesión; sesión obligatoria para crear, editar y eliminar.
 4. Crear Firestore en modo de producción, inicialmente sin acceso de clientes. Registrar la ubicación elegida; no modificar bases existentes de otros proyectos. No activar reglas temporales que permitan escribir a cualquiera.
@@ -31,7 +38,14 @@ Referencias oficiales:
 
 ## Publicaciones locales existentes
 
-Conectar Firebase no sube automáticamente las publicaciones guardadas en otros navegadores. No borrar `localStorage`, no presentar las fichas locales como públicas y no atribuir todos los registros a una cuenta nueva de forma automática. Antes de activar la conexión para usuarios que ya tengan datos, preparar un procedimiento explícito de importación de sus propias publicaciones y verificar descripción, teléfono, fotografía, GPS y direcciones históricas. El navegador original debe conservar una copia hasta comprobar el resultado.
+Conectar Firebase no sube automáticamente las publicaciones guardadas en otros navegadores. El cambio preparado incluye `local-import.js` y un botón condicional **Recuperar mis publicaciones de este navegador** en Mis publicaciones.
+
+- Solo se ofrecen registros del propietario local `demo-browser`, con consentimiento original y sin marca de ejemplo.
+- Antes de transferir se exige sesión y confirmación de cantidad, cuenta y datos públicos (texto, teléfono, foto y GPS). No hay importación al entrar ni al abrir el listado.
+- Cada registro usa un ID derivado de SHA-256 de usuario/origen. Una transacción crea el documento solo si no existe; repetir o ejecutar concurrentemente no duplica ni sobrescribe una publicación editada en Firebase.
+- Se conservan teléfono, imagen comprimida, coordenadas, fuente de dirección y dirección histórica. No enviar otros campos privados.
+- No se borra la copia local. Marcar completado solo después de confirmar creación/existencia válida en servidor. Fallos individuales se conservan y pueden reintentarse. Un cambio de cuenta detiene la operación.
+- Los registros que excedan límites (por ejemplo descripciones >1.000 en una creación) se mantienen intactos localmente: no truncarlos ni relajar reglas. Indicar la causa antes de cualquier traslado manual posterior.
 
 ## Comprobaciones de seguridad
 

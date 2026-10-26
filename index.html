@@ -7,10 +7,10 @@
   <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
   <title>LoNecesito — Publica lo que necesitas</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="simple.css?v=20261025-v2236">
-  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="simple.css?v=20261025-v2237">
+  <script src="firebase-config.js?v=20261025-v2237"></script>
   <script src="location-config.js?v=20261025-v2232"></script>
-  <script type="module" src="simple.js?v=20261025-v2236"></script>
+  <script type="module" src="simple.js?v=20261025-v2237"></script>
 </head>
 <body>
 <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -51,6 +51,10 @@
   </section>
 
   <section id="mis-publicaciones" class="screen shell content-screen" aria-label="Mis publicaciones" hidden>
+    <div id="local-import-panel" class="local-import-panel" hidden>
+      <button id="local-import-button" type="button" class="button outline-button">Recuperar mis publicaciones de este navegador</button>
+      <p id="local-import-feedback" class="feedback" role="status" hidden></p>
+    </div>
     <div id="mine-list" class="publication-list" aria-live="polite"></div>
     <p id="mine-empty" class="empty-message" hidden>Aún no tienes publicaciones. Crea la primera cuando lo necesites.</p>
   </section>

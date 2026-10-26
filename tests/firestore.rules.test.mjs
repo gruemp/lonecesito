@@ -1,7 +1,9 @@
 import test,{before,after} from 'node:test';
 import {readFileSync} from 'node:fs';
 import {initializeTestEnvironment,assertFails,assertSucceeds} from '@firebase/rules-unit-testing';
-import {collection,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc,deleteField,serverTimestamp} from 'firebase/firestore';
+import {collection,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc,deleteField,serverTimestamp,runTransaction} from 'firebase/firestore';
+import assert from 'node:assert/strict';
+import {importLocalPublications,localImportId} from '../local-import.js';
 
 let env;
 const A='usuario-a',B='usuario-b';
@@ -151,5 +153,26 @@ test('dirección opcional sin GPS: autor puede crear, actualizar y borrar',async
   await assertFails(updateDoc(doc(db(B),'requests','solo-direccion'),{
     addressText:'Suplantación'
   }));
+});
+
+test('recuperación local concurrente crea una sola ficha y nunca sobrescribe la ya editada',async()=>{
+  const record={id:'local-recuperacion',ownerUid:'demo-browser',description:'Necesito reparar un ventilador',
+    contactPhone:'3001234567',contactConsent:true,addressText:'Dirección histórica, apartamento 2',
+    picture:'data:image/jpeg;base64,AAAA',location:{latitude:11,longitude:-74,accuracy:4}};
+  const database=db(A),api={db:database,auth:{currentUser:{uid:A}},doc,serverTimestamp,runTransaction};
+  const results=await Promise.all([importLocalPublications([record],{uid:A,api}),importLocalPublications([record],{uid:A,api})]);
+  assert.equal(results.reduce((n,r)=>n+r.created,0),1);
+  assert.equal(results.reduce((n,r)=>n+r.existing,0),1);
+  assert.equal(results.reduce((n,r)=>n+r.failed.length,0),0);
+  const reference=doc(database,'requests',await localImportId(A,record.id));
+  await assertSucceeds(updateDoc(reference,{description:'Texto editado después de recuperar'}));
+  const repeated=await importLocalPublications([record],{uid:A,api});
+  assert.equal(repeated.existing,1);
+  const saved=(await getDoc(reference)).data();
+  assert.equal(saved.description,'Texto editado después de recuperar');
+  assert.equal(saved.addressText,record.addressText);
+  assert.equal(saved.picture,record.picture);
+  assert.deepEqual(saved.location,record.location);
+  await assertFails(updateDoc(doc(db(B),'requests',reference.id),{description:'Cambio ajeno'}));
 });
 

@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
-**Revisión de documentación:** 25 de octubre de 2026
-**Versión del código:** 2.2.36 (no visible al público)
+**Revisión de documentación:** 26 de octubre de 2026
+**Versión del código:** 2.2.37 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -235,3 +235,18 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Localizada la integración oficial de Firebase, aún sin instalar/conectar al iniciar esta preparación. Solicitada su conexión; ninguna cuenta de Firebase fue inspeccionada ni modificada. No se vincula facturación. Fotos comprimidas siguen en documentos; Cloud Storage requiere Blaze y autorización concreta de coste.
 - Corregida incompatibilidad de pruebas: rules-unit-testing 6 requiere Firebase 13, mientras el cliente usa SDK 12.4.0. Fijadas pruebas con rules-unit-testing 5.0.0 y Firebase 12.4.0; CLI del emulador fijada en 14.18.0. Se añade exclusión de dependencias y registros de emulador. Guía firebase-setup.md reescrita para el producto actual, retirando perfiles/interesados/estados y firebase-live.js históricos.
 - La preparación no altera UI ni versión 2.2.36. Las publicaciones locales siguen conservadas; activación exige plan explícito para importación desde el navegador de origen y verificación de autoría. Verificación: npm run check aprobado; diez pruebas de firestore.rules ejecutadas y aprobadas en Firestore Emulator, usando exclusivamente demo-lonecesito-privacidad. Verificados lectura anónima, autoría, bloqueo de suplantación, edición/borrado ajenos, validación y compatibilidad. Java 17 con ruta local de bibliotecas del entorno. No se han desplegado reglas ni probado producción, cuenta real o migración local.
+
+
+## Activación Firebase preparada — 26-10-2026 (pendiente de aprobación)
+- El titular autoriza usar navegador porque la integración de Firebase no se podía instalar. Acceso a Google mediante browserAuth seguro, cuenta seleccionada por el usuario. Se crea proyecto **lonecesito-4c42e** (LoNecesito), app **LoNecesito web** con ID **1:18685710241:web:468014c5e9bc7b8054c5e0**. Configuración pública real en la rama; sin secretos administrativos.
+- Firestore Standard (default), región nam5, Spark sin facturación, creado con acceso de clientes denegado (`allow read, write: if false;`). No hay datos de producción ni modificaciones a Natura. Gemini/Analytics no habilitados.
+- **Bloqueo de revisión automática:** intento de activar y guardar correo/contraseña rechazado porque el permiso general de Firebase no especificaba ese método ni su alcance. Verificado el interruptor sin activar y cancelada la edición. No se probaron Google ni dominios/reglas por otra vía. Se requiere aprobación concreta para registro con Google y correo/contraseña, autorización de gruemp.github.io, lectura pública de datos de publicaciones y escritura/edición/borrado del propio autor. No confundir el posterior «continúa» con esa aprobación específica.
+- Código 2.2.37 preparado: configuración real y recuperación voluntaria de publicaciones locales. Botón solo cuando hay registros propios pendientes, con sesión y confirmación antes de transferir. SHA-256 y transacción impiden duplicados/sobrescrituras. Preservar teléfono/foto/GPS/dirección histórica y copias locales; rechazar sin truncar datos incompatibles. Marcadores solo tras éxito y cambio de cuenta detiene el proceso.
+- Sintaxis y ocho pruebas de recuperación aprobadas. Suite completa: 191/238 aprobadas, 47 fallos heredados, sin fallos nuevos frente a 2.2.36. Emulador: once casos de reglas y recuperación aprobados, incluido importar concurrentemente una sola ficha y conservar su edición posterior. No se publicará la conexión hasta habilitar y verificar los permisos aprobados. Pruebas reales de login, publicación multiusuario y móvil/GPS pendientes.
+
+
+## Firebase: permisos aprobados y aplicados — 26-10-2026
+- El titular autoriza expresamente todos los cambios del alcance concreto: Google + correo/contraseña, dominio gruemp.github.io y reglas con lectura pública de publicaciones (texto, teléfono, foto, GPS), crear por autor autenticado y editar/eliminar solo sus registros. Esa aprobación resuelve el rechazo previo: no volver a pedirla por el mismo alcance.
+- En consola se habilitan y verifican ambos proveedores. Google muestra nombre público LoNecesito y correo de soporte de la cuenta elegida; gruemp.github.io consta como dominio Custom autorizado. Sin facturación ni Storage/Analytics nuevos.
+- firestore.rules publicado desde el editor web y comprobado después de recargar copiando todo el archivo desde el editor (su DOM virtualiza líneas visibles). Coincidencia íntegra con el archivo del repositorio. Prueba real HTTP sin sesión: requests lectura 200; escritura de documento vacío sin credenciales 403 PERMISSION_DENIED, sin crear datos de muestra. El aislamiento entre autores sigue cubierto por las once pruebas del emulador.
+- Se completa PR #71 con configuración real y recuperación voluntaria. Las once pruebas de reglas/emulador y ocho de recuperación ya pasan; suite general con 47 fallos heredados sin nuevos. Comprobar despliegue Pages, carga anónima y acceso real después de fusionar. Recuperación de datos reales y móvil/GPS físico siguen pendientes de interacción del titular en su navegador de origen.
