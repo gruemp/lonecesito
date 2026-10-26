@@ -124,7 +124,7 @@ test('cancelación y timeout ignoran respuestas tardías y liberan callbacks',as
     const work=t.requestGoogleGeocode(coords,{endpoint:t.endpoint,signal:controller.signal});
     const callback=new URL(t.scripts[0].src).searchParams.get('prefix');
     const rejected=assert.rejects(work,/cancelada|demasiado/);
-    if(abort)controller.abort();else [...t.timers.values()].find(t=>t.ms===8000).fn();
+    if(abort)controller.abort();else [...t.timers.values()].find(t=>t.ms===12000).fn();
     await rejected;
     assert.equal(t.scripts[0].removed,true);t.host[callback]({ok:true});
     [...t.timers.values()].forEach(t=>t.fn());assert.equal(t.host[callback],undefined);

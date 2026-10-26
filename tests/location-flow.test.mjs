@@ -35,7 +35,7 @@ function harness({confirm=true,google=null}={}){
   const args={...model,coords,state,window:browser,navigator:{geolocation:geo},fetch,AbortController,
     googleGeocoderUrl:()=>google?'https://script.google.com/macros/s/TEST/exec':'',
     requestGoogleGeocode:google,
-    setTimeout:(fn,ms)=>ms===13000?setTimeout(fn,ms):(queueMicrotask(fn),0),clearTimeout,
+    setTimeout:(fn,ms)=>[13000,25000].includes(ms)?setTimeout(fn,ms):(queueMicrotask(fn),0),clearTimeout,
     $:node,locateButton:node('pin'),el:()=>node(Symbol()),contactIcon:()=>({}),
     toast:m=>notices.push(m),feedback:(id,m)=>{node(id).textContent=m;},
     cleanPublication,canManage,currentUid:()=> 'demo-browser',legacyDetails:r=>r.description,

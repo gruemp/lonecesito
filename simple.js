@@ -621,7 +621,7 @@ function resolveGpsAddress(coords,requestId){
   };
   showLocationDraft();
   const work=(async()=>{
-    const deadline=setTimeout(()=>controller.abort(),13000);
+    const deadline=setTimeout(()=>controller.abort(),googleGeocoderUrl()?25000:13000);
     try{
       if(googleGeocoderUrl()){
         try{

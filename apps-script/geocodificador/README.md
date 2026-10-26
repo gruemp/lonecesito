@@ -1,7 +1,9 @@
 # Geocodificador Google de LoNecesito
 
-Estado inicial: **código preparado; proyecto y URL de producción pendientes**.
-No afirmar que Google está activo mientras `location-config.js` tenga URL vacía.
+Estado: **proyecto independiente creado, versión 1 desplegada y verificada**.
+La URL real está en `location-config.js` y los identificadores públicos en
+`deployment.json` / `.clasp.json`. Verificados estado anónimo, respuesta de Google
+y JSONP con ubicaciones públicas de prueba. La web se activa al publicar el PR.
 La implementación nueva está autorizada por el titular y sustituye la restricción
 anterior de no usar Apps Script.
 
@@ -31,13 +33,14 @@ hasta seis horas, o dos minutos sin resultado, siguiendo Natura.
    para que los visitantes no deban iniciar sesión. El servicio solo acepta
    consultas públicas de geocodificación y consume la cuota de Maps del propietario.
 5. Conservar el ID del proyecto y el ID de la implementación en esta carpeta
-   cuando Google los devuelva. Nunca copiar tokens OAuth ni credenciales al repositorio.
+   para conservar la identidad real del proyecto; ya están registrados en esta carpeta. Nunca copiar tokens OAuth ni credenciales al repositorio.
 6. Abrir la URL `/exec` sin coordenadas. Debe devolver:
    `{"ok":true,"service":"lonecesito-geocoder","status":"ready","version":"1"}`.
 7. Probar geocodificación con un punto público, no con coordenadas privadas del
    usuario sin su autorización. Verificar JSON y callback JSONP.
-8. Guardar la URL `/exec` real en `location-config.js`, comprobar la integración
-   en el navegador y completar el PR hacia `codex/diseno-original`.
+8. Mantener la URL `/exec` real en `location-config.js`, verificar la integración
+   y publicar el PR hacia `codex/diseno-original`. En actualizaciones del servicio,
+   editar la implementación existente para conservar su URL estable.
 9. GitHub Pages no despliega Apps Script ni reglas Firestore. Si se activa
    Firebase, desplegar también las reglas que admiten `location.addressSource`.
 
@@ -57,6 +60,14 @@ La dirección manual/apartamento prevalece como declaración del autor y nunca s
 La precisión GPS y una dirección de Google no garantizan el portal ni el apartamento.
 
 ## Validación
+
+Validación real: `/exec` devuelve `ready`; JSONP válido; un punto público de
+Bogotá devuelve administración sin calle y el ejemplo oficial Times Square
+devuelve `1560 Broadway #1105, New York, NY 10036, EE. UU.`. No se probaron
+coordenadas privadas del usuario. Google responde aproximadamente y puede no
+identificar calle o número. El cliente admite 12 s para Google y 25 s en total
+con respaldos, antes de conservar la información disponible.
+
 
 `npm run check` y `npm run test:location`.
 Las pruebas locales simulan Maps, caché y transporte; **no demuestran que un

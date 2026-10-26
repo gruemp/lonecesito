@@ -480,7 +480,7 @@ País, departamento, municipio, ciudad y calle se completan directamente desde O
 
 Validación del flujo: `npm run test:location`. Sin Apps Script, backend de visitantes de Natura ni consultas automáticas al abrir fichas.
 
-## Preparación 2.2.32 — Geocodificador Google como Natura
-El titular autorizó Apps Script. Se prepara un servicio independiente que utiliza Maps.newGeocoder y formatted_address, y un cliente con consentimiento, validación y cancelación. **Aún no está activo:** falta crear/desplegar el proyecto Google y configurar su URL /exec. Mientras la URL de location-config.js esté vacía, permanecen los respaldos anteriores.
+## 2.2.32 — Geocodificador Google como Natura
+Se creó y desplegó un servicio Apps Script independiente que utiliza Maps.newGeocoder y formatted_address como Natura. La URL real ya está configurada en location-config.js; estado anónimo y JSONP verificados con ubicaciones públicas. Google tiene prioridad al finalizar GPS o Actualizar dirección GPS, con consentimiento y cancelación; se conservan respaldos y dirección manual/apartamento. No se modificó la analítica ni los proyectos de Natura.
 
-[Servicio, contrato y despliegue](apps-script/geocodificador/README.md). La integración permanece en PR borrador hasta comprobar la URL real; no se modifica la analítica ni los proyectos Google de Natura. GitHub Pages no despliega Apps Script ni reglas Firestore.
+[Servicio, identificadores y despliegue](apps-script/geocodificador/README.md). Google sigue ofreciendo una dirección aproximada y puede no tener calle o número. No se comprobó el GPS físico del usuario. GitHub Pages publica el cliente; Apps Script ya está desplegado y las reglas Firestore requieren publicación separada cuando se active Firebase.

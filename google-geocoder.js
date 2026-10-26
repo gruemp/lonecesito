@@ -8,7 +8,7 @@ export function googleGeocoderUrl(config=typeof window==='undefined'?{}:window.L
 // ContentService de Apps Script redirige su salida. JSONP permite consumirla
 // desde Pages sin proxy ni claves; solo se manda el punto consentido del autor.
 export function requestGoogleGeocode(coords,{signal,endpoint=googleGeocoderUrl(),
-  timeoutMs=8000,doc=document,host=window,cryptoApi=crypto}={}){
+  timeoutMs=12000,doc=document,host=window,cryptoApi=crypto}={}){
   return new Promise((resolve,reject)=>{
     if(!validLocation(coords)||!googleGeocoderUrl({googleGeocoderUrl:endpoint})){
       reject(new Error('Geocodificador Google no configurado.'));return;

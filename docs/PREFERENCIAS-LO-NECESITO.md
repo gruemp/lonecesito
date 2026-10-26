@@ -198,5 +198,5 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ## 2.2.32 — Preferencia actual: implementar Apps Script como Natura
 - El titular autorizó implementar Apps Script si es necesario; esta indicación sustituye la anterior de no usarlo. La dirección de Google se obtiene mediante el mismo servicio Maps y formatted_address de Natura, sin integrar su analítica.
-- Proyecto independiente con caché temporal, privacidad y consentimiento de envío a Google. Configurar una URL real y comprobada; la URL vacía significa que la función no está activa y siguen los respaldos previos. No fusionar el borrador de integración hasta verificar despliegue y conexión.
+- Proyecto independiente con caché temporal, privacidad y consentimiento de envío a Google. Configurar una URL real y comprobada; la URL vacía significa que la función no está activa y siguen los respaldos previos. El servicio independiente ya fue desplegado y verificado; conservar su URL e IDs reales en futuras actualizaciones.
 - Conservar toda dirección manual/apartamento. Dar prioridad a Google cuando haya un resultado útil, atribuirlo a Google Maps en panel/ficha/PNG y conservar ubicación conocida si falla. La geocodificación sigue siendo aproximada.

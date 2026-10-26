@@ -1,8 +1,8 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión publicada:** 2.2.31 (no visible al público)
-**Versión preparada:** 2.2.32 — pendiente despliegue independiente Apps Script y activación de URL
+**Versión del código:** 2.2.32 (no visible al público)
+**Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -195,11 +195,11 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Nuevas regresiones sobre selección, distancia/calle/precisión, numeración faltante, respaldo condicional, fallos, cancelación, persistencia, preservación de número y consentimiento. GPS físico del usuario y Firestore Emulator siguen pendientes; no se afirma recuperación de número en su ubicación concreta.
 - Referencias primarias: https://nominatim.org/release-docs/latest/api/Reverse/ · https://github.com/komoot/photon/blob/master/docs/api-v1.md · https://github.com/komoot/photon#demo-server .
 
-## Preparación 2.2.32 — Google Apps Script como Natura (25-10-2026)
+## Cambio 2.2.32 — Google Apps Script como Natura (25-10-2026)
 - Se comprobó Natura/visitantes-servicios.js: reverseGeocodeCached_ usa Google Maps, español, región co y primer formatted_address con caché de seis horas y dos minutos vacía. Se replicó únicamente ese mecanismo en apps-script/geocodificador/Code.gs, con manifiesto independiente; no se modificó Natura.
 - El usuario autorizó Apps Script expresamente y revocó la prohibición inicial. Servicio solo de geocodificación, sin identidad, teléfono, registros de visitas o Telegram. Validación de entradas, JSONP con callback aleatorio limitado, salida escapada y endpoint de estado.
-- google-geocoder.js consume el servicio por JSONP con URL de Apps Script /exec validada, timeout, cancelación y descarte de respuestas tardías. location-config.js mantiene googleGeocoderUrl vacío hasta despliegue real; no hay endpoint de Google activo para LoNecesito todavía.
-- Cliente preparado para priorizar Google y su dirección formateada; conservar apartamento/manual, respaldos anteriores y datos conocidos del mismo punto. Campo addressSource opcional en reglas Firestore y atribución correcta en panel/ficha/PNG. Estado de la versión publicada no cambia mientras este PR sea borrador.
+- google-geocoder.js consume el servicio por JSONP con URL de Apps Script /exec validada, timeout, cancelación y descarte de respuestas tardías. location-config.js tiene la URL real de la implementación 1 devuelta por Google, con estado anónimo y JSONP comprobados.
+- Cliente preparado para priorizar Google y su dirección formateada; conservar apartamento/manual, respaldos anteriores y datos conocidos del mismo punto. Campo addressSource opcional en reglas Firestore y atribución correcta en panel/ficha/PNG. El PR se completa después de configurar el endpoint real y se publica mediante Pages.
 - Pruebas locales: 35 casos de flujo, servidor Maps/caché simulado, JSONP, validación, selección, cancelación, persistencia y PNG aprobados; 7 regresiones seleccionadas adicionales. No son pruebas de Google real ni del GPS físico. Emulador Firestore no ejecutado.
-- Despliegue bloqueado por sesión Google ausente: Apps Script redirige a portada con Acceder. La búsqueda de integraciones no encontró capacidad de gestión Apps Script en los conectores disponibles. No acceder ni copiar CLASPRC_JSON de Natura para evitar este paso. Se requiere acceso seguro a Google, crear la aplicación web, probarla y guardar su URL antes de fusionar.
-- Guía exacta: apps-script/geocodificador/README.md. Mantener esta preparación revisable en PR borrador; completar despliegue, comprobación y enlace en el siguiente paso autorizado.
+- Acceso a Google completado por el formulario seguro del navegador y cuenta elegida por el titular. Se creó LoNecesito — Geocodificador GPS y se desplegó versión 1 como propietario con acceso anónimo. Los IDs/URL están en deployment.json y .clasp.json. No se accedió ni copió CLASPRC_JSON de Natura ni se alteraron sus proyectos/workflows.
+- Verificación real HTTP sin sesión: estado ready; JSONP válido; muestra pública de Bogotá con datos administrativos sin calle y ejemplo oficial Times Square con dirección 1560 Broadway #1105, New York, NY 10036, EE. UU. (aprox. 7,65 s). No se probaron coordenadas privadas del usuario. Se amplió el timeout de Google a 12 s y el total con respaldos a 25 s por la latencia observada. Guía exacta: apps-script/geocodificador/README.md. Verificar Pages del commit final.

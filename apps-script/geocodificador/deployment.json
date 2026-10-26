@@ -1,0 +1,16 @@
+{
+  "projectName": "LoNecesito — Geocodificador GPS",
+  "scriptId": "1Cv1YzFyehWamIHn7jbqiBOQaHUhj5SNBib03-eA7N5W5uznSAQczuDTN",
+  "deploymentId": "AKfycbyVkc5BD8YQ0E7qs7c-k3YeeWZv1wwL7g9eidWo1YY20xsKch08BfxwfkpDD6dQfZ35",
+  "webAppUrl": "https://script.google.com/macros/s/AKfycbyVkc5BD8YQ0E7qs7c-k3YeeWZv1wwL7g9eidWo1YY20xsKch08BfxwfkpDD6dQfZ35/exec",
+  "version": 1,
+  "access": "ANYONE_ANONYMOUS",
+  "executeAs": "USER_DEPLOYING",
+  "verification": {
+    "anonymousHealth": "ready",
+    "publicGeocode": "OK",
+    "jsonp": true,
+    "publicSample": "Times Square — ejemplo de la documentación de Google",
+    "privateUserCoordinatesUsed": false
+  }
+}
