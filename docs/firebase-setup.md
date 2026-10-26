@@ -11,6 +11,7 @@ Firebase Authentication identifica al autor y Cloud Firestore guarda las publica
 - Firestore Standard **(default)** creado en **nam5 (United States)**, modo de producción. Las reglas efectivas son las de `firestore.rules`: lectura pública de requests, crear solo por su autor autenticado y editar/borrar solo por su propietario. Verificadas completas desde el editor tras recargar; lectura anónima HTTP 200 y escritura anónima HTTP 403 PERMISSION_DENIED. No se crearon fichas de prueba.
 - **Autorización expresa recibida y aplicada:** Google y correo/contraseña habilitados; dominio `gruemp.github.io` agregado. Nombre público de acceso Google: LoNecesito, asistencia: la cuenta del titular seleccionada en consola. El rechazo inicial de revisión se resolvió solicitando el alcance concreto; no requiere otro permiso. El despliegue de Pages del commit final se verifica por separado.
 - No se aceptaron términos nuevos, no se vinculó facturación ni se habilitaron Storage, Analytics o servicios de IA adicionales.
+- Despliegue web 2.2.37 verificado (PR #71, Pages 40277786416), acceso real con Google y publicación auténtica visible en listas propia/pública. Consulta REST anónima devuelve esa publicación; sin errores propios de la web observados. Correo/contraseña está habilitado pero no se ensayó con una cuenta real de ese método.
 - Proyecto verificable: https://console.firebase.google.com/project/lonecesito-4c42e/firestore/databases/-default-/security/rules
 
 ## Configuración del servicio
