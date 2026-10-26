@@ -115,6 +115,8 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ## I. Restricciones y seguridad que no deben olvidarse
 
+- El titular elige **Firebase** para el servicio compartido, después de evaluar Apps Script. Authentication identifica al autor y Firestore guarda publicaciones/fotos comprimidas según el modelo actual. Mantener Apps Script para direcciones GPS. Empezar sin facturación; no activar Blaze/Cloud Storage sin autorización concreta. No cambiar la interfaz por esta preparación.
+
 - El almacenamiento Firebase **todavía no está configurado** en el proyecto conocido. En modo local, las publicaciones del navegador no se comparten con otros visitantes; no prometer lo contrario ni ocultar esa limitación en respuestas técnicas.
 - Al activar Firebase, la identidad de quien publicó y el control de creación/edición/eliminación deben verificarse en reglas de seguridad, **no únicamente en botones ocultos**.
 - El número se publica como mecanismo de contacto en enlaces y PNG: solicitar consentimiento explícito y evitar usos secundarios no autorizados.
