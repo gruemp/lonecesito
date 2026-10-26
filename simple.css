@@ -1,0 +1,685 @@
+/* LoNecesito — interfaz sencilla y tipografía cuidada. */
+:root{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#173b30;background:#f7f9f6;font-synthesis:none;--green:#17493e;--green-dark:#0e352c;--ink:#173b30;--muted:#566d60;--line:#d8e4da;--paper:#f7f9f6;--white:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body{margin:0;color:var(--ink);background:var(--paper);font-size:15px;line-height:1.55}
+a{color:inherit;text-decoration:none}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.6;cursor:not-allowed}
+:focus-visible{outline:3px solid #659c72;outline-offset:3px}
+[hidden]{display:none!important}
+.shell{width:min(calc(100% - 32px),1030px);margin-inline:auto}
+.skip-link{position:absolute;top:-60px;left:12px;z-index:200;background:#fff;padding:9px;border-radius:8px}
+.skip-link:focus{top:10px}
+/* Títulos centrados, párrafos justificados, últimas líneas naturales. */
+h1,h2,h3{letter-spacing:-.035em;line-height:1.2;color:#143a30;text-wrap:balance}
+h1,h2,.page-heading h2,.modal-head h2{text-align:center}
+p,.hero-description,.page-heading p,.publication-description,.field-help,.modal-description,.consent span,.empty-message,.feedback{line-height:1.65;text-align:justify;text-align-last:start;text-justify:inter-word;hyphens:auto;overflow-wrap:break-word}
+.site-header{background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 12px #173b3009}
+.header-layout{display:flex;align-items:center;min-height:75px;gap:20px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-size:22px;font-weight:850;white-space:nowrap;letter-spacing:-.04em;color:var(--green)}
+.brand-mark{width:41px;height:41px;background:var(--green);color:#d7f486;border-radius:12px;display:grid;place-items:center;font-size:27px}
+.top-nav{display:flex;gap:8px;align-items:center;margin-left:auto}
+.top-nav a{padding:10px 12px;border-radius:9px;font-size:13px;font-weight:720;color:#375747;text-align:center;white-space:nowrap}
+.top-nav a:hover,.top-nav a[aria-current=page]{background:#e9f3ec}
+.account-button{background:#f1f7f1;border:1px solid #c8dccb;color:#17493e;font-size:13px;font-weight:750;border-radius:10px;padding:10px 13px;max-width:180px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.screen{min-height:calc(100dvh - 155px)}
+.home-screen{padding-block:42px 60px;display:grid;place-items:start center}
+.hero{max-width:730px;width:100%;background:linear-gradient(150deg,#fff 0%,#fafffa 100%);border:1px solid #dbe8dc;border-radius:25px;box-shadow:0 15px 45px #17493e0c;padding:clamp(23px,4vw,44px);text-align:center}
+.eyebrow{display:table;margin:0 auto 16px;padding:6px 14px;border-radius:25px;border:1px solid #d4e6d5;background:#eef8e9;font-size:11px;font-weight:800;letter-spacing:.14em;color:#416f4a;text-align:center}
+.hero h1{font-size:clamp(30px,4.6vw,47px);font-weight:850;margin:0 auto 18px;max-width:625px}
+.hero-description{max-width:520px;margin:0 auto 26px;font-size:clamp(14px,1.6vw,16px);color:var(--muted)}
+.content-screen{padding-block:40px 65px}
+.page-heading{max-width:780px;margin:0 auto 29px}
+.page-heading h2{font-size:clamp(27px,4vw,37px);margin:0 auto 12px}
+.page-heading p{color:var(--muted);font-size:15px;max-width:66ch;margin:0 auto}
+.search-panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;max-width:860px;margin:0 auto 20px;box-shadow:0 4px 18px #173b3007}
+label,.goods-fields legend{display:block;color:#244e38;font-size:14px;font-weight:740;margin-bottom:7px}
+input:not([type=checkbox]),select,textarea{display:block;width:100%;max-width:100%;min-height:47px;border:1px solid #c7d6c9;background:#fff;border-radius:10px;color:#173b30;padding:11px 13px;outline-color:#448c65}
+textarea{resize:vertical;min-height:118px;line-height:1.55}
+input[type=file]{min-height:unset;padding:10px}
+.filter-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.filter-fields .form-field{margin:0}
+.publication-list{max-width:860px;margin-inline:auto;display:grid;gap:16px}
+.publication-card{background:#fff;border:1px solid #d8e4da;border-radius:17px;padding:clamp(17px,3vw,25px);box-shadow:0 7px 22px #143e3210;min-width:0}
+.publication-card h3{margin:8px 0 10px;font-size:clamp(20px,2.35vw,24px);font-weight:800;text-align:left;overflow-wrap:anywhere}
+.publication-city{display:flex;gap:7px;align-items:center;font-size:13px;font-weight:650;color:#5d7265;margin:0 0 12px;text-align:left}
+.publication-description{color:#354b3d;white-space:pre-wrap;margin:13px 0;max-width:78ch}
+.publication-details{margin:10px 0 15px;padding-left:19px;color:#52685a;display:grid;gap:3px;font-size:13px}
+.publication-details li{text-align:justify;text-align-last:left}
+.publication-photo{width:min(100%,450px);max-height:290px;object-fit:contain;border:1px solid #e0e8df;background:#fff;border-radius:12px;margin:11px auto 17px;display:block}
+.contact-box{background:#f1f8f1;border:1px solid #d2e4d3;border-radius:13px;padding:14px 17px;display:grid;gap:9px;justify-items:center}
+.contact-box .contact-label{font-weight:790;font-size:13px;color:#28533e;text-align:center}
+.owner-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px;margin-top:15px}
+.button{border-radius:10px;border:1px solid var(--green);padding:12px 17px;min-height:46px;font-size:14px;font-weight:780;display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1.35}
+.primary-button{background:var(--green);color:#fff}
+.primary-button:hover{background:var(--green-dark)}
+.outline-button{background:#fff;color:var(--green);border-color:#b9d0bf}
+.outline-button:hover{background:#eef5ee}
+.danger-button{border-color:#e4b5b0;background:#fff5f4;color:#9b3835}
+.danger-button:hover{background:#ffe6e4}
+.empty-message{max-width:860px;margin:0 auto;padding:30px;border:1px dashed #b9d2bd;border-radius:14px;background:#fff;color:var(--muted)}
+.publish-form{max-width:760px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:19px;padding:clamp(18px,4vw,32px);box-shadow:0 8px 28px #173b300b;display:grid;gap:19px}
+.form-field{min-width:0}
+.goods-fields{border:1px solid #d8e7db;border-radius:12px;margin:0;padding:15px;background:#f9fcf9}
+.goods-fields legend{padding:0 5px}
+.goods-fields .filter-fields{margin-top:0}
+.field-help{color:#61756a;font-size:12px;margin:6px 0 0}
+.picture-preview img{display:block;max-width:100%;max-height:230px;object-fit:contain;border-radius:10px;margin-top:10px}
+.text-button{border:0;background:none;text-decoration:underline;color:#24694b;padding:9px 0;font-weight:730}
+.consent{display:flex;gap:12px;align-items:flex-start;font-weight:570;line-height:1.55;color:#365543;background:#f2f8f2;border:1px solid #d9e8d9;border-radius:12px;padding:15px;cursor:pointer}
+.consent input{flex:0 0 20px;width:20px;height:20px;margin-top:2px}
+.consent span{font-size:13px}
+.form-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.form-actions .button{flex:1 1 170px}
+.inline-notice,.feedback{color:#835b25;background:#fff6e3;border:1px solid #ebd5aa;border-radius:9px;padding:12px 14px;font-size:13px;margin:0}
+.feedback{color:#953e35;background:#fff1ee;border-color:#e7b4ab}
+.footer{border-top:1px solid #d9e5da;padding:20px 0 28px}
+.footer p{margin:0 auto;max-width:700px;color:#647769;font-size:12px;text-align:center}
+.toast{position:fixed;z-index:300;left:50%;bottom:22px;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 30px);padding:12px 16px;background:#17493e;color:#fff;border-radius:12px;font-size:13px;box-shadow:0 7px 28px #102c2255;text-align:center}
+dialog{border:1px solid #d0e0d4;border-radius:18px;background:#fff;color:#173b30;padding:25px;width:min(510px,calc(100% - 24px));max-height:calc(100dvh - 25px);overflow:auto;box-shadow:0 20px 70px #18352d40}
+dialog::backdrop{background:#10271e99}
+.modal-head{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.modal-head h2{margin:0;font-size:24px;flex:1}
+.close-button{background:#fff;border:1px solid #d6e2d8;border-radius:9px;width:34px;height:34px;font-size:24px;flex-shrink:0}
+.modal-description{margin:13px 0 18px;color:var(--muted);font-size:14px}
+#auth-form{display:grid;gap:15px}
+#auth-form .button,#auth-logout{width:100%}
+#auth-logout{margin-top:15px}
+@media(max-width:680px){
+  .shell{width:calc(100% - 24px)}
+  .header-layout{min-height:64px;gap:8px 10px;flex-wrap:wrap;padding-block:10px}
+  .brand{font-size:19px}
+  .brand-mark{width:35px;height:35px;font-size:23px}
+  .top-nav{order:3;flex:1 1 100%;display:flex;justify-content:center;border-top:1px solid #e6ede6;padding-top:5px;margin-left:0}
+  .top-nav a{white-space:normal;font-size:12px;padding:9px 10px}
+  .account-button{margin-left:auto;max-width:150px;padding:9px;font-size:12px}
+  .home-screen{padding-block:19px 35px}
+  .hero{padding:24px 16px;border-radius:19px}
+  .hero h1{font-size:clamp(29px,8vw,39px)}
+  .hero-description{font-size:14px}
+  .content-screen{padding-block:23px 39px}
+  .page-heading h2{font-size:clamp(25px,7vw,32px)}
+  .page-heading{margin-bottom:19px}
+  .page-heading p{font-size:14px}
+  .search-panel{padding:15px}
+  .filter-fields{grid-template-columns:1fr;gap:12px}
+  .publication-card{padding:17px}
+  .publication-card h3{font-size:20px}
+  .publication-description{font-size:14px}
+  .publish-form{padding:18px 15px;border-radius:14px}
+  .owner-actions{justify-content:stretch}
+  .owner-actions .button{flex:1}
+  /* Un párrafo muy corto se presenta sin espacios artificiales. */
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Versión de publicación visible al inicio de TODAS las pantallas. */
+.release-bar{min-height:24px;display:flex;justify-content:center;align-items:center;padding:3px 12px;background:#f7f9f6;border-bottom:1px solid #e4eae4;color:#6a796c;font-size:11px;font-weight:600;line-height:1.4;text-align:center}
+/* Información completa en todas las fichas. Títulos con jerarquía, texto justificado. */
+@media(max-width:460px){
+ .release-bar{font-size:11px}
+}
+
+/* Versión 2.1.0: una sola caja para toda la necesidad y otra para WhatsApp. */
+#publish-form{max-width:740px;gap:22px}
+#need-description{min-height:235px;padding:16px;font-size:15px;line-height:1.68;resize:vertical}
+#need-phone{font-size:17px;min-height:52px}
+#publish-form .field-help{margin-top:9px;font-size:12px;line-height:1.55}
+.publication-card h3{text-align:center;max-width:70ch;margin:4px auto 14px}
+.publication-description{margin:10px 0 19px;font-size:15px;line-height:1.7;text-align:justify;text-align-last:left;white-space:pre-wrap;overflow-wrap:break-word}
+.search-panel{max-width:860px}
+@media(max-width:680px){#need-description{min-height:220px;font-size:14px}.publication-description{font-size:14px}}
+
+
+/* Versión 2.2.0 — máxima economía vertical sin estrechar el contenido.
+   Cada área y opción tiene fondo/borde propio y separación suficiente para identificarla. */
+:root{--blue-ink:#22587d;--blue-soft:#eef6fb;--amber-soft:#fff7e9;--amber-ink:#8b5a18}
+html{scroll-padding-top:62px}
+body{line-height:1.42}
+.screen{min-height:0}
+.header-layout{min-height:54px;gap:10px}
+.brand{font-size:19px;gap:7px}
+.brand-mark{width:32px;height:32px;border-radius:9px;font-size:21px}
+.top-nav{gap:5px}
+.top-nav a{border:1px solid transparent;padding:7px 9px;font-size:12px;line-height:1.2}
+.top-nav a[aria-current=page]{outline:2px solid currentColor;outline-offset:-2px}
+.account-button{min-height:34px;padding:6px 9px}
+.home-screen{padding-block:13px 20px}
+.hero{max-width:760px;padding:clamp(13px,2.8vw,22px);border-radius:16px}
+.eyebrow{font-size:10px;padding:3px 10px;margin-bottom:8px;line-height:1.3}
+.hero h1{font-size:clamp(25px,4vw,34px);line-height:1.16;margin:0 auto 8px}
+.hero-description{max-width:610px;font-size:13px;line-height:1.42;margin:0 auto 12px}
+.content-screen{padding-block:15px 25px}
+.page-heading{margin-bottom:12px;max-width:860px}
+.page-heading h2{font-size:clamp(22px,3vw,28px);line-height:1.18;margin:0 auto 5px}
+.page-heading p{font-size:12.5px;line-height:1.45;max-width:80ch}
+.search-panel{padding:10px 12px;margin-bottom:10px;border-radius:11px;background:var(--blue-soft);border-color:#cbdfea;box-shadow:none}
+.search-panel label{font-size:12px;color:var(--blue-ink);margin-bottom:4px}
+.search-panel input{min-height:42px}
+.publication-list{gap:10px;max-width:920px}
+.publication-card{padding:11px 13px 12px;border-radius:12px;border:1px solid #dae5dc;border-left:4px solid #3d8265;box-shadow:0 2px 10px #143e320d}
+.publication-card:nth-child(4n+2){border-left-color:#407aa6}
+.publication-card:nth-child(4n+3){border-left-color:#c78b35}
+.publication-card:nth-child(4n){border-left-color:#7971a8}
+.publication-card.card-goods{background:linear-gradient(120deg,#f5faff,#fff 130px)}
+.publication-card.card-services{background:linear-gradient(120deg,#f5fbf5,#fff 130px)}
+.publication-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:6px 10px;flex-wrap:wrap;border-bottom:1px solid #e9eee9;padding-bottom:6px;margin:0 0 6px}
+.publication-card .publication-heading h3{flex:1 1 210px;text-align:left;font-size:clamp(16px,2vw,19px);line-height:1.25;letter-spacing:-.02em;margin:0;max-width:none;overflow-wrap:break-word}
+.publication-description{font-size:13.5px;line-height:1.46;margin:4px 0 8px;max-width:none;text-align:justify;text-align-last:left;hyphens:auto;white-space:pre-wrap}
+.publication-photo{max-height:190px;width:auto;max-width:100%;margin:7px auto}
+.contact-box{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;justify-items:stretch;gap:7px;padding:7px;background:#eff8f1;border:1px solid #cce3d3;border-radius:9px;margin-top:7px}
+.owner-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}
+.owner-actions .button{min-height:40px;width:100%;font-size:12.5px;padding:7px 10px;border-radius:8px}
+.owner-actions .outline-button{background:var(--blue-soft);border-color:#bfd7e8;color:var(--blue-ink)}
+.owner-actions .danger-button{background:#fff0ed;border-color:#ecc5bd;color:#913d35}
+.empty-message{padding:15px;border-radius:10px}
+#publish-form{gap:10px;padding:15px;max-width:800px;border-radius:12px;box-shadow:0 3px 14px #173b3009}
+#publish-form label{margin-bottom:4px;font-size:12.5px}
+#need-description{min-height:148px;padding:10px 12px;line-height:1.48;font-size:14px;border-color:#bfcfdb;background:#fafdff}
+#need-phone{min-height:43px;font-size:15px;border-color:#b6d7c2;background:#f8fffa}
+#publish-form .field-help{font-size:11px;line-height:1.35;margin-top:5px;color:#5a7462}
+.form-actions{gap:7px}
+.form-actions .button{min-height:42px;padding:8px 12px;font-size:13px}
+.footer{padding:9px 0 13px}
+.footer p{font-size:11px;line-height:1.4}
+dialog{padding:17px;border-radius:13px}
+.modal-head h2{font-size:20px}
+.modal-description{margin:8px 0 12px;font-size:12.5px;line-height:1.4}
+#auth-form{gap:10px}
+#auth-form .button{min-height:41px}
+@media(max-width:680px){
+  .shell{width:calc(100% - 20px)}
+  .header-layout{min-height:45px;gap:5px 8px;padding-block:6px}
+  .brand{font-size:18px}
+  .brand-mark{width:30px;height:30px;font-size:20px}
+  .top-nav{order:3;flex-basis:100%;margin:0;padding-top:4px;border-top:1px solid #eef1ed;gap:7px}
+  .top-nav a{flex:1;padding:6px 5px;font-size:11.5px}
+  .account-button{min-height:30px;padding:5px 8px;font-size:11px}
+  .home-screen{padding-block:10px 18px}
+  .hero{padding:13px 11px;border-radius:13px}
+  .hero h1{font-size:clamp(24px,6.3vw,30px);line-height:1.18}
+  .hero-description{font-size:12.5px;margin-bottom:10px}
+  .content-screen{padding-block:11px 20px}
+  .page-heading{margin-bottom:9px}
+  .page-heading h2{font-size:clamp(21px,5.3vw,25px);margin-bottom:4px}
+  .page-heading p{font-size:12px;line-height:1.42}
+  .search-panel{padding:8px 10px;margin-bottom:9px}
+  .publication-card{padding:9px 10px 10px}
+  .publication-card .publication-heading h3{font-size:16px}
+  .publication-description{font-size:13px;line-height:1.46}
+  #publish-form{padding:12px;gap:9px}
+  #need-description{min-height:146px;font-size:14px}
+}
+@media(max-width:350px){
+  .contact-box{gap:5px;padding:5px}
+  .publication-card .publication-heading h3{flex-basis:170px}
+}
+
+
+/* v2.2.3: solo dos botones con iconos, sin número de teléfono visible.
+   La acción azul abre el marcador; la verde abre WhatsApp. */
+.contact-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:6px;margin-top:7px;background:#f1f5f3;border:1px solid #c9ddd2;border-radius:10px}
+.contact-action{display:flex;align-items:center;justify-content:center;min-width:0;width:100%;min-height:46px;padding:8px;border:1px solid transparent;border-radius:9px;text-decoration:none;cursor:pointer;transition:background-color .15s ease,box-shadow .15s ease}
+.contact-action .contact-icon{display:block;width:25px;height:25px;flex:0 0 25px}
+.call-action{background:#236b96;border-color:#1e5e84;color:#fff}
+.call-action:hover{background:#185778}
+.whatsapp-action{background:#16844e;border-color:#137244;color:#fff}
+.whatsapp-action:hover{background:#11663d}
+.contact-action:focus-visible{outline:3px solid #d2b76d;outline-offset:2px}
+.contact-action:disabled{cursor:default;opacity:.52}
+.contact-action:disabled:hover{background:#236b96}
+@media(max-width:350px){.contact-box{gap:6px;padding:5px}.contact-action{min-height:44px;padding:7px}.contact-action .contact-icon{width:23px;height:23px;flex-basis:23px}}
+@media(prefers-reduced-motion:reduce){.contact-action{transition:none}}
+
+
+/* Versión 2.2.4: una única barra de navegación con tres botones permanentes.
+   La portada no repite accesos; las tres opciones mantienen colores distintos. */
+.site-header{position:sticky;top:0;z-index:60;background:#fff}
+.header-layout{gap:12px;min-height:52px}
+.top-nav{display:grid;grid-template-columns:minmax(175px,1.55fr) minmax(115px,1fr) minmax(123px,1fr);align-items:stretch;gap:7px;margin-left:auto;min-width:0}
+.top-nav a{display:flex;align-items:center;justify-content:center;text-align:center;text-wrap:balance;white-space:normal;overflow-wrap:break-word;min-height:39px;border-radius:9px;border:1px solid transparent;padding:6px 9px;font-size:12px;font-weight:780;line-height:1.2}
+.top-nav .nav-publish{background:var(--green);color:#fff;border-color:var(--green)}
+.top-nav .nav-publish:hover{background:var(--green-dark)}
+.top-nav .nav-browse{background:var(--blue-soft);color:var(--blue-ink);border-color:#bdd8e8}
+.top-nav .nav-browse:hover{background:#dceefa}
+.top-nav .nav-mine{background:var(--amber-soft);color:var(--amber-ink);border-color:#eedbb8}
+.top-nav .nav-mine:hover{background:#ffebc8}
+.top-nav a[aria-current=page]{outline:2px solid currentColor;outline-offset:-3px}
+.top-nav .nav-publish[aria-current=page]{outline-color:#d1e6d6}
+.home-screen{padding-block:13px 23px}
+.hero{max-width:680px}
+.hero-description{margin-bottom:0}
+@media(max-width:930px){
+  .header-layout{flex-wrap:wrap;gap:5px 9px;padding-block:6px}
+  .top-nav{order:3;flex:1 1 100%;width:100%;margin:0;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);border-top:1px solid #e9f0ec;padding-top:5px;gap:6px}
+  .account-button{margin-left:auto}
+}
+@media(max-width:680px){
+  .header-layout{min-height:45px;gap:4px 8px;padding-block:6px}
+  .top-nav{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:5px;padding-top:5px}
+  .top-nav a{min-height:44px;padding:5px 4px;font-size:clamp(10px,3vw,12px);line-height:1.19}
+  .hero{padding:13px 12px}
+  .hero-description{margin:0 auto}
+}
+@media(max-width:345px){.top-nav{gap:4px}.top-nav a{font-size:10px;padding:4px 3px;min-height:48px}}
+
+
+/* v2.2.5 — fichas con imagen a la DERECHA, sin hacer el cuerpo más alto. */
+.publication-main{display:grid;grid-template-columns:minmax(0,1fr) clamp(90px,25vw,180px);align-items:start;gap:10px;min-width:0}
+.publication-copy{min-width:0;overflow-wrap:anywhere}
+.publication-main .publication-heading{margin-top:0}
+.publication-main .publication-description{margin:4px 0 1px;text-align:justify;text-align-last:left}
+.publication-media{min-width:0;width:100%;aspect-ratio:4/3;overflow:hidden;border:1px solid #cedfd6;border-radius:9px;background:#eef5ef;display:flex;align-items:center;justify-content:center}
+.publication-media .publication-photo{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;margin:0;border:0;border-radius:0}
+.photo-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#82a18b;background:linear-gradient(135deg,#e5f0e9,#f4f9f5)}
+.photo-placeholder .contact-icon{width:34px;height:34px;stroke-width:1.3}
+/* Dictado y fotografía se alojan en el espacio de la caja, sin filas extras. */
+.need-entry{position:relative;min-width:0}
+.need-entry #need-description{display:block;width:100%;padding-bottom:58px}
+.entry-toolbar{position:absolute;right:7px;bottom:7px;display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.96);padding:3px;border:1px solid #dbe5de;border-radius:10px;box-shadow:0 1px 4px #163c3215}
+.entry-tool{width:40px;height:40px;flex:0 0 40px;border:1px solid #d5e5dd;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.entry-tool svg{display:block}
+.photo-tool{color:#2c688c;background:#edf5fb}
+.voice-tool{color:#196946;background:#eaf6ed}
+.entry-tool:hover{filter:brightness(.96)}
+.entry-tool:focus-visible,.remove-photo:focus-visible{outline:3px solid #d6ad4b;outline-offset:2px}
+.voice-tool.listening{background:#b92d37;color:#fff;border-color:#9f222b;box-shadow:0 0 0 3px #f8cace}
+.photo-preview{display:flex;align-items:center;gap:2px;max-width:82px}
+.photo-preview[hidden]{display:none!important}
+.photo-preview img{display:block;width:42px;height:40px;object-fit:cover;border-radius:6px;border:1px solid #aecab9}
+.remove-photo{width:28px;height:36px;display:grid;place-items:center;background:#fff4ef;color:#95452c;border:1px solid #edd2c6;border-radius:6px;font-size:22px;cursor:pointer}
+@media(max-width:460px){.publication-main{grid-template-columns:minmax(0,1fr) clamp(86px,29%,112px);gap:8px}.publication-media{border-radius:8px}.photo-placeholder .contact-icon{width:27px;height:27px}}
+@media(prefers-reduced-motion:reduce){.entry-tool{transition:none}}
+
+
+/* v2.2.6 — tocar la foto completa: visor accesible sin recortar la imagen. */
+.publication-photo-button{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0;margin:0;border:0;border-radius:inherit;background:transparent;cursor:zoom-in;overflow:hidden}
+.publication-photo-button .publication-photo{display:block;width:100%;height:100%;object-fit:cover}
+.publication-photo-button:focus-visible,.preview-photo:focus-visible{outline:3px solid #dbac36;outline-offset:-3px}
+.preview-photo{display:flex;align-items:center;justify-content:center;min-height:40px;max-height:42px;padding:0;background:transparent;border:0;border-radius:6px;cursor:zoom-in}
+.preview-photo img{margin:0}
+.image-dialog{position:fixed;inset:0;box-sizing:border-box;width:min(96vw,1200px);max-width:96vw;height:94dvh;max-height:94dvh;margin:auto;padding:0;border:0;border-radius:14px;background:#101e19;color:#fff;overflow:hidden;box-shadow:0 15px 60px #0008}
+.image-dialog::backdrop{background:rgba(9,18,15,.88)}
+.image-dialog-content{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-width:0;min-height:0;padding:10px;box-sizing:border-box}
+#image-dialog-photo{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;border:0;border-radius:4px}
+.image-dialog-close{position:absolute;top:12px;right:12px;z-index:2;display:grid;place-items:center;min-width:44px;min-height:44px;padding:0;border:1px solid #ffffff88;border-radius:50%;background:#172b25e8;color:#fff;cursor:pointer;font-size:31px;line-height:1}
+.image-dialog-close:hover{background:#305549}
+.image-dialog-close:focus-visible{outline:3px solid #f6d57e;outline-offset:2px}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+body:has(.image-dialog[open]){overflow:hidden}
+@media(max-width:600px){.image-dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0}.image-dialog-content{padding:8px}.image-dialog-close{top:max(9px,env(safe-area-inset-top));right:max(9px,env(safe-area-inset-right))}}
+
+
+/* v2.2.7: lectura justificada, foto opcional realmente invisible si falta.
+   La columna derecha queda reservada, pero sin borde, fondo, aviso ni icono. */
+.publication-main .publication-description{white-space:pre-wrap;text-align:justify;text-align-last:left;hyphens:auto;line-height:1.48}
+.publication-media{border:0;background:transparent;border-radius:10px;min-width:0}
+.publication-media:empty{border:0;background:transparent;box-shadow:none}
+.publication-photo-button{border-radius:10px}
+.publication-media .publication-photo,.publication-photo-button .publication-photo{object-fit:contain;background:transparent}
+.contact-box{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:6px}
+.share-action{background:#565c93;color:#fff;border-color:#464b7a}
+.share-action:hover{background:#414778}
+.contact-action{border-radius:9px}
+@media(max-width:350px){.contact-box{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.contact-action{padding:6px}}
+
+
+/* Versión 2.2.8. La ficha NO tiene título ni reserva foto cuando está ausente. */
+.content-screen{padding-block:8px 16px}
+.publication-card{height:auto;min-height:0;padding:10px 12px}
+.publication-main{display:block;min-width:0}
+.publication-main.has-photo{display:grid;grid-template-columns:minmax(0,1fr) clamp(90px,25vw,180px);gap:10px;align-items:start}
+.publication-copy{min-width:0}
+.publication-main .publication-description{margin:0;max-width:none;line-height:1.48;text-align:justify;text-align-last:left;white-space:pre-wrap;overflow-wrap:break-word;hyphens:auto;font-size:13.5px}
+.publication-main.has-photo .publication-media{width:100%;min-width:0;aspect-ratio:4/3;border:0;background:transparent}
+.publication-main:not(.has-photo) .publication-description{width:100%}
+.contact-box{margin-top:7px}
+@media(max-width:460px){
+ .content-screen{padding-block:7px 13px}
+ .publication-card{padding:9px 10px}
+ .publication-main.has-photo{grid-template-columns:minmax(0,1fr) clamp(86px,29%,112px);gap:8px}
+ .publication-main .publication-description{font-size:13px;line-height:1.45}
+}
+
+
+/* v2.2.9 — única fila de controles, tanto en fichas propias como ajenas.
+   Las propias muestran seis iconos; las ajenas llamar, WhatsApp, compartir y escuchar. */
+.publication-card .contact-box{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+  margin-top:9px;
+  padding:5px;
+  background:#f1f6f3;
+  border:1px solid #cfdfd5;
+  border-radius:11px;
+}
+.publication-card .contact-box.has-owner-actions{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+}
+.publication-card .contact-action{
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:46px;
+  align-items:center;
+  justify-content:center;
+  padding:7px 4px;
+  border-radius:9px;
+  font-size:0;
+}
+.publication-card .contact-action .contact-icon{width:25px;height:25px;flex:0 0 25px}
+.publication-card .share-action{background:#6357b3;border-color:#54479f;color:#fff}
+.publication-card .share-action:hover{background:#50449b}
+.publication-card .edit-action{background:#dcedfb;border-color:#c1dcf2;color:#1c5c82}
+.publication-card .edit-action:hover{background:#cce3f6}
+.publication-card .delete-action{background:#fde6e5;border-color:#f1cfcc;color:#a12e2a}
+.publication-card .delete-action:hover{background:#fbd2d0}
+@media(max-width:420px){
+  .publication-card .contact-box{gap:5px;padding:4px;margin-top:7px}
+  .publication-card .contact-action{min-height:44px;padding:6px 3px}
+  .publication-card .contact-action .contact-icon{width:22px;height:22px;flex-basis:22px}
+}
+@media(max-width:340px){
+  .publication-card .contact-box{gap:3px;padding:3px}
+  .publication-card .contact-action{min-height:44px;padding:4px 2px}
+  .publication-card .contact-action .contact-icon{width:20px;height:20px;flex-basis:20px}
+}
+
+
+/* v2.2.10: una fila debajo de la descripción, tal como la maqueta.
+   Teléfono con icono a la izquierda y ejemplo DENTRO, foto, micro y envío sin texto. */
+#publish-form{gap:8px}
+#publish-form .need-entry{position:relative;min-width:0}
+#publish-form .need-entry #need-description{display:block;width:100%;min-height:145px;padding:12px 13px;box-sizing:border-box}
+#publish-form .need-entry.has-photo-preview #need-description{padding-bottom:60px}
+#publish-form .need-entry .photo-preview{position:absolute;right:9px;bottom:9px;z-index:2;display:flex;align-items:center;gap:3px;padding:3px;border:1px solid #d9e5de;border-radius:8px;background:#ffffffee}
+#publish-form .need-entry .photo-preview[hidden]{display:none!important}
+#publish-form .publish-controls{
+  display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 52px;
+  align-items:stretch;gap:7px;min-width:0;width:100%;
+}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,44px)}
+#publish-form .publish-controls [hidden]{display:none!important}
+#publish-form .phone-field{display:flex;align-items:center;gap:7px;min-width:0;min-height:46px;box-sizing:border-box;padding:0 8px;
+  background:#f8fffa;border:1px solid #afcdbb;border-radius:10px;color:#246a53}
+#publish-form .phone-field:focus-within{border-color:#22845d;box-shadow:0 0 0 2px #b9e5d0}
+#publish-form .phone-field-icon{display:block;flex:0 0 20px;width:20px;height:20px}
+#publish-form .phone-field #need-phone{min-height:0;height:100%;width:100%;min-width:0;margin:0;padding:0;
+  font:inherit;font-size:14px;font-weight:600;border:0;outline:none;box-shadow:none;background:transparent;color:#173b30}
+#publish-form .phone-field #need-phone:focus{outline:none;border:0;box-shadow:none}
+#publish-form .phone-field #need-phone::placeholder{color:#648073;opacity:1;font-weight:500}
+#publish-form .publish-controls .entry-tool{width:100%;height:auto;min-height:46px;min-width:0;flex:none;border-radius:10px;padding:7px}
+#publish-form .publish-controls .entry-tool svg{width:22px;height:22px}
+#publish-form .publish-controls .publish-icon-button{min-width:0;width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;
+  padding:7px;border-radius:10px;background:var(--green);color:#fff;border:1px solid var(--green);cursor:pointer}
+#publish-form .publish-icon-button svg{display:block;width:23px;height:23px;flex:none}
+#publish-form .publish-icon-button:hover{background:var(--green-dark)}
+#publish-form .publish-icon-button:disabled{opacity:.6;cursor:progress}
+#publish-form .cancel-icon-button{min-width:0;width:100%;min-height:46px;padding:4px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;font-size:26px;line-height:1;color:#a34d37}
+#publish-form .publish-controls button:focus-visible{outline:3px solid #d8a944;outline-offset:2px}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 42px 42px 45px;gap:5px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,37px)}
+  #publish-form .phone-field{gap:5px;padding:0 6px;min-height:44px}
+  #publish-form .phone-field-icon{width:18px;height:18px;flex-basis:18px}
+  #publish-form .phone-field #need-phone{font-size:12px;letter-spacing:-.1px}
+  #publish-form .publish-controls .entry-tool,#publish-form .publish-controls .publish-icon-button{min-height:44px;padding:5px}
+  #publish-form .publish-icon-button svg{width:21px;height:21px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,38px);gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,32px);gap:3px}
+  #publish-form .phone-field{gap:3px;padding:0 5px}
+  #publish-form .phone-field-icon{width:16px;height:16px;flex-basis:16px}
+  #publish-form .phone-field #need-phone{font-size:11px}
+}
+
+
+/* v2.2.11 — papelera en la misma fila del editor, solo visible al editar. */
+#publish-form .delete-edit-button{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:46px;padding:5px;
+  border:1px solid #e8c2bc;border-radius:10px;
+  background:#ffeae7;color:#a43b31;cursor:pointer;
+}
+#publish-form .delete-edit-button svg{display:block;width:22px;height:22px;flex-shrink:0}
+#publish-form .delete-edit-button:hover{background:#fbd5d0}
+#publish-form .delete-edit-button:disabled{opacity:.55;cursor:progress}
+@media(max-width:450px){
+  #publish-form .delete-edit-button{min-height:44px;padding:4px}
+  #publish-form .delete-edit-button svg{width:20px;height:20px}
+}
+@media(max-width:345px){
+  #publish-form .delete-edit-button svg{width:18px;height:18px}
+}
+
+
+/* Versión 2.2.12: imagen informativa elegida por el usuario, solo en la primera pestaña. */
+#necesidades .welcome-banner{
+  margin:0 auto 12px;
+  width:100%;
+  max-width:1030px;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+#necesidades .welcome-banner img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:16 / 9;
+  object-fit:contain;
+  border:0;
+  border-radius:12px;
+}
+@media(max-width:600px){
+  #necesidades .welcome-banner{margin-bottom:9px}
+  #necesidades .welcome-banner img{border-radius:8px}
+}
+
+
+/* v2.2.16: navegación y banner comparten marco; nueva imagen de dos pasos 1819:865.
+   El ancho máximo se adapta también a la altura disponible del navegador. */
+:root{--home-frame-width:min(calc(100% - 32px),1440px,max(240px,calc(210.289dvh - 357.5px)))}
+.site-header{background:#fcfdfb;border-bottom:1px solid #dce7df;box-shadow:0 3px 16px #173b300b}
+.site-header .header-layout{
+  display:grid;width:var(--home-frame-width);grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;align-items:center;gap:7px 10px;min-height:0;padding-block:8px 10px
+}
+.site-header .brand{grid-column:1;grid-row:1;min-width:0;font-size:clamp(18px,2.1vw,22px);letter-spacing:-.035em}
+.site-header .brand-mark{border-radius:11px;box-shadow:0 2px 7px #173b301a}
+.site-header .account-button{grid-column:2;grid-row:1;justify-self:end;max-width:min(46vw,200px)}
+.site-header .top-nav{
+  grid-column:1 / -1;grid-row:2;display:grid;width:100%;min-width:0;margin:0;padding:0;border:0;
+  grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:minmax(48px,auto);gap:8px;flex:none
+}
+.site-header .top-nav a{
+  display:flex;align-items:center;justify-content:center;width:100%;min-width:0;min-height:48px;
+  padding:8px 10px;border:1px solid transparent;border-radius:12px;font-size:clamp(12px,1.4vw,15px);
+  font-weight:760;line-height:1.2;white-space:normal;text-align:center;text-wrap:balance
+}
+.site-header .top-nav .nav-home{background:#e8f5ef;color:#165744;border-color:#b9d8c8}
+.site-header .top-nav .nav-publish{background:#17493e;color:#fff;border-color:#17493e}
+.site-header .top-nav .nav-mine{background:#f9edd7;color:#77501d;border-color:#e8cfa2}
+.site-header .top-nav .nav-browse{background:#e5f2fa;color:#225d7e;border-color:#c3dce9}
+.site-header .top-nav a[aria-current=page]{outline:2px solid currentColor;outline-offset:-3px}
+.site-header .top-nav .nav-publish[aria-current=page]{outline-color:#c8e7d7}
+.home-visual-screen{width:var(--home-frame-width);max-width:none;margin-inline:auto;padding-block:10px 12px;min-height:0}
+.home-visual-screen .welcome-banner{display:block;width:100%;max-width:none;margin:0;padding:0;border:0;background:transparent}
+.home-visual-screen .welcome-banner img{
+  display:block;width:100%;height:auto;max-width:100%;max-height:calc(100dvh - 170px);
+  margin-inline:auto;aspect-ratio:1819 / 865;object-fit:contain;border:0;border-radius:14px;
+  box-shadow:0 7px 24px #17493e15
+}
+/* Mejora visible de las áreas existentes, sin tocar cuadrículas ni lógica. */
+.content-screen{padding-block:clamp(9px,1.35vw,16px) 22px}
+.search-panel{
+  padding:clamp(12px,1.7vw,19px);margin-bottom:14px;background:#fff;
+  border-color:#d4e2da;border-radius:16px;box-shadow:0 6px 20px #173b3009
+}
+.search-panel input[type=search]{min-height:48px;background:#fbfdfb;border-color:#bfd4c7}
+.publication-list{gap:12px}
+.publication-card{border-color:#d3e2d9;border-radius:16px;box-shadow:0 7px 22px #173b3009}
+.publication-card .contact-box{background:#f4f8f5;border-color:#d6e4db}
+#publish-form{border-color:#d3e2d9;border-radius:18px;box-shadow:0 9px 26px #173b300b}
+@media(max-width:680px){
+  :root{--home-frame-width:min(calc(100% - 20px),1440px,max(190px,calc(210.289dvh - 431px)))}
+  .site-header .header-layout{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px;padding-block:6px 8px}
+  .site-header .top-nav{
+    grid-column:1 / -1;grid-row:2;
+    grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(44px,auto));gap:5px
+  }
+  .site-header .top-nav a{min-height:44px;font-size:12px;padding:6px 7px;border-radius:10px}
+  .home-visual-screen{padding-block:7px 10px}
+  .home-visual-screen .welcome-banner img{max-height:calc(100dvh - 205px);border-radius:9px}
+  .search-panel{margin-bottom:10px}
+  .publication-list{gap:9px}
+}
+
+/* v2.2.17: lectura de publicaciones; el altavoz comparte la fila única de acciones. */
+.publication-card .listen-action{background:#946018;border-color:#794d10;color:#fff}
+.publication-card .listen-action:hover{background:#7f5011}
+.publication-card .listen-action[aria-pressed="true"]{background:#694311;border-color:#694311}
+
+/* v2.2.18 — escuchar borrador en la misma fila; control claro para play/pausa/reanudar. */
+#publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 44px 44px 44px 52px}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,44px)}
+#publish-form .preview-listen-tool{background:#fff4df;border-color:#dbbd84;color:#815511}
+#publish-form .preview-listen-tool[data-reading-state="playing"]{background:#8b651d;border-color:#8b651d;color:#fff}
+#publish-form .preview-listen-tool[data-reading-state="paused"]{background:#f9e1b0;border-color:#b88433;color:#66420c}
+.publication-card .listen-action[data-reading-state="paused"]{background:#ead19a;border-color:#be903e;color:#69420b}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,39px) 43px;gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,34px);gap:3px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(4,34px);gap:3px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(6,30px);gap:2px}
+  #publish-form .phone-field{padding:0 3px;gap:2px}
+  #publish-form .phone-field-icon{width:14px;height:14px;flex-basis:14px}
+  #publish-form .phone-field #need-phone{font-size:10px}
+  #publish-form .publish-controls .entry-tool svg{width:18px;height:18px}
+}
+
+
+/* 2.2.22 — ilustraciones aprobadas en Inicio: dos formatos, sin controles extra. */
+.home-visual-screen .use-cases-art{display:block;width:100%;margin:12px 0 0;padding:0;border:0;background:transparent}
+.home-visual-screen .use-cases-art picture,.home-visual-screen .use-cases-art img{
+  display:block;width:100%;max-width:none;height:auto
+}
+.home-visual-screen .use-cases-art img{border-radius:14px;box-shadow:0 2px 11px rgba(20,60,55,.06)}
+@media(max-width:680px){
+  .home-visual-screen .use-cases-art{margin-top:9px}
+  .home-visual-screen .use-cases-art img{border-radius:9px}
+}
+/* Primera fila: contacto/compartir/editar/eliminar. Segunda: lectura independiente. */
+.publication-card .contact-box{grid-template-columns:repeat(3,minmax(0,1fr))}
+.publication-card .contact-box.has-owner-actions{grid-template-columns:repeat(5,minmax(0,1fr))}
+.publication-card .audio-control-row{margin-top:5px}
+.audio-control-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%;min-width:0}
+.publication-card .audio-control-row{padding:5px;border:1px solid #e1e8d5;border-radius:11px;background:#f9faf4;box-sizing:border-box}
+.audio-action{display:flex;align-items:center;justify-content:center;min-width:0;width:100%;min-height:46px;border:1px solid #ccb989;border-radius:9px;background:#fff0cd;color:#755018;cursor:pointer}
+.audio-action .contact-icon{width:24px;height:24px;flex:none;display:block}
+.audio-play{background:#d8f1e6;border-color:#b0d9c5;color:#17684d}
+.audio-pause{background:#ffedc7;border-color:#edcd85;color:#88591d}
+.audio-resume{background:#dce9ff;border-color:#c3d8f4;color:#245b94}
+.audio-restart{background:#eee6fa;border-color:#d6c6ef;color:#714fa0}
+.audio-action:hover:not(:disabled){filter:brightness(.95)}
+.audio-action:disabled{cursor:default;opacity:.46;filter:grayscale(.18)}
+.audio-action:focus-visible{outline:3px solid #d8a944;outline-offset:2px}
+#publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 44px 44px 52px}
+#publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,44px)}
+#publish-form .draft-audio-row{margin-top:5px}
+@media(max-width:450px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) 42px 42px 45px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,35px);gap:3px}
+  .audio-control-row{gap:5px}
+  .audio-action{min-height:44px}
+}
+@media(max-width:345px){
+  #publish-form .publish-controls{grid-template-columns:minmax(0,1fr) repeat(3,36px);gap:4px}
+  #publish-form .publish-controls.editing{grid-template-columns:minmax(0,1fr) repeat(5,30px);gap:2px}
+  .audio-control-row{gap:3px}
+  .audio-action .contact-icon{width:20px;height:20px}
+}
+
+/* 2.2.23 — dos controles de voz más GPS voluntario, siempre en segunda fila */
+.audio-control-row{grid-template-columns:repeat(3,minmax(0,1fr))}
+.audio-main{background:#dbf5e8;border-color:#afddc6;color:#145e46}
+.audio-restart{background:#ece5f8;border-color:#d3c4ec;color:#5a408a}
+.audio-location{background:#e4f1ff;border-color:#a9c9e8;color:#17658b}
+.audio-location:not(:disabled):hover{background:#d4e9fb}
+.gps-preview,.publication-location{
+  white-space:pre-line;overflow-wrap:anywhere;padding:9px 12px;margin-top:7px;
+  color:#194f4c;background:#eaf6f3;border:1px solid #bddbcf;border-radius:10px;
+  font-size:13px;line-height:1.45
+}
+.gps-preview{display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:start;gap:8px}
+.gps-preview[hidden],.publication-location[hidden]{display:none}
+.gps-label{grid-column:1;grid-row:1;min-width:0;white-space:pre-line}
+#gps-remove{grid-column:2;grid-row:1;width:34px;min-height:36px;background:#fff;border:1px solid #d8b6b1;
+  border-radius:8px;color:#a32b2b;font-size:22px;cursor:pointer}
+
+/* 2.2.24 — el único botón GPS muestra precisión y estado en vivo. */
+.audio-location{display:flex;align-items:center;justify-content:center;gap:5px;overflow:hidden;
+  transition:background-color .18s ease,border-color .18s ease}
+.audio-location .contact-icon{flex:0 0 auto}
+.audio-location .gps-button-reading{font-size:11px;font-weight:800;letter-spacing:-.25px;white-space:nowrap;line-height:1}
+.audio-location.gps-measuring{background:#d9f5ff;border-color:#0b84c8;color:#075c89;
+  box-shadow:inset 0 0 0 1px #2f98d1}
+.audio-location.gps-fixed{background:#def7e7;border-color:#76c398;color:#165c37}
+.audio-location.gps-measuring .contact-icon{animation:gps-location-pulse 1.1s ease-in-out infinite}
+@keyframes gps-location-pulse{50%{opacity:.35;transform:scale(1.12)}}
+@media(max-width:360px){
+  .audio-location{gap:3px}
+  .audio-location .gps-button-reading{font-size:10px}
+  .audio-location .contact-icon{width:18px;height:18px}
+}
+@media(prefers-reduced-motion:reduce){.audio-location.gps-measuring .contact-icon{animation:none}}
+
+
+#gps-remove[hidden]{display:none!important}
+
+
+/* 2.2.26 — jerarquía GPS completa, Maps y distancia privada bajo demanda. */
+.publication-location{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;white-space:normal}
+.publication-location-lines{min-width:0;white-space:pre-line;overflow-wrap:anywhere}
+.gps-preview>.gps-osm-credit,.gps-status{grid-column:1/-1;min-width:0}
+.gps-status{font-size:12px;color:#245c56}
+.gps-status[hidden]{display:none}
+
+
+/* 2.2.27 — atribución del dato de calle a OpenStreetMap. */
+.gps-osm-credit,.publication-osm-credit{
+  display:inline-block;color:#52716c;font-size:11px;
+  margin-top:6px;text-decoration:underline;text-underline-offset:2px
+}
+.gps-osm-credit[hidden]{display:none}
+.publication-osm-credit{margin-top:9px}
+
+
+/* 2.2.36 — mapa y distancia en la misma fila, sin campo manual ni acciones debajo. */
+.audio-control-row{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr) minmax(0,1fr)}
+#publish-form .draft-audio-row>.audio-control-row{
+  grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.6fr) minmax(0,1.3fr);
+  gap:5px;align-items:stretch
+}
+.location-map-action,.location-distance-action{display:flex;align-items:center;justify-content:center;
+  gap:4px;min-width:0;box-sizing:border-box;text-decoration:none;min-height:44px;padding:5px}
+.location-map-action{background:#e3f2fb;border-color:#a4cbdc;color:#17617c}
+.location-map-action[aria-disabled="true"]{opacity:.45;cursor:default}
+.location-distance-action{background:#fff2d8;border-color:#d8bc82;color:#80581e}
+.location-distance-action .contact-icon{flex:0 0 auto;width:21px;height:21px}
+.location-distance-value{min-width:0;font-size:11px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+.location-distance-value:empty{display:none}
+.location-map-action:focus-visible,.location-distance-action:focus-visible{outline:3px solid #2c9ab4;outline-offset:2px}
+@media(max-width:360px){
+  #publish-form .draft-audio-row>.audio-control-row{gap:3px}
+  .location-map-action,.location-distance-action{gap:2px;padding:3px}
+  .location-distance-action .contact-icon{width:18px;height:18px}
+  .location-distance-value{font-size:10px}
+}

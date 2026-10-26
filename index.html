@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#17493e">
+  <meta name="description" content="LoNecesito: publica lo que necesitas en un solo texto y permite que te contacten directamente por WhatsApp.">
+  <title>LoNecesito — Publica lo que necesitas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317493e'/%3E%3Ctext x='16' y='24' text-anchor='middle' font-size='24' font-family='Arial' font-weight='bold' fill='%23d7f486'%3EL%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="simple.css?v=20261025-v2236">
+  <script src="firebase-config.js"></script>
+  <script src="location-config.js?v=20261025-v2232"></script>
+  <script type="module" src="simple.js?v=20261025-v2236"></script>
+</head>
+<body>
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+<header class="site-header">
+  <div class="shell header-layout">
+    <a class="brand" href="#inicio" aria-label="LoNecesito, inicio"><span class="brand-mark" aria-hidden="true">L</span><span>LoNecesito</span></a>
+    <nav class="top-nav" aria-label="Navegación principal">
+      <a class="nav-home" href="#inicio" data-nav="inicio">Inicio</a>
+      <a class="nav-publish" href="#publicar" data-nav="publicar">Publicar lo que necesito</a>
+      <a class="nav-mine" href="#mis-publicaciones" data-nav="mis-publicaciones">Mis publicaciones</a>
+      <a class="nav-browse" href="#necesidades" data-nav="necesidades">Ver necesidades</a>
+    </nav>
+    <button id="account-button" class="account-button" type="button" hidden>Iniciar sesión</button>
+  </div>
+</header>
+<main id="contenido">
+  <section id="inicio" class="screen home-visual-screen" aria-label="Inicio de LoNecesito">
+    <figure class="welcome-banner">
+      <img src="assets/lonecesito-presentacion-dos-pasos.png" width="1819" height="865" alt="LoNecesito: 1. Publica lo que necesitas. 2. Lo ven y te contactan por llamada o WhatsApp." decoding="async" fetchpriority="high">
+    </figure>
+    <figure class="use-cases-art" aria-label="Ejemplos ilustrativos de personas que buscan soluciones y quienes pueden ayudarlas en diferentes ciudades de Colombia">
+      <picture>
+        <source media="(max-width:680px)" srcset="assets/lonecesito-casos-movil.svg">
+        <img src="assets/lonecesito-casos-pc.svg" width="1240" height="619"
+          alt="En LoNecesito conectamos necesidades con soluciones. Ejemplos en Medellín, Bogotá, Cali, Barranquilla y Cartagena: entregas con repartidores, reparaciones con técnicos, estudios con profesores, cuidado y diseño con independientes."
+          loading="lazy" decoding="async">
+      </picture>
+    </figure>
+  </section>
+
+  <section id="necesidades" class="screen shell content-screen" aria-label="Necesidades publicadas" hidden>
+    <div class="search-panel">
+      <label for="search">Buscar necesidades</label>
+      <input id="search" type="search" autocomplete="off" maxlength="120" placeholder="Busca por palabras, partes de palabras o teléfono">
+    </div>
+    <div id="browse-list" class="publication-list" aria-live="polite"></div>
+    <p id="browse-empty" class="empty-message" hidden>No hay publicaciones que coincidan con la búsqueda.</p>
+  </section>
+
+  <section id="mis-publicaciones" class="screen shell content-screen" aria-label="Mis publicaciones" hidden>
+    <div id="mine-list" class="publication-list" aria-live="polite"></div>
+    <p id="mine-empty" class="empty-message" hidden>Aún no tienes publicaciones. Crea la primera cuando lo necesites.</p>
+  </section>
+
+  <section id="publicar" class="screen shell content-screen" aria-label="Publicar necesidad" hidden>
+    <form id="publish-form" class="publish-form">
+      <div class="form-field">
+        <label for="need-description">¿Qué necesitas?</label>
+        <div class="need-entry">
+          <textarea id="need-description" name="description" rows="5" maxlength="1000" enterkeyhint="send" placeholder="Describe aquí lo que necesitas…" title="Enter para publicar; Shift + Enter para otra línea" required></textarea>
+          <div id="photo-preview" class="photo-preview" hidden>
+            <button id="preview-photo" type="button" class="preview-photo" title="Ver foto completa" aria-label="Ampliar la fotografía seleccionada"><img id="photo-preview-image" alt="Foto seleccionada"></button>
+            <button id="remove-photo" type="button" class="remove-photo" title="Quitar imagen" aria-label="Quitar imagen">×</button>
+          </div>
+        </div>
+      </div>
+      <div class="publish-controls">
+        <div class="phone-field">
+          <label for="need-phone" class="visually-hidden">Teléfono para llamadas y WhatsApp</label>
+          <svg class="phone-field-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.7 2.8a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.84.57 2.8.7A2 2 0 0 1 22 16.92z"/></svg>
+          <input id="need-phone" name="contactPhone" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="send" maxlength="24" placeholder="Ej: 300 123 4567" title="Tu número quedará disponible en los enlaces públicos de llamada y WhatsApp" required>
+        </div>
+        <button id="add-photo" type="button" class="entry-tool photo-tool" title="Adjuntar fotografía" aria-label="Adjuntar fotografía">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.7"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg>
+        </button>
+        <button id="voice-button" type="button" class="entry-tool voice-tool" title="Dictar necesidad" aria-label="Dictar necesidad por voz" aria-pressed="false">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8"/></svg>
+        </button>
+        <button id="save-button" type="submit" class="button primary-button publish-icon-button" title="Publicar" aria-label="Publicar">
+          <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+        <button id="delete-edit" type="button" class="button delete-edit-button" title="Eliminar publicación" aria-label="Eliminar publicación" hidden>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2"/><path d="m19 6-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+        <button id="cancel-edit" type="button" class="button outline-button cancel-icon-button" title="Cancelar edición" aria-label="Cancelar edición" hidden>×</button>
+      </div>
+      <div id="draft-audio-row" class="draft-audio-row" aria-label="Lectura, mapa, distancia y GPS" role="group"></div>
+      <div id="gps-preview" class="gps-preview" hidden>
+        <span id="gps-label" class="gps-label" aria-live="polite"></span>
+        <span id="gps-status" class="gps-status" role="status" hidden>Identificando dirección…</span>
+        <a id="gps-osm-credit" class="gps-osm-credit" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" hidden>Calles: © OpenStreetMap</a>
+        <button id="gps-remove" type="button" aria-label="Quitar ubicación GPS de esta publicación" title="Quitar ubicación">×</button>
+      </div>
+      <p id="form-feedback" class="feedback" role="alert" hidden></p>
+    </form>
+    <input id="photo-picker" type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="Seleccionar fotografía del producto">
+  </section>
+</main>
+<dialog id="image-dialog" class="image-dialog" aria-labelledby="image-dialog-title">
+  <div class="image-dialog-content">
+    <h2 id="image-dialog-title" class="visually-hidden">Fotografía ampliada</h2>
+    <button id="close-image" class="image-dialog-close" type="button" aria-label="Cerrar fotografía" title="Cerrar fotografía">×</button>
+    <img id="image-dialog-photo" alt="" decoding="async">
+  </div>
+</dialog>
+<dialog id="auth-dialog" aria-labelledby="auth-title">
+  <div class="modal-head"><h2 id="auth-title">Accede a LoNecesito</h2><button id="close-auth" class="close-button" type="button" aria-label="Cerrar">×</button></div>
+  <p class="modal-description">Inicia sesión o crea una cuenta para publicar, editar y eliminar tus publicaciones.</p>
+  <form id="auth-form">
+    <div class="form-field"><label for="auth-mode">¿Qué deseas hacer?</label><select id="auth-mode"><option value="login">Iniciar sesión</option><option value="register">Crear cuenta</option></select></div>
+    <div class="form-field"><label for="auth-email">Correo electrónico</label><input id="auth-email" type="email" autocomplete="email" required></div>
+    <div class="form-field"><label for="auth-password">Contraseña</label><input id="auth-password" type="password" minlength="6" autocomplete="current-password" required></div>
+    <p id="auth-feedback" class="feedback" role="alert" hidden></p>
+    <button id="auth-submit" class="button primary-button" type="submit">Iniciar sesión</button>
+    <button id="auth-google" class="button outline-button" type="button">Continuar con Google</button>
+  </form>
+  <button id="auth-logout" class="button outline-button" type="button" hidden>Cerrar sesión</button>
+</dialog>
+<div id="toast" role="status" class="toast" hidden></div>
+</body>
+</html>
