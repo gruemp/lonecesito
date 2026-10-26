@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026
-**Versión del código:** 2.2.35 (no visible al público)
+**Versión del código:** 2.2.36 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -221,3 +221,10 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - El titular pide retirar el aviso largo mostrado al pulsar GPS. El pin inicia directamente watchPosition, sujeto al permiso nativo del navegador. Actualizar dirección GPS también ejecuta la consulta voluntaria sin confirmación adicional. Esta decisión sustituye las referencias históricas a confirmaciones propias y a textos modales de proveedores/caché.
 - Se mantiene el aviso breve existente de dirección/GPS públicos en ficha y PNG, sin añadir textos técnicos al flujo. No hay captura al abrir el editor ni consultas mientras solo se escribe. La mejor muestra se geocodifica al segundo toque; actualización usa la coordenada guardada. Permisos nativos, errores, cancelación y confirmación de borrado permanecen.
 - Pruebas: sintaxis, 35 de ubicación/geocodificación y cuatro regresiones seleccionadas aprobadas. Ajustados los contratos existentes para comprobar ausencia de confirmaciones propias, captura por toque, geocodificación solo al detener y consulta guardada sin medir. GPS físico, móvil real y Firestore Emulator no ejecutados.
+
+
+## Cambio 2.2.36 — Ubicación compacta por iconos (25-10-2026)
+- Retirados campo manual de dirección, avisos finales de opcionalidad/datos públicos/PNG, Actualizar dirección GPS y acciones inferiores duplicadas. Segunda fila del editor: voz, reiniciar, mapa, distancia, GPS; en fichas el último pin conserva el detalle. Los datos geográficos y atribución permanecen sin botones debajo.
+- location-actions.js comparte mapa y distancia entre editor/Mis publicaciones/Ver necesidades. Iconos SVG de mapa plegado y regla diagonal. El mapa abre el destino; la distancia pide posición actual solo por toque, Haversine local y cifra en el mismo botón, con descripción accesible en línea recta. Sin párrafo de resultado. Permite reintentar, invalida respuestas tardías al cambiar/quitar destino y no envía ni guarda posición del visitante.
+- legacyAddressDraft conserva addressText histórico al editar/guardar y en ficha/PNG; no existe campo visible ni oculto para nuevas direcciones manuales. Si no hay destino, acciones deshabilitadas; Maps permite texto histórico sin GPS pero distancia no inventa una cifra. Geocodificación/PNG/Firestore sin cambios. GPS sigue al segundo toque; correcciones de dirección requieren nueva captura porque se retiró el botón de actualizar.
+- Verificación local: sintaxis, 35 casos de ubicación y ocho de controles compartidos aprobados. Suite completa: 183/230 aprobadas, 47 fallos heredados, ningún fallo nuevo respecto a la referencia. Contratos actualizados al retirar la entrada y mover el resultado. GPS físico, revisión móvil real y Firestore Emulator pendientes.

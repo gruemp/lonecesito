@@ -7,19 +7,19 @@ const input={
   description:'Necesito que reparen una nevera que dejó de enfriar. Estoy en Santa Marta. Mi presupuesto es de 150.000 pesos.',
   contactPhone:'300 123 4567'
 };
-test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
+test('la interfaz solo tiene necesidad y teléfono, sin campo de dirección',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const form=html.split('<form id="publish-form"')[1].split('</form>')[0];
   assert.match(form,/id="need-description"/);
   assert.match(form,/id="need-phone"/);
-  assert.equal([...form.matchAll(/<(?:textarea|input|select)\b/g)].length,3);
-  assert.match(form,/id="need-address"[^>]*maxlength="180"/);
+  assert.equal([...form.matchAll(/<(?:textarea|input|select)\b/g)].length,2);
+  assert.doesNotMatch(form,/need-address/);
   for(const old of ['need-category','need-city','need-title','need-budget','need-picture','need-quantity','need-condition','need-consent'])assert.doesNotMatch(form,new RegExp(old));
 });
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.35');
+  assert.equal(APP_VERSION,'2.2.36');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -674,7 +674,7 @@ test('dos botones reproducen, pausan, reanudan y reinician',()=>{
   ctrl.stopReading();
   assert.equal(panel.dataset.readingState,'idle');
 });
-test('GPS opcional en el editor: activación directa, aviso breve y precisión GPS',()=>{
+test('GPS opcional en el editor: activación directa sin avisos y precisión GPS',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
@@ -685,7 +685,7 @@ test('GPS opcional en el editor: activación directa, aviso breve y precisión G
   assert.match(js,/enableHighAccuracy:true,maximumAge:0,timeout:12000/);
   const gps=js.slice(js.indexOf('let locationDraft=null,'),js.indexOf('function setMicState(active){'));
   assert.doesNotMatch(gps,/window\.confirm/);
-  assert.match(html,/La dirección y el GPS son opcionales\. Si los agregas, serán públicos y aparecerán en el PNG\./);
+  assert.doesNotMatch(html,/gps-disclaimer|need-address|gps-refresh|gps-map-link/);
   assert.match(js,/https:\/\/api\.bigdatacloud\.net\/data\/reverse-geocode-client/);
   assert.match(js,/locationDraft=locationFromGps\(coords\)/);
   assert.match(js,/if\(capturingLocation\)\{finishGpsMeasurement\(\);return;\}/);
@@ -799,12 +799,12 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
     return 0;
   },clearWatch(id){assert.equal(id,0);stops++;}};
   const controller=new Function(
-    'locateButton','$','el','contactIcon','navigator','window',
+    'locateButton','draftLocationActions','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber','locationFromGoogleGeocoder','googleGeocoderUrl','requestGoogleGeocode',
     'fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(start,end)+
     ';return {get state(){return {capturingLocation,locationDraft};}};')(
-      pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
+      pin,{update(){}},id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
       {geolocation:geo},{isSecureContext:true,confirm:()=>true},
       locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,locationFromGoogleGeocoder,()=>'',null,
       async url=>{requests++;return {ok:true,json:async()=>url.includes('nominatim')?{address:{}}:{countryName:'Colombia',city:'Santa Marta'}};},
@@ -825,21 +825,20 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   assert.equal(requests,2);
   assert.doesNotMatch(js,/GPS_MAX_TIME_MS|GPS_TARGET_METERS/);
   assert.match(js,/Pulsa nuevamente el botón GPS para detener la medición antes de publicar/);
-  assert.match(nodes['gps-label'].textContent,/Dirección indicada por el autor: Calle 10 #5-20/);
+  assert.doesNotMatch(nodes['gps-label'].textContent,/Dirección indicada por el autor/);
   assert.match(nodes['gps-label'].textContent,/Dirección aproximada: Calle y número no identificados/);
 });
-test('dirección opcional en la misma fila y persistida también sin GPS',async()=>{
+test('mapa y distancia sustituyen dirección manual y conservan direcciones heredadas',async()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
   const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
   const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
-  assert.match(html,/id="need-address-field" class="address-field"/);
-  assert.match(html,/id="need-address"[^>]*maxlength="180"/);
-  assert.match(js,/draftReadingPanel\.append\(\$\('need-address-field'\)\)/);
+  assert.doesNotMatch(html,/need-address/);
+  assert.match(js,/draftReadingPanel\.append\(draftLocationActions.map,draftLocationActions.distance\)/);
   assert.match(js,/if\(addressText\)data\.addressText=addressText/);
   assert.match(js,/if\(current\.addressText&&!addressText\)updated\.addressText=api\.deleteField\(\)/);
-  assert.match(js,/addressText:record\.addressText\|\|''/);
+  assert.match(js,/legacyAddressDraft=cleanAddressText\(record.addressText\|\|''\)/);
   assert.match(js,/locationLines\(location,addressText,true\)/);
   assert.match(css,/#publish-form \.draft-audio-row>\.audio-control-row\{/);
   assert.match(rules,/addressText\.size\(\) <= 180/);
@@ -916,18 +915,18 @@ test('distancia en línea recta calculada sin revelar ni guardar ubicación del 
   assert.match(card,/locationLines\(location,addressText,true\)/);
   assert.doesNotMatch(card,/publication-route-link|Desde mí/);
   assert.doesNotMatch(card,/Cómo llegar/);
-  assert.match(card,/navigator\.geolocation\.getCurrentPosition/);
-  assert.match(card,/distanceKmBetween/);
-  assert.match(card,/Distancia aproximada en línea recta:/);
-  assert.match(card,/No es la distancia por carretera/);
-  assert.match(card,/enableHighAccuracy:true,maximumAge:0,timeout:15000/);
-  assert.doesNotMatch(card,/localStorage|setDoc|addDoc|watchPosition|fetch\(/);
-  assert.match(card,/if\(!location\)\{/); // no numeric distance for address-only
+  assert.match(card,/createLocationActions/);
+  const actions=readFileSync(new URL('../location-actions.js',import.meta.url),'utf8');
+  assert.match(actions,/geolocation\.getCurrentPosition/);
+  assert.match(actions,/distanceKmBetween/);
+  assert.match(actions,/en línea recta, no por carretera/);
+  assert.match(actions,/enableHighAccuracy:true,maximumAge:0,timeout:15000/);
+  assert.doesNotMatch(actions,/localStorage|setDoc|addDoc|watchPosition|fetch\(/);
+  assert.match(actions,/if\(!validLocation\(destination\)\)return/);
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
-  assert.match(html,/id="gps-map-link"/);
+  assert.doesNotMatch(html,/id="gps-map-link"|need-address|gps-disclaimer/);
   const css=readFileSync(new URL('../simple.css',import.meta.url),'utf8');
-  assert.match(css,/\.publication-map-actions\{/);
-  assert.match(css,/\.publication-distance-button:disabled/);
+  assert.match(css,/\.location-distance-action/);
 });
 
 test('OSM obtiene calle y numeración en formato colombiano sin inventar datos',()=>{
@@ -970,11 +969,11 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
     setAttribute(){},addEventListener(type,fn){this[type]=fn;}};
   let fix,clearCount=0;
   const urls=[],notices=[];
-  const request=new Function('locateButton','$','el','contactIcon','navigator','window',
+  const request=new Function('locateButton','draftLocationActions','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl',
     'streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber','locationFromGoogleGeocoder','googleGeocoderUrl','requestGoogleGeocode','fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(a,b)+';return {read:()=>({locationDraft,capturingLocation})};');
-  const ctx=request(pin,key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
+  const ctx=request(pin,{update(){}},key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
     kind=>({kind}),{geolocation:{
       watchPosition(success){fix=success;return 0;},
       clearWatch(){clearCount++;}

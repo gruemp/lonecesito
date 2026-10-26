@@ -50,7 +50,7 @@ No pedir un mínimo de caracteres: **un único carácter no vacío es válido**;
 
 La fila directamente debajo del editor se presenta, en orden:
 
-**Fila 1:** teléfono, foto, micrófono y enviar (más borrar/cancelar en edición). **Fila 2:** reproducir, pausar, reanudar y reiniciar mediante cuatro botones independientes.
+**Fila 1:** teléfono, foto, micrófono y enviar (más borrar/cancelar en edición). **Fila 2:** voz dinámica, reiniciar, mapa, distancia y GPS, en una sola línea.
 
 - El icono verde **no lleva la palabra «Publicar»** en su superficie; accesiblemente sí se denomina «Publicar» o «Guardar cambios».
 - Enter desde descripción o teléfono activa publicar/guardar por la misma ruta que el icono. **Shift+Enter inserta un salto de línea** en la descripción. Evitar publicar involuntariamente mientras se compone texto con un teclado IME o al repetir una tecla.
@@ -58,7 +58,7 @@ La fila directamente debajo del editor se presenta, en orden:
 - El botón de foto permite adjuntar una imagen. Comprimirla y mostrar una miniatura dentro del área de texto, con opción de ampliarla o quitarla.
 - **Al editar**, aparecen también, en **la misma fila**, una **papelera roja** para eliminar y una **X** para cancelar. Al crear, ambas desaparecen. Eliminar pide confirmación, verifica que el registro pertenezca al autor y solo tras completar el borrado retorna a Mis publicaciones. Rechazar el borrado deja el texto en su lugar.
 - El teléfono conserva semántica y accesibilidad aunque no tenga etiqueta de texto visible.
-- Al pulsar GPS o Actualizar dirección GPS, no mostrar ventanas de confirmación propias ni el aviso largo de proveedores/caché. Mantener el permiso nativo del navegador y el aviso breve público ya existente. Conservar la confirmación para eliminar publicaciones.
+- No mostrar casilla de dirección ni avisos finales de GPS opcional/publicación pública/PNG. Los botones de mapa y distancia sustituyen esa casilla, con iconos reconocibles y resultado dentro del botón. Retirar Actualizar dirección GPS y los enlaces duplicados inferiores. Mantener permiso nativo y confirmación de borrado. Direcciones antiguas conservadas sin edición ni pérdida de datos.
 
 ## E. La ficha ideal (centro de todo el producto)
 
@@ -83,7 +83,8 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
 - El teléfono no aparece escrito sobre la ficha web, pero sí en el PNG. Los enlaces siguen llamando por teléfono o WhatsApp. El audio utiliza dos botones en la segunda fila, con reanudación por tramos compatible con Android. La dirección opcional y el GPS aparecen aparte del texto de la descripción y se pueden consultar desde la ficha.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
-- El panel de ubicación en Mis publicaciones y Ver necesidades conserva todos los datos, con el estilo del editor: texto a ancho completo y botones debajo en una sola columna. Primero **Distancia desde mi ubicación actual**, luego Ver en Google Maps; sin botón «Desde mí»; controles de ancho completo y mínimo 44 px de alto. Mostrar el resultado bajo distancia solo al pulsar. Sin GPS de destino, mantener el botón y orientar hacia Google Maps sin pedir ubicación ni inventar kilómetros.
+- Segunda fila compacta en las fichas: voz dinámica, reiniciar, **mapa plegado**, **regla de distancia** y pin de detalle. Mapa abre Google Maps, distancia usa la posición actual bajo demanda y muestra la cifra en el propio botón, con descripción accesible de que es aproximada en línea recta. El pin conserva datos geográficos y atribución; el panel no lleva botones ni resultados separados.
+
 
 ## F. Imagen PNG al compartir
 
@@ -141,7 +142,7 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 - [ ] ¿Con foto va a la derecha y amplía completa; sin foto, texto usa todo el ancho?
 - [ ] ¿En la ficha ajena hay 4 iconos y en la propia 6, incluido el altavoz, todos en una sola fila?
 - [ ] ¿El PNG representa fielmente texto/foto y contiene teléfono real?
-- [ ] ¿La descripción y el teléfono son obligatorios, la dirección es opcional, y el editor mantiene las dos filas compactas?
+- [ ] ¿La descripción y el teléfono son obligatorios, no existe campo de dirección, y el editor mantiene las dos filas compactas?
 - [ ] ¿Enter envía, Shift+Enter hace salto, micro y foto siguen funcionando?
 - [ ] ¿Solo el dueño puede editar/eliminar y el editor muestra papelera más X al editar?
 - [ ] ¿Desaparecieron ejemplos, versiones visibles, avisos molestos y controles descartados?
@@ -151,6 +152,8 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ---
 **Fuentes vigentes:** [AGENTS.md](../AGENTS.md) · [Continuidad técnica](CONTINUIDAD-Y-APRENDIZAJES.md) · [Código GitHub](https://github.com/gruemp/lonecesito/tree/codex/diseno-original).
+
+**Regla actual 2.2.36:** las referencias históricas siguientes a entrada manual, avisos al final y botones inferiores de ubicación están sustituidas por las secciones D y E. No recuperarlos.
 
 ## Casos de uso responsivos y voz (aprobación 25-10-2026)
 - Inicio añade debajo de la portada vigente dos imágenes SVG, una para PC y otra para móvil, mostrando pares «quien necesita → quien puede ayudar»: repartidores, técnicos, profesores, cuidadores e independientes, con necesidades de Medellín, Bogotá, Cali, Barranquilla y Cartagena.

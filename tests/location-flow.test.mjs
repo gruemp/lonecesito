@@ -33,6 +33,7 @@ function harness({confirm=true,google=null}={}){
     requests.push({url,signal,ok(data){resolve({ok:true,json:async()=>data});},fail(){reject(new Error('offline'));}});
   });
   const args={...model,coords,state,window:browser,navigator:{geolocation:geo},fetch,AbortController,
+    draftLocationActions:{update(){}},
     googleGeocoderUrl:()=>google?'https://script.google.com/macros/s/TEST/exec':'',
     requestGoogleGeocode:google,
     setTimeout:(fn,ms)=>[13000,25000].includes(ms)?setTimeout(fn,ms):(queueMicrotask(fn),0),clearTimeout,
@@ -47,7 +48,8 @@ function harness({confirm=true,google=null}={}){
     function resetForm(){cancelGpsTasks();locationDraft=null;}
     ${submit}
     return {
-      seed(value){locationDraft=value;showLocationDraft();},
+      seed(value){locationDraft=value;legacyAddressDraft='Calle 10A #20A-06, apartamento 302';showLocationDraft();},
+      get address(){return legacyAddressDraft;},
       get location(){return locationDraft;},
       get pending(){return gpsGeocoding;},
       resolve(){resolveGpsAddress(coords,locationRequestId);return gpsGeocoding;},
@@ -56,7 +58,6 @@ function harness({confirm=true,google=null}={}){
   `)(...Object.values(args));
   node('need-description').value='Necesito un electricista';
   node('need-phone').value='3001234567';
-  node('need-address').value='Calle 10A #20A-06, apartamento 302';
   return {instance,node,requests,notices,confirmations,saved,state,geo};
 }
 
@@ -74,7 +75,6 @@ test('los nombres aparecen con el primer proveedor y se completan con el segundo
   await work;
   assert.equal(h.instance.location.address,'Calle 10A #20A-06');
   assert.equal(h.node('gps-status').hidden,true);
-  assert.equal(h.node('gps-refresh').disabled,false);
 });
 
 test('OSM conserva país, municipio, ciudad y dirección aunque BigDataCloud falle',async()=>{
@@ -89,9 +89,9 @@ test('OSM conserva país, municipio, ciudad y dirección aunque BigDataCloud fal
   assert.equal(h.instance.location.city,'Santa Marta');
 });
 
-test('actualizar GPS histórico consulta por toque sin confirmación adicional ni medir al autor',async()=>{
+test('resolver GPS histórico conserva coordenadas y dirección heredada sin medir al autor',async()=>{
   const h=harness();h.instance.seed(model.locationFromGps(coords));
-  h.node('gps-refresh').click();
+  h.instance.resolve();
   const work=h.instance.pending;
   assert.equal(h.confirmations.length,0);
   assert.equal(h.geo.watches,0);
@@ -104,12 +104,12 @@ test('actualizar GPS histórico consulta por toque sin confirmación adicional n
   }
   await work;
   assert.equal(h.instance.location.city,'Santa Marta');
-  assert.equal(h.node('need-address').value,'Calle 10A #20A-06, apartamento 302');
+  assert.equal(h.instance.address,'Calle 10A #20A-06, apartamento 302');
 });
 
 test('abrir el borrador y escribir dirección no consulta proveedores ni GPS',()=>{
   const h=harness();h.instance.seed(model.locationFromGps(coords));
-  h.node('need-address').input();
+  // Merely seeding the editor must not request GPS or geocoding.
   assert.equal(h.requests.length,0);
   assert.equal(h.geo.watches,0);
 });
@@ -219,7 +219,7 @@ test('consulta enfocada a direcciones y un único respaldo cuando OSM devuelve s
   assert.equal(new URL(extra[0].url).searchParams.get('limit'),'5');
   extra[0].ok(photon(numberedFeature()));await work;
   assert.equal(h.instance.location.address,'Calle 10A #20A-06');
-  assert.equal(h.node('need-address').value,'Calle 10A #20A-06, apartamento 302');
+  assert.equal(h.instance.address,'Calle 10A #20A-06, apartamento 302');
 });
 
 test('no consulta Photon si Nominatim ya devuelve número',async()=>{
@@ -318,9 +318,9 @@ test('Google fallido no degrada una dirección Google ya guardada del mismo punt
   assert.equal(h.requests.length,2);
   assert.equal(h.node('gps-osm-credit').textContent,'Dirección: Google Maps');
 });
-test('actualizar con Google consulta el punto guardado por toque sin modal',async()=>{
+test('resolver con Google consulta el punto guardado sin modal',async()=>{
   const h=harness({google:async()=>googlePayload});h.instance.seed(model.locationFromGps(coords));
-  h.node('gps-refresh').click();await h.instance.pending;
+  h.instance.resolve();await h.instance.pending;
   assert.equal(h.confirmations.length,0);
   assert.equal(h.instance.location.address,googlePayload.result.address);
   assert.equal(h.geo.watches,0);
