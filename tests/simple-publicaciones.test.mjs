@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.33');
+  assert.equal(APP_VERSION,'2.2.34');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -912,7 +912,7 @@ test('distancia en línea recta calculada sin revelar ni guardar ubicación del 
   const card=js.slice(js.indexOf('function renderCard(record,owner){'),
     js.indexOf('function visibleItems(){'));
   assert.match(card,/locationLines\(location,addressText,true\)/);
-  assert.match(card,/const route=el\('a','publication-route-link','Desde mí'\)/);
+  assert.doesNotMatch(card,/publication-route-link|Desde mí/);
   assert.doesNotMatch(card,/Cómo llegar/);
   assert.match(card,/navigator\.geolocation\.getCurrentPosition/);
   assert.match(card,/distanceKmBetween/);

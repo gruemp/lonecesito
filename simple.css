@@ -692,22 +692,20 @@ body:has(.image-dialog[open]){overflow:hidden}
 .publication-location{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;white-space:normal}
 .publication-location-lines{min-width:0;white-space:pre-line;overflow-wrap:anywhere}
 .publication-map-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0;margin-top:2px}
-.publication-map-link,.publication-route-link,.publication-distance-button,.gps-map-link{
+.publication-map-link,.publication-distance-button,.gps-map-link{
   display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;
   min-height:40px;padding:8px 12px;border-radius:9px;border:1px solid #9dbfc2;
   background:#fff;color:#135d75;text-decoration:none;font:inherit;
   font-size:12px;font-weight:700;cursor:pointer
 }
-.publication-route-link{border-color:#a7c9ac;background:#f2faf2;color:#226444}
 .publication-distance-button{border-color:#d7b57c;background:#fff6e6;color:#80551f}
 .publication-map-actions>.publication-map-link,
-.publication-map-actions>.publication-route-link,
 .publication-map-actions>.publication-distance-button{
   width:100%;min-width:0;min-height:44px;font-size:12px;
   padding:8px 12px;white-space:normal;text-align:center;overflow-wrap:anywhere
 }
 .publication-distance-button:disabled{opacity:.65;cursor:wait}
-.publication-map-link:focus-visible,.publication-route-link:focus-visible,
+.publication-map-link:focus-visible,
 .publication-distance-button:focus-visible,.gps-map-link:focus-visible{
   outline:3px solid #2c9ab4;outline-offset:2px
 }

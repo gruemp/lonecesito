@@ -1,8 +1,8 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261026-v2233';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2234';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
-  googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
+  googleMapsLocationUrl,distanceKmBetween,distanceLabel,
   streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,
   preserveStreetNumber,locationFromGoogleGeocoder} from './location-model.js?v=20261025-v2232';
 import {googleGeocoderUrl,requestGoogleGeocode} from './google-geocoder.js?v=20261025-v2232';
@@ -419,7 +419,7 @@ function renderCard(record,owner){
     details.append(lines);
     const actions=el('div','publication-map-actions');
     {
-      const distanceButton=el('button','publication-distance-button','Distancia desde mí');
+      const distanceButton=el('button','publication-distance-button','Distancia desde mi ubicación actual');
       distanceButton.type='button';
       distanceButton.title='Consultar distancia aproximada en línea recta desde tu ubicación actual';
       distanceButton.setAttribute('aria-label',distanceButton.title);
@@ -430,7 +430,7 @@ function renderCard(record,owner){
       distanceButton.addEventListener('click',()=>{
         distanceInfo.hidden=false;
         if(!location){
-          distanceInfo.textContent='Esta publicación no tiene coordenadas GPS. Consulta la ruta desde tu ubicación en «Desde mí».';
+          distanceInfo.textContent='Esta publicación no tiene coordenadas GPS para calcular la distancia. Puedes consultar la dirección en Google Maps.';
           return;
         }
         if(!navigator.geolocation||!window.isSecureContext){
@@ -466,12 +466,7 @@ function renderCard(record,owner){
     maps.target='_blank';
     maps.rel='noopener noreferrer';
     maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
-    const route=el('a','publication-route-link','Desde mí');
-    route.href=googleMapsDirectionsUrl(location,addressText);
-    route.target='_blank';
-    route.rel='noopener noreferrer';
-    route.setAttribute('aria-label','Ver ruta desde mi ubicación en Google Maps');
-    actions.append(maps,route);
+    actions.append(maps);
     details.append(actions);
     if(location?.address){
       const google=location.addressSource==='google';
