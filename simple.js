@@ -1,4 +1,4 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2234';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2235';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
@@ -714,8 +714,6 @@ function finishGpsMeasurement(){
 $('need-address').addEventListener('input',showLocationDraft);
 $('gps-refresh').addEventListener('click',()=>{
   if(state.saving||capturingLocation||gpsGeocoding||!validLocation(locationDraft))return;
-  const google=googleGeocoderUrl()?'Se enviarán primero a Google mediante el Apps Script de LoNecesito. Si no hay resultado suficiente, se consultarán ':'Se enviarán a ';
-  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? '+google+'Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. El servicio de Google usa caché de hasta seis horas para ahorrar consultas. La dirección encontrada será aproximada y puede corresponder a un portal cercano. No se medirá tu ubicación actual.'))return;
   const coords={...locationDraft};
   resolveGpsAddress(coords,++locationRequestId);
 });
@@ -737,10 +735,6 @@ locateButton.addEventListener('click',()=>{
   if(capturingLocation){finishGpsMeasurement();return;}
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
-  }
-  const google=googleGeocoderUrl()?'Google mediante el Apps Script de LoNecesito; si no hay resultado suficiente, se consultarán ':' ';
-  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a '+google+'Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. El servicio de Google usa caché de hasta seis horas para ahorrar consultas. La dirección encontrada será aproximada y puede corresponder a un portal cercano.')){
-    return;
   }
   cancelGpsTasks();
   const requestId=++locationRequestId;

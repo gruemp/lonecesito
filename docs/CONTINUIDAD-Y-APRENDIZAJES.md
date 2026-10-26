@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026
-**Versión del código:** 2.2.34 (no visible al público)
+**Versión del código:** 2.2.35 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -215,3 +215,9 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Instrucción vigente del titular: el cálculo se llama exactamente **Distancia desde mi ubicación actual**. Quitar **Desde mí** en Mis publicaciones y Ver necesidades; sustituye las instrucciones de conservar ese botón de versiones anteriores.
 - Las acciones del panel son distancia y Ver en Google Maps, ambas a ancho completo. Sin coordenadas del destino, la ayuda apunta a Google Maps y no al botón retirado. Se elimina el estilo e importación sin uso del enlace de ruta; helper puro Maps Directions conservado por compatibilidad, sin representarlo en la interfaz.
 - Ajustadas las siete pruebas existentes del renderizador para el nombre, las dos acciones y la ayuda sin GPS. Sintaxis y regresiones seleccionadas verificadas; GPS físico, revisión visual móvil y Firestore Emulator no ejecutados. Sin cambios a la fórmula de distancia, permisos, almacenamiento, geocodificación o PNG.
+
+
+## Cambio 2.2.35 — GPS sin aviso modal propio (25-10-2026)
+- El titular pide retirar el aviso largo mostrado al pulsar GPS. El pin inicia directamente watchPosition, sujeto al permiso nativo del navegador. Actualizar dirección GPS también ejecuta la consulta voluntaria sin confirmación adicional. Esta decisión sustituye las referencias históricas a confirmaciones propias y a textos modales de proveedores/caché.
+- Se mantiene el aviso breve existente de dirección/GPS públicos en ficha y PNG, sin añadir textos técnicos al flujo. No hay captura al abrir el editor ni consultas mientras solo se escribe. La mejor muestra se geocodifica al segundo toque; actualización usa la coordenada guardada. Permisos nativos, errores, cancelación y confirmación de borrado permanecen.
+- Pruebas: sintaxis, 35 de ubicación/geocodificación y cuatro regresiones seleccionadas aprobadas. Ajustados los contratos existentes para comprobar ausencia de confirmaciones propias, captura por toque, geocodificación solo al detener y consulta guardada sin medir. GPS físico, móvil real y Firestore Emulator no ejecutados.
