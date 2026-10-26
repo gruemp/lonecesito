@@ -1,10 +1,11 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2235';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2236';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2232';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
-  googleMapsLocationUrl,distanceKmBetween,distanceLabel,
+  googleMapsLocationUrl,
   streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,
   preserveStreetNumber,locationFromGoogleGeocoder} from './location-model.js?v=20261025-v2232';
+import {createLocationActions} from './location-actions.js?v=20261025-v2236';
 import {googleGeocoderUrl,requestGoogleGeocode} from './google-geocoder.js?v=20261025-v2232';
 
 const $=id=>document.getElementById(id);
@@ -100,6 +101,10 @@ function contactIcon(kind){
     ['M11 5 6 9H2v6h4l5 4V5z','M15.5 8.5a5 5 0 0 1 0 7','M18.7 5.3a9.5 9.5 0 0 1 0 13.4']:
     kind==='location'?
     ['M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0z','M12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z']:
+    kind==='map'?
+    ['m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6z','M9 3v15M15 6v15']:
+    kind==='distance'?
+    ['m3 16 13-13 5 5-13 13-5-5z','m7 12 2 2m2-6 2 2m2-6 2 2']:
     kind==='play'?
     ['M7 4v16l13-8z']:
     kind==='restart'?
@@ -408,7 +413,10 @@ function renderCard(record,owner){
   pin.setAttribute('aria-label',pin.title);
   pin.disabled=!(location||addressText);
   pin.append(contactIcon('location'));
-  tools.append(pin);
+  const locationActions=createLocationActions(()=>location,()=>addressText,{
+    el,icon:contactIcon,geolocation:navigator.geolocation,secure:window.isSecureContext});
+  locationActions.update();
+  tools.append(locationActions.map,locationActions.distance,pin);
   article.append(tools);
   if(location||addressText){
     const details=el('div','publication-location');
@@ -417,57 +425,6 @@ function renderCard(record,owner){
     const lines=el('div','publication-location-lines',
       locationLines(location,addressText,true).join('\n'));
     details.append(lines);
-    const actions=el('div','publication-map-actions');
-    {
-      const distanceButton=el('button','publication-distance-button','Distancia desde mi ubicación actual');
-      distanceButton.type='button';
-      distanceButton.title='Consultar distancia aproximada en línea recta desde tu ubicación actual';
-      distanceButton.setAttribute('aria-label',distanceButton.title);
-      const distanceInfo=el('p','publication-distance-result');
-      distanceInfo.hidden=true;
-      distanceInfo.setAttribute('role','status');
-      distanceInfo.setAttribute('aria-live','polite');
-      distanceButton.addEventListener('click',()=>{
-        distanceInfo.hidden=false;
-        if(!location){
-          distanceInfo.textContent='Esta publicación no tiene coordenadas GPS para calcular la distancia. Puedes consultar la dirección en Google Maps.';
-          return;
-        }
-        if(!navigator.geolocation||!window.isSecureContext){
-          distanceInfo.textContent='La distancia requiere permiso de ubicación en un navegador HTTPS.';
-          return;
-        }
-        distanceButton.disabled=true;
-        distanceInfo.textContent='Consultando tu ubicación para calcular la distancia…';
-        // Obtener UNA sola lectura por petición del visitante, sin guardarla
-        // de forma persistente, compartirla ni comunicarla a LoNecesito.
-        navigator.geolocation.getCurrentPosition(position=>{
-          distanceButton.disabled=false;
-          try{
-            const km=distanceKmBetween(
-              position.coords.latitude,position.coords.longitude,
-              location.latitude,location.longitude);
-            distanceInfo.textContent='Distancia aproximada en línea recta: '+
-              distanceLabel(km)+'. No es la distancia por carretera.';
-          }catch{
-            distanceInfo.textContent='No se pudo calcular la distancia con estas coordenadas.';
-          }
-        },error=>{
-          distanceButton.disabled=false;
-          distanceInfo.textContent=error?.code===1?
-            'Permiso de ubicación denegado. Puedes ver la ruta en Google Maps.':
-            'No se pudo obtener tu ubicación. Puedes consultar la ruta en Google Maps.';
-        },{enableHighAccuracy:true,maximumAge:0,timeout:15000});
-      });
-      actions.append(distanceButton,distanceInfo);
-    }
-    const maps=el('a','publication-map-link','Ver en Google Maps');
-    maps.href=googleMapsLocationUrl(location,addressText);
-    maps.target='_blank';
-    maps.rel='noopener noreferrer';
-    maps.setAttribute('aria-label','Ver ubicación de esta necesidad en Google Maps');
-    actions.append(maps);
-    details.append(actions);
     if(location?.address){
       const google=location.addressSource==='google';
       const attribution=el('a','publication-osm-credit',google?'Dirección: Google Maps':'Datos de calles © OpenStreetMap');
@@ -504,10 +461,10 @@ function render(){
 }
 $('search').addEventListener('input',render);
 const draftReadingPanel=createReadingPanel(()=>$('need-description').value);
-draftReadingPanel.setAttribute('aria-label','Lectura, dirección opcional y GPS');
-// Dos iconos de audio, después una caja de dirección análoga a la de teléfono,
-// y el pin GPS en el extremo derecho de la misma fila.
-draftReadingPanel.append($('need-address-field'));
+draftReadingPanel.setAttribute('aria-label','Lectura, mapa, distancia y GPS');
+const draftLocationActions=createLocationActions(()=>capturingLocation?null:locationDraft,()=>legacyAddressDraft,{
+  el,icon:contactIcon,geolocation:navigator.geolocation,secure:window.isSecureContext});
+draftReadingPanel.append(draftLocationActions.map,draftLocationActions.distance);
 const locateButton=el('button','audio-action audio-location');
 locateButton.type='button';
 locateButton.title='Obtener ubicación GPS con permiso';
@@ -523,6 +480,7 @@ let recognition=null;
 let pictureDraft='';
 let pictureLoading=false;
 let locationDraft=null,locationRequestId=0,capturingLocation=false;
+let legacyAddressDraft='';
 let gpsWatchId=null,gpsBestCoords=null,gpsGeocoding=null,gpsGeocodeController=null;
 let lastStreetLookupAt=0;
 function updateGpsButton(){
@@ -550,12 +508,10 @@ function updateGpsButton(){
 function showLocationDraft(){
   const preview=$('gps-preview');
   const gpsExists=validLocation(locationDraft);
-  const declared=cleanAddressText($('need-address').value);
+  const declared=legacyAddressDraft;
   preview.hidden=!(gpsExists||declared);
   $('gps-remove').hidden=!gpsExists;
   const refreshing=Boolean(gpsGeocodeController);
-  $('gps-refresh').hidden=!gpsExists;
-  $('gps-refresh').disabled=capturingLocation||refreshing;
   $('gps-status').hidden=!refreshing;
   preview.setAttribute('aria-busy',String(refreshing));
   $('gps-label').textContent=locationLines(locationDraft,declared,true).join('\n');
@@ -564,11 +520,7 @@ function showLocationDraft(){
   const google=gpsExists&&locationDraft.addressSource==='google';
   credit.textContent=google?'Dirección: Google Maps':'Calles: © OpenStreetMap';
   credit.href=google?googleMapsLocationUrl(locationDraft):'https://www.openstreetmap.org/copyright';
-  const maps=$('gps-map-link');
-  const url=googleMapsLocationUrl(locationDraft,declared);
-  maps.hidden=!url;
-  if(url)maps.href=url;
-  else maps.removeAttribute('href');
+  draftLocationActions.update();
   updateGpsButton();
 }
 function stopGpsWatch(){
@@ -678,7 +630,7 @@ function resolveGpsAddress(coords,requestId){
       await Promise.allSettled([cityRequest,streetRequest]);
       if(requestId!==locationRequestId||gpsGeocodeController!==controller)return;
       if(!locationDraft.address){
-        toast('GPS guardado. La calle o el número no se identificaron; puedes indicarlos en Dirección (opcional).');
+        toast('GPS guardado. La calle o el número no se identificaron; puedes volver a medir el GPS.');
       }
       if(!locationDraft.city||!locationDraft.department||!locationDraft.country){
         toast('GPS guardado. Faltan datos administrativos del mapa; puedes volver a medir el GPS.');
@@ -711,12 +663,6 @@ function finishGpsMeasurement(){
     toast('No se recibió una posición GPS. Inténtalo de nuevo al aire libre.');
   }
 }
-$('need-address').addEventListener('input',showLocationDraft);
-$('gps-refresh').addEventListener('click',()=>{
-  if(state.saving||capturingLocation||gpsGeocoding||!validLocation(locationDraft))return;
-  const coords={...locationDraft};
-  resolveGpsAddress(coords,++locationRequestId);
-});
 $('gps-remove').addEventListener('click',()=>{
   if(state.saving)return;
   locationRequestId++;
@@ -889,6 +835,7 @@ function resetForm(){
   locationRequestId++;
   cancelGpsTasks();
   locationDraft=null;
+  legacyAddressDraft='';
   pictureDraft='';updatePhotoPreview();
   $('publish-form').reset();state.editingId=null;
   showLocationDraft();
@@ -908,7 +855,7 @@ function editRecord(record){
   // Las fichas anteriores de más de 1.000 caracteres se conservan íntegras.
   $('need-description').maxLength=$('need-description').value.length>1000?4000:1000;
   $('need-phone').value=record.contactPhone||'';
-  $('need-address').value=record.addressText||'';
+  legacyAddressDraft=cleanAddressText(record.addressText||'');
   pictureDraft=record.picture||'';updatePhotoPreview();
   locationDraft=validLocation(record.location)?{...record.location}:null;
   showLocationDraft();
@@ -958,7 +905,6 @@ function publishOnEnter(event){
 }
 $('need-description').addEventListener('keydown',publishOnEnter);
 $('need-phone').addEventListener('keydown',publishOnEnter);
-$('need-address').addEventListener('keydown',publishOnEnter);
 async function deleteRecord(record){
   if(!canManage(record,currentUid()))return false;
   if(!window.confirm('¿Eliminar definitivamente esta publicación?'))return false;
@@ -1001,7 +947,7 @@ $('publish-form').addEventListener('submit',async event=>{
       contactPhone:$('need-phone').value
     },{originalDescription:current?legacyDetails(current):null});
     if(pictureDraft)data.picture=pictureDraft;
-    const addressText=cleanAddressText($('need-address').value);
+    const addressText=legacyAddressDraft;
     if(addressText)data.addressText=addressText;
     if(validLocation(locationDraft))data.location={...locationDraft};
     if(!['demo','cloud'].includes(state.mode))throw Error('No se puede guardar en este momento.');
