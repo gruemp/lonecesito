@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
-**Revisión de documentación:** 26 de octubre de 2026
-**Versión del código:** 2.2.33 (no visible al público)
+**Revisión de documentación:** 25 de octubre de 2026
+**Versión del código:** 2.2.34 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
@@ -209,3 +209,9 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Mis publicaciones y Ver necesidades comparten renderCard. El panel desplegado conserva información y atribución, con texto a ancho completo y las acciones en una columna como el editor. Distancia desde mí va primero y conserva color diferenciado; los tres botones ocupan el ancho y tienen mínimo 44 px de alto. Resultado inmediatamente bajo distancia, oculto mientras no se usa.
 - Distancia solicita una lectura fresca del visitante solo al pulsar, calcula Haversine en memoria, informa línea recta y permite reintentar. Sin GPS de destino, el botón sigue disponible y orienta hacia Desde mí sin pedir posición ni inventar distancia. No se modifican geocodificadores, Apps Script, datos, PNG o Firestore.
 - Pruebas: siete casos nuevos ejecutan el renderizador real con DOM/geolocalización simulados para ambas vistas, orden de acciones, lectura actual y repetición, errores/permisos, dirección sin GPS, HTTPS y coordenadas inválidas. Sintaxis aprobada. Suite completa: 179/229 aprobadas, 50 fallos heredados, ningún fallo nuevo; la regresión antigua de distancia queda reparada. GPS físico, revisión visual en móvil y Firestore Emulator no ejecutados.
+
+
+## Cambio 2.2.34 — Nombre de distancia y retirada de ruta (25-10-2026)
+- Instrucción vigente del titular: el cálculo se llama exactamente **Distancia desde mi ubicación actual**. Quitar **Desde mí** en Mis publicaciones y Ver necesidades; sustituye las instrucciones de conservar ese botón de versiones anteriores.
+- Las acciones del panel son distancia y Ver en Google Maps, ambas a ancho completo. Sin coordenadas del destino, la ayuda apunta a Google Maps y no al botón retirado. Se elimina el estilo e importación sin uso del enlace de ruta; helper puro Maps Directions conservado por compatibilidad, sin representarlo en la interfaz.
+- Ajustadas las siete pruebas existentes del renderizador para el nombre, las dos acciones y la ayuda sin GPS. Sintaxis y regresiones seleccionadas verificadas; GPS físico, revisión visual móvil y Firestore Emulator no ejecutados. Sin cambios a la fórmula de distancia, permisos, almacenamiento, geocodificación o PNG.

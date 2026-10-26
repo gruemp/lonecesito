@@ -1,6 +1,6 @@
 # Preferencias de LoNecesito — diseño y funcionamiento vigentes
 
-**Actualizado: 26 de octubre de 2026.** Este documento reemplaza como guía vigente la acumulación de versiones anteriores. Las decisiones descartadas siguen en el historial Git, pero **no son requisitos actuales**. Consultar también [AGENTS.md](../AGENTS.md) (normas operativas) y [CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md) (estado técnico).
+**Actualizado: 25 de octubre de 2026.** Este documento reemplaza como guía vigente la acumulación de versiones anteriores. Las decisiones descartadas siguen en el historial Git, pero **no son requisitos actuales**. Consultar también [AGENTS.md](../AGENTS.md) (normas operativas) y [CONTINUIDAD-Y-APRENDIZAJES.md](CONTINUIDAD-Y-APRENDIZAJES.md) (estado técnico).
 
 ## A. Concepto exacto del producto
 
@@ -82,7 +82,7 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 - Ni la palabra «Contactar» ni etiquetas visibles para los botones. Mantener títulos, semántica, estado de foco y accesibilidad.
 - El teléfono no aparece escrito sobre la ficha web, pero sí en el PNG. Los enlaces siguen llamando por teléfono o WhatsApp. El audio utiliza dos botones en la segunda fila, con reanudación por tramos compatible con Android. La dirección opcional y el GPS aparecen aparte del texto de la descripción y se pueden consultar desde la ficha.
 - Los botones de editar y borrar están disponibles exclusivamente para el dueño, no para visitantes.
-- El panel de ubicación en Mis publicaciones y Ver necesidades conserva todos los datos, con el estilo del editor: texto a ancho completo y botones debajo en una sola columna. Primero **Distancia desde mí**, luego Maps y Desde mí; controles de ancho completo y mínimo 44 px de alto. Mostrar el resultado bajo distancia solo al pulsar. Sin GPS de destino, mantener el botón y orientar hacia Desde mí sin pedir ubicación ni inventar kilómetros.
+- El panel de ubicación en Mis publicaciones y Ver necesidades conserva todos los datos, con el estilo del editor: texto a ancho completo y botones debajo en una sola columna. Primero **Distancia desde mi ubicación actual**, luego Ver en Google Maps; sin botón «Desde mí»; controles de ancho completo y mínimo 44 px de alto. Mostrar el resultado bajo distancia solo al pulsar. Sin GPS de destino, mantener el botón y orientar hacia Google Maps sin pedir ubicación ni inventar kilómetros.
 
 ## F. Imagen PNG al compartir
 
@@ -167,12 +167,12 @@ Esta decisión reemplaza por completo varias reglas viejas que pedían fichas de
 
 ## Mejora aprobada 2.2.26 — detalle GPS, Google Maps y distancia
 - La ventana informativa desplegada mediante el pin **siempre muestra las etiquetas País, Departamento, Ciudad y Barrio o localidad**, con su contenido solo si fue devuelto por el proveedor. Si falta, escribir «No identificado». Mantener las demás partes de dirección, las coordenadas y la precisión, así como la dirección opcional escrita por el autor. No usar Santa Marta como valor predeterminado.
-- El cuadro informativo y el editor pueden abrir la ubicación en **Google Maps**. Para GPS usar latitud y longitud; para dirección sin GPS buscar el texto introducido. En el panel de una ficha, ofrecer **Ver en Google Maps**, **Desde mí** y **Distancia desde mí**; este último calcula una cifra solo con GPS del destino.
-- La distancia interior se calcula **aproximadamente en línea recta** al solicitar el visitante su posición con un toque y permiso explícito; no es una ruta por calles. Para la distancia por carretera se pulsa «Desde mí» y Google Maps presenta sus rutas. No recordar, publicar ni transmitir las coordenadas del visitante a LoNecesito ni al servicio de geocodificación.
+- El cuadro informativo y el editor pueden abrir la ubicación en **Google Maps**. Para GPS usar latitud y longitud; para dirección sin GPS buscar el texto introducido. En el panel de una ficha, ofrecer **Distancia desde mi ubicación actual** y **Ver en Google Maps**; este último calcula una cifra solo con GPS del destino.
+- La distancia interior se calcula **aproximadamente en línea recta** al solicitar el visitante su posición con un toque y permiso explícito; no es una ruta por calles. Las rutas por carretera se consultan dentro de Google Maps, sin botón independiente «Desde mí» en LoNecesito. No recordar, publicar ni transmitir las coordenadas del visitante a LoNecesito ni al servicio de geocodificación.
 
 ## Ajuste aprobado 2.2.27 — calle y número, sin barrio; Desde mí
 - Dentro de la caja de ubicación se muestran País, Departamento, Ciudad, Dirección aproximada en formato calle/número solo si se puede identificar, dirección opcional escrita, latitud/longitud y precisión. **Nunca mostrar el rótulo «Barrio o localidad»**, incluso para registros viejos.
-- Renombrar «Cómo llegar» a **«Desde mí»** manteniendo el enlace de rutas a Google Maps. «Distancia desde mí» continúa como herramienta diferente de distancia en línea recta, bajo permiso explícito de la persona que consulta.
+- **Actualización vigente 2.2.34:** retirar el botón «Desde mí». El botón de cálculo se llama exactamente **«Distancia desde mi ubicación actual»**, bajo permiso de la persona que consulta. Mantener Ver en Google Maps.
 - Una dirección postal aproximada es una calle reconocida y número cuando esté disponible, por ejemplo «Calle 10A #20A-06». Para capturas GPS nuevas, consulta puntual de BigDataCloud para país/departamento/ciudad y Nominatim de OSM para calle/número al pulsar por segunda vez el botón GPS. Al no conseguir calle, mostrar explícitamente que no se identificó; **no transformar localidad+ciudad+país en dirección de calle** ni prometer dirección exacta. Mantener caja manual opcional. Advertir autorización para compartir coordenadas con ambos servicios y dar atribución a OpenStreetMap.
 
 ## 2.2.28 — Municipio y direcciones: adaptación de Natura

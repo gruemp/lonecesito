@@ -38,11 +38,11 @@ for(const owner of [false,true]){
     assert.equal(panel.hidden,false);
     assert.match(find('publication-location-lines').textContent,/Dirección escrita, apto 2/);
     assert.deepEqual(find('publication-map-actions').children.map(n=>n.className),[
-      'publication-distance-button','publication-distance-result','publication-map-link','publication-route-link']);
+      'publication-distance-button','publication-distance-result','publication-map-link']);
     assert.equal(find('publication-distance-result').hidden,true);
-    assert.equal(find('publication-distance-button').textContent,'Distancia desde mí');
+    assert.equal(find('publication-distance-button').textContent,'Distancia desde mi ubicación actual');
     assert.equal(requests.length,0);
-    assert.equal(new URL(find('publication-route-link').href).searchParams.has('origin'),false);
+    assert.equal(find('publication-route-link'),undefined);
     find('audio-location').click();
     assert.equal(panel.hidden,true);
   });
@@ -75,12 +75,13 @@ test('permiso denegado y GPS no disponible permiten reintentar y conservan Maps'
     assert.equal(requests.length,2);
   }
 });
-test('dirección sin GPS conserva botón y orienta hacia ruta sin solicitar posición',()=>{
+test('dirección sin GPS conserva botón y orienta hacia Maps sin solicitar posición',()=>{
   const {find,requests}=setup({location:null});
   find('publication-distance-button').click();
   assert.match(find('publication-distance-result').textContent,/no tiene coordenadas GPS/);
   assert.equal(requests.length,0);
-  assert.equal(new URL(find('publication-route-link').href).searchParams.get('destination'),'Dirección escrita, apto 2');
+  assert.match(find('publication-distance-result').textContent,/Google Maps/);
+  assert.equal(new URL(find('publication-map-link').href).searchParams.get('query'),'Dirección escrita, apto 2');
 });
 test('navegador sin contexto seguro explica requisito sin solicitar GPS',()=>{
   const {find,requests}=setup({secure:false});
