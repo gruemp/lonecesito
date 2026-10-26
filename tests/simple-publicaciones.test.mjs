@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.34');
+  assert.equal(APP_VERSION,'2.2.35');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -674,7 +674,7 @@ test('dos botones reproducen, pausan, reanudan y reinician',()=>{
   ctrl.stopReading();
   assert.equal(panel.dataset.readingState,'idle');
 });
-test('GPS opcional en el editor: consentimiento explícito y precisión GPS',()=>{
+test('GPS opcional en el editor: activación directa, aviso breve y precisión GPS',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
   const rules=readFileSync(new URL('../firestore.rules',import.meta.url),'utf8');
@@ -683,9 +683,11 @@ test('GPS opcional en el editor: consentimiento explícito y precisión GPS',()=
   assert.match(html,/id="gps-remove"/);
   assert.match(js,/navigator\.geolocation\.watchPosition/);
   assert.match(js,/enableHighAccuracy:true,maximumAge:0,timeout:12000/);
-  assert.match(js,/window\.confirm\('¿Quieres adjuntar/);
+  const gps=js.slice(js.indexOf('let locationDraft=null,'),js.indexOf('function setMicState(active){'));
+  assert.doesNotMatch(gps,/window\.confirm/);
+  assert.match(html,/La dirección y el GPS son opcionales\. Si los agregas, serán públicos y aparecerán en el PNG\./);
   assert.match(js,/https:\/\/api\.bigdatacloud\.net\/data\/reverse-geocode-client/);
-  assert.match(js,/locationDraft=locationFromGps\(coords,geo\)/);
+  assert.match(js,/locationDraft=locationFromGps\(coords\)/);
   assert.match(js,/if\(capturingLocation\)\{finishGpsMeasurement\(\);return;\}/);
   assert.match(js,/if\(current\.location&&!locationDraft\)updated\.location=api\.deleteField\(\)/);
   assert.match(rules,/validLocation\(data\.location\)/);

@@ -89,11 +89,11 @@ test('OSM conserva país, municipio, ciudad y dirección aunque BigDataCloud fal
   assert.equal(h.instance.location.city,'Santa Marta');
 });
 
-test('actualizar GPS histórico consulta sus coordenadas con consentimiento, sin medir al autor',async()=>{
+test('actualizar GPS histórico consulta por toque sin confirmación adicional ni medir al autor',async()=>{
   const h=harness();h.instance.seed(model.locationFromGps(coords));
   h.node('gps-refresh').click();
   const work=h.instance.pending;
-  assert.match(h.confirmations[0],/coordenadas GPS guardadas/);
+  assert.equal(h.confirmations.length,0);
   assert.equal(h.geo.watches,0);
   assert.equal(h.requests.length,2);
   for(const request of h.requests){
@@ -107,9 +107,9 @@ test('actualizar GPS histórico consulta sus coordenadas con consentimiento, sin
   assert.equal(h.node('need-address').value,'Calle 10A #20A-06, apartamento 302');
 });
 
-test('rechazar la actualización no consulta proveedores ni GPS',()=>{
-  const h=harness({confirm:false});h.instance.seed(model.locationFromGps(coords));
-  h.node('gps-refresh').click();
+test('abrir el borrador y escribir dirección no consulta proveedores ni GPS',()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));
+  h.node('need-address').input();
   assert.equal(h.requests.length,0);
   assert.equal(h.geo.watches,0);
 });
@@ -263,12 +263,21 @@ test('guardar espera Photon y conserva el número recuperado y el apartamento es
   assert.match(h.saved[0][0].addressText,/apartamento 302/);
 });
 
-test('el consentimiento anuncia Photon y la aproximación antes de transmitir coordenadas',()=>{
-  const h=harness();h.instance.seed(model.locationFromGps(coords));
-  h.node('gps-refresh').click();
-  assert.match(h.confirmations[0],/Photon \(komoot\)/);
-  assert.match(h.confirmations[0],/portal cercano/);
+test('el pin activa GPS sin modal y no consulta dirección hasta el segundo toque',async()=>{
+  const h=harness();
+  h.node('pin').click();
+  assert.equal(h.confirmations.length,0);
+  assert.equal(h.geo.watches,1);
+  assert.equal(h.requests.length,0);
+  h.geo.fix({coords});
+  assert.equal(h.requests.length,0);
+  h.node('pin').click();
+  assert.equal(h.geo.clears,1);
+  assert.equal(h.confirmations.length,0);
+  assert.equal(h.requests.length,2);
+  const work=h.instance.pending;
   h.instance.cancel();
+  await work;
 });
 
 const googlePayload={ok:true,service:'lonecesito-geocoder',status:'OK',result:{
@@ -309,9 +318,10 @@ test('Google fallido no degrada una dirección Google ya guardada del mismo punt
   assert.equal(h.requests.length,2);
   assert.equal(h.node('gps-osm-credit').textContent,'Dirección: Google Maps');
 });
-test('actualizar con Google anuncia Apps Script antes de consultar el punto guardado',async()=>{
+test('actualizar con Google consulta el punto guardado por toque sin modal',async()=>{
   const h=harness({google:async()=>googlePayload});h.instance.seed(model.locationFromGps(coords));
   h.node('gps-refresh').click();await h.instance.pending;
-  assert.match(h.confirmations[0],/Google mediante el Apps Script de LoNecesito/);
+  assert.equal(h.confirmations.length,0);
+  assert.equal(h.instance.location.address,googlePayload.result.address);
   assert.equal(h.geo.watches,0);
 });
