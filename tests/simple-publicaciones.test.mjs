@@ -19,7 +19,7 @@ test('la interfaz tiene necesidad, teléfono y dirección opcional',()=>{
 test('la versión solo existe en el modelo interno y no aparece en pantalla',()=>{
   const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
   const js=readFileSync(new URL('../simple.js',import.meta.url),'utf8');
-  assert.equal(APP_VERSION,'2.2.31');
+  assert.equal(APP_VERSION,'2.2.32');
   assert.doesNotMatch(html,/Versión 2|release-version|release-bar/);
   assert.doesNotMatch(js,/\$\('release-version'\)/);
 });
@@ -782,9 +782,9 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   const model=readFileSync(new URL('../location-model.js',import.meta.url),'utf8');
   const start=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
   const end=js.indexOf('function setMicState(active){',start);
-  const {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber}=new Function(
+  const {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,locationFromGoogleGeocoder}=new Function(
     model.replace(/^export /gm,'')+
-    ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber};')();
+    ';return {locationFromGps,locationLines,validLocation,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,locationFromGoogleGeocoder};')();
   const pin={classList:{toggle(){}},setAttribute(){},replaceChildren(){},append(){},
     addEventListener(t,fn){this[t]=fn;}};
   const nodes={'gps-preview':{setAttribute(){}},'gps-label':{},'gps-map-link':{removeAttribute(){}},'gps-osm-credit':{},'gps-remove':{addEventListener(t,fn){this[t]=fn;}},
@@ -798,13 +798,13 @@ test('GPS continúa midiendo tras ±10 m y termina solo con segundo toque',async
   },clearWatch(id){assert.equal(id,0);stops++;}};
   const controller=new Function(
     'locateButton','$','el','contactIcon','navigator','window',
-    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber',
+    'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl','streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber','locationFromGoogleGeocoder','googleGeocoderUrl','requestGoogleGeocode',
     'fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(start,end)+
     ';return {get state(){return {capturingLocation,locationDraft};}};')(
       pin,id=>nodes[id],(tag,c,t)=>({textContent:t,setAttribute(){}}),()=>({}),
       {geolocation:geo},{isSecureContext:true,confirm:()=>true},
-      locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,
+      locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,locationFromGoogleGeocoder,()=>'',null,
       async url=>{requests++;return {ok:true,json:async()=>url.includes('nominatim')?{address:{}}:{countryName:'Colombia',city:'Santa Marta'}};},
       class Abort {constructor(){this.signal={};}abort(){}},()=>{},
       ()=>1,()=>{},{saving:false});
@@ -955,7 +955,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   const a=js.indexOf('let locationDraft=null,locationRequestId=0,capturingLocation=false;');
   const b=js.indexOf('function setMicState(active){',a);
   const f=new Function(model.replace(/^export /gm,'')+
-    ';return {streetAddressFromOsm,locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber};')();
+    ';return {streetAddressFromOsm,locationFromGps,validLocation,locationLines,cleanAddressText,googleMapsLocationUrl,locationFromNaturaGeocoders,streetAddressFromPhoton,preserveStreetNumber,locationFromGoogleGeocoder};')();
   const elms={
     'gps-preview':{hidden:true,setAttribute(){}},'gps-label':{textContent:''},'need-address':{value:'',addEventListener(){}},
     'gps-map-link':{hidden:true,removeAttribute(){}},
@@ -970,7 +970,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
   const urls=[],notices=[];
   const request=new Function('locateButton','$','el','contactIcon','navigator','window',
     'locationFromGps','validLocation','locationLines','cleanAddressText','googleMapsLocationUrl',
-    'streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber','fetch','AbortController','toast','setTimeout','clearTimeout','state',
+    'streetAddressFromOsm','locationFromNaturaGeocoders','streetAddressFromPhoton','preserveStreetNumber','locationFromGoogleGeocoder','googleGeocoderUrl','requestGoogleGeocode','fetch','AbortController','toast','setTimeout','clearTimeout','state',
     js.slice(a,b)+';return {read:()=>({locationDraft,capturingLocation})};');
   const ctx=request(pin,key=>elms[key],(tag,c,v)=>({textContent:v,setAttribute(){}}),
     kind=>({kind}),{geolocation:{
@@ -978,7 +978,7 @@ test('al detener GPS se consulta calle OSM y país/ciudad por separado y una sol
       clearWatch(){clearCount++;}
     }},{isSecureContext:true,confirm:()=>true},
     f.locationFromGps,f.validLocation,f.locationLines,f.cleanAddressText,f.googleMapsLocationUrl,
-    f.streetAddressFromOsm,f.locationFromNaturaGeocoders,f.streetAddressFromPhoton,f.preserveStreetNumber,
+    f.streetAddressFromOsm,f.locationFromNaturaGeocoders,f.streetAddressFromPhoton,f.preserveStreetNumber,f.locationFromGoogleGeocoder,()=>'',null,
     async url=>{
       urls.push(url);
       if(url.includes('nominatim.openstreetmap.org'))

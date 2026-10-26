@@ -13,7 +13,7 @@ const osm={address:{road:'Calle 10A',house_number:'20A-06',city:'Santa Marta',
 const big={city:'Santa Marta',principalSubdivision:'Magdalena',countryName:'Colombia'};
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 
-function harness({confirm=true}={}){
+function harness({confirm=true,google=null}={}){
   const nodes=new Map();
   const node=id=>{
     if(!nodes.has(id))nodes.set(id,{value:'',hidden:false,disabled:false,textContent:'',
@@ -33,6 +33,8 @@ function harness({confirm=true}={}){
     requests.push({url,signal,ok(data){resolve({ok:true,json:async()=>data});},fail(){reject(new Error('offline'));}});
   });
   const args={...model,coords,state,window:browser,navigator:{geolocation:geo},fetch,AbortController,
+    googleGeocoderUrl:()=>google?'https://script.google.com/macros/s/TEST/exec':'',
+    requestGoogleGeocode:google,
     setTimeout:(fn,ms)=>ms===13000?setTimeout(fn,ms):(queueMicrotask(fn),0),clearTimeout,
     $:node,locateButton:node('pin'),el:()=>node(Symbol()),contactIcon:()=>({}),
     toast:m=>notices.push(m),feedback:(id,m)=>{node(id).textContent=m;},
@@ -171,8 +173,8 @@ test('campos vacíos no bloquean alternativas de Natura y municipio faltante que
     .includes('Municipio: No identificado'));
 });
 
-test('flujo de ubicación no depende de Apps Script ni de analítica de Natura',()=>{
-  assert.doesNotMatch(gps,/script\.google\.com|Maps\.newGeocoder|GPS_LOG_ENDPOINT|ipapi|ipwho/);
+test('flujo de ubicación no reutiliza analítica de Natura ni ubicación por IP',()=>{
+  assert.doesNotMatch(gps,/GPS_LOG_ENDPOINT|ipapi|ipwho|TELEGRAM/);
 });
 
 const streetOnly={address:{...osm.address,house_number:''}};
@@ -267,4 +269,49 @@ test('el consentimiento anuncia Photon y la aproximación antes de transmitir co
   assert.match(h.confirmations[0],/Photon \(komoot\)/);
   assert.match(h.confirmations[0],/portal cercano/);
   h.instance.cancel();
+});
+
+const googlePayload={ok:true,service:'lonecesito-geocoder',status:'OK',result:{
+  country:'Colombia',department:'Magdalena',municipality:'Santa Marta',city:'Santa Marta',
+  address:'Calle 10A #20A-06, Santa Marta, Magdalena, Colombia'
+}};
+test('Google configurado tiene prioridad y guarda la dirección formateada como Natura',async()=>{
+  const h=harness({google:async()=>googlePayload});
+  h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();
+  const saved=h.node('publish-form').submit({preventDefault(){}});await work;await saved;
+  assert.equal(h.requests.length,0);
+  assert.equal(h.saved[0][0].location.address,googlePayload.result.address);
+  assert.equal(h.saved[0][0].location.addressSource,'google');
+  assert.match(h.saved[0][0].addressText,/apartamento 302/);
+});
+test('un fallo de Google mantiene el respaldo OSM sin bloquear la publicación',async()=>{
+  const h=harness({google:async()=>{throw new Error('offline');}});
+  h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();await flush();
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?osm:big));await work;
+  assert.equal(h.instance.location.address,'Calle 10A #20A-06');
+  assert.notEqual(h.instance.location.addressSource,'google');
+});
+test('cancelar Google no aplica su dirección ni activa proveedores después de salir',async()=>{
+  const h=harness({google:(coords,{signal})=>new Promise((resolve,reject)=>{
+    signal.addEventListener('abort',()=>reject(new Error('cancelled')),{once:true});
+  })});
+  h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();
+  h.instance.cancel();await work;assert.equal(h.requests.length,0);
+  assert.equal(h.instance.location.address,'');
+});
+test('Google fallido no degrada una dirección Google ya guardada del mismo punto',async()=>{
+  const h=harness({google:async()=>{throw new Error('offline');}});
+  h.instance.seed(model.locationFromGoogleGeocoder(coords,googlePayload));
+  const work=h.instance.resolve();await flush();
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?streetOnly:big));await work;
+  assert.equal(h.instance.location.address,googlePayload.result.address);
+  assert.equal(h.instance.location.addressSource,'google');
+  assert.equal(h.requests.length,2);
+  assert.equal(h.node('gps-osm-credit').textContent,'Dirección: Google Maps');
+});
+test('actualizar con Google anuncia Apps Script antes de consultar el punto guardado',async()=>{
+  const h=harness({google:async()=>googlePayload});h.instance.seed(model.locationFromGps(coords));
+  h.node('gps-refresh').click();await h.instance.pending;
+  assert.match(h.confirmations[0],/Google mediante el Apps Script de LoNecesito/);
+  assert.equal(h.geo.watches,0);
 });

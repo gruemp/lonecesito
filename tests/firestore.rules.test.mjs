@@ -123,6 +123,12 @@ test('ubicación GPS solo opcional, válida y guardada por el dueño',async()=>{
     ...publication(A),location:{...coords,ownerEmail:'personal@example.com'}
   }));
   await assertFails(updateDoc(doc(db(B),'requests','con-gps'),{location:coords}));
+  await assertSucceeds(setDoc(doc(db(A),'requests','gps-google'),{
+    ...publication(A),location:{...coords,address:'Calle 10A #20A-06',addressSource:'google'}
+  }));
+  await assertFails(setDoc(doc(db(A),'requests','gps-fuente-invalida'),{
+    ...publication(A),location:{...coords,addressSource:'arbitrary'}
+  }));
 });
 
 test('dirección opcional sin GPS: autor puede crear, actualizar y borrar',async()=>{
@@ -146,3 +152,4 @@ test('dirección opcional sin GPS: autor puede crear, actualizar y borrar',async
     addressText:'Suplantación'
   }));
 });
+

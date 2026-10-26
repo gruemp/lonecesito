@@ -479,3 +479,8 @@ Rama propuesta: `codex/usabilidad-etapa1-2026-10-23`. Se apoya en el diseño y e
 País, departamento, municipio, ciudad y calle se completan directamente desde OpenStreetMap/BigDataCloud conforme llega cada respuesta. En una publicación con GPS, editar → Actualizar dirección GPS → autorizar → guardar permite recuperar nombres faltantes desde el punto guardado, sin medir la ubicación actual. Una consulta fallida no borra datos conocidos de ese punto. Apartamento o complemento se escribe en la caja de dirección opcional; no se detecta por GPS. Se mantienen PNG, Maps y distancia local bajo permiso.
 
 Validación del flujo: `npm run test:location`. Sin Apps Script, backend de visitantes de Natura ni consultas automáticas al abrir fichas.
+
+## Preparación 2.2.32 — Geocodificador Google como Natura
+El titular autorizó Apps Script. Se prepara un servicio independiente que utiliza Maps.newGeocoder y formatted_address, y un cliente con consentimiento, validación y cancelación. **Aún no está activo:** falta crear/desplegar el proyecto Google y configurar su URL /exec. Mientras la URL de location-config.js esté vacía, permanecen los respaldos anteriores.
+
+[Servicio, contrato y despliegue](apps-script/geocodificador/README.md). La integración permanece en PR borrador hasta comprobar la URL real; no se modifica la analítica ni los proyectos Google de Natura. GitHub Pages no despliega Apps Script ni reglas Firestore.
