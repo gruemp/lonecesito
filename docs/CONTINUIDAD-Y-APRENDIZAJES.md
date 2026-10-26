@@ -1,13 +1,20 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 26 de octubre de 2026
-**Versión del código:** 2.2.37 (no visible al público)
+**Versión del código:** 2.2.38 (no visible al público)
 **Apps Script:** proyecto independiente desplegado, versión 1, URL verificada y configurada
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
 
 Este documento permite que una nueva IA retome el proyecto con contexto real y sin depender de esta conversación. **Obligatorio leer [AGENTS.md](../AGENTS.md) y [PREFERENCIAS-LO-NECESITO.md](PREFERENCIAS-LO-NECESITO.md)** antes de intervenir. Ambos recogen las instrucciones vigentes; este archivo añade estado técnico, aprendizajes y protocolo.
+
+## 2.2.38 — logo en PNG y enlace compartido (26-10-2026)
+- Alcance autorizado tras las maquetas: logo en PNG y vista previa del enlace público. El usuario excluye expresamente añadir enlace/logo al mensaje para contactar al autor por WhatsApp. La función whatsappUrl conserva exactamente su comportamiento.
+- card-png.js dibuja la L lima y recuadro verde con Canvas, junto al nombre al pie. Generación local, sin descargar logo ni enviar contenido; preserva foto, teléfono, datos GPS, atribución y altura natural. Se reserva alto suficiente incluso si falta teléfono.
+- index.html incluye Open Graph y tarjeta social, con URL e imagen HTTPS absolutas. assets/lonecesito-compartir-v2238.png es PNG público 1200 × 630, solo logo/nombre sobre fondo claro, sin teléfonos, fotos ni GPS de publicaciones. La vista previa es genérica del sitio; no inventar tarjetas individuales dinámicas en GitHub Pages.
+- No se altera el mensaje contextual WhatsApp, Firebase, Apps Script, controles, portada ni publicaciones reales. La caché y configuración de WhatsApp pueden retrasar o impedir la vista previa; comprobar HTTP y metadatos publicados sin atribuir eso a una prueba física de WhatsApp.
+- Verificación: sintaxis aprobada; 83 pruebas de publicaciones, búsqueda y controles de ubicación, 74 aprobadas y los mismos nueve fallos heredados frente al código previo, sin regresiones nuevas. PNG generado desde la función real con Canvas local para texto corto/largo, con foto/GPS y sin teléfono; revisión visual del logo y banda de contacto. Metadatos estáticos e imagen 1200 × 630 comprobados. No se ejecutó WhatsApp en teléfono físico ni se modificaron datos/reglas de Firebase.
 
 ## Cambios aprobados e implementados el 25-10-2026
 

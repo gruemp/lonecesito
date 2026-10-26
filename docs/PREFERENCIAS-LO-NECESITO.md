@@ -88,6 +88,7 @@ La ficha presenta **el contenido íntegro que escribió la persona**, sin forzar
 
 ## F. Imagen PNG al compartir
 
+- **2.2.38, aprobado 26-10-2026:** logo de la página (L lima sobre recuadro verde oscuro) junto al nombre LoNecesito al pie del PNG. Conservar texto, fotografía, teléfono y GPS existentes. Para compartir el enlace del sitio, vista previa con ese logo y nombre sobre fondo claro, título y descripción breve mediante Open Graph. **Excluir el WhatsApp de contacto con el autor**: conservar su mensaje contextual sin añadir URL ni logo. No añadir otro botón de compartir ni cambiar las fichas.
 - El icono de compartir genera **una imagen PNG de la ficha**, no solo una URL de la web.
 - PNG **sin título añadido**, con toda la descripción justificada y **sin espacio reservado** cuando no hay foto; si hay foto, va a la derecha y completa.
 - **El número real del autor sí aparece dentro del PNG**: destacarlo elegantemente en una banda de contacto «TELÉFONO · WHATSAPP» con el número legible y formateado, porque la imagen enviada es estática y sin ese dato el destinatario no podría llamarlo. La ficha web sigue sin imprimirlo.

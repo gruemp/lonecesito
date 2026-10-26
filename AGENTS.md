@@ -43,6 +43,7 @@
 
 ## 5. Compartir ficha en PNG
 
+- **Aprobación vigente 2.2.38 (26-10-2026):** añadir al pie del PNG el logo de la web (L lima en recuadro verde) junto a LoNecesito y conservar la banda de teléfono. Al compartir la URL, usar imagen pública estática de marca y metadatos Open Graph en index.html. **No añadir el enlace ni el logo al mensaje de contacto de WhatsApp**: el usuario excluyó expresamente ese tercer caso. La vista previa del enlace depende de la aplicación receptora y su caché; no prometer un resultado idéntico en todos los teléfonos.
 - Botón morado con icono de **tres puntos conectados**. Generar **PNG local** fiel a la ficha: **sin título adicional**, texto completo justificado, altura natural, foto a la derecha si existe; sin foto, el texto ocupa todo el ancho.
 - En **el PNG sí incluir el teléfono real** del autor, destacado y legible en una banda de contacto elegante («TELÉFONO · WHATSAPP»), porque una imagen estática compartida debe permitir contactarlo. En **la ficha web, no**. No insertar teléfonos de prueba.
 - Usar **navigator.share con archivo PNG** si está disponible; en caso contrario, **descargar el PNG**. No enviar el contenido a servidores para generar la imagen.
