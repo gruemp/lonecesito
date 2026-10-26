@@ -1,9 +1,10 @@
-import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2230';
+import {cleanPublication,whatsappUrl,derivedTitle,canManage,normalizeWhatsApp} from './simple-model.js?v=20261025-v2231';
 import {publicationMatchesQuery} from './simple-search.js?v=20261024-v2213';
 import {makeCardPng} from './card-png.js?v=20261025-v2229';
 import {locationFromGps,validLocation,locationLines,cleanAddressText,
   googleMapsLocationUrl,googleMapsDirectionsUrl,distanceKmBetween,distanceLabel,
-  streetAddressFromOsm,locationFromNaturaGeocoders} from './location-model.js?v=20261025-v2229';
+  streetAddressFromOsm,locationFromNaturaGeocoders,streetAddressFromPhoton,
+  preserveStreetNumber} from './location-model.js?v=20261025-v2231';
 
 const $=id=>document.getElementById(id);
 const pages=['inicio','mis-publicaciones','necesidades','publicar'];
@@ -587,13 +588,15 @@ function resolveGpsAddress(coords,requestId){
   // En una actualización de coordenadas guardadas, conservar cada campo
   // conocido si los proveedores no pueden recuperarlo esta vez.
   const previous=locationDraft?{...locationDraft}:{};
-  let geo={},osm={};
+  let geo={},osm={},photonAddress='';
   const isCurrent=()=>requestId===locationRequestId&&
     gpsGeocodeController===controller&&!controller.signal.aborted;
   const applyResult=()=>{
     if(!isCurrent())return;
     const resolved=locationFromNaturaGeocoders(coords,osm,geo);
+    if(photonAddress)resolved.address=photonAddress;
     if(previous.latitude===resolved.latitude&&previous.longitude===resolved.longitude){
+      resolved.address=preserveStreetNumber(resolved.address,previous.address||'');
       for(const field of ['country','department','municipality','city','address']){
         if(!resolved[field])resolved[field]=previous[field]||'';
       }
@@ -612,7 +615,7 @@ function resolveGpsAddress(coords,requestId){
       const cityUrl='https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='
         +encodeURIComponent(coords.latitude)+'&longitude='+encodeURIComponent(coords.longitude)
         +'&localityLanguage=es';
-      const streetUrl='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18'
+      const streetUrl='https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&layer=address'
         +'&accept-language=es&lat='+encodeURIComponent(coords.latitude)
         +'&lon='+encodeURIComponent(coords.longitude);
       const cityRequest=fetch(cityUrl,{signal:controller.signal}).then(async response=>{
@@ -630,7 +633,24 @@ function resolveGpsAddress(coords,requestId){
         const response=await fetch(streetUrl,{signal:controller.signal});
         if(!response.ok)throw Error('Calle no disponible');
         return response.json();
-      })().then(data=>{osm=data;applyResult();});
+      })().then(async data=>{
+        osm=data;applyResult();
+        // Un solo respaldo por acción, únicamente si falta número en una
+        // calle identificada. No consultar durante mediciones ni visitas.
+        if(!isCurrent())return;
+        const street=streetAddressFromOsm(data);
+        const knownNumber=previous.latitude===locationDraft.latitude&&previous.longitude===locationDraft.longitude&&
+          preserveStreetNumber(street,previous.address||'')!==street;
+        if(!street||coords.accuracy>25||String(data?.address?.house_number||'').trim()||knownNumber)return;
+        try{
+          const url='https://photon.komoot.io/reverse?radius=0.025&limit=5&lat='
+            +encodeURIComponent(coords.latitude)+'&lon='+encodeURIComponent(coords.longitude);
+          const response=await fetch(url,{signal:controller.signal});
+          if(!response.ok)return;
+          photonAddress=streetAddressFromPhoton(coords,await response.json(),osm);
+          applyResult();
+        }catch{/* Conservar la calle y demás datos si el respaldo no responde. */}
+      });
       await Promise.allSettled([cityRequest,streetRequest]);
       if(requestId!==locationRequestId||gpsGeocodeController!==controller)return;
       if(!locationDraft.address){
@@ -670,7 +690,7 @@ function finishGpsMeasurement(){
 $('need-address').addEventListener('input',showLocationDraft);
 $('gps-refresh').addEventListener('click',()=>{
   if(state.saving||capturingLocation||gpsGeocoding||!validLocation(locationDraft))return;
-  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? Se enviarán a OpenStreetMap y BigDataCloud, que también pueden recibir tu IP. No se medirá tu ubicación actual.'))return;
+  if(!window.confirm('¿Actualizar la dirección usando las coordenadas GPS guardadas de esta publicación? Se enviarán a Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. La dirección encontrada será aproximada y puede corresponder a un portal cercano. No se medirá tu ubicación actual.'))return;
   const coords={...locationDraft};
   resolveGpsAddress(coords,++locationRequestId);
 });
@@ -693,7 +713,7 @@ locateButton.addEventListener('click',()=>{
   if(!navigator.geolocation||!window.isSecureContext){
     toast('El GPS requiere un navegador con ubicación y una conexión HTTPS.');return;
   }
-  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a OpenStreetMap y BigDataCloud para identificar calle, municipio, ciudad, departamento y país. Ambos servicios pueden recibir tu IP.')){
+  if(!window.confirm('¿Quieres publicar tus coordenadas GPS y precisión reales? Serán visibles para todos y aparecerán en el PNG. Al detener el GPS, se enviará la mejor coordenada final a Nominatim (OpenStreetMap) y BigDataCloud; si falta el número, también a Photon (komoot). Estos servicios pueden recibir tu IP. La dirección encontrada será aproximada y puede corresponder a un portal cercano.')){
     return;
   }
   cancelGpsTasks();

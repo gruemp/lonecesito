@@ -134,3 +134,9 @@
 ## 2.2.30 — Panel GPS legible en móvil
 - El texto de ubicación ocupa su propia fila con ancho flexible completo, reservando únicamente el botón de quitar a la derecha. Los botones Actualizar dirección GPS y Ver en Google Maps se agrupan debajo, con salto de fila según espacio, sin comprimir el texto en una columna estrecha.
 - Estado y atribución ocupan filas completas. Mantener todos los datos y acciones existentes; sin cambios a geocodificación, permisos, apartamento, distancias o PNG. Comprobar el panel desplegado, no solo el editor vacío.
+
+## 2.2.31 — Intento adicional de recuperar numeración
+- Nominatim consulta layer=address y zoom=18 para priorizar direcciones. Si reconoce calle sin número, el autor puede autorizar en la misma captura/actualización una única consulta condicional a Photon (komoot), que también utiliza OpenStreetMap. No requiere claves ni Apps Script y no garantiza más cobertura ni el portal exacto.
+- Aceptar únicamente número registrado con calle coincidente (normalizar solo espacios, tildes y mayúsculas), coordenadas válidas y punto a ≤25 m. Requerir precisión GPS estimada ≤25 m. Elegir el candidato más cercano entre un máximo de cinco; no cambiar de calle ni inventar números. Si falla o no hay candidato, mantener la calle.
+- Conservar número conocido de esa misma coordenada/calle si la actualización solo devuelve calle, sin consultar respaldo innecesario. No reemplazar dirección manual ni apartamento. El resultado sigue siendo aproximado y puede corresponder a un portal cercano.
+- El consentimiento identifica Nominatim, BigDataCloud y el respaldo condicional Photon (komoot), así como coordenadas/IP y aproximación. No consultar al abrir fichas, en cada muestra GPS ni al calcular la distancia del visitante. Mantener cancelación, límite total de consulta y moderación de uso.

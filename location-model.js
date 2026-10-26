@@ -99,6 +99,34 @@ export function streetAddressFromOsm(response){
   return safeText(house?road+' #'+house:road);
 }
 
+const streetKey=value=>safeText(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+export function preserveStreetNumber(address,previous=''){
+  const hash=previous.indexOf('#');
+  return hash>0&&!address.includes('#')&&streetKey(address)===streetKey(previous.slice(0,hash))
+    ?previous:address;
+}
+// Photon también usa OSM. Un candidato no confirma el portal del autor:
+// aceptar solo calle coincidente y número registrado a un máximo de 25 m.
+export function streetAddressFromPhoton(coords,response,osmResponse){
+  if(!validLocation(coords)||coords.accuracy>25||!Array.isArray(response?.features))return '';
+  const road=streetAddressFromOsm(osmResponse);
+  if(!road||String(osmResponse?.address?.house_number||'').trim())return '';
+  let nearest=null;
+  for(const feature of response.features.slice(0,5)){
+    const p=feature?.properties,point=feature?.geometry?.coordinates;
+    if(feature?.geometry?.type!=='Point'||!Array.isArray(point)||point.length!==2||
+      point.some(n=>typeof n!=='number'||!Number.isFinite(n)))continue;
+    const street=safeText(p?.street),house=safeText(p?.housenumber).replace(/^#\s*/,'');
+    if(!street||streetKey(street)!==streetKey(road)||!/[0-9]/.test(house)||/[;,]/.test(house))continue;
+    let distance;
+    try{distance=distanceKmBetween(coords.latitude,coords.longitude,point[1],point[0]);}
+    catch{continue;}
+    if(distance<=0.025&&(!nearest||distance<nearest.distance))
+      nearest={address:safeText(street+' #'+house),distance};
+  }
+  return nearest?.address||'';
+}
+
 
 /* Estrategia adaptada de Natura:
  * Nominatim permite leer ciudad/town/village/municipality/county/estado,

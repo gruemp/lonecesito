@@ -174,3 +174,97 @@ test('campos vacíos no bloquean alternativas de Natura y municipio faltante que
 test('flujo de ubicación no depende de Apps Script ni de analítica de Natura',()=>{
   assert.doesNotMatch(gps,/script\.google\.com|Maps\.newGeocoder|GPS_LOG_ENDPOINT|ipapi|ipwho/);
 });
+
+const streetOnly={address:{...osm.address,house_number:''}};
+const numberedFeature=(house='20A-06',street='Calle 10A',lon=coords.longitude,lat=coords.latitude)=>({
+  type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{street,housenumber:house}
+});
+const photon=(...features)=>({type:'FeatureCollection',features});
+
+test('Photon solo admite un número registrado en la misma calle a menos de 25 m',()=>{
+  assert.equal(model.streetAddressFromPhoton(coords,photon(numberedFeature()),streetOnly),
+    'Calle 10A #20A-06');
+  for(const feature of [numberedFeature('20A-06','Carrera 20D'),
+    numberedFeature('20A-06','Calle 10A',coords.longitude+0.01),
+    numberedFeature(''),numberedFeature('sin número'),numberedFeature('20A-06;20A-08'),
+    numberedFeature('20A-06','Calle 10A',null)]){
+    assert.equal(model.streetAddressFromPhoton(coords,photon(feature),streetOnly),'');
+  }
+  assert.equal(model.streetAddressFromPhoton(coords,photon(numberedFeature()),{address:{}}),'');
+  assert.equal(model.streetAddressFromPhoton({...coords,accuracy:50},photon(numberedFeature()),streetOnly),'');
+});
+
+test('Photon escoge el candidato más próximo de la misma calle',()=>{
+  const result=model.streetAddressFromPhoton(coords,photon(
+    numberedFeature('20A-08','Calle 10A',coords.longitude+0.0001),
+    numberedFeature('20A-06')
+  ),streetOnly);
+  assert.equal(result,'Calle 10A #20A-06');
+});
+
+test('consulta enfocada a direcciones y un único respaldo cuando OSM devuelve solo calle',async()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));
+  const work=h.instance.resolve();
+  const osmRequest=h.requests.find(r=>r.url.includes('nominatim'));
+  assert.equal(new URL(osmRequest.url).searchParams.get('layer'),'address');
+  assert.equal(h.requests.length,2);
+  h.requests.find(r=>r.url.includes('bigdatacloud')).ok(big);
+  osmRequest.ok(streetOnly);await flush();
+  assert.equal(h.instance.location.address,'Calle 10A');
+  const extra=h.requests.filter(r=>r.url.includes('photon.komoot.io'));
+  assert.equal(extra.length,1);
+  assert.equal(new URL(extra[0].url).searchParams.get('radius'),'0.025');
+  assert.equal(new URL(extra[0].url).searchParams.get('limit'),'5');
+  extra[0].ok(photon(numberedFeature()));await work;
+  assert.equal(h.instance.location.address,'Calle 10A #20A-06');
+  assert.equal(h.node('need-address').value,'Calle 10A #20A-06, apartamento 302');
+});
+
+test('no consulta Photon si Nominatim ya devuelve número',async()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?osm:big));await work;
+  assert.equal(h.requests.length,2);
+});
+
+test('un fallo de Photon conserva calle y campos administrativos',async()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?streetOnly:big));await flush();
+  h.requests.find(r=>r.url.includes('photon')).fail();await work;
+  assert.equal(h.instance.location.address,'Calle 10A');
+  assert.equal(h.instance.location.department,'Magdalena');
+});
+
+test('cancelar durante Photon impide aplicar la numeración tardía',async()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));const work=h.instance.resolve();
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?streetOnly:big));await flush();
+  const extra=h.requests.find(r=>r.url.includes('photon'));
+  h.instance.cancel();extra.ok(photon(numberedFeature()));await work;
+  assert.equal(extra.signal.aborted,true);
+  assert.equal(h.instance.location.address,'Calle 10A');
+});
+
+test('la consulta sin número no degrada un número conocido del mismo punto y calle',async()=>{
+  const h=harness();h.instance.seed(model.locationFromNaturaGeocoders(coords,osm,big));
+  const work=h.instance.resolve();h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?streetOnly:big));
+  await work;assert.equal(h.instance.location.address,'Calle 10A #20A-06');
+  assert.equal(h.requests.length,2);
+  assert.equal(model.preserveStreetNumber('Carrera 20D','Calle 10A #20A-06'),'Carrera 20D');
+});
+
+test('guardar espera Photon y conserva el número recuperado y el apartamento escrito',async()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));h.instance.resolve();
+  const saving=h.node('publish-form').submit({preventDefault(){}});
+  h.requests.forEach(r=>r.ok(r.url.includes('nominatim')?streetOnly:big));await flush();
+  assert.equal(h.saved.length,0);
+  h.requests.find(r=>r.url.includes('photon')).ok(photon(numberedFeature()));await saving;
+  assert.equal(h.saved[0][0].location.address,'Calle 10A #20A-06');
+  assert.match(h.saved[0][0].addressText,/apartamento 302/);
+});
+
+test('el consentimiento anuncia Photon y la aproximación antes de transmitir coordenadas',()=>{
+  const h=harness();h.instance.seed(model.locationFromGps(coords));
+  h.node('gps-refresh').click();
+  assert.match(h.confirmations[0],/Photon \(komoot\)/);
+  assert.match(h.confirmations[0],/portal cercano/);
+  h.instance.cancel();
+});

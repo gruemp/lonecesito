@@ -1,7 +1,7 @@
 # LoNecesito — estado vigente, aprendizajes y continuidad
 
 **Revisión de documentación:** 25 de octubre de 2026  
-**Versión interna del código de interfaz:** 2.2.30 (no visible al público)
+**Versión interna del código de interfaz:** 2.2.31 (no visible al público)
 **Sitio:** https://gruemp.github.io/lonecesito/  
 **Repositorio:** https://github.com/gruemp/lonecesito  
 **Rama desplegada por GitHub Pages:** **codex/diseno-original**.
@@ -185,3 +185,11 @@ El historial de Git y el README registran un proceso iterativo desde formularios
 - Captura del titular: el texto del panel GPS se dividía en fragmentos de pocas letras y producía una columna excesivamente alta. Causa: gps-label con flex:1 y min-width:0 compartía fila con dos acciones de ancho intrínseco; flex-wrap permitía encoger el texto antes de mover los botones.
 - Sustituir únicamente la distribución del panel por grid de texto y botón quitar. Agrupar Actualizar dirección GPS y Maps en gps-preview-actions, en una fila independiente con flex-wrap; estado y atribución ocupan ancho completo. Los ID/eventos no cambian y el texto sigue íntegro.
 - Versión/caché 2.2.30. Sin cambios al PNG, datos, geocodificación, GPS continuo, permisos, distancias, Firebase o Firestore. Pruebas físicas de GPS y Firestore Emulator no realizadas.
+
+## Cambio 2.2.31 — Numeración aproximada con respaldo (25-10-2026)
+- Petición del titular: intentar recuperar automáticamente la nomenclatura completa. No se incorporan Apps Script, claves de pago ni backend. Nominatim usa layer=address y se añade una sola consulta Photon cuando hay calle sin número y precisión GPS ≤25 m. Photon usa el mismo origen OSM: mejora potencial de selección/índice, no promesa de nueva cobertura.
+- Validar candidatos por calle coincidente, número registrado, geometría Point válida y distancia ≤25 m. No inferir número por interpolación ni adoptar otra calle. Mantener datos previos y dirección manual/apartamento; esperar respaldo antes de guardar y abortarlo al salir/quitar GPS. No degradar número conocido del mismo punto/calle.
+- Consentimiento actualizado con los tres destinatarios y aproximación de portal cercano. La atribución OSM del panel y PNG sigue siendo válida. Los servicios públicos no garantizan disponibilidad; moderar consultas y sustituir por servicio administrado si el proyecto escala.
+- Prueba HTTP real del endpoint Photon: 200 y CORS permisivo. Caso público Unter den Linden 2, Berlín: búsqueda pública y consulta inversa producen dos candidatos; el selector recupera Unter den Linden #2. No se enviaron a terceros las coordenadas de las capturas del usuario.
+- Nuevas regresiones sobre selección, distancia/calle/precisión, numeración faltante, respaldo condicional, fallos, cancelación, persistencia, preservación de número y consentimiento. GPS físico del usuario y Firestore Emulator siguen pendientes; no se afirma recuperación de número en su ubicación concreta.
+- Referencias primarias: https://nominatim.org/release-docs/latest/api/Reverse/ · https://github.com/komoot/photon/blob/master/docs/api-v1.md · https://github.com/komoot/photon#demo-server .
