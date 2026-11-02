@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title">
+  <title id="title">LoNecesito</title>
+  <rect width="1200" height="630" fill="#eaf6f2"/>
+  <rect x="170" y="225" width="180" height="180" rx="52" fill="#17493e"/>
+  <text x="260" y="362" text-anchor="middle" font-family="Arial, sans-serif" font-size="130" font-weight="bold" fill="#d7f486">L</text>
+  <text x="390" y="349" font-family="Arial, sans-serif" font-size="100" font-weight="bold" letter-spacing="-3" fill="#17493e">LoNecesito</text>
+</svg>
