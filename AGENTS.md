@@ -2,6 +2,8 @@
 
 **Vigencia: 26 de octubre de 2026.** Este documento es la **fuente de verdad operativa**. Leer también [Preferencias detalladas](docs/PREFERENCIAS-LO-NECESITO.md) y [Continuidad técnica](docs/CONTINUIDAD-Y-APRENDIZAJES.md) antes de editar. **La instrucción expresa más reciente del usuario prevalece** sobre mensajes antiguos, versiones y requisitos históricos.
 
+**Control de cambios vigente desde el 6 de noviembre de 2026:** las fuentes principales se mantienen en Google Drive, carpeta `paginas web/lonecesito/codigo/`. Queda suspendida toda sincronización con GitHub y toda publicación de cambios del sitio hasta una orden nueva y expresa del titular. Si se autoriza sincronizar en el futuro, el sentido predeterminado es **Drive → GitHub**, y la rama publicada de este proyecto es `codex/diseno-original`, **no `main`**. La carpeta `recursos/` de Drive es intocable en este procedimiento. La norma de control actual está en [`.github/POLITICA-SINCRONIZACION-DRIVE-GITHUB.md`](.github/POLITICA-SINCRONIZACION-DRIVE-GITHUB.md) y prevalece sobre indicaciones históricas de publicación inmediata.
+
 **Prohibido recuperar funciones descartadas basándose en documentación vieja.** No mostrar publicaciones ficticias, versión visible, ofertas de proveedores ni avisos de prueba. La historia permanece consultable en Git.
 
 ## 1. Propósito y límites del producto
@@ -77,9 +79,9 @@
 
 ## 9. Forma de trabajar — aprendizaje transversal
 
-1. **Leer código vigente** de la rama **codex/diseno-original**, no asumir que main ni los archivos de versiones anteriores representan la web. Leer antes AGENTS.md, las preferencias y continuidad.
+1. **Leer primero las fuentes operativas** de Google Drive, `paginas web/lonecesito/codigo/`. Consultar la rama GitHub **codex/diseno-original** solo para conocer la versión publicada y detectar diferencias, sin transferir archivos. No asumir que `main` ni archivos históricos representan la web. Leer antes AGENTS.md, las preferencias y continuidad.
 2. **Hacer solo lo pedido**. No agregar mensajes didácticos o cambios de estilo espontáneos. Si hay conflicto con una regla anterior, actualizarla; **no apilar normas incompatibles**.
-3. Usar **rama nueva** desde codex/diseno-original, cambios verificables y PR dirigido a esa rama. **Instrucción permanente explícita del titular (25-10-2026): publicar inmediatamente todo cambio solicitado en el proyecto** mediante PR y fusión en la rama de GitHub Pages, sin pedir otra autorización; verificar el resultado disponible e informar las pruebas no realizadas. No afectar main.
+3. **No sincronizar, fusionar ni publicar automáticamente**. Preparar y validar las modificaciones en Google Drive `codigo/`, sin tocar `recursos/`. La autorización anterior del 25-10-2026 para publicar inmediatamente quedó reemplazada por la instrucción posterior del 6-11-2026: **cualquier envío a GitHub y cualquier publicación requieren autorización expresa y específica**. Cuando se autorice, comparar rutas y SHA-256, preparar una rama de revisión y presentar los cambios; la fusión a la rama publicada `codex/diseno-original` y el despliegue requieren orden expresa. No afectar `main` por inferencia.
 4. Probar sintaxis, comportamiento, regresiones, búsqueda, acciones, versión oculta, ausencia de ejemplos, y responsive **móvil y PC**. Decir expresamente qué pruebas físicas/Firestore no se realizaron.
 5. Mantener **reglas portables para otra IA**, en **AGENTS.md**, **docs/PREFERENCIAS-LO-NECESITO.md** y **docs/CONTINUIDAD-Y-APRENDIZAJES.md**. Alinear la documentación y pruebas con la decisión reciente; el historial queda en Git.
 6. Evitar modificar la interfaz cuando la solicitud sea solo de documentación. Los cambios exclusivamente documentales no requieren incrementar la versión técnica.

@@ -2,6 +2,8 @@
 
 **Leer antes de modificar el proyecto:** [AGENTS.md](AGENTS.md) · [Preferencias actuales](docs/PREFERENCIAS-LO-NECESITO.md) · [Estado y aprendizajes de continuidad](docs/CONTINUIDAD-Y-APRENDIZAJES.md).
 
+**Norma vigente desde el 6 de noviembre de 2026:** Google Drive `paginas web/lonecesito/codigo/` es el origen principal. Las sincronizaciones y publicaciones están **suspendidas** hasta nueva autorización específica. Para una futura sincronización, el sentido predeterminado será Drive → GitHub, hacia la rama operativa publicada `codex/diseno-original` solo tras revisión; `recursos/` se excluye. La política está en [`.github/POLITICA-SINCRONIZACION-DRIVE-GITHUB.md`](.github/POLITICA-SINCRONIZACION-DRIVE-GITHUB.md). Las instrucciones históricas de publicación inmediata no tienen vigencia.
+
 Estos archivos se consolidaron el **24 de octubre de 2026**. Contienen la **única especificación vigente**: cuatro pestañas en una fila en PC y dos en móvil, ilustración vigente de dos pasos solo en Inicio, fichas reales sin títulos ni ejemplos, buscador por fragmentos/teléfono, controles directos, sin versión visible. **Las entradas de versiones y prototipos que aparecen más abajo son exclusivamente históricas** y pueden estar contradichas por decisiones posteriores. No adoptarlas como requisitos actuales.
 
 **Estado técnico que no cambia con esta revisión:** Firebase sigue sin configurar en el repositorio; en modo local las publicaciones no se comparten entre navegadores. La actualización de diseño 2.2.15 conserva la funcionalidad técnica y Firebase sigue sin configurar.
@@ -16,7 +18,7 @@ Se instala la **primera ilustración de dos pasos aprobada por el usuario**, «P
 
 # Versión técnica 2.2.15 — alineación y portada completa al 100 %
 
-En PC, los cuatro botones comparten los márgenes izquierdo y derecho de la imagen de Inicio. El ancho de la ilustración 16:9 se adapta a la altura útil del navegador para verse íntegra a zoom 100 %. Se mejoran superficies, proporciones, color y espacio de encabezado, buscador, fichas y editor, sin alterar su lógica. En celular se conservan dos filas de pestañas. Las modificaciones futuras deben publicarse inmediatamente al completarse.
+En PC, los cuatro botones comparten los márgenes izquierdo y derecho de la imagen de Inicio. El ancho de la ilustración 16:9 se adapta a la altura útil del navegador para verse íntegra a zoom 100 %. Se mejoran superficies, proporciones, color y espacio de encabezado, buscador, fichas y editor, sin alterar su lógica. En celular se conservan dos filas de pestañas. La antigua instrucción de publicar modificaciones inmediatamente se encuentra revocada: desde el 6-11-2026 se exige autorización expresa para publicar.
 
 ---
 
